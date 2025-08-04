@@ -27,15 +27,15 @@ class ProductionImageHandler {
       const outputFormat = 'webp';
       const outputFilename = `${Date.now()}-${Math.random().toString(36).substring(2)}.${outputFormat}`;
       
-      // Обрабатываем изображение
+      // Обрабатываем изображение с оптимизированными настройками для скорости
       const processedBuffer = await sharp(buffer)
-        .resize(800, 800, { 
+        .resize(600, 600, { 
           fit: 'inside',
           withoutEnlargement: true 
         })
         .webp({ 
-          quality: 80,
-          effort: 6 
+          quality: 70,
+          effort: 3 
         })
         .toBuffer();
 

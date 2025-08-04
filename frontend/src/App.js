@@ -5869,21 +5869,32 @@ function CMSCategories({ loadCategoriesFromAPI }) {
     e.preventDefault();
     if (!editForm.name) return;
 
-    try {
-      const formData = new FormData();
-      formData.append('name', editForm.name);
-      if (editForm.icon) {
-        formData.append('image', editForm.icon);
-      }
-      if (editForm.parent !== '') {
-        formData.append('parentId', editForm.parent);
-      }
+    // Сохраняем данные формы до сброса
+    const formDataToSend = new FormData();
+    formDataToSend.append('name', editForm.name);
+    if (editForm.icon) {
+      formDataToSend.append('image', editForm.icon);
+    }
+    if (editForm.parent !== '') {
+      formDataToSend.append('parentId', editForm.parent);
+    }
 
-      // Обновляем основную информацию категории (включая изображение)
-      const response = await fetch(`${API_BASE_URL}/api/categories/${editForm.id}`, {
+    // Сохраняем ID категории до сброса формы
+    const categoryId = editForm.id;
+    console.log('Frontend: Начинаем обновление категории с ID:', categoryId);
+
+    // Сразу закрываем диалог и сбрасываем форму
+    setEditForm({ id: null, name: '', parent: '', icon: null });
+    setIsEditing(false);
+    setEditDialogOpen(false);
+    if (editFileInputRef.current) editFileInputRef.current.value = '';
+
+    try {
+      // Отправляем запрос на обновление
+      const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${user.token}` },
-        body: formData
+        body: formDataToSend
       });
 
       if (!response.ok) {
@@ -5893,15 +5904,6 @@ function CMSCategories({ loadCategoriesFromAPI }) {
       const updatedCategory = await response.json();
       console.log('Frontend: Категория обновлена:', updatedCategory);
       console.log('Frontend: Новое изображение:', updatedCategory.image);
-
-      // Сохраняем ID категории до сброса формы
-      const categoryId = editForm.id;
-      console.log('Frontend: Обновляем категорию с ID:', categoryId);
-
-      setEditForm({ id: null, name: '', parent: '', icon: null });
-      setIsEditing(false);
-      setEditDialogOpen(false);
-      if (editFileInputRef.current) editFileInputRef.current.value = '';
       
       // Обновляем состояние локально используя данные с сервера
       setCategories(prevCategories => {
@@ -5922,28 +5924,22 @@ function CMSCategories({ loadCategoriesFromAPI }) {
         );
       });
       
-      // Обновляем только боковое меню, если нужно
+      // Обновляем боковое меню асинхронно
       if (loadCategoriesFromAPI) {
-        await loadCategoriesFromAPI();
+        setTimeout(() => {
+          loadCategoriesFromAPI();
+        }, 100);
       }
       
       // Принудительно обновляем состояние для немедленного отображения изменений
-      setCategories(prevCategories => [...prevCategories]); // Принудительное обновление
+      setCategories(prevCategories => [...prevCategories]);
       
-      // Добавляем небольшую задержку для гарантии обновления UI
-      setTimeout(() => {
-        console.log('Frontend: Принудительное обновление UI через 100ms');
-        setCategories(prevCategories => [...prevCategories]);
-      }, 100);
-      
-      // Добавляем еще одну задержку для гарантии обновления изображения
+      // Добавляем задержку для гарантии обновления изображения
       setTimeout(() => {
         console.log('Frontend: Финальное обновление UI через 500ms');
         setCategories(prevCategories => [...prevCategories]);
       }, 500);
       
-      // Принудительно обновляем категории в CMS без перезагрузки с сервера
-      // await fetchCategories(); // Убираем этот вызов, так как он может перезаписать локальные изменения
     } catch (error) {
       console.error('Ошибка обновления категории:', error);
       alert('Ошибка при обновлении категории');
