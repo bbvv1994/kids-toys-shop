@@ -34,10 +34,18 @@ class ProductionUploadMiddleware {
       const imageUrls = [];
       const processedFiles = [];
 
+      // Создаем папку uploads если её нет
+      const uploadsDir = path.join(__dirname, '..', 'uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
       results.forEach(result => {
         if (result.success) {
-          // В production мы не сохраняем файлы на диск
-          // Вместо этого сохраняем информацию о файле
+          // Сохраняем файл на диск
+          const filePath = path.join(uploadsDir, result.filename);
+          fs.writeFileSync(filePath, result.buffer);
+          
           const fileInfo = {
             filename: result.filename,
             originalName: result.originalName || 'unknown',

@@ -508,7 +508,14 @@ passport.use(new FacebookStrategy({
   }
 }));
 
-app.post('/api/products', authMiddleware, upload.array('images', 7), imageMiddleware.checkFileSizes.bind(imageMiddleware), imageMiddleware.processUploadedImages.bind(imageMiddleware), async (req, res) => {
+app.post('/api/products', authMiddleware, upload.array('images', 7), 
+  process.env.NODE_ENV === 'production' 
+    ? productionUploadMiddleware.processUploadedFiles.bind(productionUploadMiddleware)
+    : imageMiddleware.checkFileSizes.bind(imageMiddleware), 
+  process.env.NODE_ENV === 'production' 
+    ? (req, res, next) => next()
+    : imageMiddleware.processUploadedImages.bind(imageMiddleware), 
+  async (req, res) => {
   // Проверка роли admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
@@ -2043,7 +2050,14 @@ app.patch('/api/products/:id/hidden', authMiddleware, async (req, res) => {
   }
 });
 
-app.put('/api/products/:id', authMiddleware, upload.array('images', 7), imageMiddleware.checkFileSizes.bind(imageMiddleware), imageMiddleware.processUploadedImages.bind(imageMiddleware), async (req, res) => {
+app.put('/api/products/:id', authMiddleware, upload.array('images', 7), 
+  process.env.NODE_ENV === 'production' 
+    ? productionUploadMiddleware.processUploadedFiles.bind(productionUploadMiddleware)
+    : imageMiddleware.checkFileSizes.bind(imageMiddleware), 
+  process.env.NODE_ENV === 'production' 
+    ? (req, res, next) => next()
+    : imageMiddleware.processUploadedImages.bind(imageMiddleware), 
+  async (req, res) => {
   // Проверка роли admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
