@@ -1,4 +1,6 @@
 const ProductionImageHandler = require('./productionImageHandler');
+const path = require('path');
+const fs = require('fs');
 
 class ProductionUploadMiddleware {
   constructor() {
@@ -72,6 +74,13 @@ class ProductionUploadMiddleware {
    * Middleware для обработки одного файла
    */
   async processSingleFile(req, res, next) {
+    return this.processSingleImage(req, res, next);
+  }
+
+  /**
+   * Middleware для обработки одного изображения (алиас для processSingleFile)
+   */
+  async processSingleImage(req, res, next) {
     try {
       if (!req.file) {
         return next();
@@ -93,6 +102,19 @@ class ProductionUploadMiddleware {
       const result = results[0];
 
       if (result.success) {
+        // Сохраняем файл на диск
+        const uploadsDir = path.join(__dirname, '..', 'uploads');
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        
+        const filePath = path.join(uploadsDir, result.filename);
+        fs.writeFileSync(filePath, result.buffer);
+        
+        // Обновляем информацию о файле
+        req.file.filename = result.filename;
+        req.file.mimetype = result.mimetype;
+        
         req.processedFile = {
           filename: result.filename,
           originalName: req.file.originalname,

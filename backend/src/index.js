@@ -2554,6 +2554,11 @@ app.patch('/api/categories/:id/toggle', authMiddleware, async (req, res) => {
     });
     
     console.log('API: Категория обновлена:', updated.name, 'active:', updated.active);
+    
+    // Проверяем, что обновление действительно произошло
+    const verification = await prisma.category.findUnique({ where: { id } });
+    console.log('API: Проверка после обновления:', verification.name, 'active:', verification.active);
+    
     res.json(updated);
   } catch (e) {
     console.error('API: Ошибка toggle категории:', e);
@@ -2627,7 +2632,7 @@ app.put('/api/categories/reorder', authMiddleware, async (req, res) => {
   }
 });
 
-app.put('/api/categories/:id', authMiddleware, upload.single('image'), imageMiddleware.processSingleImage.bind(imageMiddleware), async (req, res) => {
+app.put('/api/categories/:id', authMiddleware, upload.single('image'), productionUploadMiddleware.processSingleImage.bind(productionUploadMiddleware), async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
@@ -2658,7 +2663,7 @@ app.put('/api/categories/:id', authMiddleware, upload.single('image'), imageMidd
   }
 });
 
-app.post('/api/categories', authMiddleware, upload.single('image'), imageMiddleware.processSingleImage.bind(imageMiddleware), async (req, res) => {
+app.post('/api/categories', authMiddleware, upload.single('image'), productionUploadMiddleware.processSingleImage.bind(productionUploadMiddleware), async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
