@@ -5597,14 +5597,14 @@ const getCategoryIcon = (category) => {
   
   // Если есть загруженное изображение, используем его
   if (category.image && /^175\d+/.test(category.image)) {
-    const url = `${API_BASE_URL}/uploads/${category.image}`;
+    const url = `${API_BASE_URL}/uploads/${category.image}?t=${Date.now()}`;
     console.log('Returning uploads URL:', url);
     return url;
   }
   
   // Если есть изображение, но это не загруженный файл, используем его
   if (category.image) {
-    const url = `${API_BASE_URL}/public/${category.image}`;
+    const url = `${API_BASE_URL}/public/${category.image}?t=${Date.now()}`;
     console.log('Returning public URL:', url);
     return url;
   }
@@ -5889,6 +5889,7 @@ function CMSCategories({ loadCategoriesFromAPI }) {
 
       const updatedCategory = await response.json();
       console.log('Frontend: Категория обновлена:', updatedCategory);
+      console.log('Frontend: Новое изображение:', updatedCategory.image);
 
       setEditForm({ id: null, name: '', parent: '', icon: null });
       setIsEditing(false);
@@ -5915,8 +5916,16 @@ function CMSCategories({ loadCategoriesFromAPI }) {
         await loadCategoriesFromAPI();
       }
       
-      // Принудительно обновляем категории в CMS
-      await fetchCategories();
+      // Принудительно обновляем состояние для немедленного отображения изменений
+      setCategories(prevCategories => [...prevCategories]); // Принудительное обновление
+      
+      // Добавляем небольшую задержку для гарантии обновления UI
+      setTimeout(() => {
+        setCategories(prevCategories => [...prevCategories]);
+      }, 100);
+      
+      // Принудительно обновляем категории в CMS без перезагрузки с сервера
+      // await fetchCategories(); // Убираем этот вызов, так как он может перезаписать локальные изменения
     } catch (error) {
       console.error('Ошибка обновления категории:', error);
       alert('Ошибка при обновлении категории');
