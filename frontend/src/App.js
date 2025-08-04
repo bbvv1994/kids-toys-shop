@@ -924,9 +924,9 @@ const theme = createTheme({
   }, [drawerOpen]);
 
   // Получаем только корневые категории
-  const rootCategories = (dbCategories || []).filter(cat => !cat.parentId);
+  const rootCategories = (dbCategories || []).filter(cat => !cat.parentId && cat.active !== false);
   // Для поиска подкатегорий
-  const getSubcategories = (cat) => (dbCategories || []).filter(sub => sub.parentId === cat.id);
+  const getSubcategories = (cat) => (dbCategories || []).filter(sub => sub.parentId === cat.id && sub.active !== false);
 
   // Получаем дерево категорий с подкатегориями-объектами
   const treeCategories = transformCategoriesForNavigation(dbCategories || []);

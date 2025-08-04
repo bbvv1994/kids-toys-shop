@@ -91,9 +91,13 @@ export function getCategoryIcon(category) {
 // Преобразует плоский массив категорий с parentId в дерево с подкатегориями (sub)
 export function transformCategoriesForNavigation(categories) {
   if (!Array.isArray(categories)) return [];
+  
+  // Фильтруем только активные категории
+  const activeCategories = categories.filter(cat => cat.active !== false);
+  
   // Создаём карту по id
   const map = {};
-  categories.forEach(cat => {
+  activeCategories.forEach(cat => {
     map[cat.id] = {
       ...cat,
       label: cat.label || cat.name,
