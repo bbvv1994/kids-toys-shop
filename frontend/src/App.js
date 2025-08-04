@@ -3805,7 +3805,7 @@ function App() {
   // Загрузка данных из API
   useEffect(() => {
     // Загрузка товаров (без аутентификации)
-    fetch('${API_BASE_URL}/api/products')
+    fetch(`${API_BASE_URL}/api/products`)
       .then(res => {
         if (!res.ok) {
           console.error('Products API error:', res.status, res.statusText);
