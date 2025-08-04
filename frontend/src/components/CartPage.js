@@ -292,34 +292,37 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                               <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap', alignItems: 'center' }}>
                                 {item.product.category && (
                                   <Chip 
-                                    label={item.product.category} 
+                                    label={typeof item.product.category === 'object' ? (item.product.category.name || '') : String(item.product.category || '')} 
                                     size="small" 
                                     sx={{ background: '#E3F2FD' }}
                                   />
                                 )}
                                 {item.product.ageGroup && (
                                   <>
-                                    {ageIcons[item.product.ageGroup] && (
-                                      <img 
-                                        src={ageIcons[item.product.ageGroup]} 
-                                        alt={item.product.ageGroup}
-                                        style={{ 
-                                          width: 28, 
-                                          height: 28, 
-                                          marginRight: 4, 
-                                          marginBottom: 4,
-                                          verticalAlign: 'middle',
-                                          background: 'transparent',
-                                          border: 'none',
-                                          outline: 'none'
-                                        }} 
-                                        onError={(e) => {
-                                          e.target.style.display = 'none';
-                                        }}
-                                      />
-                                    )}
+                                    {(() => {
+                                      const ageGroupStr = typeof item.product.ageGroup === 'object' ? (item.product.ageGroup.name || '') : String(item.product.ageGroup || '');
+                                      return ageIcons[ageGroupStr] && (
+                                        <img 
+                                          src={ageIcons[ageGroupStr]} 
+                                          alt={ageGroupStr}
+                                          style={{ 
+                                            width: 28, 
+                                            height: 28, 
+                                            marginRight: 4, 
+                                            marginBottom: 4,
+                                            verticalAlign: 'middle',
+                                            background: 'transparent',
+                                            border: 'none',
+                                            outline: 'none'
+                                          }} 
+                                          onError={(e) => {
+                                            e.target.style.display = 'none';
+                                          }}
+                                        />
+                                      );
+                                    })()}
                                     <span style={{ fontSize: '0.8rem', color: '#666', marginBottom: 4, marginRight: 6 }}>
-                                      {item.product.ageGroup}
+                                      {typeof item.product.ageGroup === 'object' ? (item.product.ageGroup.name || '') : String(item.product.ageGroup || '')}
                                     </span>
                                   </>
                                 )}
@@ -333,7 +336,10 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                                     marginBottom: '4px',
                                     background: '#f0f0f0'
                                   }}>
-                                    {item.product.gender === 'Мальчик' ? 'Для мальчиков' : item.product.gender === 'Девочка' ? 'Для девочек' : 'Универсальный'}
+                                    {(() => {
+                                      const genderStr = typeof item.product.gender === 'object' ? (item.product.gender.name || '') : String(item.product.gender || '');
+                                      return genderStr === 'Мальчик' ? 'Для мальчиков' : genderStr === 'Девочка' ? 'Для девочек' : 'Универсальный';
+                                    })()}
                                   </span>
                                 )}
                               </Box>
