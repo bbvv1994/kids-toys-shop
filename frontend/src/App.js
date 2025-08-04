@@ -5891,15 +5891,23 @@ function CMSCategories({ loadCategoriesFromAPI }) {
       console.log('Frontend: Категория обновлена:', updatedCategory);
       console.log('Frontend: Новое изображение:', updatedCategory.image);
 
+      // Сохраняем ID категории до сброса формы
+      const categoryId = editForm.id;
+      console.log('Frontend: Обновляем категорию с ID:', categoryId);
+
       setEditForm({ id: null, name: '', parent: '', icon: null });
       setIsEditing(false);
       setEditDialogOpen(false);
       if (editFileInputRef.current) editFileInputRef.current.value = '';
       
       // Обновляем состояние локально используя данные с сервера
-      setCategories(prevCategories => 
-        prevCategories.map(category => 
-          category.id === editForm.id 
+      setCategories(prevCategories => {
+        console.log('Frontend: Обновляем состояние категорий');
+        console.log('Frontend: Ищем категорию с ID:', categoryId);
+        console.log('Frontend: Доступные категории:', prevCategories.map(c => ({ id: c.id, name: c.name })));
+        
+        return prevCategories.map(category => 
+          category.id === categoryId 
             ? { 
                 ...category, 
                 name: updatedCategory.name, 
@@ -5908,8 +5916,8 @@ function CMSCategories({ loadCategoriesFromAPI }) {
                 active: updatedCategory.active
               }
             : category
-        )
-      );
+        );
+      });
       
       // Обновляем только боковое меню, если нужно
       if (loadCategoriesFromAPI) {
@@ -5921,8 +5929,15 @@ function CMSCategories({ loadCategoriesFromAPI }) {
       
       // Добавляем небольшую задержку для гарантии обновления UI
       setTimeout(() => {
+        console.log('Frontend: Принудительное обновление UI через 100ms');
         setCategories(prevCategories => [...prevCategories]);
       }, 100);
+      
+      // Добавляем еще одну задержку для гарантии обновления изображения
+      setTimeout(() => {
+        console.log('Frontend: Финальное обновление UI через 500ms');
+        setCategories(prevCategories => [...prevCategories]);
+      }, 500);
       
       // Принудительно обновляем категории в CMS без перезагрузки с сервера
       // await fetchCategories(); // Убираем этот вызов, так как он может перезаписать локальные изменения
