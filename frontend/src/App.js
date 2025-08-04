@@ -3074,6 +3074,11 @@ function App() {
       // Если пользователь не авторизован, загружаем локальную корзину
       const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');
       console.log('🔍 Загружаем локальную корзину для гостя:', localCart);
+      console.log('🔍 Локальная корзина items:', localCart.items);
+      if (localCart.items && localCart.items.length > 0) {
+        console.log('🔍 Первый товар в корзине:', localCart.items[0]);
+        console.log('🔍 imageUrls первого товара:', localCart.items[0].product?.imageUrls);
+      }
       setCart(localCart);
     }
   }, [user]);
@@ -3171,6 +3176,8 @@ function App() {
 
   // Функции для работы с корзиной
   const handleAddToCart = async (product, category, quantity = 1) => {
+    console.log('🛒 handleAddToCart: Добавляем товар в корзину:', product);
+    console.log('🛒 handleAddToCart: imageUrls товара:', product.imageUrls);
     if (!user || !user.token) {
       // Для незарегистрированных пользователей используем локальную корзину
       const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');

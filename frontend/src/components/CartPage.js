@@ -277,7 +277,11 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                               borderRadius: 2,
                               border: '2px solid #f0f0f0',
                               flexShrink: 0,
-                              backgroundImage: `url(${item.product.imageUrls?.[0] || '/toys.png'})`,
+                              backgroundImage: `url(${(() => {
+                                const imageUrl = item.product.imageUrls?.[0];
+                                console.log('🖼️ CartPage: imageUrl для товара', item.product.id, ':', imageUrl);
+                                return imageUrl || '/toys.png';
+                              })()})`,
                               backgroundSize: '100% 100%',
                               backgroundPosition: 'center',
                               backgroundRepeat: 'no-repeat'
