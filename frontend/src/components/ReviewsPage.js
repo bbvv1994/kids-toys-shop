@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, Rating, CircularProgress, Alert, List, ListItem, ListItemText, Divider } from '@mui/material';
+import { API_BASE_URL } from '../config';
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState([]);

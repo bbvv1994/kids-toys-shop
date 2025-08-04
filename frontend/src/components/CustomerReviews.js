@@ -13,6 +13,7 @@ import {
   ListItemSecondaryAction
 } from '@mui/material';
 import { Store, Star } from '@mui/icons-material';
+import { API_BASE_URL } from '../config';
 
 const CustomerReviews = () => {
   const [reviews, setReviews] = useState([]);

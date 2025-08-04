@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, Rating, CircularProgress } from '@mui/material';
+import { API_BASE_URL } from '../config';
 
 export default function TestProductReviews() {
   const [reviews, setReviews] = useState([]);

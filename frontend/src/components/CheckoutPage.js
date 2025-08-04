@@ -5,6 +5,7 @@ import {
   FormLabel, Divider, Paper, Grid, Alert, CircularProgress
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
   const navigate = useNavigate();
