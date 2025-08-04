@@ -9,7 +9,8 @@
     "migrate": "node prisma/migrate.js",
     "build": "npx prisma generate && npx prisma migrate deploy",
     "postinstall": "npx prisma generate",
-    "init-db": "node init-db.js"
+    "init-db": "node init-db.js",
+    "fix-categories": "node fix-category-images-on-render.js"
   },
   "keywords": [],
   "author": "",
