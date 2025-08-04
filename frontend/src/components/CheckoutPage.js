@@ -23,7 +23,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
   const [loadingUserData, setLoadingUserData] = useState(true);
   const [error, setError] = useState('');
   const [userData, setUserData] = useState(null);
-  const [pickupStore, setPickupStore] = useState('');
+  const [pickupStore, setPickupStore] = useState('store1');
   const [isGuest, setIsGuest] = useState(false);
 
   // Загрузка данных пользователя
@@ -95,6 +95,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
     setError('');
 
     // Валидация
+    console.log('🔍 Checkout validation:', { formData, pickupStore, cart });
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !pickupStore) {
       setError('Пожалуйста, заполните все обязательные поля и выберите магазин для самовывоза');
       setLoading(false);
@@ -111,26 +112,33 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
           productName: item.product.name
         }));
 
+        const requestBody = {
+          customerInfo: formData,
+          pickupStore,
+          paymentMethod,
+          total: calculateTotal(),
+          cartItems
+        };
+        console.log('📤 Guest checkout request:', requestBody);
+        
         const response = await fetch(`${API_BASE_URL}/api/guest/checkout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            customerInfo: formData,
-            pickupStore,
-            paymentMethod,
-            total: calculateTotal(),
-            cartItems
-          })
+          body: JSON.stringify(requestBody)
         });
 
+        console.log('📥 Guest checkout response status:', response.status);
+        
         if (!response.ok) {
           const errorData = await response.json();
+          console.error('❌ Guest checkout error response:', errorData);
           throw new Error(errorData.error || 'Ошибка при создании заказа');
         }
 
         const orderData = await response.json();
+        console.log('✅ Guest checkout success:', orderData);
         
         // Очищаем корзину после успешного заказа
         if (onClearCart) {
@@ -200,6 +208,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
         });
       }
     } catch (err) {
+      console.error('❌ Checkout error:', err);
       setError('Ошибка при оформлении заказа. Попробуйте еще раз.');
     } finally {
       setLoading(false);
