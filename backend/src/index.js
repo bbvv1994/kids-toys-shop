@@ -1723,26 +1723,36 @@ ${cart.items.map(item => `• ${item.product.name} x${item.quantity} - ${item.pr
 // === Оформление гостевого заказа (без авторизации) ===
 app.post('/api/guest/checkout', async (req, res) => {
   try {
+    console.log('🛒 Guest checkout request received:', req.body);
     const { customerInfo, pickupStore, paymentMethod, total, cartItems } = req.body;
+    
+    console.log('📋 Parsed data:', { customerInfo, pickupStore, paymentMethod, total, cartItems });
     
     // Валидация входных данных
     if (!customerInfo || !customerInfo.firstName || !customerInfo.lastName || 
         !customerInfo.email || !customerInfo.phone || !pickupStore || !cartItems || !cartItems.length) {
+      console.log('❌ Validation failed:', { customerInfo, pickupStore, cartItems });
       return res.status(400).json({ error: 'Необходимо заполнить все обязательные поля и добавить товары в корзину' });
     }
     
     // Проверяем наличие товара на складе
+    console.log('🔍 Checking product availability...');
     for (const item of cartItems) {
+      console.log('🔍 Checking product:', item);
       const product = await prisma.product.findUnique({ where: { id: item.productId } });
       if (!product) {
+        console.log('❌ Product not found:', item.productId);
         return res.status(400).json({ error: `Товар не найден: ID ${item.productId}` });
       }
       if (item.quantity > product.quantity) {
+        console.log('❌ Insufficient quantity:', { requested: item.quantity, available: product.quantity });
         return res.status(400).json({ error: `Недостаточно товара: ${product.name}` });
       }
+      console.log('✅ Product available:', { productId: item.productId, quantity: product.quantity });
     }
     
     // Создаём гостевой заказ
+    console.log('📝 Creating guest order...');
     const order = await prisma.order.create({
       data: {
         status: 'pending',
@@ -1764,7 +1774,9 @@ app.post('/api/guest/checkout', async (req, res) => {
     });
     
     // Уменьшаем количество на складе
+    console.log('📦 Updating product quantities...');
     for (const item of cartItems) {
+      console.log('📦 Updating product:', item.productId, 'quantity:', item.quantity);
       await prisma.product.update({
         where: { id: item.productId },
         data: { quantity: { decrement: item.quantity } }
@@ -1772,6 +1784,7 @@ app.post('/api/guest/checkout', async (req, res) => {
     }
     
     // Отправляем уведомление в Telegram
+    console.log('📱 Sending Telegram notification...');
     try {
       const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       
@@ -1796,6 +1809,7 @@ ${cartItems.map(item => `• ${item.productName} x${item.quantity} - ${item.pric
     }
     
     // Отправляем email подтверждения заказа гостю
+    console.log('📧 Sending order confirmation email...');
     try {
       const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       
@@ -1882,12 +1896,13 @@ ${cartItems.map(item => `• ${item.productName} x${item.quantity} - ${item.pric
       console.error('Error sending order confirmation email:', emailError);
     }
     
+    console.log('✅ Guest order created successfully:', order.id);
     res.json({
       order,
       message: 'Гостевой заказ успешно оформлен'
     });
   } catch (error) {
-    console.error('Guest checkout error:', error);
+    console.error('❌ Guest checkout error:', error);
     res.status(500).json({ error: 'Ошибка оформления гостевого заказа' });
   }
 });
