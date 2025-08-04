@@ -614,8 +614,14 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1, mb: 1, width: 'auto', maxWidth: 'max-content' }}>
               {product.category && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '0.9rem', color: '#1976d2', padding: '2px 8px', borderRadius: '4px', fontWeight: 500, marginBottom: 2 }}>
-                  <img src={getCategoryIcon(typeof product.category === 'object' ? product.category : { name: product.category })} alt="cat" style={{ width: 20, height: 20, marginRight: 6, verticalAlign: 'middle' }} />
-                  {typeof product.category === 'object' ? (product.category.label || product.category?.name) : product.category}
+                  <img src={getCategoryIcon(
+                    typeof product.category === 'object' && product.category !== null
+                      ? product.category
+                      : { name: String(product.category) }
+                  )} alt="cat" style={{ width: 20, height: 20, marginRight: 6, verticalAlign: 'middle' }} />
+                  {typeof product.category === 'object' && product.category !== null
+                    ? (product.category.label || product.category.name || '')
+                    : (typeof product.category === 'string' ? product.category : String(product.category || ''))}
                 </span>
               )}
               {product.ageGroup && (
