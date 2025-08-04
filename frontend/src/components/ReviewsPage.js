@@ -53,8 +53,15 @@ export default function ReviewsPage() {
       {reviews.length > 0 && (
         <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
           <List sx={{ p: 0 }}>
-            {reviews.map((review, index) => (
-              <React.Fragment key={review.id}>
+            {reviews.map((review, index) => {
+              // Проверяем, что у отзыва есть id
+              if (!review || !review.id) {
+                console.warn('Review without id:', review);
+                return null;
+              }
+              
+              return (
+                <React.Fragment key={review.id}>
                 <ListItem sx={{ 
                   py: 3, 
                   px: 3,
@@ -95,7 +102,8 @@ export default function ReviewsPage() {
                   <Divider sx={{ mx: 3 }} />
                 )}
               </React.Fragment>
-            ))}
+              );
+            })}
           </List>
         </Paper>
       )}

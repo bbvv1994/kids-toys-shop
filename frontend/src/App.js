@@ -3073,6 +3073,7 @@ function App() {
     if (!user) {
       // Если пользователь не авторизован, загружаем локальную корзину
       const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');
+      console.log('🔍 Загружаем локальную корзину для гостя:', localCart);
       setCart(localCart);
     }
   }, [user]);

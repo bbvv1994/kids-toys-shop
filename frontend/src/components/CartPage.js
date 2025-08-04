@@ -44,9 +44,16 @@ const ageIcons = {
 function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
   const navigate = useNavigate();
   const [removingItem, setRemovingItem] = useState(null);
+  
+  console.log('🛒 CartPage: Получена корзина:', cart);
+  console.log('🛒 CartPage: cart.items:', cart?.items);
+  
   const items = (cart?.items || []).sort((a, b) => a.id - b.id);
   const total = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  
+  console.log('🛒 CartPage: Обработанные items:', items);
+  console.log('🛒 CartPage: Количество товаров:', itemCount);
 
   const handleRemoveItem = async (productId) => {
     setRemovingItem(productId);
