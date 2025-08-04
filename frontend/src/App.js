@@ -3068,6 +3068,15 @@ function App() {
     }
   }, []);
 
+  // Загрузка локальной корзины для гостей
+  useEffect(() => {
+    if (!user) {
+      // Если пользователь не авторизован, загружаем локальную корзину
+      const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');
+      setCart(localCart);
+    }
+  }, [user]);
+
   // Обработка подтверждения email через URL
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
