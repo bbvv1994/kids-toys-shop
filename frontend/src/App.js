@@ -5898,7 +5898,13 @@ function CMSCategories({ loadCategoriesFromAPI }) {
       setCategories(prevCategories => 
         prevCategories.map(category => 
           category.id === editForm.id 
-            ? { ...category, name: editForm.name, parentId: editForm.parent || null }
+            ? { 
+                ...category, 
+                name: editForm.name, 
+                parentId: editForm.parent || null,
+                // Если есть новое изображение, обновляем его
+                ...(editForm.icon && { image: editForm.icon.name })
+              }
             : category
         )
       );
@@ -5907,6 +5913,9 @@ function CMSCategories({ loadCategoriesFromAPI }) {
       if (loadCategoriesFromAPI) {
         await loadCategoriesFromAPI();
       }
+      
+      // Принудительно обновляем категории в CMS
+      await fetchCategories();
     } catch (error) {
       console.error('Ошибка обновления категории:', error);
       alert('Ошибка при обновлении категории');

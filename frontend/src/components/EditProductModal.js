@@ -868,7 +868,7 @@ function EditProductModal(props) {
                               }}
                             >
                               <img
-                                src={imageUrl.startsWith('http') || imageUrl.startsWith('/') ? imageUrl : `/uploads/${imageUrl}`}
+                                src={imageUrl.startsWith('http') ? imageUrl : `${API_BASE_URL}${imageUrl.startsWith('/') ? imageUrl : `/uploads/${imageUrl}`}`}
                                 alt={`Existing ${index + 1}`}
                                 style={{
                                   width: 100,
