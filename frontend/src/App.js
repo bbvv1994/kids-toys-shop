@@ -3874,11 +3874,11 @@ function App() {
                 iconPath = `${API_BASE_URL}/uploads/${cat.image}`;
               } else {
                 // Если это старый файл из public папки
-                iconPath = `/${cat.image}`;
+                iconPath = `${API_BASE_URL}/public/${cat.image}`;
               }
             } else {
               // Если нет изображения, используем fallback
-              iconPath = getCategoryIconForAPI(cat.name);
+              iconPath = `${API_BASE_URL}/public${getCategoryIconForAPI(cat.name)}`;
             }
             
             return {
@@ -5604,7 +5604,7 @@ const getCategoryIcon = (category) => {
   
   // Если есть изображение, но это не загруженный файл, используем его
   if (category.image) {
-    const url = `/${category.image}`;
+    const url = `${API_BASE_URL}/public/${category.image}`;
     console.log('Returning public URL:', url);
     return url;
   }
@@ -5625,7 +5625,7 @@ const getCategoryIcon = (category) => {
   
   const fallbackIcon = fallbackIcons[category.name] || '/toys.png';
   console.log(`No image for category "${category.name}", using fallback: ${fallbackIcon}`);
-  return fallbackIcon;
+  return `${API_BASE_URL}/public${fallbackIcon}`;
 };
 
 function CMSCategories({ loadCategoriesFromAPI }) {
