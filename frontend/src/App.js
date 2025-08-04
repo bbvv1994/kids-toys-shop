@@ -2321,7 +2321,19 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
     // Фильтр по полу
     if (selectedGenders && selectedGenders.length > 0 && !selectedGenders.includes(product.gender)) return false;
     // Поиск (если есть)
-    if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase()) && !product.description?.toLowerCase().includes(searchQuery.toLowerCase()) && !product.category?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      const nameMatch = product.name?.toLowerCase().includes(searchLower);
+      const descriptionMatch = product.description?.toLowerCase().includes(searchLower);
+      const categoryMatch = (() => {
+        if (typeof product.category === 'object' && product.category !== null) {
+          return (product.category.name || '').toLowerCase().includes(searchLower);
+        }
+        return (product.category || '').toLowerCase().includes(searchLower);
+      })();
+      
+      if (!nameMatch && !descriptionMatch && !categoryMatch) return false;
+    }
     return true;
   });
   
@@ -7558,9 +7570,12 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
   };
 
   // Фильтрация подкатегорий по поисковому запросу
-  const filteredSubcategories = subcategories.filter(subcat =>
-    subcat.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredSubcategories = subcategories.filter(subcat => {
+    if (!searchQuery) return true;
+    const searchLower = searchQuery.toLowerCase();
+    const nameMatch = subcat.name?.toLowerCase().includes(searchLower);
+    return nameMatch;
+  });
 
   // ... после useState для categoryProducts и после загрузки category ...
   const filteredCategoryProducts = categoryProducts.filter(product => {
@@ -7938,7 +7953,19 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
   // Фильтрация товаров по поисковому запросу
   const filteredProducts = subcategoryProducts.filter(product => {
     if (selectedGenders && selectedGenders.length > 0 && !selectedGenders.includes(product.gender)) return false;
-    if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase()) && !product.description?.toLowerCase().includes(searchQuery.toLowerCase()) && !product.category?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      const nameMatch = product.name?.toLowerCase().includes(searchLower);
+      const descriptionMatch = product.description?.toLowerCase().includes(searchLower);
+      const categoryMatch = (() => {
+        if (typeof product.category === 'object' && product.category !== null) {
+          return (product.category.name || '').toLowerCase().includes(searchLower);
+        }
+        return (product.category || '').toLowerCase().includes(searchLower);
+      })();
+      
+      if (!nameMatch && !descriptionMatch && !categoryMatch) return false;
+    }
     return true;
   });
 
