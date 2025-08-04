@@ -167,18 +167,58 @@ if (process.env.NODE_ENV === 'production') {
   }
 }
 
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3002',
-    'http://192.168.31.156:3000',
-    'http://192.168.31.156',
-    'https://*.vercel.app',
-    'https://*.netlify.app',
-    'https://*.onrender.com'
-  ],
-  credentials: true
-}));
+// CORS настройки
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Разрешаем запросы без origin (например, Postman)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3002',
+      'http://192.168.31.156:3000',
+      'http://192.168.31.156',
+      'https://*.vercel.app',
+      'https://*.netlify.app',
+      'https://*.onrender.com',
+      'https://vercel.app',
+      'https://kids-toys-shop.vercel.app',
+      'https://kids-toys-shop-git-main-bbvv1994.vercel.app',
+      'https://kids-toys-shop-bbvv1994.vercel.app'
+    ];
+    
+    // Проверяем точное совпадение
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Проверяем wildcard домены
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (allowed.includes('*')) {
+        const pattern = allowed.replace('*', '.*');
+        return new RegExp(pattern).test(origin);
+      }
+      return false;
+    });
+    
+    if (isAllowed) {
+      return callback(null, true);
+    }
+    
+    // В production разрешаем все Vercel домены
+    if (process.env.NODE_ENV === 'production' && origin.includes('vercel.app')) {
+      return callback(null, true);
+    }
+    
+    console.log('CORS blocked origin:', origin);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
