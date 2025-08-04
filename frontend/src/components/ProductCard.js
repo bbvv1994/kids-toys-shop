@@ -182,7 +182,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             return (
               <img
                 src={imgSrc}
-                alt={product.name}
+                alt={typeof product.name === 'string' ? product.name : String(product.name || '')}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -216,7 +216,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             minHeight: '4.5rem',
             maxHeight: '4.5rem'
           }}>
-            {product.name}
+            {typeof product.name === 'string' ? product.name : String(product.name || '')}
           </h3>
           {/* Рейтинг */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, marginTop: 0 }}>
@@ -491,7 +491,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             return (
               <img
                 src={imgSrc}
-                alt={product.name}
+                alt={typeof product.name === 'string' ? product.name : String(product.name || '')}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', borderRadius: 0, padding: 0, margin: 0, display: 'block', pointerEvents: 'none' }}
                 onError={() => setImgError(true)}
               />
@@ -575,7 +575,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             minHeight: '4.5rem',
             maxHeight: '4.5rem'
           }}>
-            {product.name}
+            {typeof product.name === 'string' ? product.name : String(product.name || '')}
           </h3>
           {/* Рейтинг */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, marginTop: 0 }}>
@@ -926,7 +926,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           return (
             <img
               src={imgSrc}
-              alt={product.name}
+              alt={typeof product.name === 'string' ? product.name : String(product.name || '')}
               style={{
                 width: '100%',
                 height: '100%',
@@ -961,7 +961,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           minHeight: '4.5rem',
           maxHeight: '4.5rem'
         }}>
-          {product.name}
+          {typeof product.name === 'string' ? product.name : String(product.name || '')}
         </h3>
         {/* Рейтинг */}
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, marginTop: 0 }}>

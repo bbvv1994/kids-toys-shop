@@ -247,7 +247,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                             }} />
                             <Box sx={{ minWidth: 0 }}>
                               <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, wordBreak: 'break-word' }}>
-                                {item.product.name}
+                                {typeof item.product.name === 'string' ? item.product.name : String(item.product.name || '')}
                               </Typography>
                               <Typography variant="body2" sx={{ color: '#666', mb: 1, wordBreak: 'break-word' }}>
                                 {item.product.description?.substring(0, 100)}...
