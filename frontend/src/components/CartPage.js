@@ -28,6 +28,7 @@ import {
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { getImageUrl } from '../config';
 
 // Иконки для возрастных групп
 const ageIcons = {
@@ -277,11 +278,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                               borderRadius: 2,
                               border: '2px solid #f0f0f0',
                               flexShrink: 0,
-                              backgroundImage: `url(${(() => {
-                                const imageUrl = item.product.imageUrls?.[0];
-                                console.log('🖼️ CartPage: imageUrl для товара', item.product.id, ':', imageUrl);
-                                return imageUrl || '/toys.png';
-                              })()})`,
+                              backgroundImage: `url(${getImageUrl(item.product.imageUrls?.[0] || '/toys.png')})`,
                               backgroundSize: '100% 100%',
                               backgroundPosition: 'center',
                               backgroundRepeat: 'no-repeat'
