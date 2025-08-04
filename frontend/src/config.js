@@ -5,7 +5,7 @@ const config = {
     FRONTEND_URL: 'http://localhost:3000'
   },
   production: {
-    API_BASE_URL: process.env.REACT_APP_API_BASE_URL || 'https://kids-toys-backend.onrender.com',
+    API_BASE_URL: 'https://kids-toys-backend.onrender.com',
     FRONTEND_URL: process.env.REACT_APP_FRONTEND_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://your-frontend-vercel-url.vercel.app')
   }
 };
