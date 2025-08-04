@@ -3368,7 +3368,7 @@ app.post('/api/reviews/product', authMiddleware, async (req, res) => {
         productId: parsedProductId,
         orderId: parsedOrderId,
         rating: parsedRating,
-        comment: text,
+        text: text,
         status: 'pending'
       }
     });
@@ -3807,8 +3807,6 @@ app.get('/api/reviews/product', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Ошибка получения отзывов о товарах' });
   }
 });
-
-// POST /api/reviews/product — создать отзыв о товаре
 
 // === API для статистики изображений ===
 app.get('/api/admin/images/stats', authMiddleware, async (req, res) => {
