@@ -1,0 +1,1113 @@
+/* ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ ПРОБЛЕМЫ С ЛЕЙБЛАМИ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ ПРОБЛЕМЫ С ЛЕЙБЛАМИ
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+/* ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ ПРОБЛЕМЫ С ЛЕЙБЛАМИ */
+
+/* .MuiTextField-root, .MuiContainer-root, .MuiCard-root, .MuiButton-root, .MuiAppBar-root, .MuiDrawer-paper, .MuiDialog-paper, .MuiBox-root, .MuiList-root, .MuiTooltip-popper, .MuiSnackbar-root, .MuiAlert-root {
+  все стили временно закомментированы для диагностики
+} */
+
+/* ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ ПРОБЛЕМЫ С ЛЕЙБЛАМИ
+#root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+*/
+
+/* Кастомные скроллбары */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #FF5252, #26A69A);
+}
+
+/* Стили для учета скроллбара */
+html {
+  overflow-y: scroll;
+}
+
+/* Для Firefox */
+@supports (scrollbar-gutter: stable) {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
+/* Для WebKit браузеров */
+@supports not (scrollbar-gutter: stable) {
+  body {
+    padding-right: 8px; /* Ширина скроллбара */
+  }
+}
+
+/* Анимации для элементов */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes flyHeart {
+  0% {
+    opacity: 0.7;
+    transform: translateY(0) scale(1) rotate(var(--angle, 0deg));
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-38px) scale(1.2) rotate(var(--angle, 0deg));
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-80px) scale(0.7) rotate(var(--angle, 0deg));
+  }
+}
+
+/* Применение анимаций к элементам */
+.bounce {
+  animation: bounce 2s infinite;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Стили для карточек товаров - НОВЫЙ ДИЗАЙН */
+.product-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+  border-radius: 24px;
+  box-shadow: 
+    0 8px 32px rgba(0,0,0,0.08),
+    0 2px 8px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+  overflow: hidden;
+  cursor: pointer;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+  position: relative;
+  backdrop-filter: blur(10px);
+  transition: box-shadow 0.9s, transform 0.9s;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.product-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+
+.product-card:hover::before {
+  opacity: 1;
+}
+
+.product-card:hover {
+  transform: translateY(-12px) scale(1.03);
+  box-shadow: 
+    0 24px 48px rgba(0,0,0,0.15),
+    0 8px 16px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+.product-image {
+  width: 100%;
+  height: 224px;
+  object-fit: cover;
+  transition: all 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  max-width: 100%;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.08);
+}
+
+.product-info {
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(248,249,255,0.95) 100%);
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.product-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  color: #2d3748;
+  line-height: 1.4;
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}
+
+.product-description {
+  font-size: 0.85rem;
+  color: #718096;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-weight: 400;
+}
+
+.product-meta {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.product-category,
+.product-age {
+  font-size: 0.75rem;
+  color: #4a5568;
+  background: linear-gradient(135deg, #e2e8f0 0%, #f7fafc 100%);
+  padding: 4px 10px;
+  border-radius: 16px;
+  white-space: nowrap;
+  font-weight: 500;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.product-category:hover,
+.product-age:hover {
+  background: linear-gradient(135deg, #cbd5e0 0%, #e2e8f0 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.product-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  gap: 12px;
+}
+
+.price {
+  font-size: 1.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.date {
+  font-size: 0.85rem;
+  color: #718096;
+  font-weight: 600;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.date:hover {
+  background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.product-quantity-admin {
+  background: linear-gradient(135deg, #bee3f8 0%, #ebf8ff 100%);
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-top: 10px;
+  text-align: center;
+  border-left: 4px solid #3182ce;
+  font-weight: 600;
+  color: #2c5282;
+  box-shadow: 0 2px 8px rgba(49, 130, 206, 0.15);
+}
+
+/* Стили для карточек категорий */
+.category-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.category-tile {
+  position: relative;
+  width: 286px;
+  height: 156px;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.category-tile:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.category-tile.active {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  border: 3px solid #4FC3F7;
+}
+
+
+
+/* Стили для списка товаров */
+.product-list-container {
+  padding: 20px 0;
+}
+
+.filters-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.filter-group {
+  margin-bottom: 20px;
+}
+
+.filter-group label {
+  display: block;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 16px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #4FC3F7;
+  box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.1);
+}
+
+.refresh-button {
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.refresh-button:hover {
+  background: linear-gradient(45deg, #FF5252, #26A69A);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 32px;
+  margin-top: 32px;
+  padding: 0 16px;
+}
+
+.no-products {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.no-products h3 {
+  color: #333;
+  margin-bottom: 16px;
+}
+
+/* Стили для кнопок */
+.gradient-button {
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: none;
+  font-size: 1rem;
+}
+
+.gradient-button:hover {
+  background: linear-gradient(45deg, #FF5252, #26A69A);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.red-gradient-button {
+  background: linear-gradient(45deg, #ff0844, #d7003a) !important;
+  border: none !important;
+  color: white !important;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  min-width: 100px;
+}
+
+.red-gradient-button:hover {
+  background: linear-gradient(45deg, #d7003a, #b3002e) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255,8,68,0.3);
+}
+
+.red-gradient-button:disabled {
+  background: linear-gradient(45deg, #ccc, #999) !important;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Стили для навигации */
+.nav-link {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Стили для иконок */
+.icon-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.icon-3d:hover {
+  transform: rotateY(180deg);
+}
+
+/* Стили для загрузки */
+.loading-spinner {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(255, 107, 107, 0.3);
+  border-radius: 50%;
+  border-top-color: #FF6B6B;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Стили для уведомлений */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  z-index: 1000;
+  animation: slideIn 0.3s ease;
+}
+
+.notification.success {
+  background: linear-gradient(45deg, #4CAF50, #45a049);
+}
+
+.notification.error {
+  background: linear-gradient(45deg, #f44336, #d32f2f);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Стили для модальных окон */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Стили для поиска */
+.search-container {
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #FF6B6B;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  display: none;
+}
+
+/* Стили для фильтров */
+.filter-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+}
+
+.filter-title {
+  font-weight: bold;
+  color: #FF6B6B;
+  margin-bottom: 15px;
+}
+
+/* Стили для пагинации */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+.pagination-button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 20px;
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.pagination-button.active {
+  background: linear-gradient(45deg, #FF5252, #26A69A);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Адаптивность для нового дизайна карточек */
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 0 8px;
+    padding-right: calc(8px + (100vw - 100%));
+  }
+  
+  .product-card {
+    margin-bottom: 12px;
+    max-width: 100%;
+  }
+  
+  .product-card:hover {
+    transform: translateY(-4px) scale(1.02);
+  }
+  
+  .product-info {
+    padding: 12px;
+  }
+  
+  .product-name {
+    font-size: 1rem;
+  }
+  
+  .product-description {
+    font-size: 0.8rem;
+  }
+  
+  .price {
+    font-size: 1.1rem;
+  }
+  
+  .hero-title {
+    font-size: 1.8rem;
+  }
+  
+  .nav-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .modal-content {
+    max-width: 95vw;
+    margin: 10px;
+    padding: 15px;
+  }
+  
+  .search-input {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  
+  .filter-container {
+    gap: 8px;
+    padding: 0 8px;
+    padding-right: calc(8px + (100vw - 100%));
+  }
+  
+  .pagination {
+    gap: 8px;
+    padding: 0 8px;
+    padding-right: calc(8px + (100vw - 100%));
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 0 4px;
+    padding-right: calc(4px + (100vw - 100%));
+  }
+  
+  .product-card {
+    margin-bottom: 10px;
+  }
+  
+  .product-image {
+    height: 180px;
+  }
+  
+  .product-info {
+    padding: 10px;
+  }
+  
+  .product-name {
+    font-size: 0.9rem;
+  }
+  
+  .product-description {
+    font-size: 0.75rem;
+  }
+  
+  .price {
+    font-size: 1rem;
+  }
+  
+  .hero-title {
+    font-size: 1.5rem;
+  }
+  
+  .modal-content {
+    max-width: 98vw;
+    margin: 5px;
+    padding: 10px;
+  }
+  
+  .search-input {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .filter-container {
+    gap: 6px;
+    padding: 0 4px;
+    padding-right: calc(4px + (100vw - 100%));
+  }
+  
+  .pagination {
+    gap: 6px;
+    padding: 0 4px;
+  }
+}
+
+/* Стили для кнопок навигации Swiper (как в галерее) */
+/* .swiper-button-next,
+.swiper-button-prev {
+  background: transparent !important;
+  color: #ff6600 !important;
+  border-radius: 50% !important;
+  font-weight: 600 !important;
+  font-size: 36px !important;
+  min-width: 80px !important;
+  height: 80px !important;
+  transition: color 0.2s ease !important;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background: transparent !important;
+  color: #e55a00 !important;
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 36px !important;
+  font-weight: 600 !important;
+}
+
+.swiper-button-disabled {
+  color: #ccc !important;
+} */
+
+/* Мобильные улучшения */
+@media (max-width: 768px) {
+  .MuiContainer-root {
+    padding-left: 8px !important;
+    padding-right: calc(8px + (100vw - 100%)) !important;
+    max-width: 100% !important;
+  }
+
+  .MuiCard-root {
+    max-width: 100% !important;
+    margin: 0 4px !important;
+  }
+
+  .MuiButton-root {
+    font-size: 0.9rem !important;
+    padding: 8px 16px !important;
+    max-width: 100% !important;
+  }
+
+  .MuiAppBar-root {
+    padding-left: 8px !important;
+    padding-right: calc(8px + (100vw - 100%)) !important;
+  }
+
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  .MuiDrawer-paper {
+    width: 280px !important;
+    max-width: 90vw !important;
+  }
+  
+  .MuiModal-root {
+    padding: 8px !important;
+  }
+  
+  .MuiDialog-paper {
+    max-width: 95vw !important;
+    margin: 8px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .MuiContainer-root {
+    padding-left: 4px !important;
+    padding-right: calc(4px + (100vw - 100%)) !important;
+  }
+
+  .MuiCard-root {
+    margin: 0 2px !important;
+  }
+
+  .MuiButton-root {
+    font-size: 0.8rem !important;
+    padding: 6px 12px !important;
+  }
+  
+  .MuiDrawer-paper {
+    width: 260px !important;
+    max-width: 95vw !important;
+  }
+  
+  .MuiDialog-paper {
+    max-width: 98vw !important;
+    margin: 4px !important;
+  }
+}
+
+/* Предотвращение зума на iOS */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Улучшения для планшетов */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .MuiContainer-root {
+    padding-left: 12px !important;
+    padding-right: calc(12px + (100vw - 100%)) !important;
+    max-width: 100% !important;
+  }
+  
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 0 12px;
+    padding-right: calc(12px + (100vw - 100%));
+  }
+  
+  .product-card {
+    max-width: 100%;
+  }
+  
+  .MuiDrawer-paper {
+    width: 300px !important;
+    max-width: 80vw !important;
+  }
+  
+  .MuiDialog-paper {
+    max-width: 90vw !important;
+    margin: 16px !important;
+  }
+}
+
+/* Дополнительные эффекты */
+.glow-effect {
+  box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+}
+
+.rainbow-text {
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4, #FFEAA7);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow 3s ease-in-out infinite;
+}
+
+@keyframes rainbow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ ПРОБЛЕМЫ С ЛЕЙБЛАМИ
+#root > div {
+  background: transparent !important;
+}
+*/
+
+/* Дополнительные стили для предотвращения горизонтального скролла */
+/* ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ ПРОБЛЕМЫ С ЛЕЙБЛАМИ
+.MuiBox-root,
+.MuiGrid-root,
+.MuiStack-root,
+.MuiPaper-root {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+*/
+
+/* ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ ПРОБЛЕМЫ С ЛЕЙБЛАМИ
+.MuiTextField-root,
+.MuiFormControl-root,
+.MuiInputBase-root {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+*/
+
+/* ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ ПРОБЛЕМЫ С ЛЕЙБЛАМИ
+.MuiList-root,
+.MuiListItem-root {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+*/
+
+/* Стили для предотвращения выхода за пределы экрана */
+.MuiTooltip-popper {
+  max-width: 90vw !important;
+}
+
+.MuiSnackbar-root {
+  max-width: 90vw !important;
+}
+
+.MuiAlert-root {
+  max-width: 100% !important;
+  word-wrap: break-word !important;
+}
+
+/* Стили для изображений */
+img, video, iframe {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+}
+
+/* Стили для таблиц */
+table {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+/* Стили для длинного текста */
+/* ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ ПРОБЛЕМЫ С ЛЕЙБЛАМИ
+p, h1, h2, h3, h4, h5, h6, span, div {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+*/
+
+/* Дополнительные стили для контейнеров */
+/* ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ ПРОБЛЕМЫ С ЛЕЙБЛАМИ
+.container, .wrapper, .content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+*/
+
+/* Простые стили для скроллбара */
+html {
+  overflow-y: auto;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Скрыть скроллбар только для меню каталога */
+.sidebar-categories::-webkit-scrollbar,
+.sidebar-subcategories::-webkit-scrollbar {
+  display: none !important;
+}
+.sidebar-categories {
+  -ms-overflow-style: none !important; /* IE/Edge */
+  scrollbar-width: none !important;    /* Firefox */
+}
+.sidebar-subcategories {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.catalog-sidebar-categories,
+.catalog-sidebar-categories * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.catalog-sidebar-categories::-webkit-scrollbar,
+.catalog-sidebar-categories *::-webkit-scrollbar {
+  display: none !important;
+}
+
+.category-dropdown-menu,
+.category-dropdown-menu * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.category-dropdown-menu::-webkit-scrollbar,
+.category-dropdown-menu *::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Оставить скроллбар для подкатегорий */
+.category-dropdown-submenu,
+.category-dropdown-submenu * {
+  scrollbar-width: auto !important;
+  -ms-overflow-style: auto !important;
+}
+.category-dropdown-submenu::-webkit-scrollbar,
+.category-dropdown-submenu *::-webkit-scrollbar {
+  display: initial !important;
+}
+
+.category-listitem-text {
+  line-height: 0.85 !important;
+}
+
+.dropdown-category-icon {
+  margin-left: 4px !important;
+}
+
+.dropdown-category-list .dropdown-category-icon {
+  margin-left: 4px !important;
+}
+
+body {
+  overflow-y: scroll;
+}
+
+.main-banner-img {
+  margin-left: 50px;
+}
+
+@media (max-width: 600px) {
+  .main-banner-img {
+    margin-left: 0 !important;
+  }
+}
+
+
