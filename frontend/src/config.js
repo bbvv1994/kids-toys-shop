@@ -66,35 +66,50 @@ export const getUploadUrl = (filename) => {
 
 // Функция для получения URL изображений
 export const getImageUrl = (imagePath) => {
-  if (!imagePath) return '';
+  console.log('🔧 getImageUrl called with:', imagePath);
+  
+  if (!imagePath) {
+    console.log('❌ No imagePath provided');
+    return '';
+  }
   
   // Если это уже полный URL
   if (imagePath.startsWith('http')) {
+    console.log('✅ Full URL detected:', imagePath);
     return imagePath;
   }
   
   // Если это путь /uploads/...
   if (imagePath.startsWith('/uploads/')) {
-    return `${API_BASE_URL}${imagePath}`;
+    const url = `${API_BASE_URL}${imagePath}`;
+    console.log('✅ Uploads path detected:', url);
+    return url;
   }
   
   // Если это загруженный файл (начинается с цифр)
   if (/^\d+/.test(imagePath)) {
-    return getUploadUrl(imagePath);
+    const url = getUploadUrl(imagePath);
+    console.log('✅ Uploaded file detected:', url);
+    return url;
   }
   
   // Если это статический файл из public папки (PNG, JPG, etc.)
   if (imagePath.match(/\.(png|jpg|jpeg|gif|webp)$/i)) {
-    return `${API_BASE_URL}/public/${imagePath}`;
+    const url = `${API_BASE_URL}/public/${imagePath}`;
+    console.log('✅ Static file detected:', url);
+    return url;
   }
   
   // Если это статический файл
   if (imagePath.startsWith('/')) {
+    console.log('✅ Static path detected:', imagePath);
     return imagePath;
   }
   
   // По умолчанию считаем загруженным файлом
-  return getUploadUrl(imagePath);
+  const url = getUploadUrl(imagePath);
+  console.log('✅ Default upload file:', url);
+  return url;
 };
 
 // Экспортируем информацию о текущей среде для отладки

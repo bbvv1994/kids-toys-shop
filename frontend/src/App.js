@@ -4859,8 +4859,10 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map(p => (
-              <tr key={p.id}>
+            {filteredProducts.map(p => {
+              console.log('🔧 Rendering product:', p.id, 'imageUrls:', p.imageUrls);
+              return (
+                <tr key={p.id}>
                 <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center' }}>
                   {p.imageUrls && p.imageUrls.length > 0 && !imageErrors[p.id] ? (
                     <img 
@@ -4868,6 +4870,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
                       alt="img" 
                       style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4 }} 
                       onError={() => handleImageError(p.id)}
+                      onLoad={() => console.log('✅ Image loaded successfully for product:', p.id, 'URL:', getImageUrl(p.imageUrls[0]))}
                     />
                   ) : (
                     <img 
