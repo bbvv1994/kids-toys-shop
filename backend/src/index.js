@@ -249,6 +249,28 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Debug endpoint для проверки категорий
+app.get('/api/debug/categories', async (req, res) => {
+  try {
+    const categories = await prisma.category.findMany({ 
+      where: { active: true },
+      orderBy: { order: 'asc' },
+      take: 5
+    });
+    
+    res.json({ 
+      total: categories.length,
+      categories: categories,
+      message: 'Debug endpoint working'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Debug endpoint error', 
+      message: error.message 
+    });
+  }
+});
+
 // Функция для безопасного декодирования имени пользователя
 function decodeUserName(name) {
   if (!name) return '';
