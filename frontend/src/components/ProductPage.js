@@ -420,6 +420,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   // Функция для получения реальных изображений
   const getRealImages = () => {
+    console.log('🖼️ ProductPage: getRealImages вызван');
+    console.log('🖼️ ProductPage: product.imageUrls =', product.imageUrls);
+    console.log('🖼️ ProductPage: typeof product.imageUrls =', typeof product.imageUrls);
+    console.log('🖼️ ProductPage: Array.isArray(product.imageUrls) =', Array.isArray(product.imageUrls));
+    
     const isDefaultCategoryIcon = url =>
       url && (
         url.includes('bear.png') ||
@@ -435,14 +440,20 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       ? product.imageUrls.some(url => url && url.trim() !== '' && !isDefaultCategoryIcon(url))
       : (typeof product.imageUrls === 'string' && product.imageUrls.trim() !== '' && !isDefaultCategoryIcon(product.imageUrls));
     
+    console.log('🖼️ ProductPage: hasRealImages =', hasRealImages);
+    
     // Если нет реальных изображений, возвращаем пустой массив
     if (!hasRealImages) {
+      console.log('🖼️ ProductPage: Нет реальных изображений, возвращаем пустой массив');
       return [];
     }
     
-    return Array.isArray(product.imageUrls)
+    const result = Array.isArray(product.imageUrls)
       ? product.imageUrls.filter(url => url && url.trim() !== '' && !isDefaultCategoryIcon(url))
       : (typeof product.imageUrls === 'string' && product.imageUrls.trim() !== '' && !isDefaultCategoryIcon(product.imageUrls) ? [product.imageUrls] : []);
+    
+    console.log('🖼️ ProductPage: Результат getRealImages =', result);
+    return result;
   };
 
   const handleGalleryKeyDown = (e) => {
