@@ -45,8 +45,33 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
   const navigate = useNavigate();
   const [removingItem, setRemovingItem] = useState(null);
   
+  console.log('🛒 CartPage: Начало рендера');
   console.log('🛒 CartPage: Получена корзина:', cart);
   console.log('🛒 CartPage: cart.items:', cart?.items);
+  console.log('🛒 CartPage: cart.items.length:', cart?.items?.length);
+  
+  // Защита от ошибок - всегда возвращаем JSX
+  if (!cart) {
+    console.warn('🛒 CartPage: cart is null/undefined, using default');
+    return (
+      <Box sx={{ 
+        maxWidth: 1400,
+        width: '90%',
+        mx: 'auto', 
+        mt: 4, 
+        p: 3,
+        pt: { xs: 8, md: 10 },
+        background: 'white',
+        borderRadius: 4,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+        border: '1px solid #e0e0e0'
+      }}>
+        <Typography variant="h3" sx={{ textAlign: 'center', color: '#666' }}>
+          Загрузка корзины...
+        </Typography>
+      </Box>
+    );
+  }
   
   const items = (cart?.items || []).sort((a, b) => a.id - b.id);
   const total = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
@@ -54,6 +79,11 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
   
   console.log('🛒 CartPage: Обработанные items:', items);
   console.log('🛒 CartPage: Количество товаров:', itemCount);
+  console.log('🛒 CartPage: Общая сумма:', total);
+  
+  // Проверяем, что все необходимые функции переданы
+  console.log('🛒 CartPage: onChangeCartQuantity:', typeof onChangeCartQuantity);
+  console.log('🛒 CartPage: onRemoveFromCart:', typeof onRemoveFromCart);
 
   const handleRemoveItem = async (productId) => {
     setRemovingItem(productId);

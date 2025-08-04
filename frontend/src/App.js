@@ -4118,7 +4118,54 @@ function AppContent({
 }) {
   const location = useLocation();
   
+  // Обработка ошибок рендера
+  const [hasError, setHasError] = React.useState(false);
+  const [errorInfo, setErrorInfo] = React.useState(null);
 
+  React.useEffect(() => {
+    const handleError = (error, errorInfo) => {
+      console.error('AppContent Error:', error, errorInfo);
+      setHasError(true);
+      setErrorInfo(errorInfo);
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  if (hasError) {
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      }}>
+        <Box sx={{ 
+          textAlign: 'center', 
+          p: 4, 
+          background: 'white', 
+          borderRadius: 3,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+        }}>
+          <Typography variant="h4" sx={{ color: '#f44336', mb: 2 }}>
+            😵 Произошла ошибка
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 3, color: '#666' }}>
+            Что-то пошло не так. Попробуйте обновить страницу.
+          </Typography>
+          <Button 
+            variant="contained" 
+            onClick={() => window.location.reload()}
+            sx={{ background: '#4CAF50' }}
+          >
+            Обновить страницу
+          </Button>
+        </Box>
+      </Box>
+    );
+  }
   
   return (
     <>
