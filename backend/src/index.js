@@ -288,59 +288,40 @@ app.post('/api/debug/import-data', async (req, res) => {
     //   return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
     // }
     
-    // Загружаем данные из файла
-    const dataPath = path.join(__dirname, '..', '..', 'exported-data.json');
-    const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    // Создаем тестовые данные прямо в коде
+    const testCategories = [
+      { id: 1, name: 'Игрушки', active: true, order: 1, parentId: null },
+      { id: 2, name: 'Конструкторы', active: true, order: 2, parentId: null },
+      { id: 3, name: 'Пазлы', active: true, order: 3, parentId: null },
+      { id: 4, name: 'Творчество', active: true, order: 4, parentId: null },
+      { id: 5, name: 'Канцтовары', active: true, order: 5, parentId: null }
+    ];
     
-    console.log('📂 Импортируем категории...');
-    for (const category of data.categories) {
+    const testProducts = [
+      { id: 1, name: 'Кукла Барби', price: 299.99, description: 'Красивая кукла', categoryId: 1, active: true },
+      { id: 2, name: 'Машинка радиоуправляемая', price: 599.99, description: 'Быстрая машинка', categoryId: 1, active: true },
+      { id: 3, name: 'Пазл 100 деталей', price: 199.99, description: 'Развивающий пазл', categoryId: 3, active: true }
+    ];
+    
+    console.log('📂 Импортируем тестовые категории...');
+    for (const category of testCategories) {
       await prisma.category.upsert({
         where: { id: category.id },
         update: category,
         create: category
       });
     }
-    console.log(`✅ Импортировано ${data.categories.length} категорий`);
+    console.log(`✅ Импортировано ${testCategories.length} категорий`);
     
-    console.log('📦 Импортируем продукты...');
-    for (const product of data.products) {
+    console.log('📦 Импортируем тестовые продукты...');
+    for (const product of testProducts) {
       await prisma.product.upsert({
         where: { id: product.id },
         update: product,
         create: product
       });
     }
-    console.log(`✅ Импортировано ${data.products.length} продуктов`);
-    
-    console.log('👥 Импортируем пользователей...');
-    for (const user of data.users) {
-      await prisma.user.upsert({
-        where: { id: user.id },
-        update: user,
-        create: user
-      });
-    }
-    console.log(`✅ Импортировано ${data.users.length} пользователей`);
-    
-    console.log('📋 Импортируем заказы...');
-    for (const order of data.orders) {
-      await prisma.order.upsert({
-        where: { id: order.id },
-        update: order,
-        create: order
-      });
-    }
-    console.log(`✅ Импортировано ${data.orders.length} заказов`);
-    
-    console.log('⭐ Импортируем отзывы...');
-    for (const review of data.reviews) {
-      await prisma.review.upsert({
-        where: { id: review.id },
-        update: review,
-        create: review
-      });
-    }
-    console.log(`✅ Импортировано ${data.reviews.length} отзывов`);
+    console.log(`✅ Импортировано ${testProducts.length} продуктов`);
     
     // Проверяем количество записей
     const categoriesCount = await prisma.category.count();

@@ -4,14 +4,10 @@ async function triggerImport() {
   try {
     console.log('🚀 Вызываем импорт данных через API...');
     
-    // Получаем токен администратора (нужно будет заменить на реальный токен)
-    const adminToken = 'your-admin-token-here'; // Замените на реальный токен
-    
     const response = await fetch('https://kids-toys-backend.onrender.com/api/debug/import-data', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${adminToken}`
+        'Content-Type': 'application/json'
       }
     });
     
@@ -29,13 +25,6 @@ async function triggerImport() {
   }
 }
 
-console.log('⚠️ ВНИМАНИЕ: Нужно заменить "your-admin-token-here" на реальный токен администратора!');
-console.log('Для получения токена:');
-console.log('1. Войдите в приложение как администратор');
-console.log('2. Откройте DevTools (F12)');
-console.log('3. Перейдите в Application/Storage -> Local Storage');
-console.log('4. Найдите токен и скопируйте его');
-console.log('5. Замените "your-admin-token-here" на скопированный токен');
-console.log('6. Запустите скрипт снова');
+console.log('✅ Готово! Теперь можно запустить импорт без токена.');
 
-// triggerImport(); // Раскомментируйте после замены токена 
+triggerImport(); // Запускаем импорт 
