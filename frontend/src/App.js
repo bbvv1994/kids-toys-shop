@@ -4,7 +4,7 @@ import AdminReviews from './components/AdminReviews';
 import AdminShopReviews from './components/AdminShopReviews';
 import AdminProductReviews from './components/AdminProductReviews';
 import CustomerReviews from './components/CustomerReviews';
-import { getImageUrl } from './config';
+import { getImageUrl, API_BASE_URL } from './config';
 import { 
   DndContext,
   closestCenter,
