@@ -45,6 +45,27 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
   const navigate = useNavigate();
   const [removingItem, setRemovingItem] = useState(null);
   
+  // Функция для очистки корзины от удаленных товаров
+  const cleanupRemovedProducts = React.useCallback(() => {
+    if (!cart?.items) return;
+    
+    const removedProducts = cart.items.filter(item => !item || !item.product);
+    if (removedProducts.length > 0) {
+      console.log('🛒 CartPage: Найдены удаленные товары в корзине:', removedProducts);
+      // Удаляем каждый удаленный товар из корзины
+      removedProducts.forEach(item => {
+        if (item && item.product && onRemoveFromCart) {
+          onRemoveFromCart(item.product.id);
+        }
+      });
+    }
+  }, [cart?.items, onRemoveFromCart]);
+
+  // Очищаем удаленные товары при загрузке
+  React.useEffect(() => {
+    cleanupRemovedProducts();
+  }, [cleanupRemovedProducts]);
+  
   console.log('🛒 CartPage: Начало рендера');
   console.log('🛒 CartPage: Получена корзина:', cart);
   console.log('🛒 CartPage: cart.items:', cart?.items);
@@ -93,27 +114,6 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
   // Проверяем, что все необходимые функции переданы
   console.log('🛒 CartPage: onChangeCartQuantity:', typeof onChangeCartQuantity);
   console.log('🛒 CartPage: onRemoveFromCart:', typeof onRemoveFromCart);
-
-  // Функция для очистки корзины от удаленных товаров
-  const cleanupRemovedProducts = React.useCallback(() => {
-    if (!cart?.items) return;
-    
-    const removedProducts = cart.items.filter(item => !item || !item.product);
-    if (removedProducts.length > 0) {
-      console.log('🛒 CartPage: Найдены удаленные товары в корзине:', removedProducts);
-      // Удаляем каждый удаленный товар из корзины
-      removedProducts.forEach(item => {
-        if (item && item.product && onRemoveFromCart) {
-          onRemoveFromCart(item.product.id);
-        }
-      });
-    }
-  }, [cart?.items, onRemoveFromCart]);
-
-  // Очищаем удаленные товары при загрузке
-  React.useEffect(() => {
-    cleanupRemovedProducts();
-  }, [cleanupRemovedProducts]);
 
   const handleRemoveItem = async (productId) => {
     setRemovingItem(productId);
