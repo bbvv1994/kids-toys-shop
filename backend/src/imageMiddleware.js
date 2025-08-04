@@ -10,11 +10,15 @@ class ImageMiddleware {
    */
   async processUploadedImages(req, res, next) {
     try {
+      console.log('🖼️ ImageMiddleware: processUploadedImages вызван');
+      console.log('🖼️ ImageMiddleware: req.files =', req.files ? req.files.length : 'undefined');
+      
       if (!req.files || req.files.length === 0) {
+        console.log('🖼️ ImageMiddleware: Нет файлов для обработки');
         return next();
       }
 
-      console.log(`Обработка ${req.files.length} загруженных файлов...`);
+      console.log(`🖼️ ImageMiddleware: Обработка ${req.files.length} загруженных файлов...`);
 
       // Фильтруем только изображения
       const imageFiles = req.files.filter(file => 

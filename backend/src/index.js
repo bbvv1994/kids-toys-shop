@@ -2055,7 +2055,10 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7),
     ? productionUploadMiddleware.processUploadedFiles.bind(productionUploadMiddleware)
     : imageMiddleware.checkFileSizes.bind(imageMiddleware), 
   process.env.NODE_ENV === 'production' 
-    ? (req, res, next) => next()
+    ? (req, res, next) => {
+        console.log('🖼️ PUT /api/products/:id - Production mode middleware');
+        next();
+      }
     : imageMiddleware.processUploadedImages.bind(imageMiddleware), 
   async (req, res) => {
   // Проверка роли admin
@@ -2093,20 +2096,34 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7),
     }
     
     // Добавляем новые изображения
+    console.log('🖼️ PUT /api/products/:id - Обработка файлов');
+    console.log('🖼️ PUT /api/products/:id - req.files =', req.files ? req.files.length : 'undefined');
+    console.log('🖼️ PUT /api/products/:id - req.imageUrls =', req.imageUrls);
+    
     if (req.files && req.files.length > 0) {
       const newImageUrls = req.files.map(file => {
+        console.log('🖼️ PUT /api/products/:id - Обработка файла:', file.originalname);
+        console.log('🖼️ PUT /api/products/:id - file.filename =', file.filename);
+        
         // В production режиме файлы могут быть в памяти
         if (file.filename) {
-          return `/uploads/${file.filename}`;
+          const url = `/uploads/${file.filename}`;
+          console.log('🖼️ PUT /api/products/:id - Используем file.filename:', url);
+          return url;
         } else if (req.imageUrls && req.imageUrls.length > 0) {
           // Используем обработанные URL из middleware
-          return req.imageUrls[req.files.indexOf(file)] || `/uploads/${Date.now()}_${file.originalname}`;
+          const url = req.imageUrls[req.files.indexOf(file)] || `/uploads/${Date.now()}_${file.originalname}`;
+          console.log('🖼️ PUT /api/products/:id - Используем req.imageUrls:', url);
+          return url;
         } else {
           // Fallback для production
-          return `/uploads/${Date.now()}_${file.originalname}`;
+          const url = `/uploads/${Date.now()}_${file.originalname}`;
+          console.log('🖼️ PUT /api/products/:id - Fallback URL:', url);
+          return url;
         }
       });
       imageUrls = [...imageUrls, ...newImageUrls];
+      console.log('🖼️ PUT /api/products/:id - Итоговые imageUrls:', imageUrls);
     }
     
     // Переупорядочиваем изображения, если указан главный индекс

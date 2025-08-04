@@ -12,11 +12,16 @@ class ProductionUploadMiddleware {
    */
   async processUploadedFiles(req, res, next) {
     try {
+      console.log('🖼️ ProductionUploadMiddleware: processUploadedFiles вызван');
+      console.log('🖼️ ProductionUploadMiddleware: req.files =', req.files ? req.files.length : 'undefined');
+      console.log('🖼️ ProductionUploadMiddleware: NODE_ENV =', process.env.NODE_ENV);
+      
       if (!req.files || req.files.length === 0) {
+        console.log('🖼️ ProductionUploadMiddleware: Нет файлов для обработки');
         return next();
       }
 
-      console.log(`Processing ${req.files.length} uploaded files in production...`);
+      console.log(`🖼️ ProductionUploadMiddleware: Processing ${req.files.length} uploaded files in production...`);
 
       // Проверяем размеры файлов
       const sizeErrors = this.imageHandler.checkFileSizes(req.files);

@@ -21,7 +21,8 @@ class ProductionImageHandler {
    */
   async processImageFromBuffer(buffer, originalName) {
     try {
-      console.log(`Processing image: ${originalName}`);
+      console.log(`🖼️ ProductionImageHandler: Processing image: ${originalName}`);
+      console.log(`🖼️ ProductionImageHandler: Buffer size: ${buffer.length} bytes`);
       
       // Определяем формат выходного файла
       const outputFormat = 'webp';
