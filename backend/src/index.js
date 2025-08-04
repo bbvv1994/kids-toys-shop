@@ -3205,7 +3205,7 @@ app.post('/api/reviews/shop', authMiddleware, async (req, res) => {
         userId: req.user.userId,
         orderId: parsedOrderId,
         rating: parsedRating,
-        comment: text,
+        text: text,
         status: 'pending'
       }
     });

@@ -26,7 +26,7 @@ const ReviewPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [currentStep, setCurrentStep] = useState(0);
-  const [shopReview, setShopReview] = useState({ rating: 0, comment: '' });
+  const [shopReview, setShopReview] = useState({ rating: 0, text: '' });
   const [productReviews, setProductReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -141,7 +141,7 @@ const ReviewPage = () => {
       return;
     }
 
-    if (!shopReview.comment.trim()) {
+    if (!shopReview.text.trim()) {
       setError('Пожалуйста, напишите отзыв о магазине');
       return;
     }
@@ -162,7 +162,7 @@ const ReviewPage = () => {
         body: JSON.stringify({
           orderId: orderData.id, // Добавляем orderId
           rating: shopReview.rating,
-          text: shopReview.comment // Используем 'text' вместо 'comment'
+          text: shopReview.text
         })
       });
 
@@ -422,8 +422,8 @@ const ReviewPage = () => {
               multiline
               rows={4}
               fullWidth
-              value={shopReview.comment}
-              onChange={(e) => handleShopReviewChange('comment', e.target.value)}
+              value={shopReview.text}
+              onChange={(e) => handleShopReviewChange('text', e.target.value)}
               variant="outlined"
               placeholder="Поделитесь своим мнением о магазине, обслуживании, доставке..."
               sx={{ mb: 3 }}
