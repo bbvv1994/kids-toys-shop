@@ -271,6 +271,105 @@ app.get('/api/debug/categories', async (req, res) => {
   }
 });
 
+// Endpoint для импорта данных в Render базу данных
+app.post('/api/debug/import-data', async (req, res) => {
+  try {
+    console.log('🚀 Начинаем импорт данных через API...');
+    
+    // Проверяем, что это администратор
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: 'Требуется авторизация' });
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    }
+    
+    // Загружаем данные из файла
+    const dataPath = path.join(__dirname, '..', '..', 'exported-data.json');
+    const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    
+    console.log('📂 Импортируем категории...');
+    for (const category of data.categories) {
+      await prisma.category.upsert({
+        where: { id: category.id },
+        update: category,
+        create: category
+      });
+    }
+    console.log(`✅ Импортировано ${data.categories.length} категорий`);
+    
+    console.log('📦 Импортируем продукты...');
+    for (const product of data.products) {
+      await prisma.product.upsert({
+        where: { id: product.id },
+        update: product,
+        create: product
+      });
+    }
+    console.log(`✅ Импортировано ${data.products.length} продуктов`);
+    
+    console.log('👥 Импортируем пользователей...');
+    for (const user of data.users) {
+      await prisma.user.upsert({
+        where: { id: user.id },
+        update: user,
+        create: user
+      });
+    }
+    console.log(`✅ Импортировано ${data.users.length} пользователей`);
+    
+    console.log('📋 Импортируем заказы...');
+    for (const order of data.orders) {
+      await prisma.order.upsert({
+        where: { id: order.id },
+        update: order,
+        create: order
+      });
+    }
+    console.log(`✅ Импортировано ${data.orders.length} заказов`);
+    
+    console.log('⭐ Импортируем отзывы...');
+    for (const review of data.reviews) {
+      await prisma.review.upsert({
+        where: { id: review.id },
+        update: review,
+        create: review
+      });
+    }
+    console.log(`✅ Импортировано ${data.reviews.length} отзывов`);
+    
+    // Проверяем количество записей
+    const categoriesCount = await prisma.category.count();
+    const productsCount = await prisma.product.count();
+    const usersCount = await prisma.user.count();
+    const ordersCount = await prisma.order.count();
+    const reviewsCount = await prisma.review.count();
+    
+    res.json({
+      success: true,
+      message: 'Данные успешно импортированы',
+      stats: {
+        categories: categoriesCount,
+        products: productsCount,
+        users: usersCount,
+        orders: ordersCount,
+        reviews: reviewsCount
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Ошибка при импорте данных:', error);
+    res.status(500).json({ 
+      error: 'Ошибка при импорте данных', 
+      message: error.message 
+    });
+  }
+});
+
 // Функция для безопасного декодирования имени пользователя
 function decodeUserName(name) {
   if (!name) return '';
