@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, getImageUrl } from '../config';
 import Lenis from 'lenis';
 import {
   Dialog,
@@ -868,7 +868,7 @@ function EditProductModal(props) {
                               }}
                             >
                               <img
-                                src={imageUrl.startsWith('http') ? imageUrl : `${API_BASE_URL}${imageUrl.startsWith('/') ? imageUrl : `/uploads/${imageUrl}`}`}
+                                src={getImageUrl(imageUrl)}
                                 alt={`Existing ${index + 1}`}
                                 style={{
                                   width: 100,

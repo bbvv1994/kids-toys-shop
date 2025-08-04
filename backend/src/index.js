@@ -516,7 +516,18 @@ app.post('/api/products', authMiddleware, upload.array('images', 7), imageMiddle
   }
   try {
     const { name, description, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden } = req.body;
-    const imageUrls = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+    const imageUrls = req.files ? req.files.map(file => {
+      // В production режиме файлы могут быть в памяти
+      if (file.filename) {
+        return `/uploads/${file.filename}`;
+      } else if (req.imageUrls && req.imageUrls.length > 0) {
+        // Используем обработанные URL из middleware
+        return req.imageUrls[req.files.indexOf(file)] || `/uploads/${Date.now()}_${file.originalname}`;
+      } else {
+        // Fallback для production
+        return `/uploads/${Date.now()}_${file.originalname}`;
+      }
+    }) : [];
 
     // Отладочная информация
 
@@ -2069,7 +2080,18 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7), imageMid
     
     // Добавляем новые изображения
     if (req.files && req.files.length > 0) {
-      const newImageUrls = req.files.map(file => `/uploads/${file.filename}`);
+      const newImageUrls = req.files.map(file => {
+        // В production режиме файлы могут быть в памяти
+        if (file.filename) {
+          return `/uploads/${file.filename}`;
+        } else if (req.imageUrls && req.imageUrls.length > 0) {
+          // Используем обработанные URL из middleware
+          return req.imageUrls[req.files.indexOf(file)] || `/uploads/${Date.now()}_${file.originalname}`;
+        } else {
+          // Fallback для production
+          return `/uploads/${Date.now()}_${file.originalname}`;
+        }
+      });
       imageUrls = [...imageUrls, ...newImageUrls];
     }
     
