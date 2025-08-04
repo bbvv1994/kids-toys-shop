@@ -13,7 +13,7 @@ export default function TestReviews() {
       try {
         // Тестируем отзывы о магазине
         console.log('TestReviews: Тестируем /api/reviews/shop');
-        const shopRes = await fetch('${API_BASE_URL}/api/reviews/shop');
+        const shopRes = await fetch(`${API_BASE_URL}/api/reviews/shop`);
         console.log('TestReviews: Статус отзывов о магазине:', shopRes.status);
         const shopData = await shopRes.json();
         console.log('TestReviews: Данные отзывов о магазине:', shopData);
@@ -21,7 +21,7 @@ export default function TestReviews() {
         
         // Тестируем отзывы о товаре
         console.log('TestReviews: Тестируем /api/reviews/product/27');
-        const productRes = await fetch('${API_BASE_URL}/api/reviews/product/27');
+        const productRes = await fetch(`${API_BASE_URL}/api/reviews/product/27`);
         console.log('TestReviews: Статус отзывов о товаре:', productRes.status);
         const productData = await productRes.json();
         console.log('TestReviews: Данные отзывов о товаре:', productData);

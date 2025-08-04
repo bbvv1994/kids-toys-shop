@@ -44,7 +44,7 @@ export default function AdminReviews() {
     setError('');
     try {
       console.log('AdminReviews: Загружаем отзывы для модерации...');
-      const res = await fetch('${API_BASE_URL}/api/admin/reviews/product', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/reviews/product`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       console.log('AdminReviews: Статус ответа:', res.status);

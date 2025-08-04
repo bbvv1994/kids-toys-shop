@@ -13,7 +13,7 @@ export default function TestProductReviews() {
       try {
         // Тестируем отзывы о товаре с ID 27
         console.log('TestProductReviews: Тестируем /api/reviews/product/27');
-        const res = await fetch('${API_BASE_URL}/api/reviews/product/27');
+        const res = await fetch(`${API_BASE_URL}/api/reviews/product/27`);
         console.log('TestProductReviews: Статус ответа:', res.status);
         const data = await res.json();
         console.log('TestProductReviews: Полученные отзывы:', data);

@@ -38,7 +38,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
         return;
       }
 
-      const response = await fetch('${API_BASE_URL}/api/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/profile`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
@@ -110,7 +110,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
           productName: item.product.name
         }));
 
-        const response = await fetch('${API_BASE_URL}/api/guest/checkout', {
+        const response = await fetch(`${API_BASE_URL}/api/guest/checkout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -158,7 +158,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
           return;
         }
 
-        const response = await fetch('${API_BASE_URL}/api/profile/checkout', {
+        const response = await fetch(`${API_BASE_URL}/api/profile/checkout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

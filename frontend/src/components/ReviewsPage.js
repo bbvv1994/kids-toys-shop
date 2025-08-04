@@ -9,7 +9,7 @@ export default function ReviewsPage() {
   useEffect(() => {
     console.log('ReviewsPage: Загружаем отзывы о магазине');
     setLoading(true);
-    fetch('${API_BASE_URL}/api/reviews/shop/published')
+    fetch(`${API_BASE_URL}/api/reviews/shop/published`)
       .then(res => {
         console.log('ReviewsPage: Ответ API отзывов о магазине:', res.status);
         return res.json();

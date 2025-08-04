@@ -46,8 +46,8 @@ const NotificationCenter = ({ user }) => {
     setError('');
     try {
       const endpoint = user.role === 'admin' 
-        ? '${API_BASE_URL}/api/admin/notifications'
-        : '${API_BASE_URL}/api/profile/notifications';
+        ? `${API_BASE_URL}/api/admin/notifications`
+        : `${API_BASE_URL}/api/profile/notifications`;
       const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
@@ -65,8 +65,8 @@ const NotificationCenter = ({ user }) => {
     
     try {
       const endpoint = user.role === 'admin'
-        ? '${API_BASE_URL}/api/admin/notifications/unread-count'
-        : '${API_BASE_URL}/api/profile/notifications/unread-count';
+        ? `${API_BASE_URL}/api/admin/notifications/unread-count`
+        : `${API_BASE_URL}/api/profile/notifications/unread-count`;
       const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
@@ -106,8 +106,8 @@ const NotificationCenter = ({ user }) => {
     
     try {
       const endpoint = user.role === 'admin'
-        ? '${API_BASE_URL}/api/admin/notifications/read-all'
-        : '${API_BASE_URL}/api/profile/notifications/read-all';
+        ? `${API_BASE_URL}/api/admin/notifications/read-all`
+        : `${API_BASE_URL}/api/profile/notifications/read-all`;
       const res = await fetch(endpoint, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${user.token}` }

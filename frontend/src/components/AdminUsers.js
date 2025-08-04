@@ -59,7 +59,7 @@ const AdminUsers = () => {
     setError('');
     try {
       const token = JSON.parse(localStorage.getItem('user'))?.token;
-      const res = await fetch('${API_BASE_URL}/api/admin/users', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Ошибка загрузки пользователей');

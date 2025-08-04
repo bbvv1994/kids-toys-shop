@@ -42,7 +42,7 @@ const AdminShopReviews = () => {
       const userData = localStorage.getItem('user');
       const token = userData ? JSON.parse(userData).token : null;
 
-      const response = await fetch('${API_BASE_URL}/api/reviews/shop', {
+      const response = await fetch(`${API_BASE_URL}/api/reviews/shop`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

@@ -65,7 +65,7 @@ export default function ReviewModal({ open, onClose, orderId, user }) {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('${API_BASE_URL}/api/reviews/shop', {
+      const res = await fetch(`${API_BASE_URL}/api/reviews/shop`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ export default function ReviewModal({ open, onClose, orderId, user }) {
     setError('');
     const review = productReviews[idx];
     try {
-      const res = await fetch('${API_BASE_URL}/api/reviews/product', {
+      const res = await fetch(`${API_BASE_URL}/api/reviews/product`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

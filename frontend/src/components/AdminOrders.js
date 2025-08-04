@@ -46,7 +46,7 @@ export default function AdminOrders({ user }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('${API_BASE_URL}/api/admin/orders', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/orders`, {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
       if (!res.ok) throw new Error('Ошибка загрузки заказов');

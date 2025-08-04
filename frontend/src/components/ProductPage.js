@@ -228,7 +228,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   useEffect(() => {
     async function fetchWishlist() {
       if (!user || !user.token) return setWishlist([]);
-      const res = await fetch('${API_BASE_URL}/api/profile/wishlist', {
+      const res = await fetch(`${API_BASE_URL}/api/profile/wishlist`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       const data = await res.json();
@@ -291,14 +291,14 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     }
     
     if (isInWishlist) {
-      await fetch('${API_BASE_URL}/api/profile/wishlist/remove', {
+      await fetch(`${API_BASE_URL}/api/profile/wishlist/remove`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
         body: JSON.stringify({ productId })
       });
       setWishlist(wishlist.filter(id => id !== productId));
     } else {
-      await fetch('${API_BASE_URL}/api/profile/wishlist/add', {
+      await fetch(`${API_BASE_URL}/api/profile/wishlist/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
         body: JSON.stringify({ productId })

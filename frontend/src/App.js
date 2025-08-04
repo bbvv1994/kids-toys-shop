@@ -312,7 +312,7 @@ const theme = createTheme({
     }
     
     try {
-      const response = await fetch('${API_BASE_URL}/api/profile/notifications/unread-count', {
+      const response = await fetch(`${API_BASE_URL}/api/profile/notifications/unread-count`, {
         headers: {
           'Authorization': `Bearer ${user.token}`,
           'Content-Type': 'application/json'
@@ -385,7 +385,7 @@ const theme = createTheme({
       
       // Сохраняем текущее количество уведомлений для расчета новых
       // Используем актуальное количество из API, а не из состояния
-      fetch('${API_BASE_URL}/api/profile/notifications/unread-count', {
+      fetch(`${API_BASE_URL}/api/profile/notifications/unread-count`, {
         headers: {
           'Authorization': `Bearer ${user.token}`,
           'Content-Type': 'application/json'
@@ -3107,7 +3107,7 @@ function App() {
   // Load cart when user is authenticated
   useEffect(() => {
     if (user && user.token) {
-      fetch('${API_BASE_URL}/api/profile/cart', {
+      fetch(`${API_BASE_URL}/api/profile/cart`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
@@ -3128,7 +3128,7 @@ function App() {
   // Load wishlist when user is authenticated
   useEffect(() => {
     if (user && user.token) {
-      fetch('${API_BASE_URL}/api/profile/wishlist', {
+      fetch(`${API_BASE_URL}/api/profile/wishlist`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
@@ -3184,7 +3184,7 @@ function App() {
     }
     
     try {
-      const response = await fetch('${API_BASE_URL}/api/profile/cart/add', {
+      const response = await fetch(`${API_BASE_URL}/api/profile/cart/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -3225,7 +3225,7 @@ function App() {
     }
     
     try {
-      const response = await fetch('${API_BASE_URL}/api/profile/cart/update', {
+      const response = await fetch(`${API_BASE_URL}/api/profile/cart/update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -3258,7 +3258,7 @@ function App() {
     }
     
     try {
-      const response = await fetch('${API_BASE_URL}/api/profile/cart/remove', {
+      const response = await fetch(`${API_BASE_URL}/api/profile/cart/remove`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -3291,7 +3291,7 @@ function App() {
       setCart({ items: [] });
       
       // Обновляем корзину через API для синхронизации с сервером
-      const response = await fetch('${API_BASE_URL}/api/profile/cart', {
+      const response = await fetch(`${API_BASE_URL}/api/profile/cart`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
@@ -4612,7 +4612,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         });
       }
 
-      const response = await fetch('${API_BASE_URL}/api/products', {
+      const response = await fetch(`${API_BASE_URL}/api/products`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}` },
         body: formData
@@ -4635,7 +4635,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await fetch('${API_BASE_URL}/api/products?admin=true', {
+      const response = await fetch(`${API_BASE_URL}/api/products?admin=true`, {
         headers: { 'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}` }
       });
       if (response.ok) {
@@ -4760,7 +4760,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         });
       }
 
-      const response = await fetch('${API_BASE_URL}/api/products', {
+      const response = await fetch(`${API_BASE_URL}/api/products`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}` },
         body: formData
@@ -5655,7 +5655,7 @@ function CMSCategories({ loadCategoriesFromAPI }) {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await fetch('${API_BASE_URL}/api/categories', {
+      const res = await fetch(`${API_BASE_URL}/api/categories`, {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
       const data = await res.json();
@@ -5710,7 +5710,7 @@ function CMSCategories({ loadCategoriesFromAPI }) {
           // Отправляем категории того же уровня в API
           const sameLevelCategoryIds = reorderedSameLevel.map(cat => cat.id);
           
-          const response = await fetch('${API_BASE_URL}/api/categories/reorder', {
+          const response = await fetch(`${API_BASE_URL}/api/categories/reorder`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -5938,7 +5938,7 @@ function CMSCategories({ loadCategoriesFromAPI }) {
       formData.append('parentId', form.parent);
     }
       
-      const response = await fetch('${API_BASE_URL}/api/categories', {
+      const response = await fetch(`${API_BASE_URL}/api/categories`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${user.token}` },
       body: formData
@@ -6551,7 +6551,7 @@ function CMSOrders() {
     setLoading(true);
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const response = await fetch('${API_BASE_URL}/api/admin/orders', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/orders`, {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
       if (response.ok) {
@@ -8089,7 +8089,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
           let ignore = false;
           setLoadingNotifications(true);
           setErrorNotifications('');
-          fetch('${API_BASE_URL}/api/profile/notifications', {
+          fetch(`${API_BASE_URL}/api/profile/notifications`, {
             headers: { 'Authorization': `Bearer ${user.token}` }
           })
             .then(res => {
@@ -8134,7 +8134,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
       let ignore = false;
       setLoadingNotifications(true);
       setErrorNotifications('');
-      fetch('${API_BASE_URL}/api/profile/notifications', {
+      fetch(`${API_BASE_URL}/api/profile/notifications`, {
         headers: { 'Authorization': `Bearer ${user.token}` }
       })
         .then(res => {
@@ -8154,7 +8154,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
     let ignore = false;
     setLoadingNotifications(true);
     setErrorNotifications('');
-    fetch('${API_BASE_URL}/api/profile/notifications', {
+    fetch(`${API_BASE_URL}/api/profile/notifications`, {
       headers: { 'Authorization': `Bearer ${user.token}` }
     })
       .then(res => {
@@ -8208,7 +8208,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
       let ignore = false;
       setLoadingNotifications(true);
       setErrorNotifications('');
-      fetch('${API_BASE_URL}/api/profile/notifications', {
+      fetch(`${API_BASE_URL}/api/profile/notifications`, {
         headers: { 'Authorization': `Bearer ${user.token}` }
       })
         .then(res => {
@@ -8256,7 +8256,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
   const loadProfileData = async () => {
     try {
       setProfileLoading(true);
-      const response = await fetch('${API_BASE_URL}/api/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/profile`, {
         headers: {
           'Authorization': `Bearer ${user.token}`,
           'Content-Type': 'application/json'
@@ -8284,7 +8284,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
   const loadOrders = async () => {
     try {
       setOrdersLoading(true);
-      const response = await fetch('${API_BASE_URL}/api/profile/orders', {
+      const response = await fetch(`${API_BASE_URL}/api/profile/orders`, {
         headers: {
           'Authorization': `Bearer ${user.token}`,
           'Content-Type': 'application/json'
@@ -8465,7 +8465,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         requestBody.currentPassword = passwordForm.currentPassword;
       }
       
-      const response = await fetch('${API_BASE_URL}/api/auth/change-password', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user.token}`,
@@ -8502,7 +8502,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
     e.preventDefault();
     try {
       setProfileLoading(true);
-      const response = await fetch('${API_BASE_URL}/api/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${user.token}`,
@@ -8570,7 +8570,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
   const handleClearWishlist = async () => {
     if (!user || !user.token) return;
     try {
-      await fetch('${API_BASE_URL}/api/profile/wishlist/clear', {
+      await fetch(`${API_BASE_URL}/api/profile/wishlist/clear`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
       });
@@ -8615,7 +8615,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
   // Обработка удаления профиля
   const handleDeleteProfile = async () => {
     try {
-      const response = await fetch('${API_BASE_URL}/api/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/profile`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${user.token}`,
@@ -8957,7 +8957,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         const handleDeleteAllNotifications = async () => {
           if (!user || !user.token) return;
           try {
-            await fetch('${API_BASE_URL}/api/profile/notifications', {
+            await fetch(`${API_BASE_URL}/api/profile/notifications`, {
               method: 'DELETE',
               headers: { 'Authorization': `Bearer ${user.token}` }
             });
@@ -9432,7 +9432,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                                 height: 70,
                                 borderRadius: 3,
                                 background: item.product?.imageUrls && item.product.imageUrls.length > 0
-                                  ? `center/cover no-repeat url('${API_BASE_URL}${item.product.imageUrls[0]}')` 
+                                  ? `center/cover no-repeat url(`${API_BASE_URL}${item.product.imageUrls[0]}`)` 
                                   : '#f0f0f0',
                                 display: 'flex',
                                 alignItems: 'center',

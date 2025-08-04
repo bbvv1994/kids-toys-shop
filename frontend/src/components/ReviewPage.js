@@ -153,7 +153,7 @@ const ReviewPage = () => {
       const userData = localStorage.getItem('user');
       const token = userData ? JSON.parse(userData).token : null;
 
-      const response = await fetch('${API_BASE_URL}/api/reviews/shop', {
+      const response = await fetch(`${API_BASE_URL}/api/reviews/shop`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -228,7 +228,7 @@ const ReviewPage = () => {
       const userData = localStorage.getItem('user');
       const token = userData ? JSON.parse(userData).token : null;
 
-      const response = await fetch('${API_BASE_URL}/api/reviews/product', {
+      const response = await fetch(`${API_BASE_URL}/api/reviews/product`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

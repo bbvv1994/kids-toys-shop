@@ -25,7 +25,7 @@ const CustomerReviews = () => {
 
   const loadReviews = async () => {
     try {
-      const response = await fetch('${API_BASE_URL}/api/reviews/shop/published');
+      const response = await fetch(`${API_BASE_URL}/api/reviews/shop/published`);
       
       if (response.ok) {
         const data = await response.json();
