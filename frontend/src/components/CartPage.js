@@ -73,7 +73,16 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
     );
   }
   
-  const items = (cart?.items || []).sort((a, b) => a.id - b.id);
+  // Фильтруем товары, исключая удаленные (null/undefined product)
+  const validItems = (cart?.items || []).filter(item => {
+    if (!item || !item.product) {
+      console.warn('🛒 CartPage: Найден товар с null/undefined product:', item);
+      return false;
+    }
+    return true;
+  });
+  
+  const items = validItems.sort((a, b) => a.id - b.id);
   const total = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   
@@ -84,6 +93,27 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
   // Проверяем, что все необходимые функции переданы
   console.log('🛒 CartPage: onChangeCartQuantity:', typeof onChangeCartQuantity);
   console.log('🛒 CartPage: onRemoveFromCart:', typeof onRemoveFromCart);
+
+  // Функция для очистки корзины от удаленных товаров
+  const cleanupRemovedProducts = React.useCallback(() => {
+    if (!cart?.items) return;
+    
+    const removedProducts = cart.items.filter(item => !item || !item.product);
+    if (removedProducts.length > 0) {
+      console.log('🛒 CartPage: Найдены удаленные товары в корзине:', removedProducts);
+      // Удаляем каждый удаленный товар из корзины
+      removedProducts.forEach(item => {
+        if (item && item.product && onRemoveFromCart) {
+          onRemoveFromCart(item.product.id);
+        }
+      });
+    }
+  }, [cart?.items, onRemoveFromCart]);
+
+  // Очищаем удаленные товары при загрузке
+  React.useEffect(() => {
+    cleanupRemovedProducts();
+  }, [cleanupRemovedProducts]);
 
   const handleRemoveItem = async (productId) => {
     setRemovingItem(productId);
@@ -207,15 +237,22 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                 🛒 Товары в корзине ({items.length})
               </Typography>
               <AnimatePresence>
-                {items.map((item, index) => (
-                  <motion.div
-                    key={`${item.product.id}-${item.id}`}
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 50, scale: 0.8 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ marginBottom: 16 }}
-                  >
+                {items.map((item, index) => {
+                  // Дополнительная защита от null/undefined product
+                  if (!item || !item.product) {
+                    console.warn('🛒 CartPage: Пропускаем товар с null/undefined product:', item);
+                    return null;
+                  }
+                  
+                  return (
+                    <motion.div
+                      key={`${item.product.id}-${item.id}`}
+                      initial={{ opacity: 0, x: -50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 50, scale: 0.8 }}
+                      transition={{ duration: 0.3 }}
+                      style={{ marginBottom: 16 }}
+                    >
                     <Card 
                       sx={{ 
                         borderRadius: 3,
@@ -382,7 +419,8 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                       </CardContent>
                     </Card>
                   </motion.div>
-                ))}
+                );
+                })}
               </AnimatePresence>
             </Paper>
           </Grid>
