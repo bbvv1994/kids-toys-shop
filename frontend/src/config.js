@@ -83,6 +83,11 @@ export const getImageUrl = (imagePath) => {
     return getUploadUrl(imagePath);
   }
   
+  // Если это статический файл из public папки (PNG, JPG, etc.)
+  if (imagePath.match(/\.(png|jpg|jpeg|gif|webp)$/i)) {
+    return `${API_BASE_URL}/public/${imagePath}`;
+  }
+  
   // Если это статический файл
   if (imagePath.startsWith('/')) {
     return imagePath;
