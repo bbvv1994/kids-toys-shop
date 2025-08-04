@@ -4859,10 +4859,8 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map(p => {
-              console.log('🔧 Rendering product:', p.id, 'imageUrls:', p.imageUrls);
-              return (
-                <tr key={p.id}>
+            {filteredProducts.map(p => (
+              <tr key={p.id}>
                 <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center' }}>
                   {p.imageUrls && p.imageUrls.length > 0 && !imageErrors[p.id] ? (
                     <img 
