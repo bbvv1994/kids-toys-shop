@@ -109,7 +109,7 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { jwtDecode } from 'jwt-decode';
-import Lenis from '@studio-freight/lenis';
+import Lenis from 'lenis';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import categoriesData from './categoriesData';
 import { transformCategoriesForNavigation } from './utils/categoryIcon';
