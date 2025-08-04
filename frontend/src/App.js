@@ -4900,49 +4900,49 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
                 </td>
                 <td style={{ padding: 8, border: '1px solid #eee', whiteSpace: 'nowrap' }}>
                   <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center', alignItems: 'center' }}>
-                    <IconButton 
-                      size="small" 
-                      onClick={() => handleOpenEdit(p)} 
-                      sx={{ 
-                        color: '#1976d2',
-                        '&:hover': {
-                          backgroundColor: '#e3f2fd'
-                        }
-                      }}
-                      title="Редактировать"
-                    >
-                      <Edit />
-                    </IconButton>
-                                      <IconButton 
-                    size="small" 
-                    onClick={() => {
-                      console.log('Клик по кнопке удаления для товара:', p);
-                      console.log('ID товара:', p.id, 'Тип ID:', typeof p.id);
-                      handleDelete(p.id);
-                    }}
-                    sx={{ 
-                      color: '#f44336',
-                      '&:hover': {
-                        backgroundColor: '#ffebee'
-                      }
-                    }}
-                    title="Удалить"
-                  >
-                    <Delete />
-                  </IconButton>
-                    <IconButton 
-                      size="small" 
-                      onClick={() => handleToggleHidden(p)}
-                      sx={{ 
-                        color: p.isHidden ? '#4caf50' : '#ff9800',
-                        '&:hover': {
-                          backgroundColor: p.isHidden ? '#e8f5e8' : '#fff3e0'
-                        }
-                      }}
-                      title={p.isHidden ? 'Показать товар' : 'Скрыть товар'}
-                    >
-                      {p.isHidden ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
+                      <IconButton 
+                        size="small" 
+                        onClick={() => handleOpenEdit(p)} 
+                        sx={{ 
+                          color: '#1976d2',
+                          '&:hover': {
+                            backgroundColor: '#e3f2fd'
+                          }
+                        }}
+                        title="Редактировать"
+                      >
+                        <Edit />
+                      </IconButton>
+                      <IconButton 
+                        size="small" 
+                        onClick={() => {
+                          console.log('Клик по кнопке удаления для товара:', p);
+                          console.log('ID товара:', p.id, 'Тип ID:', typeof p.id);
+                          handleDelete(p.id);
+                        }}
+                        sx={{ 
+                          color: '#f44336',
+                          '&:hover': {
+                            backgroundColor: '#ffebee'
+                          }
+                        }}
+                        title="Удалить"
+                      >
+                        <Delete />
+                      </IconButton>
+                      <IconButton 
+                        size="small" 
+                        onClick={() => handleToggleHidden(p)}
+                        sx={{ 
+                          color: p.isHidden ? '#4caf50' : '#ff9800',
+                          '&:hover': {
+                            backgroundColor: p.isHidden ? '#e8f5e8' : '#fff3e0'
+                          }
+                        }}
+                        title={p.isHidden ? 'Показать товар' : 'Скрыть товар'}
+                      >
+                        {p.isHidden ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
                   </Box>
                 </td>
               </tr>
