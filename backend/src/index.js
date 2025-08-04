@@ -3796,3 +3796,83 @@ app.post('/api/admin/images/process', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Ошибка обработки изображений' });
   }
 });
+
+// === API для исправления изображений категорий ===
+app.post('/api/admin/fix-category-images', authMiddleware, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    }
+
+    // Маппинг категорий на правильные fallback изображения
+    const categoryImageMapping = {
+      'Настольные игры': 'nastolka.png',
+      'Рисование': 'creativity.png',
+      'Наборы для творчества': 'creativity.png',
+      'Раскраски': 'creativity.png',
+      'Куклы': 'toys.png',
+      'Мягкие игрушки': 'toys.png',
+      'Активные игры': 'sport.png',
+      'Декоративная косметика и украшения': 'toys.png',
+      'Роботы и трансформеры': 'toys.png',
+      'Игрушки на радиоуправлении': 'toys.png'
+    };
+
+    // Получаем все категории
+    const categories = await prisma.category.findMany({
+      select: {
+        id: true,
+        name: true,
+        image: true
+      }
+    });
+
+    let updatedCount = 0;
+    const updatedCategories = [];
+
+    // Проверяем каждую категорию
+    for (const category of categories) {
+      let needsUpdate = false;
+      let newImage = category.image;
+
+      // Если изображение начинается с цифр (загруженный файл), заменяем на fallback
+      if (category.image && /^\d+/.test(category.image)) {
+        needsUpdate = true;
+        newImage = categoryImageMapping[category.name] || 'toys.png';
+      }
+
+      // Если изображение не соответствует маппингу, исправляем
+      if (categoryImageMapping[category.name] && category.image !== categoryImageMapping[category.name]) {
+        needsUpdate = true;
+        newImage = categoryImageMapping[category.name];
+      }
+
+      // Обновляем категорию если нужно
+      if (needsUpdate) {
+        await prisma.category.update({
+          where: { id: category.id },
+          data: { image: newImage }
+        });
+        updatedCategories.push({
+          id: category.id,
+          name: category.name,
+          oldImage: category.image,
+          newImage: newImage
+        });
+        updatedCount++;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Исправлено ${updatedCount} категорий`,
+      updatedCount,
+      updatedCategories
+    });
+
+  } catch (error) {
+    console.error('Error fixing category images:', error);
+    res.status(500).json({ error: 'Ошибка исправления изображений категорий' });
+  }
+});
