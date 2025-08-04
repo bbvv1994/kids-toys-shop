@@ -420,11 +420,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   // Функция для получения реальных изображений
   const getRealImages = () => {
-    console.log('🖼️ ProductPage: getRealImages вызван');
-    console.log('🖼️ ProductPage: product.imageUrls =', product.imageUrls);
-    console.log('🖼️ ProductPage: typeof product.imageUrls =', typeof product.imageUrls);
-    console.log('🖼️ ProductPage: Array.isArray(product.imageUrls) =', Array.isArray(product.imageUrls));
-    
     const isDefaultCategoryIcon = url =>
       url && (
         url.includes('bear.png') ||
@@ -440,20 +435,14 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       ? product.imageUrls.some(url => url && url.trim() !== '' && !isDefaultCategoryIcon(url))
       : (typeof product.imageUrls === 'string' && product.imageUrls.trim() !== '' && !isDefaultCategoryIcon(product.imageUrls));
     
-    console.log('🖼️ ProductPage: hasRealImages =', hasRealImages);
-    
     // Если нет реальных изображений, возвращаем пустой массив
     if (!hasRealImages) {
-      console.log('🖼️ ProductPage: Нет реальных изображений, возвращаем пустой массив');
       return [];
     }
     
-    const result = Array.isArray(product.imageUrls)
+    return Array.isArray(product.imageUrls)
       ? product.imageUrls.filter(url => url && url.trim() !== '' && !isDefaultCategoryIcon(url))
       : (typeof product.imageUrls === 'string' && product.imageUrls.trim() !== '' && !isDefaultCategoryIcon(product.imageUrls) ? [product.imageUrls] : []);
-    
-    console.log('🖼️ ProductPage: Результат getRealImages =', result);
-    return result;
   };
 
   const handleGalleryKeyDown = (e) => {
@@ -656,11 +645,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                         ? realImages[galleryIndex] 
                         : `${API_BASE_URL}${realImages[galleryIndex]}`;
                     
-                    console.log('🖼️ ProductPage: Отображение изображения');
-                    console.log('🖼️ ProductPage: realImages[galleryIndex] =', realImages[galleryIndex]);
-                    console.log('🖼️ ProductPage: API_BASE_URL =', API_BASE_URL);
-                    console.log('🖼️ ProductPage: imageSrc =', imageSrc);
-                    
                     return (
                       <img
                         src={imageSrc}
@@ -673,8 +657,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                         onKeyDown={handleGalleryKeyDown}
                         tabIndex={0}
                         onError={(e) => {
-                          console.log('🖼️ ProductPage: Ошибка загрузки изображения');
-                          console.log('🖼️ ProductPage: imageSrc =', e.target.src);
                           // Показываем заглушку вместо скрытия изображения
                           const container = e.target.parentElement;
                           if (container) {
