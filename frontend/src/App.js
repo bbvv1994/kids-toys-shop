@@ -9432,7 +9432,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                                 height: 70,
                                 borderRadius: 3,
                                 background: item.product?.imageUrls && item.product.imageUrls.length > 0
-                                  ? `center/cover no-repeat url(`${API_BASE_URL}${item.product.imageUrls[0]}`)` 
+                                  ? `center/cover no-repeat url(${API_BASE_URL}${item.product.imageUrls[0]})` 
                                   : '#f0f0f0',
                                 display: 'flex',
                                 alignItems: 'center',
