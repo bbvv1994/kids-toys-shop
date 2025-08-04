@@ -9,15 +9,17 @@
       }
     }
   ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://kids-toys-backend.onrender.com/api/$1"
+    },
+    {
+      "source": "/uploads/(.*)",
+      "destination": "https://kids-toys-backend.onrender.com/uploads/$1"
+    }
+  ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "https://kids-toys-backend.onrender.com/api/$1"
-    },
-    {
-      "src": "/uploads/(.*)",
-      "dest": "https://kids-toys-backend.onrender.com/uploads/$1"
-    },
     {
       "src": "/(.*)",
       "dest": "/frontend/index.html"
