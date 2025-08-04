@@ -656,6 +656,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                         ? realImages[galleryIndex] 
                         : `${API_BASE_URL}${realImages[galleryIndex]}`;
                     
+                    console.log('🖼️ ProductPage: Отображение изображения');
+                    console.log('🖼️ ProductPage: realImages[galleryIndex] =', realImages[galleryIndex]);
+                    console.log('🖼️ ProductPage: API_BASE_URL =', API_BASE_URL);
+                    console.log('🖼️ ProductPage: imageSrc =', imageSrc);
+                    
                     return (
                       <img
                         src={imageSrc}
@@ -668,6 +673,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                         onKeyDown={handleGalleryKeyDown}
                         tabIndex={0}
                         onError={(e) => {
+                          console.log('🖼️ ProductPage: Ошибка загрузки изображения');
+                          console.log('🖼️ ProductPage: imageSrc =', e.target.src);
                           // Показываем заглушку вместо скрытия изображения
                           const container = e.target.parentElement;
                           if (container) {
