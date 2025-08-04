@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { API_BASE_URL } from '../config';
 import Lenis from 'lenis';
 import {
   Dialog,

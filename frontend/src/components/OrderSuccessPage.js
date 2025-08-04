@@ -1,4 +1,5 @@
 import React from 'react';
+import { API_BASE_URL } from '../config';
 import {
   Container, Typography, Box, Paper, Button, 
   Divider, Grid, Chip

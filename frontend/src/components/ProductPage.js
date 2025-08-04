@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../config';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Box, Button, Typography, Container, Modal, Rating, TextField, Chip, IconButton, Breadcrumbs } from '@mui/material';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';

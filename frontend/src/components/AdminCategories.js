@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, List, ListItem, ListItemText, IconButton, Menu, MenuItem, Switch, CircularProgress, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, Card, CardContent } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { API_BASE_URL } from '../config';
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -24,7 +25,7 @@ const AdminCategories = () => {
 
   useEffect(() => {
     // Получение категорий с backend
-    fetch('${API_BASE_URL}/api/categories', {
+    fetch(`${API_BASE_URL}/api/categories`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     })
       .then(res => res.json())
