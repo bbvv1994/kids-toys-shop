@@ -5754,11 +5754,13 @@ function CMSCategories({ loadCategoriesFromAPI }) {
 
   // Построить дерево категорий
   const buildTree = (cats) => {
-
+    // Фильтруем категории без id
+    const validCats = cats.filter(cat => cat && cat.id);
+    
     const map = {};
-    cats.forEach(cat => { map[cat.id] = { ...cat, sub: [] }; });
+    validCats.forEach(cat => { map[cat.id] = { ...cat, sub: [] }; });
     const tree = [];
-    cats.forEach(cat => {
+    validCats.forEach(cat => {
       if (cat.parentId) {
         if (map[cat.parentId]) map[cat.parentId].sub.push(map[cat.id]);
       } else {
@@ -6121,25 +6123,35 @@ function CMSCategories({ loadCategoriesFromAPI }) {
   };
 
   // Рекурсивный рендер дерева категорий
-  const renderCategory = cat => (
-    <React.Fragment key={cat.id}>
-      <SortableCategoryItem cat={cat} isRoot={!cat.parentId} />
-      {/* Подкатегории */}
-      {cat.sub.length > 0 && expanded.includes(cat.id) && (
-        <Box sx={{ ml: 6, mb: 2 }}>
-          {cat.sub.map(renderCategory)}
-        </Box>
-      )}
-    </React.Fragment>
-  );
+  const renderCategory = cat => {
+    // Проверяем, что у категории есть id
+    if (!cat || !cat.id) {
+      console.warn('Category without id:', cat);
+      return null;
+    }
+    
+    return (
+      <React.Fragment key={cat.id}>
+        <SortableCategoryItem cat={cat} isRoot={!cat.parentId} />
+        {/* Подкатегории */}
+        {cat.sub && cat.sub.length > 0 && expanded.includes(cat.id) && (
+          <Box sx={{ ml: 6, mb: 2 }}>
+            {cat.sub.map(renderCategory)}
+          </Box>
+        )}
+      </React.Fragment>
+    );
+  };
 
   // Функция для получения всех категорий в плоском виде для drag & drop
   const getAllCategories = (cats) => {
     let result = [];
     cats.forEach(cat => {
-      result.push(cat);
-      if (cat.sub && cat.sub.length > 0) {
-        result = result.concat(getAllCategories(cat.sub));
+      if (cat && cat.id) {
+        result.push(cat);
+        if (cat.sub && cat.sub.length > 0) {
+          result = result.concat(getAllCategories(cat.sub));
+        }
       }
     });
     return result;
