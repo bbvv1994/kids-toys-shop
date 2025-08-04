@@ -12,11 +12,11 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://your-backend-name.onrender.com/api/$1"
+      "dest": "https://kids-toys-backend.onrender.com/api/$1"
     },
     {
       "src": "/uploads/(.*)",
-      "dest": "https://your-backend-name.onrender.com/uploads/$1"
+      "dest": "https://kids-toys-backend.onrender.com/uploads/$1"
     },
     {
       "src": "/(.*)",
@@ -24,6 +24,6 @@
     }
   ],
   "env": {
-    "REACT_APP_API_BASE_URL": "https://your-backend-name.onrender.com"
+    "REACT_APP_API_BASE_URL": "https://kids-toys-backend.onrender.com"
   }
 } 
