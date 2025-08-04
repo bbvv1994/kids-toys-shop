@@ -105,12 +105,28 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
     try {
       if (isGuest) {
         // Гостевой заказ
-        const cartItems = cart.items.map(item => ({
-          productId: item.product.id,
-          quantity: item.quantity,
-          price: item.product.price,
-          productName: item.product.name
-        }));
+        console.log('🔍 Cart items before mapping:', cart.items);
+        const cartItems = cart.items
+          .filter(item => item.product && item.product.id) // Фильтруем удаленные товары
+          .map(item => {
+            console.log('🔍 Processing cart item:', item);
+            const mappedItem = {
+              productId: parseInt(item.product.id),
+              quantity: item.quantity,
+              price: item.product.price,
+              productName: item.product.name
+            };
+            console.log('🔍 Mapped item:', mappedItem);
+                      return mappedItem;
+        });
+        
+        console.log('🔍 Final cartItems:', cartItems);
+        
+        if (cartItems.length === 0) {
+          setError('В корзине нет доступных товаров для заказа');
+          setLoading(false);
+          return;
+        }
 
         const requestBody = {
           customerInfo: formData,
