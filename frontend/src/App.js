@@ -5770,23 +5770,28 @@ function CMSCategories({ loadCategoriesFromAPI }) {
   // Отключение категории
   const handleToggleActive = async (cat) => {
     try {
+      console.log('Frontend: Toggle категории:', cat.name, 'ID:', cat.id);
+      
       const response = await fetch(`${API_BASE_URL}/api/categories/${cat.id}/toggle`, {
-      method: 'PATCH',
-      headers: { 'Authorization': `Bearer ${user.token}` }
-    });
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${user.token}` }
+      });
       
       if (response.ok) {
-        // Обновляем состояние локально
+        const updatedCategory = await response.json();
+        console.log('Frontend: Категория обновлена:', updatedCategory);
+        
+        // Обновляем состояние локально используя данные с сервера
         setCategories(prevCategories => 
           prevCategories.map(category => 
             category.id === cat.id 
-              ? { ...category, active: !category.active }
+              ? { ...category, active: updatedCategory.active }
               : category
           )
         );
         
         // Обновляем только боковое меню, если нужно
-    if (loadCategoriesFromAPI) {
+        if (loadCategoriesFromAPI) {
           await loadCategoriesFromAPI();
         }
       } else {
@@ -5871,39 +5876,35 @@ function CMSCategories({ loadCategoriesFromAPI }) {
         formData.append('parentId', editForm.parent);
       }
 
-      // Обновляем основную информацию категории
-      await fetch(`${API_BASE_URL}/api/categories/${editForm.id}`, {
+      // Обновляем основную информацию категории (включая изображение)
+      const response = await fetch(`${API_BASE_URL}/api/categories/${editForm.id}`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${user.token}` },
         body: formData
       });
 
-      // Если есть новое изображение, загружаем его отдельно
-      if (editForm.icon) {
-        const imageFormData = new FormData();
-        imageFormData.append('image', editForm.icon);
-        await fetch(`${API_BASE_URL}/api/categories/${editForm.id}/image`, {
-          method: 'PATCH',
-          headers: { 'Authorization': `Bearer ${user.token}` },
-          body: imageFormData
-        });
+      if (!response.ok) {
+        throw new Error('Ошибка обновления категории');
       }
+
+      const updatedCategory = await response.json();
+      console.log('Frontend: Категория обновлена:', updatedCategory);
 
       setEditForm({ id: null, name: '', parent: '', icon: null });
       setIsEditing(false);
       setEditDialogOpen(false);
       if (editFileInputRef.current) editFileInputRef.current.value = '';
       
-      // Обновляем состояние локально
+      // Обновляем состояние локально используя данные с сервера
       setCategories(prevCategories => 
         prevCategories.map(category => 
           category.id === editForm.id 
             ? { 
                 ...category, 
-                name: editForm.name, 
-                parentId: editForm.parent || null,
-                // Если есть новое изображение, обновляем его
-                ...(editForm.icon && { image: editForm.icon.name })
+                name: updatedCategory.name, 
+                parentId: updatedCategory.parentId,
+                image: updatedCategory.image,
+                active: updatedCategory.active
               }
             : category
         )

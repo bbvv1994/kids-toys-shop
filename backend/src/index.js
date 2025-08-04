@@ -2536,14 +2536,27 @@ app.patch('/api/categories/:id/toggle', authMiddleware, async (req, res) => {
     }
     
     const id = Number(req.params.id);
+    console.log('API: Toggle категории ID:', id);
+    
     const category = await prisma.category.findUnique({ where: { id } });
-    if (!category) return res.status(404).json({ error: 'Категория не найдена' });
+    if (!category) {
+      console.log('API: Категория не найдена ID:', id);
+      return res.status(404).json({ error: 'Категория не найдена' });
+    }
+    
+    console.log('API: Текущее состояние категории:', category.name, 'active:', category.active);
+    const newActiveState = !category.active;
+    console.log('API: Новое состояние active:', newActiveState);
+    
     const updated = await prisma.category.update({
       where: { id },
-      data: { active: !category.active }
+      data: { active: newActiveState }
     });
+    
+    console.log('API: Категория обновлена:', updated.name, 'active:', updated.active);
     res.json(updated);
   } catch (e) {
+    console.error('API: Ошибка toggle категории:', e);
     res.status(500).json({ error: 'Ошибка обновления категории' });
   }
 });
@@ -2632,11 +2645,15 @@ app.put('/api/categories/:id', authMiddleware, upload.single('image'), imageMidd
     // Если загружено новое изображение, добавляем его в данные
     if (req.file) {
       data.image = req.file.filename;
+      console.log('API: Обновление изображения категории:', req.file.filename);
     }
     
+    console.log('API: Обновление категории ID:', id, 'Данные:', data);
     const updated = await prisma.category.update({ where: { id }, data });
+    console.log('API: Категория обновлена:', updated);
     res.json(updated);
   } catch (e) {
+    console.error('API: Ошибка редактирования категории:', e);
     res.status(500).json({ error: 'Ошибка редактирования категории' });
   }
 });
