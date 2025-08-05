@@ -1271,7 +1271,36 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               sx={{ mb: 1 }}
               required
             />
-            <Button type="submit" variant="contained" disabled={reviewLoading || !reviewText}>Отправить</Button>
+            <Button 
+              type="submit" 
+              variant="contained" 
+              disabled={reviewLoading || !reviewText}
+              sx={{
+                background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                color: '#fff',
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: 15,
+                px: 3,
+                py: 1.5,
+                height: 44,
+                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                textTransform: 'none',
+                minWidth: 120,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                  boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+                '&:disabled': {
+                  background: '#ccc',
+                  boxShadow: 'none',
+                  transform: 'none'
+                }
+              }}
+            >
+              Отправить
+            </Button>
             {reviewError && <Typography color="error" sx={{ mt: 1 }}>{reviewError}</Typography>}
             {reviewSuccess && <Typography color="success.main" sx={{ mt: 1 }}>{reviewSuccess}</Typography>}
           </Box>
