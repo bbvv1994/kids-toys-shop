@@ -63,8 +63,8 @@ export default function OrderSuccessPage() {
   const total = orderData?.total || 0;
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
+    <Container maxWidth="md" sx={{ mt: 12, mb: 4 }}>
+      <Box sx={{ textAlign: 'center', mb: 4, pt: 2 }}>
         <CheckCircleIcon sx={{ fontSize: 80, color: 'success.main', mb: 2 }} />
         <Typography variant="h4" color="success.main" gutterBottom>
           Заказ успешно оформлен!
@@ -72,69 +72,51 @@ export default function OrderSuccessPage() {
         <Typography variant="h6" color="text.secondary">
           Номер заказа: {orderNumber}
         </Typography>
-        <Typography variant="body1" sx={{ mt: 2 }}>
+        <Typography variant="h6" sx={{ mt: 2 }}>
           <strong>Самовывоз из:</strong> {orderData?.pickupStore === 'store1' ? 'רוברט סולד 8 קריית ים' : orderData?.pickupStore === 'store2' ? 'ויצמן 6 קריית מוצקין' : 'Не выбран'}
         </Typography>
-        <Typography variant="body1" sx={{ mt: 2 }}>
-          Спасибо за ваш заказ! Мы свяжемся с вами в ближайшее время для подтверждения.
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          Спасибо за ваш заказ! Вам было отправленно подтверждение заказа на ваш email. Мы свяжемся с вами в ближайшее время для подтверждения.
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
-        <Grid gridColumn="span 12" md="span 6">
-          <Paper sx={{ p: 3, background: 'linear-gradient(135deg, #E8F5E8 0%, #F1F8E9 100%)' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#2E7D32', fontWeight: 'bold' }}>
-              📦 Информация о заказе
-            </Typography>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Номер заказа:</Typography>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2E7D32' }}>
-                #{orderNumber}
-              </Typography>
-            </Box>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Статус:</Typography>
-              <Chip 
-                label={getStatusLabel('pending')} 
-                color={getStatusColor('pending')}
-                sx={{ fontWeight: 'bold' }}
-              />
-            </Box>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Дата заказа:</Typography>
-              <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-                {new Date(orderData?.createdAt).toLocaleDateString('ru-RU', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid gridColumn="span 12" md="span 6">
-          <Paper sx={{ p: 3, background: 'linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%)' }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#E65100', fontWeight: 'bold' }}>
-              💰 Итоговая сумма
-            </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#E65100' }}>
-                {total} ₪
-              </Typography>
-              <EmojiEventsIcon sx={{ fontSize: 40, color: '#FF9800' }} />
-            </Box>
-            <Typography variant="body2" color="text.secondary">
-              Спасибо за ваш заказ! Мы уведомим вас о статусе доставки.
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
+      <Paper sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #E8F5E8 0%, #F1F8E9 100%)' }}>
+        <Typography variant="h6" sx={{ mb: 2, color: '#2E7D32', fontWeight: 'bold' }}>
+          📦 Информация о заказе
+        </Typography>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary">Номер заказа:</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2E7D32' }}>
+            #{orderNumber}
+          </Typography>
+        </Box>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary">Статус:</Typography>
+          <Chip 
+            label={getStatusLabel('pending')} 
+            color={getStatusColor('pending')}
+            sx={{ fontWeight: 'bold' }}
+          />
+        </Box>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary">Дата заказа:</Typography>
+          <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+            {new Date(orderData?.createdAt).toLocaleDateString('ru-RU', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </Typography>
+        </Box>
+      </Paper>
+
+
 
       <Paper sx={{ p: 3, mt: 3, background: 'white' }}>
         <Typography variant="h6" sx={{ mb: 3, color: '#333', fontWeight: 'bold' }}>
-          🛒 Товары в заказе
+          Товары в заказе
         </Typography>
         {orderData?.items?.map((item, index) => (
           <Box key={index} sx={{ 
@@ -190,27 +172,77 @@ export default function OrderSuccessPage() {
       </Paper>
 
       <Box sx={{ textAlign: 'center' }}>
-        <Typography variant="body1" sx={{ mb: 3 }}>
-          Мы отправили подтверждение заказа на ваш email.
-          Наш менеджер свяжется с вами в течение 24 часов.
-        </Typography>
         
-        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap', mt: 3 }}>
           <Button 
             variant="contained" 
             onClick={() => navigate('/catalog')}
+            sx={{
+              background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 15,
+              px: 3,
+              py: 1.5,
+              height: 44,
+              boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+              textTransform: 'none',
+              minWidth: 120,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+            }}
           >
             Продолжить покупки
           </Button>
           <Button 
-            variant="outlined" 
+            variant="contained" 
             onClick={() => navigate('/profile')}
+            sx={{
+              background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 15,
+              px: 3,
+              py: 1.5,
+              height: 44,
+              boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
+              textTransform: 'none',
+              minWidth: 120,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
+                boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+            }}
           >
             Мои заказы
           </Button>
           <Button 
-            variant="outlined" 
+            variant="contained" 
             onClick={() => navigate('/')}
+            sx={{
+              background: 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 15,
+              px: 3,
+              py: 1.5,
+              height: 44,
+              boxShadow: '0 2px 8px rgba(255, 152, 0, 0.3)',
+              textTransform: 'none',
+              minWidth: 120,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #ffb74d 0%, #ff9800 100%)',
+                boxShadow: '0 4px 12px rgba(255, 152, 0, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+            }}
           >
             На главную
           </Button>
