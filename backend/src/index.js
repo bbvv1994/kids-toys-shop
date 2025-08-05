@@ -184,7 +184,13 @@ const corsOptions = {
       'https://vercel.app',
       'https://kids-toys-shop.vercel.app',
       'https://kids-toys-shop-git-main-bbvv1994.vercel.app',
-      'https://kids-toys-shop-bbvv1994.vercel.app'
+      'https://kids-toys-shop-bbvv1994.vercel.app',
+      // Добавляем все возможные Vercel домены
+      'https://*.vercel.app',
+      'https://vercel.app',
+      // Добавляем все возможные Render домены
+      'https://*.onrender.com',
+      'https://onrender.com'
     ];
     
     // Проверяем точное совпадение
@@ -205,8 +211,9 @@ const corsOptions = {
       return callback(null, true);
     }
     
-    // В production разрешаем все Vercel домены
-    if (process.env.NODE_ENV === 'production' && origin.includes('vercel.app')) {
+    // В production разрешаем все Vercel и Render домены
+    if (process.env.NODE_ENV === 'production' && 
+        (origin.includes('vercel.app') || origin.includes('onrender.com'))) {
       return callback(null, true);
     }
     

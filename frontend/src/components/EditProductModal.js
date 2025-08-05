@@ -29,6 +29,11 @@ import { Close, Delete, CloudUpload, Toys, Add as AddIcon, DragIndicator, Star }
 
 function EditProductModal(props) {
   const { open, product, onClose, onSave, onDelete, categories = [] } = props;
+  console.log('=== EditProductModal RENDER ===');
+  console.log('open:', open);
+  console.log('product:', product);
+  console.log('categories length:', categories.length);
+  console.log('props:', props);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -58,19 +63,47 @@ function EditProductModal(props) {
   const modalRef = useRef(null);
   const dialogContentRef = useRef(null);
   const lenisRef = useRef(null);
+  const [openSelects, setOpenSelects] = useState({
+    category: false,
+    subcategory: false,
+    ageGroup: false,
+    gender: false
+  });
 
-  // Блокировка прокрутки фона
+  // Блокировка прокрутки фона и установка z-index для Popover
   useEffect(() => {
     if (open) {
       // Блокируем прокрутку body
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
+      
+      // Устанавливаем глобальные стили для Popover компонентов
+      const style = document.createElement('style');
+      style.id = 'modal-popover-styles';
+      style.textContent = `
+        .MuiPopover-root {
+          z-index: 10002 !important;
+        }
+        .MuiPaper-root {
+          z-index: 10002 !important;
+        }
+        .MuiMenu-root {
+          z-index: 10002 !important;
+        }
+      `;
+      document.head.appendChild(style);
     } else {
       // Восстанавливаем прокрутку
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
+      
+      // Удаляем добавленные стили
+      const style = document.getElementById('modal-popover-styles');
+      if (style) {
+        style.remove();
+      }
     }
     
     return () => {
@@ -78,6 +111,12 @@ function EditProductModal(props) {
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
+      
+      // Удаляем добавленные стили
+      const style = document.getElementById('modal-popover-styles');
+      if (style) {
+        style.remove();
+      }
     };
   }, [open]);
 
@@ -107,6 +146,27 @@ function EditProductModal(props) {
             gestureOrientation: 'vertical',
             smoothWheel: true,
             wheelMultiplier: 0.8,
+            // Добавляем обработчик для исключения выпадающих списков
+            wheel: (e) => {
+              const target = e.target;
+              const isInSelect = target.closest('.MuiPopover-root') || 
+                                target.closest('.MuiMenu-root');
+              
+              if (isInSelect) {
+                return false; // Не обрабатываем прокрутку в выпадающих списках
+              }
+              return true; // Обрабатываем прокрутку в остальных местах
+            },
+            touch: (e) => {
+              const target = e.target;
+              const isInSelect = target.closest('.MuiPopover-root') || 
+                                target.closest('.MuiMenu-root');
+              
+              if (isInSelect) {
+                return false; // Не обрабатываем touch в выпадающих списках
+              }
+              return true; // Обрабатываем touch в остальных местах
+            }
           });
 
           // Функция для анимации кадров
@@ -115,7 +175,6 @@ function EditProductModal(props) {
             if (open) requestAnimationFrame(raf);
           }
           requestAnimationFrame(raf);
-
 
         } else {
           // Если элемент еще не готов, пробуем еще раз через 100мс
@@ -149,6 +208,135 @@ function EditProductModal(props) {
 
 
   const ageGroups = ['0-1 год', '1-3 года', '3-5 лет', '5-7 лет', '7-10 лет', '10-12 лет', '12-14 лет', '14-16 лет'];
+
+  // Обработчики для управления Lenis в выпадающих списках
+  const handleSelectOpen = (selectName) => {
+    if (lenisRef.current) {
+      lenisRef.current.stop();
+    }
+    setOpenSelects(prev => ({ ...prev, [selectName]: true }));
+  };
+
+  const handleSelectClose = (selectName) => {
+    if (lenisRef.current) {
+      lenisRef.current.start();
+    }
+    setOpenSelects(prev => ({ ...prev, [selectName]: false }));
+  };
+
+  // Автоматически возобновляем Lenis при закрытии всех выпадающих списков
+  useEffect(() => {
+    const hasOpenSelects = Object.values(openSelects).some(isOpen => isOpen);
+    
+    if (!hasOpenSelects && lenisRef.current) {
+      lenisRef.current.start();
+    }
+  }, [openSelects]);
+
+  const handleMenuOpen = () => {
+    if (lenisRef.current) {
+      lenisRef.current.stop();
+    }
+  };
+
+  const handleMenuClose = () => {
+    if (lenisRef.current) {
+      lenisRef.current.start();
+    }
+  };
+
+  // Добавляем обработчик для предотвращения прокрутки в выпадающих списках
+  useEffect(() => {
+    const handleWheel = (e) => {
+      // Проверяем, находится ли событие в выпадающем списке
+      const target = e.target;
+      const isInSelect = target.closest('.MuiPopover-root') || 
+                        target.closest('.MuiMenu-root');
+      
+      if (isInSelect) {
+        // Останавливаем Lenis если он активен
+        if (lenisRef.current) {
+          lenisRef.current.stop();
+        }
+        // Разрешаем обычную прокрутку
+        e.stopPropagation();
+      } else {
+        // Если не в выпадающем списке, возобновляем Lenis
+        if (lenisRef.current) {
+          lenisRef.current.start();
+        }
+      }
+    };
+
+    const handleTouchStart = (e) => {
+      const target = e.target;
+      const isInSelect = target.closest('.MuiPopover-root') || 
+                        target.closest('.MuiMenu-root');
+      
+      if (isInSelect) {
+        if (lenisRef.current) {
+          lenisRef.current.stop();
+        }
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      const target = e.target;
+      const isInSelect = target.closest('.MuiPopover-root') || 
+                        target.closest('.MuiMenu-root');
+      
+      if (!isInSelect && lenisRef.current) {
+        lenisRef.current.start();
+      }
+    };
+
+    if (open) {
+      document.addEventListener('wheel', handleWheel, { passive: false });
+      document.addEventListener('touchstart', handleTouchStart, { passive: true });
+      document.addEventListener('touchend', handleTouchEnd, { passive: true });
+    }
+
+    return () => {
+      document.removeEventListener('wheel', handleWheel);
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [open]);
+
+  // Обработчик клика вне выпадающих списков
+  const handleClickOutside = useCallback((event) => {
+    // Проверяем, что клик не внутри Select компонента
+    const isSelectClick = event.target.closest('.MuiSelect-select') || 
+                          event.target.closest('.MuiMenu-root') || 
+                          event.target.closest('.MuiPopover-root');
+    
+    if (!isSelectClick) {
+      // Закрываем все открытые выпадающие списки
+      setOpenSelects({
+        category: false,
+        subcategory: false,
+        ageGroup: false,
+        gender: false
+      });
+    }
+  }, []);
+
+  // Добавляем обработчик клика вне списков
+  useEffect(() => {
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [open, handleClickOutside]);
+
+
+
+
 
   useEffect(() => {
     if (product) {
@@ -474,7 +662,19 @@ function EditProductModal(props) {
       open={open} 
       onClose={onClose} 
       sx={{
-        zIndex: 9999
+        zIndex: 9999,
+        '& .MuiDialog-paper': {
+          zIndex: 9999
+        },
+        '& .MuiPopover-root': {
+          zIndex: 10002
+        },
+        '& .MuiMenu-root': {
+          zIndex: 10002
+        },
+        '& .MuiPaper-root': {
+          zIndex: 10002
+        }
       }}
       PaperProps={{
         sx: {
@@ -482,9 +682,12 @@ function EditProductModal(props) {
           boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
           minWidth: 600,
           maxWidth: 800,
-          maxHeight: '90vh'
+          maxHeight: '90vh',
+          position: 'relative',
+          overflow: 'visible'
         }
       }}
+
     >
       <DialogTitle sx={{
         textAlign: 'center', 
@@ -535,12 +738,35 @@ function EditProductModal(props) {
                 background: '#555',
               },
             },
+            '& .MuiSelect-select': {
+              zIndex: 1
+            },
+            '& .MuiPopover-root': {
+              zIndex: 10002
+            },
+            '& .MuiMenu-root': {
+              zIndex: 10002
+            },
+            '& .MuiPaper-root': {
+              zIndex: 10002
+            }
           }}
           dividers
         >
           <Box sx={{ p: 0 }}>
             <Container maxWidth="md" sx={{ py: 0 }}>
-              <Paper elevation={8} sx={{ p: 4, borderRadius: 3, background: 'linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%)', border: '1px solid rgba(255, 107, 107, 0.1)' }}>
+              <Paper elevation={8} sx={{ 
+                p: 4, 
+                borderRadius: 3, 
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%)', 
+                border: '1px solid rgba(255, 107, 107, 0.1)',
+                position: 'relative',
+                overflow: 'visible',
+                '& .MuiFormControl-root': {
+                  position: 'relative',
+                  zIndex: 1
+                }
+              }}>
                 {error && (
                   <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
                 )}
@@ -588,7 +814,17 @@ function EditProductModal(props) {
                       name="category" 
                       value={formData.category} 
                       onChange={handleInputChange} 
+                      open={openSelects.category}
+                      onOpen={() => handleSelectOpen('category')}
+                      onClose={() => handleSelectClose('category')}
                       renderValue={selected => selected ? (categories.find(c => c.id === selected)?.label || categories.find(c => c.id === selected)?.name || selected) : 'Выберите категорию'}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: { zIndex: 10002, maxHeight: 300 }
+                        },
+                        anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                        transformOrigin: { vertical: 'top', horizontal: 'left' }
+                      }}
                     >
                       {categories.filter(c => !c.parentId).map(c => <MenuItem key={c.id} value={c.id}>{c.label || c.name}</MenuItem>)}
                     </Select>
@@ -601,7 +837,17 @@ function EditProductModal(props) {
                       name="subcategory" 
                       value={subcategories.length > 0 && subcategories.find(sub => sub.id === formData.subcategory) ? formData.subcategory : ''}
                       onChange={handleInputChange} 
+                      open={openSelects.subcategory}
+                      onOpen={() => handleSelectOpen('subcategory')}
+                      onClose={() => handleSelectClose('subcategory')}
                       renderValue={selected => selected ? (subcategories.find(sub => sub.id === selected)?.name || selected) : 'Выберите подкатегорию'}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: { zIndex: 10002, maxHeight: 300 }
+                        },
+                        anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                        transformOrigin: { vertical: 'top', horizontal: 'left' }
+                      }}
                     >
                       {subcategories.length > 0 ? (
                         subcategories.map(sub => <MenuItem key={sub.id} value={sub.id}>{sub.name}</MenuItem>)
@@ -658,7 +904,17 @@ function EditProductModal(props) {
                       name="ageGroup" 
                       value={formData.ageGroup} 
                       onChange={handleInputChange} 
+                      open={openSelects.ageGroup}
+                      onOpen={() => handleSelectOpen('ageGroup')}
+                      onClose={() => handleSelectClose('ageGroup')}
                       renderValue={selected => selected || 'Выберите возрастную группу'}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: { zIndex: 10002, maxHeight: 300 }
+                        },
+                        anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                        transformOrigin: { vertical: 'top', horizontal: 'left' }
+                      }}
                     >
                       {ageGroups.map(age => (
                         <MenuItem key={age} value={age}>{age}</MenuItem>
@@ -673,7 +929,17 @@ function EditProductModal(props) {
                       name="gender"
                       value={formData.gender || ''}
                       onChange={handleInputChange}
+                      open={openSelects.gender}
+                      onOpen={() => handleSelectOpen('gender')}
+                      onClose={() => handleSelectClose('gender')}
                       renderValue={selected => selected || 'Выберите пол'}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: { zIndex: 10002, maxHeight: 300 }
+                        },
+                        anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                        transformOrigin: { vertical: 'top', horizontal: 'left' }
+                      }}
                     >
                       <MenuItem value="Мальчик">Для мальчиков</MenuItem>
                       <MenuItem value="Девочка">Для девочек</MenuItem>
