@@ -342,8 +342,10 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
                     edge="end"
                     sx={{
                       color: 'text.secondary',
+                      backgroundColor: 'transparent',
                       '&:hover': {
                         color: 'primary.main',
+                        backgroundColor: 'transparent',
                       }
                     }}
                   >
