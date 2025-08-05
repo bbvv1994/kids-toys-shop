@@ -135,11 +135,7 @@ class FlexibleImageHandler {
             transformation: [
               { width: 600, height: 600, crop: 'limit' },
               { quality: 'auto', fetch_format: 'auto' }
-            ],
-            // Добавляем автоматическое удаление фона (если включено)
-            ...(process.env.ENABLE_BG_REMOVAL === 'true' && {
-              background_removal: 'auto'
-            })
+            ]
           },
           (error, result) => {
             if (error) {
@@ -150,9 +146,6 @@ class FlexibleImageHandler {
               });
             } else {
               console.log(`✅ Uploaded to Cloudinary: ${result.secure_url}`);
-              if (process.env.ENABLE_BG_REMOVAL === 'true') {
-                console.log('🎨 Background removal applied');
-              }
               resolve({
                 success: true,
                 filename: `${timestamp}-${randomString}.webp`,
@@ -161,8 +154,7 @@ class FlexibleImageHandler {
                 originalSize: buffer.length,
                 processedSize,
                 compressionRatio: parseFloat(compressionRatio),
-                mimetype: 'image/webp',
-                backgroundRemoved: process.env.ENABLE_BG_REMOVAL === 'true'
+                mimetype: 'image/webp'
               });
             }
           }
