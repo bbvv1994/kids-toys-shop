@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '../config';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, TextField, Typography, Box, IconButton, Divider, Link
+  Button, TextField, Typography, Box, IconButton, Divider, Link, InputAdornment
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 const API_URL = `${API_BASE_URL}/api/auth`;
 
@@ -168,6 +170,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const [forgotOpen, setForgotOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const dialogContentRef = useRef(null);
 
   // Блокировка прокрутки фона
@@ -217,6 +220,10 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
     setIsLogin(!isLogin);
     setError('');
     setInfo('');
+  };
+
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleSubmit = async (e) => {
@@ -320,13 +327,31 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
           />
           <TextField
             label="Пароль"
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={e => setPassword(e.target.value)}
             fullWidth
             margin="normal"
             required
             autoComplete="current-password"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={handleTogglePasswordVisibility}
+                    edge="end"
+                    sx={{
+                      color: 'text.secondary',
+                      '&:hover': {
+                        color: 'primary.main',
+                      }
+                    }}
+                  >
+                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           {isLogin && (
             <Box sx={{ mt: 1, textAlign: 'right' }}>
