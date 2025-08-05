@@ -5,7 +5,7 @@ import {
   FormLabel, Divider, Paper, Grid, Alert, CircularProgress
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, getImageUrl } from '../config';
 
 export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
   const navigate = useNavigate();
@@ -128,8 +128,14 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
           return;
         }
 
+        // Добавляем код страны к номеру телефона
+        const customerInfoWithPhone = {
+          ...formData,
+          phone: formData.phone.startsWith('+972') ? formData.phone : `+972${formData.phone.replace(/^0/, '')}`
+        };
+
         const requestBody = {
-          customerInfo: formData,
+          customerInfo: customerInfoWithPhone,
           pickupStore,
           paymentMethod,
           total: calculateTotal(),
@@ -183,6 +189,12 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
           return;
         }
 
+        // Добавляем код страны к номеру телефона для авторизованных пользователей
+        const customerInfoWithPhone = {
+          ...formData,
+          phone: formData.phone.startsWith('+972') ? formData.phone : `+972${formData.phone.replace(/^0/, '')}`
+        };
+
         const response = await fetch(`${API_BASE_URL}/api/profile/checkout`, {
           method: 'POST',
           headers: {
@@ -190,7 +202,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
             'Authorization': `Bearer ${user.token}`
           },
           body: JSON.stringify({
-            customerInfo: formData,
+            customerInfo: customerInfoWithPhone,
             pickupStore,
             paymentMethod,
             total: calculateTotal()
@@ -258,11 +270,11 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
 
       {!loadingUserData && (
         <form onSubmit={handleSubmit}>
-        <Grid container spacing={3}>
-          <Grid gridColumn="span 12" md="span 8">
-            <Paper sx={{ p: 3, background: 'white' }}>
+        <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
+          <Grid gridColumn="span 12" md="span 6">
+            <Paper sx={{ p: 3, background: 'white', width: '900px' }}>
               <Typography variant="h5" sx={{ mb: 3, color: '#333', fontWeight: 'bold' }}>
-                📋 Информация о заказе
+                Информация о заказе
               </Typography>
               
               {isGuest ? (
@@ -322,6 +334,9 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
                     onChange={handleInputChange}
                     required
                     variant="outlined"
+                    InputProps={{
+                      startAdornment: <span style={{ color: '#000', marginRight: '8px' }}>+972</span>,
+                    }}
                     sx={{ mb: 2 }}
                   />
                 </Grid>
@@ -341,28 +356,44 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
               </Grid>
             </Paper>
           </Grid>
-          <Grid gridColumn="span 12" md="span 4">
-            <Paper sx={{ p: 3, position: 'sticky', top: 20 }}>
+          <Grid gridColumn="span 12" md="span 6">
+            <Paper sx={{ p: 3, background: 'white', width: '900px' }}>
               <Typography variant="h6" gutterBottom>
                 Итоги заказа
               </Typography>
               {cart.items.map((item) => (
-                <Box key={item.id} sx={{ mb: 2 }}>
-                  <Typography variant="body2">
-                    {item.product.name} x {item.quantity}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {item.product.price} ₪ x {item.quantity} = {item.product.price * item.quantity} ₪
-                  </Typography>
+                <Box key={item.id} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ 
+                    width: 80, 
+                    height: 80, 
+                    borderRadius: 3,
+                    border: '2px solid #f0f0f0',
+                    flexShrink: 0,
+                    backgroundImage: `url(${getImageUrl(item.product.imageUrls?.[0] || '/toys.png')})`,
+                    backgroundSize: '100% 100%',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat'
+                  }} />
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      {item.product.name} x {item.quantity}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      {item.product.price} ₪ x {item.quantity} = {item.product.price * item.quantity} ₪
+                    </Typography>
+                  </Box>
                 </Box>
               ))}
               <Divider sx={{ my: 2 }} />
               <Box sx={{ mb: 2 }}>
-                <Typography variant="body2">
+                <Typography variant="body1" sx={{ fontWeight: 500 }}>
                   Товары: {cart.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)} ₪
                 </Typography>
-                <Typography variant="body2">
-                  Самовывоз: Бесплатно
+                <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                  Самовывоз из: {pickupStore === 'store1' ? 'רוברט סולד 8 קריית ים' : 'ויצמן 6 קריית מוצקין'}
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                  Оплата: Наличными или картой
                 </Typography>
               </Box>
               <Divider sx={{ my: 2 }} />
@@ -380,7 +411,26 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
                 fullWidth
                 size="large"
                 disabled={loading}
-                sx={{ mt: 2 }}
+                sx={{ 
+                  mt: 2, 
+                  mt: 'auto',
+                  background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                  color: '#fff',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  fontSize: 15,
+                  px: 3,
+                  py: 1.5,
+                  height: 44,
+                  boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                  textTransform: 'none',
+                  minWidth: 120,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                    transform: 'translateY(-1px)'
+                  },
+                }}
               >
                 {loading ? 'Оформление...' : 'Оформить заказ'}
               </Button>
