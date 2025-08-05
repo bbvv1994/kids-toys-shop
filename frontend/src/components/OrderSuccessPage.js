@@ -1,5 +1,5 @@
 import React from 'react';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, getImageUrl } from '../config';
 import {
   Container, Typography, Box, Paper, Button, 
   Divider, Grid, Chip
@@ -128,19 +128,18 @@ export default function OrderSuccessPage() {
             borderRadius: 2,
             background: '#fafafa'
           }}>
-            <img
-              src={item.product.imageUrls && item.product.imageUrls.length > 0 
-                ? `${API_BASE_URL}${item.product.imageUrls[0]}` 
-                : '/toys.png'}
-              alt={item.product.name}
-              style={{ 
-                width: 60, 
-                height: 60, 
-                objectFit: 'cover', 
-                borderRadius: 8,
-                marginRight: 16
-              }}
-            />
+            <Box sx={{ 
+              width: 60, 
+              height: 60, 
+              borderRadius: 2,
+              border: '2px solid #f0f0f0',
+              flexShrink: 0,
+              backgroundImage: `url(${getImageUrl(item.product.imageUrls?.[0] || '/toys.png')})`,
+              backgroundSize: '100% 100%',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              marginRight: 16
+            }} />
             <Box sx={{ flexGrow: 1 }}>
               <Typography variant="h6" sx={{ mb: 1 }}>
                 {item.product.name}
