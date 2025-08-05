@@ -259,9 +259,9 @@ const theme = createTheme({
   const [priceLimits, setPriceLimits] = useState([0, 10000]);
   const cartIconRef = useRef(null);
   const drawerListRef = useRef(null); // ref для списка категорий внутри Drawer
-  const subcategoriesPanelRef = useRef(null); // ref для панели подкатегорий
+
   const lenisDrawerRef = useRef(null); // Lenis instance для Drawer
-  const lenisSubcatRef = useRef(null); // Lenis instance для подкатегорий
+
   const [searchValue, setSearchValue] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
@@ -1471,8 +1471,7 @@ const theme = createTheme({
          location.pathname !== '/contacts' && 
          location.pathname !== '/reviews' && 
          location.pathname !== '/cart' && 
-         user?.role !== 'admin' && 
-         !isHome && (
+         user?.role !== 'admin' && (
           <>
           <Box sx={{ 
             position: 'fixed',
@@ -1493,7 +1492,7 @@ const theme = createTheme({
                 fontSize: 20,
                 border: 'none',
                 borderRadius: 0,
-                boxShadow: menuOpen ? '0 4px 16px rgba(255,179,0,0.15)' : '0 2px 8px rgba(0,0,0,0.08)',
+                boxShadow: menuOpen ? 'none' : '0 2px 8px rgba(0,0,0,0.08)',
                 cursor: 'pointer',
                 outline: 'none',
                 display: 'flex',
@@ -1663,16 +1662,16 @@ const theme = createTheme({
             className="category-dropdown-menu"
             sx={{
               position: 'fixed',
-              top: isHome ? 100 : 140,
+              top: isHome ? 100 : 144,
               left: 0,
               width: 250,
               zIndex: 2000,
               m: 0,
               p: 0,
               borderRadius: 0,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              boxShadow: menuOpen ? 'none' : '0 2px 8px rgba(0,0,0,0.08)',
               background: '#fff',
-              // Меню всегда открыто на главной странице
+              // Унифицированная высота для всех случаев
               maxHeight: (menuOpen || isHome) ? '540px' : '0px',
               transition: 'none',
               overflow: 'auto',
@@ -1687,8 +1686,13 @@ const theme = createTheme({
                 fontSize: 20, 
                 textAlign: 'center', 
                 py: 1,
-                borderBottom: '1px solid rgba(255,255,255,0.2)'
+                borderBottom: '1px solid rgba(255,255,255,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1
               }}>
+                <CategoryIcon sx={{ fontSize: 24, color: 'inherit' }} />
                 Категории
               </Box>
             )}
@@ -1726,11 +1730,23 @@ const theme = createTheme({
                 </ListItem>
               ))}
             </List>
-            {/* Правая панель подкатегорий */}
-            {activeSub && (() => {
-              const cat = rootCategories.find(c => c.id === activeSub);
-              const subcats = cat ? getSubcategories(cat) : [];
+            {/* Универсальная панель подкатегорий */}
+            {(activeSub || hoveredCategory) && (() => {
+              // Определяем категорию и подкатегории
+              let cat, subcats;
+              
+              if (activeSub) {
+                // Для основного меню (activeSub)
+                cat = rootCategories.find(c => c.id === activeSub);
+                subcats = cat ? getSubcategories(cat) : [];
+              } else if (hoveredCategory) {
+                // Для мобильного меню (hoveredCategory)
+                cat = safeCategories.find(c => c.label === hoveredCategory);
+                subcats = cat && Array.isArray(cat.sub) ? cat.sub : [];
+              }
+              
               if (!cat || !subcats.length) return null;
+              
               return (
                 <Box
                   className="category-dropdown-submenu"
@@ -1749,7 +1765,7 @@ const theme = createTheme({
                       });
                       function raf(time) {
                         window.lenisCategorySubmenu?.raf(time);
-                        if (activeSub) requestAnimationFrame(raf);
+                        if (activeSub || hoveredCategory) requestAnimationFrame(raf);
                       }
                       requestAnimationFrame(raf);
                     } else {
@@ -1764,7 +1780,7 @@ const theme = createTheme({
                     top: 100,
                     left: 250,
                     width: 250,
-                    height: 'calc(100vh - 100px - 67px)',
+                    height: 'calc(100vh - 100px - 67px + 4px)',
                     background: '#fff',
                     zIndex: 2100,
                     boxShadow: '0 8px 16px -8px rgba(0,0,0,0.08)',
@@ -1775,8 +1791,14 @@ const theme = createTheme({
                     pt: '44px',
                     overflowY: 'auto',
                   }}
-                  onMouseEnter={() => setActiveSub(cat.id)}
-                  onMouseLeave={() => setActiveSub(null)}
+                  onMouseEnter={() => {
+                    if (activeSub) setActiveSub(activeSub);
+                    if (hoveredCategory) setHoveredCategory(hoveredCategory);
+                  }}
+                  onMouseLeave={() => {
+                    if (activeSub) setActiveSub(null);
+                    if (hoveredCategory) setHoveredCategory(null);
+                  }}
                   onWheel={e => e.stopPropagation()}
                 >
                   {subcats.map((subcat, i) => (
@@ -1784,9 +1806,33 @@ const theme = createTheme({
                       key={subcat.id || i}
                       onClick={() => {
                         setInstantClose(true);
-                        navigate(`/subcategory/${subcat.id}`);
-                        setActiveSub(null);
-                        if (!isHome) setMenuOpen(false); // Не закрывать меню на главной странице
+                        
+                        if (activeSub) {
+                          // Для основного меню
+                          navigate(`/subcategory/${subcat.id}`);
+                          setActiveSub(null);
+                          if (!isHome) setMenuOpen(false);
+                        } else if (hoveredCategory) {
+                          // Для мобильного меню
+                          if (dbCategories && dbCategories.length > 0) {
+                            const parentCat = dbCategories.find(c => c.name === cat.name && !c.parentId);
+                            if (parentCat) {
+                              const dbSubcat = dbCategories.find(c => c.name === subcat && c.parentId === parentCat.id);
+                              if (dbSubcat) {
+                                navigate(`/subcategory/${dbSubcat.id}`);
+                                setDrawerOpen(false);
+                                setHoveredCategory(null);
+                                setTimeout(() => setInstantClose(false), 0);
+                                return;
+                              }
+                            }
+                          }
+                          // Fallback - используем индекс как ID
+                          navigate(`/subcategory/${i + 1}`);
+                          setDrawerOpen(false);
+                          setHoveredCategory(null);
+                        }
+                        
                         setTimeout(() => setInstantClose(false), 0);
                       }}
                       sx={{
@@ -1804,7 +1850,7 @@ const theme = createTheme({
                         },
                       }}
                     >
-                      {subcat.label || subcat.name}
+                      {subcat.label || subcat.name || subcat}
                     </Box>
                   ))}
                 </Box>
@@ -1812,122 +1858,7 @@ const theme = createTheme({
             })()}
           </Paper>
         )}
-        {/* Отдельная панель подкатегорий сбоку от Drawer */}
-        {user?.role !== 'admin' && hoveredCategory && (() => {
-          const cat = safeCategories.find(c => c.label === hoveredCategory);
-          if (!cat || !Array.isArray(cat.sub) || cat.sub.length === 0) return null;
-          console.log('[Lenis] render subcategories panel', hoveredCategory, subcategoriesPanelRef.current);
-          return (
-            <Box
-              ref={node => {
-                subcategoriesPanelRef.current = node;
-                if (node && hoveredCategory) {
-                  document.body.style.overflow = 'hidden';
-                  let scrollable = node;
-                  const style = window.getComputedStyle(scrollable);
-                  console.log('[Lenis] subcat scrollable (callback-ref):', scrollable, 'overflowY:', style.overflowY);
-                  if (lenisSubcatRef.current) {
-                    lenisSubcatRef.current.destroy();
-                    lenisSubcatRef.current = null;
-                  }
-                  lenisSubcatRef.current = new Lenis({
-                    wrapper: scrollable,
-                    duration: 1.2,
-                    smooth: true,
-                    easing: (t) => 1 - Math.pow(1 - t, 3),
-                    syncTouch: true,
-                  });
-                  function raf(time) {
-                    lenisSubcatRef.current?.raf(time);
-                    if (hoveredCategory) requestAnimationFrame(raf);
-                  }
-                  requestAnimationFrame(raf);
-                  // Wheel лог
-                  const onWheel = (e) => {
-                    console.log('[Lenis] wheel event subcat', e.deltaY, 'scrollTop before:', scrollable.scrollTop);
-                  };
-                  scrollable.addEventListener('wheel', onWheel);
-                  lenisSubcatRef.current._onWheelLog = onWheel;
-                } else {
-                  if (lenisSubcatRef.current) {
-                    if (lenisSubcatRef.current.wrapper && lenisSubcatRef.current._onWheelLog) {
-                      lenisSubcatRef.current.wrapper.removeEventListener('wheel', lenisSubcatRef.current._onWheelLog);
-                    }
-                    lenisSubcatRef.current.destroy();
-                    lenisSubcatRef.current = null;
-                  }
-                  document.body.style.overflow = '';
-                }
-              }}
-              sx={{
-                position: 'fixed',
-                top: 96,
-                left: 250,
-                width: 250,
-                height: 'calc(100vh - 96px - 67px)',
-                background: '#fff',
-                zIndex: 1403,
-                boxShadow: 'none',
-                borderLeft: 'none',
-                borderRadius: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                pt: '30px',
-                overflowY: 'auto',
-              }}
-              onMouseEnter={() => {
-                console.log('[Lenis] onMouseEnter subcat', cat.label);
-                setHoveredCategory(cat.label);
-              }}
-              onMouseLeave={() => {
-                console.log('[Lenis] onMouseLeave subcat', cat.label);
-                setHoveredCategory(null);
-              }}
-              onWheel={e => e.stopPropagation()}
-            >
-              {Array.isArray(cat.sub) && cat.sub.length > 0 ? cat.sub.map((subcat, i) => (
-                <Box
-                  key={i}
-                  onClick={() => {
-                    // Находим подкатегорию в dbCategories для получения правильного ID
-                    if (dbCategories && dbCategories.length > 0) {
-                      const parentCat = dbCategories.find(c => c.name === cat.name && !c.parentId);
-                      if (parentCat) {
-                        const dbSubcat = dbCategories.find(c => c.name === subcat && c.parentId === parentCat.id);
-                        if (dbSubcat) {
-                          navigate(`/subcategory/${dbSubcat.id}`);
-                          setDrawerOpen(false);
-                          setHoveredCategory(null);
-                          return;
-                        }
-                      }
-                    }
-                    // Fallback - используем индекс как ID
-                    navigate(`/subcategory/${i + 1}`);
-                    setDrawerOpen(false);
-                    setHoveredCategory(null);
-                  }}
-                  sx={{
-                    px: 3,
-                    py: 2,
-                    fontWeight: 500,
-                    fontSize: 16,
-                    cursor: 'pointer',
-                    color: '#2c3e50',
-                    borderRadius: 2,
-                    lineHeight: 0.95,
-                    '&:hover': {
-                      backgroundColor: '#FFF3E0',
-                      color: '#FFB300',
-                    },
-                  }}
-                >
-                  {subcat}
-                </Box>
-              )) : null}
-            </Box>
-          );
-        })()}
+
         {/* Переношу бургер-меню под AppBar */}
         {location.pathname !== '/profile' && (
         <Box sx={{ display: { xs: 'block', md: 'none' }, p: 1 }}>
@@ -4000,62 +3931,7 @@ function App() {
     }
   }, []); // Убираем зависимость от categories, чтобы не перезаписывать при изменениях
 
-  useEffect(() => {
-    // Лог для отладки
-    console.log('[Lenis] useEffect for subcategories, hoveredCategory:', hoveredCategory, 'ref:', subcategoriesPanelRef.current);
 
-    if (hoveredCategory && subcategoriesPanelRef.current) {
-      document.body.style.overflow = 'hidden';
-      // Даем DOM обновиться
-      const timeout = setTimeout(() => {
-        let scrollable = subcategoriesPanelRef.current;
-        const style = window.getComputedStyle(scrollable);
-        console.log('[Lenis] subcat scrollable:', scrollable, 'overflowY:', style.overflowY);
-        if (lenisSubcatRef.current) {
-          lenisSubcatRef.current.destroy();
-          lenisSubcatRef.current = null;
-        }
-        lenisSubcatRef.current = new Lenis({
-          wrapper: scrollable,
-          duration: 1.2,
-          smooth: true,
-          easing: (t) => 1 - Math.pow(1 - t, 3),
-          syncTouch: true,
-        });
-        function raf(time) {
-          lenisSubcatRef.current?.raf(time);
-          if (hoveredCategory) requestAnimationFrame(raf);
-        }
-        requestAnimationFrame(raf);
-        // Wheel лог
-        const onWheel = (e) => {
-          console.log('[Lenis] wheel event subcat', e.deltaY, 'scrollTop before:', scrollable.scrollTop);
-        };
-        scrollable.addEventListener('wheel', onWheel);
-        lenisSubcatRef.current._onWheelLog = onWheel;
-      }, 0);
-      return () => {
-        clearTimeout(timeout);
-        if (lenisSubcatRef.current) {
-          if (lenisSubcatRef.current.wrapper && lenisSubcatRef.current._onWheelLog) {
-            lenisSubcatRef.current.wrapper.removeEventListener('wheel', lenisSubcatRef.current._onWheelLog);
-          }
-          lenisSubcatRef.current.destroy();
-          lenisSubcatRef.current = null;
-        }
-        document.body.style.overflow = '';
-      };
-    } else {
-      if (lenisSubcatRef.current) {
-        if (lenisSubcatRef.current.wrapper && lenisSubcatRef.current._onWheelLog) {
-          lenisSubcatRef.current.wrapper.removeEventListener('wheel', lenisSubcatRef.current._onWheelLog);
-        }
-        lenisSubcatRef.current.destroy();
-        lenisSubcatRef.current = null;
-      }
-      document.body.style.overflow = '';
-    }
-  }, [hoveredCategory, subcategoriesPanelRef.current]);
 
   return (
     <ThemeProvider theme={theme}>
