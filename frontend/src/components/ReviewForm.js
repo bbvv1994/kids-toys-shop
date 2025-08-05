@@ -87,7 +87,25 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
           <Button
             startIcon={<ArrowBack />}
             onClick={onClose}
-            sx={{ mr: 2 }}
+            sx={{ 
+              mr: 2,
+              background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 15,
+              px: 3,
+              py: 1.5,
+              height: 44,
+              boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
+              textTransform: 'none',
+              minWidth: 120,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
+                boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+            }}
           >
             Назад
           </Button>
@@ -197,6 +215,24 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
               variant="outlined"
               onClick={onClose}
               disabled={loading}
+              sx={{
+                border: '2px solid #2196f3',
+                color: '#2196f3',
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: 15,
+                px: 3,
+                py: 1.5,
+                height: 44,
+                textTransform: 'none',
+                minWidth: 120,
+                '&:hover': {
+                  border: '2px solid #1976d2',
+                  color: '#1976d2',
+                  background: 'rgba(33, 150, 243, 0.04)',
+                  transform: 'translateY(-1px)'
+                },
+              }}
             >
               Отмена
             </Button>
@@ -205,6 +241,29 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
               variant="contained"
               startIcon={loading ? <CircularProgress size={20} /> : <Send />}
               disabled={loading || success}
+              sx={{
+                background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                color: '#fff',
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: 15,
+                px: 3,
+                py: 1.5,
+                height: 44,
+                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                textTransform: 'none',
+                minWidth: 120,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                  boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+                '&:disabled': {
+                  background: '#ccc',
+                  boxShadow: 'none',
+                  transform: 'none'
+                }
+              }}
             >
               {loading ? 'Отправка...' : 'Отправить отзыв'}
             </Button>

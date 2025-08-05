@@ -302,17 +302,34 @@ const ReviewPage = () => {
 
   if (!orderData) {
     return (
-      <Box sx={{ p: 4, maxWidth: 800, mx: 'auto', mt: 4 }}>
+      <Box sx={{ p: 4, maxWidth: 800, mx: 'auto', mt: 12 }}>
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: '#3f51b5' }}>
               Отзывы о заказе
             </Typography>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<ArrowBack />}
               onClick={() => navigate('/profile')}
-              sx={{ borderRadius: 2 }}
+              sx={{ 
+                background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+                color: '#fff',
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: 15,
+                px: 3,
+                py: 1.5,
+                height: 44,
+                boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
+                textTransform: 'none',
+                minWidth: 120,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
+                  boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+              }}
             >
               Назад
             </Button>
@@ -346,7 +363,24 @@ const ReviewPage = () => {
                 variant="contained"
                 color="primary"
                 onClick={() => navigate('/profile')}
-                sx={{ borderRadius: 2 }}
+                sx={{ 
+                  borderRadius: 2,
+                  background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: 15,
+                  px: 3,
+                  py: 1.5,
+                  height: 44,
+                  boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                  textTransform: 'none',
+                  minWidth: 120,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                    transform: 'translateY(-1px)'
+                  },
+                }}
               >
                 Вернуться в личный кабинет
               </Button>
@@ -358,7 +392,7 @@ const ReviewPage = () => {
   }
 
   return (
-    <Box sx={{ p: 4, maxWidth: 800, mx: 'auto', mt: 4 }}>
+    <Box sx={{ p: 4, maxWidth: 800, mx: 'auto', mt: 12 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
         {/* Заголовок */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -366,10 +400,27 @@ const ReviewPage = () => {
             Отзывы о заказе #{orderData.id}
           </Typography>
           <Button
-            variant="outlined"
+            variant="contained"
             startIcon={<ArrowBack />}
             onClick={() => navigate('/profile')}
-            sx={{ borderRadius: 2 }}
+            sx={{ 
+              background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 15,
+              px: 3,
+              py: 1.5,
+              height: 44,
+              boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
+              textTransform: 'none',
+              minWidth: 120,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
+                boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+            }}
           >
             Назад
           </Button>
@@ -436,7 +487,27 @@ const ReviewPage = () => {
               onClick={handleSubmitShopReview}
               disabled={loading}
               endIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Send />}
-              sx={{ py: 1.5, borderRadius: 2, fontWeight: 'bold' }}
+              sx={{ 
+                py: 1.5, 
+                borderRadius: 2, 
+                fontWeight: 'bold',
+                background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                color: '#fff',
+                fontSize: 15,
+                height: 44,
+                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                textTransform: 'none',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                  boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+                '&:disabled': {
+                  background: '#ccc',
+                  boxShadow: 'none',
+                  transform: 'none'
+                }
+              }}
             >
               {loading ? 'Отправка...' : 'Отправить отзыв о магазине'}
             </Button>
@@ -533,7 +604,27 @@ const ReviewPage = () => {
                         onClick={() => handleSubmitProductReview(index)}
                         disabled={loading}
                         endIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Send />}
-                        sx={{ py: 1, borderRadius: 2, fontWeight: 'bold' }}
+                        sx={{ 
+                          py: 1, 
+                          borderRadius: 2, 
+                          fontWeight: 'bold',
+                          background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                          color: '#fff',
+                          fontSize: 15,
+                          height: 44,
+                          boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                          textTransform: 'none',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                            boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                            transform: 'translateY(-1px)'
+                          },
+                          '&:disabled': {
+                            background: '#ccc',
+                            boxShadow: 'none',
+                            transform: 'none'
+                          }
+                        }}
                       >
                         {loading ? 'Отправка...' : 'Отправить отзыв'}
                       </Button>
@@ -556,7 +647,24 @@ const ReviewPage = () => {
                   variant="contained"
                   color="primary"
                   onClick={() => navigate('/profile')}
-                  sx={{ borderRadius: 2 }}
+                  sx={{ 
+                    borderRadius: 2,
+                    background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                    color: '#fff',
+                    fontWeight: 600,
+                    fontSize: 15,
+                    px: 3,
+                    py: 1.5,
+                    height: 44,
+                    boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                    textTransform: 'none',
+                    minWidth: 120,
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                      transform: 'translateY(-1px)'
+                    },
+                  }}
                 >
                   Вернуться в личный кабинет
                 </Button>
