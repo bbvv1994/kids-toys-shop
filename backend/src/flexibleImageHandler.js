@@ -13,21 +13,46 @@ class FlexibleImageHandler {
     
     // Настройка Cloudinary только если используется
     if (this.storageMode === 'cloudinary') {
-      cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET
-      });
+      this.setupCloudinary();
     }
     
     console.log(`🖼️ FlexibleImageHandler: Режим хранения - ${this.storageMode}`);
   }
 
   /**
+   * Настройка Cloudinary
+   */
+  setupCloudinary() {
+    // Проверяем CLOUDINARY_URL
+    if (process.env.CLOUDINARY_URL) {
+      cloudinary.config({
+        url: process.env.CLOUDINARY_URL
+      });
+      console.log('🖼️ FlexibleImageHandler: Cloudinary настроен через CLOUDINARY_URL');
+    } 
+    // Fallback для отдельных переменных
+    else if (process.env.CLOUDINARY_CLOUD_NAME && 
+             process.env.CLOUDINARY_API_KEY && 
+             process.env.CLOUDINARY_API_SECRET) {
+      cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET
+      });
+      console.log('🖼️ FlexibleImageHandler: Cloudinary настроен через отдельные переменные');
+    }
+  }
+
+  /**
    * Определяет режим хранения на основе переменных окружения
    */
   getStorageMode() {
-    // Если есть все переменные Cloudinary, используем его
+    // Если есть CLOUDINARY_URL, используем Cloudinary
+    if (process.env.CLOUDINARY_URL) {
+      return 'cloudinary';
+    }
+    
+    // Если есть все отдельные переменные Cloudinary, используем его
     if (process.env.CLOUDINARY_CLOUD_NAME && 
         process.env.CLOUDINARY_API_KEY && 
         process.env.CLOUDINARY_API_SECRET) {
