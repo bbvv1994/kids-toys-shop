@@ -15,10 +15,14 @@ const TelegramBot = require('node-telegram-bot-api');
 const ImageMiddleware = require('./imageMiddleware');
 const BatchImageProcessor = require('./batchImageProcessor');
 const ProductionUploadMiddleware = require('./productionUploadMiddleware');
+const CloudinaryUploadMiddleware = require('./cloudinaryUploadMiddleware');
+const FlexibleUploadMiddleware = require('./flexibleUploadMiddleware');
 
 // Создаем один экземпляр ImageMiddleware для использования во всех маршрутах
 const imageMiddleware = new ImageMiddleware();
 const productionUploadMiddleware = new ProductionUploadMiddleware();
+const cloudinaryUploadMiddleware = new CloudinaryUploadMiddleware();
+const flexibleUploadMiddleware = new FlexibleUploadMiddleware();
 require('dotenv').config();
 
 // Настройка Brevo
@@ -516,12 +520,7 @@ passport.use(new FacebookStrategy({
 }));
 
 app.post('/api/products', authMiddleware, upload.array('images', 7), 
-  process.env.NODE_ENV === 'production' 
-    ? productionUploadMiddleware.processUploadedFiles.bind(productionUploadMiddleware)
-    : imageMiddleware.checkFileSizes.bind(imageMiddleware), 
-  process.env.NODE_ENV === 'production' 
-    ? (req, res, next) => next()
-    : imageMiddleware.processUploadedImages.bind(imageMiddleware), 
+  flexibleUploadMiddleware.processUploadedFiles.bind(flexibleUploadMiddleware), 
   async (req, res) => {
   // Проверка роли admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
@@ -530,13 +529,15 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
   }
   try {
     const { name, description, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden } = req.body;
-    const imageUrls = req.files ? req.files.map(file => {
-      // В production режиме файлы могут быть в памяти
-      if (file.filename) {
+    
+    // Используем URL из Cloudinary или локальные пути
+    const imageUrls = req.files ? req.files.map((file, index) => {
+      if (req.imageUrls && req.imageUrls[index]) {
+        // Используем URL из Cloudinary
+        return req.imageUrls[index];
+      } else if (file.filename) {
+        // Fallback для локальных файлов
         return `/uploads/${file.filename}`;
-      } else if (req.imageUrls && req.imageUrls.length > 0) {
-        // Используем обработанные URL из middleware
-        return req.imageUrls[req.files.indexOf(file)] || `/uploads/${Date.now()}_${file.originalname}`;
       } else {
         // Fallback для production
         return `/uploads/${Date.now()}_${file.originalname}`;
@@ -2073,15 +2074,7 @@ app.patch('/api/products/:id/hidden', authMiddleware, async (req, res) => {
 });
 
 app.put('/api/products/:id', authMiddleware, upload.array('images', 7), 
-  process.env.NODE_ENV === 'production' 
-    ? productionUploadMiddleware.processUploadedFiles.bind(productionUploadMiddleware)
-    : imageMiddleware.checkFileSizes.bind(imageMiddleware), 
-  process.env.NODE_ENV === 'production' 
-    ? (req, res, next) => {
-        console.log('🖼️ PUT /api/products/:id - Production mode middleware');
-        next();
-      }
-    : imageMiddleware.processUploadedImages.bind(imageMiddleware), 
+  flexibleUploadMiddleware.processUploadedFiles.bind(flexibleUploadMiddleware), 
   async (req, res) => {
   // Проверка роли admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
@@ -2123,19 +2116,20 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7),
     console.log('🖼️ PUT /api/products/:id - req.imageUrls =', req.imageUrls);
     
     if (req.files && req.files.length > 0) {
-      const newImageUrls = req.files.map(file => {
+      const newImageUrls = req.files.map((file, index) => {
         console.log('🖼️ PUT /api/products/:id - Обработка файла:', file.originalname);
         console.log('🖼️ PUT /api/products/:id - file.filename =', file.filename);
         
-        // В production режиме файлы могут быть в памяти
-        if (file.filename) {
+        // Используем URL из Cloudinary или локальные пути
+        if (req.imageUrls && req.imageUrls[index]) {
+          // Используем URL из Cloudinary
+          const url = req.imageUrls[index];
+          console.log('🖼️ PUT /api/products/:id - Используем Cloudinary URL:', url);
+          return url;
+        } else if (file.filename) {
+          // Fallback для локальных файлов
           const url = `/uploads/${file.filename}`;
           console.log('🖼️ PUT /api/products/:id - Используем file.filename:', url);
-          return url;
-        } else if (req.imageUrls && req.imageUrls.length > 0) {
-          // Используем обработанные URL из middleware
-          const url = req.imageUrls[req.files.indexOf(file)] || `/uploads/${Date.now()}_${file.originalname}`;
-          console.log('🖼️ PUT /api/products/:id - Используем req.imageUrls:', url);
           return url;
         } else {
           // Fallback для production
