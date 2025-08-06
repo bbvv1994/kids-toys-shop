@@ -38,7 +38,19 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
         transition: 'width 0.3s',
       }}
     >
-      <Typography variant="h5" sx={{ mb: 2, fontWeight: 700, letterSpacing: 1 }}>{title}</Typography>
+      <Typography variant="h5" sx={{ 
+        mb: 2, 
+        fontWeight: 800, 
+        color: '#ff6600',
+        fontFamily: '"Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
+        fontSize: '2.2rem',
+        textShadow: '0 2px 4px rgba(255, 102, 0, 0.2)',
+        letterSpacing: '0.5px',
+        background: 'linear-gradient(135deg, #ff6600 0%, #ff8533 100%)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text'
+      }}>{title}</Typography>
       <Box sx={{ width: '100%', position: 'relative', px: { xs: 4, md: 8 } }}
         onMouseEnter={() => { swiperInstance && swiperInstance.autoplay && swiperInstance.autoplay.stop(); }}
         onMouseLeave={() => { swiperInstance && swiperInstance.autoplay && swiperInstance.autoplay.start(); }}
