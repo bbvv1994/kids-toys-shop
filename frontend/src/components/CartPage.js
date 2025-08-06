@@ -147,9 +147,9 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
       maxWidth: 1400,
       width: '90%',
       mx: 'auto', 
-      mt: 4, 
+      mt: 16, 
       p: 3,
-      pt: { xs: 8, md: 10 },
+      pt: { xs: 20, md: 22 },
       background: 'white',
       borderRadius: 4,
       border: '1px solid #e0e0e0'
@@ -219,10 +219,24 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
             <Button
               variant="contained"
               onClick={() => navigate('/catalog')}
-              sx={{ 
+              sx={{
+                background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                color: '#fff',
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: 15,
+                px: 3,
+                py: 1.5,
+                height: 44,
+                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                textTransform: 'none',
+                minWidth: 120,
                 mt: 2,
-                backgroundColor: '#4ECDC4', 
-                '&:hover': { backgroundColor: '#45b7aa' } 
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                  boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
               }}
             >
               Перейти к покупкам
