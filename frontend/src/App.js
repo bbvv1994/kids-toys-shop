@@ -7640,6 +7640,10 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
             mb: 6,
             maxWidth: 1400,
             mx: 'auto',
+            pl: { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 },
+            '@media (min-width: 1200px)': {
+              pl: 9, // Отступ слева для больших экранов
+            },
           }}>
             {filteredSubcategories.map(subcat => {
               const nameTrimmed = subcat.name && subcat.name.trim();
@@ -7703,7 +7707,11 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)', lg: 'repeat(4, 1fr)' },
           gap: 3,
-          mb: 6
+          mb: 6,
+          pl: { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 },
+          '@media (min-width: 1200px)': {
+            pl: 9, // Отступ слева для больших экранов
+          },
         }}>
           {filteredCategoryProducts.length > 0 ? (
             filteredCategoryProducts.map(product => (
@@ -8007,7 +8015,9 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)', lg: 'repeat(4, 1fr)' },
           gap: 3,
-          mb: 6
+          mb: 6,
+          ml: { xs: 0, md: '220px' }, // Отступ слева для десктопа
+          pl: { xs: 2, md: 0 } // Отступ слева для мобильных
         }}>
           {filteredProducts.length > 0 ? (
             filteredProducts.map(product => (

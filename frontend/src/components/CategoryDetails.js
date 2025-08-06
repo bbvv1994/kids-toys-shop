@@ -68,7 +68,12 @@ function CategoryDetails({ category }) {
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#34495e' }}>
             Подкатегории ({category.sub.length}):
           </Typography>
-          <Grid container spacing={3}>
+          <Grid container spacing={3} sx={{
+            pl: { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 },
+            '@media (min-width: 1200px)': {
+              pl: 9, // Отступ слева для больших экранов
+            },
+          }}>
             {category.sub.map((subCategory, index) => {
               const fileName = getSubcategoryImageFileName(subCategory);
               const src = `/${fileName}`;
