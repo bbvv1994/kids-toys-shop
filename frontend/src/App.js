@@ -2727,7 +2727,7 @@ function ConfirmEmailPage() {
   }, [navigate, location]);
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 8, textAlign: 'center' }}>
+    <Container maxWidth="sm" sx={{ mt: 16, textAlign: 'center' }}>
       <Box sx={{ 
         p: 4, 
         borderRadius: 3, 
@@ -2764,15 +2764,51 @@ function ConfirmEmailPage() {
               {message}
             </Typography>
             <Button 
-              variant="contained" 
               onClick={() => navigate('/')}
-              sx={{ mr: 2 }}
+              sx={{
+                background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: 15,
+                borderRadius: 2,
+                px: 3,
+                py: 1.5,
+                textTransform: 'none',
+                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                minWidth: 120,
+                height: 44,
+                mr: 2,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                  boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+                transition: 'all 0.3s ease'
+              }}
             >
               На главную
             </Button>
             <Button 
-              variant="outlined" 
               onClick={() => window.location.reload()}
+              sx={{
+                background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: 15,
+                borderRadius: 2,
+                px: 3,
+                py: 1.5,
+                textTransform: 'none',
+                boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
+                minWidth: 120,
+                height: 44,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+                  boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+                transition: 'all 0.3s ease'
+              }}
             >
               Попробовать снова
             </Button>
