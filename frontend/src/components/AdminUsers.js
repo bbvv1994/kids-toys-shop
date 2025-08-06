@@ -446,15 +446,60 @@ const AdminUsers = () => {
           <Button 
             onClick={handleCloseDeleteDialog}
             disabled={notifyLoading}
-            variant="outlined"
+            sx={{
+              background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+              color: '#fff',
+              fontWeight: 600,
+              fontSize: 15,
+              borderRadius: 2,
+              px: 3,
+              py: 1.5,
+              textTransform: 'none',
+              boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
+              minWidth: 120,
+              height: 44,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+                boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: 'linear-gradient(135deg, #ccc 0%, #999 100%)',
+                color: '#666',
+                boxShadow: 'none',
+                transform: 'none'
+              }
+            }}
           >
             Отмена
           </Button>
           <Button 
             onClick={handleSendNotification} 
             disabled={notifyLoading}
-            variant="contained"
-            color="primary"
+            sx={{
+              background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+              color: '#fff',
+              fontWeight: 600,
+              fontSize: 15,
+              borderRadius: 2,
+              px: 3,
+              py: 1.5,
+              textTransform: 'none',
+              boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+              minWidth: 120,
+              height: 44,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: 'linear-gradient(135deg, #ccc 0%, #999 100%)',
+                color: '#666',
+                boxShadow: 'none',
+                transform: 'none'
+              }
+            }}
           >
             {notifyLoading ? 'Отправка...' : 'Отправить'}
           </Button>
