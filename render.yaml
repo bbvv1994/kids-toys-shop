@@ -29,4 +29,6 @@ services:
       - key: GOOGLE_CALLBACK_URL
         sync: false
       - key: FACEBOOK_CALLBACK_URL
-        sync: false 
+        sync: false
+      - key: FRONTEND_URL
+        value: https://kids-toys-shop.vercel.app 
