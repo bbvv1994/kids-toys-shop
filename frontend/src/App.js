@@ -3831,14 +3831,14 @@ function App() {
             if (cat.image) {
               // Если изображение содержит временную метку (175...), это загруженный файл
               if (cat.image.match(/^175\d+/)) {
-                iconPath = `${API_BASE_URL}/uploads/${cat.image}`;
+                iconPath = `${API_BASE_URL}/uploads/${cat.image}?t=${Date.now()}`;
               } else {
                 // Если это старый файл из public папки
-                iconPath = `${API_BASE_URL}/public/${cat.image}`;
+                iconPath = `${API_BASE_URL}/public/${cat.image}?t=${Date.now()}`;
               }
             } else {
               // Если нет изображения, используем fallback
-              iconPath = `${API_BASE_URL}/public${getCategoryIconForAPI(cat.name)}`;
+              iconPath = `${API_BASE_URL}/public${getCategoryIconForAPI(cat.name)}?t=${Date.now()}`;
             }
             
             return {
