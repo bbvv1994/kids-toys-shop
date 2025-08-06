@@ -1579,9 +1579,24 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
       
       // Отправляем уведомления
       try {
-        const userName = decodeUserName(order.user.name || order.user.surname || '');
-        const userDisplayName = userName.trim() || 'Не указано';
-        await sendTelegramNotification(`🛒 Новый заказ #${order.id} от ${userDisplayName}`);
+        const totalAmount = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        const telegramMessage = `
+🛒 <b>Новый заказ #${order.id}</b>
+
+👤 <b>Клиент:</b> ${(order.user.name || order.user.surname || '').trim() || 'Не указано'}
+📧 <b>Email:</b> ${order.user.email || 'Не указано'}
+📱 <b>Телефон:</b> ${order.user.phone || 'Не указано'}
+🏬 <b>Самовывоз из:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
+💳 <b>Оплата:</b> ${paymentMethod === 'card' ? 'Карта' : 'Наличными или картой'}
+
+📦 <b>Товары:</b>
+${order.items.map(item => `• ${item.product.name} x${item.quantity} - ${item.price * item.quantity} ₪`).join('\n')}
+
+💰 <b>Итого:</b> ${totalAmount} ₪
+📅 <b>Дата:</b> ${new Date().toLocaleString('ru-RU')}
+        `.trim();
+        await sendTelegramNotification(telegramMessage);
       } catch (telegramError) {
         console.error('Ошибка отправки в Telegram:', telegramError);
       }
@@ -1799,7 +1814,7 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
       const telegramMessage = `
 🛒 <b>Новый заказ #${order.id}</b>
 
-👤 <b>Клиент:</b> ${decodeUserName(user.name || customerInfo?.firstName || '').trim() || 'Не указано'}
+👤 <b>Клиент:</b> ${(user.name || customerInfo?.firstName || '').trim() || 'Не указано'}
 📧 <b>Email:</b> ${user.email || customerInfo?.email || 'Не указано'}
 📱 <b>Телефон:</b> ${user.phone || customerInfo?.phone || 'Не указано'}
 🏬 <b>Самовывоз из:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
@@ -1988,7 +2003,7 @@ app.post('/api/guest/checkout', async (req, res) => {
       const telegramMessage = `
 🛒 <b>Новый гостевой заказ #${order.id}</b>
 
-👤 <b>Клиент:</b> ${decodeUserName(customerInfo.firstName || '')} ${decodeUserName(customerInfo.lastName || '')}
+👤 <b>Клиент:</b> ${(customerInfo.firstName || '').trim()} ${(customerInfo.lastName || '').trim()}
 📧 <b>Email:</b> ${customerInfo.email}
 📱 <b>Телефон:</b> ${customerInfo.phone}
 🏬 <b>Самовывоз из:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
