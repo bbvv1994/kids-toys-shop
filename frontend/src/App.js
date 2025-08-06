@@ -4870,23 +4870,34 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
               <tr key={p.id}>
                 <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center' }}>
                   {p.imageUrls && p.imageUrls.length > 0 && !imageErrors[p.id] ? (
-                    <img 
-                      src={getImageUrl(p.imageUrls[0])} 
-                      alt="img" 
-                      style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4 }} 
-                      onError={() => handleImageError(p.id)}
-                      onLoad={() => console.log('✅ Image loaded successfully for product:', p.id, 'URL:', getImageUrl(p.imageUrls[0]))}
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 1,
+                        backgroundImage: `url(${getImageUrl(p.imageUrls[0])})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundColor: '#f0f0f0',
+                        margin: '0 auto'
+                      }}
+                      onError={(e) => {
+                        e.target.style.backgroundImage = 'url(/photography.jpg)';
+                        handleImageError(p.id);
+                      }}
                     />
                   ) : (
-                    <img 
-                      src="/photography.jpg" 
-                      alt="Нет фото" 
-                      style={{ 
-                        width: 48, 
-                        height: 48, 
-                        objectFit: 'cover', 
-                        borderRadius: 4
-                      }} 
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 1,
+                        backgroundImage: 'url(/photography.jpg)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundColor: '#f0f0f0',
+                        margin: '0 auto'
+                      }}
                     />
                   )}
                 </td>
@@ -4944,7 +4955,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
                             backgroundColor: p.isHidden ? '#e8f5e8' : '#fff3e0'
                           }
                         }}
-                        title={p.isHidden ? 'Показать товар' : 'Скрыть товар'}
+                        title={p.isHidden ? 'Показать' : 'Скрыть'}
                       >
                         {p.isHidden ? <Visibility /> : <VisibilityOff />}
                       </IconButton>
