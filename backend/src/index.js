@@ -1579,7 +1579,9 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
       
       // Отправляем уведомления
       try {
-        await sendTelegramNotification(`🛒 Новый заказ #${order.id} от ${order.user.name} ${order.user.surname}`);
+        const userName = decodeUserName(order.user.name || order.user.surname || '');
+        const userDisplayName = userName.trim() || 'Не указано';
+        await sendTelegramNotification(`🛒 Новый заказ #${order.id} от ${userDisplayName}`);
       } catch (telegramError) {
         console.error('Ошибка отправки в Telegram:', telegramError);
       }
@@ -1797,7 +1799,7 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
       const telegramMessage = `
 🛒 <b>Новый заказ #${order.id}</b>
 
-👤 <b>Клиент:</b> ${user.name || customerInfo?.firstName || 'Не указано'}
+👤 <b>Клиент:</b> ${decodeUserName(user.name || customerInfo?.firstName || '').trim() || 'Не указано'}
 📧 <b>Email:</b> ${user.email || customerInfo?.email || 'Не указано'}
 📱 <b>Телефон:</b> ${user.phone || customerInfo?.phone || 'Не указано'}
 🏬 <b>Самовывоз из:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
@@ -1986,7 +1988,7 @@ app.post('/api/guest/checkout', async (req, res) => {
       const telegramMessage = `
 🛒 <b>Новый гостевой заказ #${order.id}</b>
 
-👤 <b>Клиент:</b> ${customerInfo.firstName} ${customerInfo.lastName}
+👤 <b>Клиент:</b> ${decodeUserName(customerInfo.firstName || '')} ${decodeUserName(customerInfo.lastName || '')}
 📧 <b>Email:</b> ${customerInfo.email}
 📱 <b>Телефон:</b> ${customerInfo.phone}
 🏬 <b>Самовывоз из:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
