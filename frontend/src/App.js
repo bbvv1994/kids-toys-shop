@@ -5545,7 +5545,7 @@ const getCategoryIcon = (category) => {
   
   if (!category) {
     console.log('No category provided, returning default');
-    return '/toys.png';
+    return `${API_BASE_URL}/public/toys.png?t=${Date.now()}`;
   }
   
   // Если есть загруженное изображение, используем его
@@ -5578,7 +5578,7 @@ const getCategoryIcon = (category) => {
   
   const fallbackIcon = fallbackIcons[category.name] || '/toys.png';
   console.log(`No image for category "${category.name}", using fallback: ${fallbackIcon}`);
-  return `${API_BASE_URL}/public${fallbackIcon}`;
+  return `${API_BASE_URL}/public${fallbackIcon}?t=${Date.now()}`;
 };
 
 function CMSCategories({ loadCategoriesFromAPI }) {
@@ -6006,14 +6006,7 @@ function CMSCategories({ loadCategoriesFromAPI }) {
           </IconButton>
         )}
         {cat.parentId == null && (
-          <>
-            {(() => { 
-              const iconSrc = getCategoryIcon(cat);
-              console.log('CMSCategories icon src:', iconSrc, cat); 
-              return null; 
-            })()}
-            <img src={getCategoryIcon(cat)} alt="icon" style={{ width: 32, height: 32, marginLeft: '4px', marginRight: 12, borderRadius: 0, objectFit: 'cover' }} />
-          </>
+          <img src={getCategoryIcon(cat)} alt="icon" style={{ width: 32, height: 32, marginLeft: '4px', marginRight: 12, borderRadius: 0, objectFit: 'cover' }} />
         )}
         <Typography sx={{ fontWeight: 500, flex: 1 }}>{cat.name}</Typography>
         <Switch
