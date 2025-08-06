@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, getImageUrl } from '../config';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Box, Button, Typography, Container, Modal, Rating, TextField, Chip, IconButton, Breadcrumbs } from '@mui/material';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
@@ -639,11 +639,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   const realImages = getRealImages();
                   
                   if (realImages.length > 0 && galleryIndex < realImages.length && galleryIndex >= 0) {
-                    const imageSrc = realImages[galleryIndex].startsWith('/uploads/') 
-                      ? `${API_BASE_URL}${realImages[galleryIndex]}`
-                      : realImages[galleryIndex].startsWith('/') 
-                        ? realImages[galleryIndex] 
-                        : `${API_BASE_URL}${realImages[galleryIndex]}`;
+                    const imageSrc = getImageUrl(realImages[galleryIndex]);
                     
                     return (
                       <img
@@ -769,11 +765,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                         {realImages.map((url, idx) => (
                           <img
                             key={idx}
-                            src={url.startsWith('/uploads/') 
-                              ? `${API_BASE_URL}${url}`
-                              : url.startsWith('/') 
-                                ? url 
-                                : `${API_BASE_URL}${url}`}
+                            src={getImageUrl(url)}
                             alt={`Миниатюра ${idx+1}`}
                             style={{ 
                               width: 56, 
@@ -1373,11 +1365,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     ‹
                   </Button>
                   <img
-                    src={realImages[galleryIndex].startsWith('/uploads/') 
-                      ? `${API_BASE_URL}${realImages[galleryIndex]}`
-                      : realImages[galleryIndex].startsWith('/') 
-                        ? realImages[galleryIndex] 
-                        : `${API_BASE_URL}${realImages[galleryIndex]}`}
+                    src={getImageUrl(realImages[galleryIndex])}
                     alt={`Фото ${galleryIndex+1}`}
                     style={{ width: 500, height: 500, objectFit: 'contain', borderRadius: 8, margin: '0 16px', background: '#f6f6f6' }}
                   />
@@ -1423,11 +1411,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   {realImages.map((url, idx) => (
                                           <img
                         key={idx}
-                        src={url.startsWith('/uploads/') 
-                          ? `${API_BASE_URL}${url}`
-                          : url.startsWith('/') 
-                            ? url 
-                            : `${API_BASE_URL}${url}`}
+                        src={getImageUrl(url)}
                         alt={`Миниатюра ${idx+1}`}
                       style={{ 
                         width: 48, 
