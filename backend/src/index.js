@@ -1591,36 +1591,84 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
         ).join('\n');
         
         const emailContent = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
-            <h2 style="color: #333; text-align: center;">Подтверждение заказа #${order.id}</h2>
-            <p style="color: #555; font-size: 16px;">Здравствуйте, ${order.user.name}!</p>
-            <p style="color: #555; font-size: 16px;">Ваш заказ успешно оформлен.</p>
-            
-            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <h3 style="color: #333; margin-top: 0;">Детали заказа:</h3>
-              <p><strong>Номер заказа:</strong> #${order.id}</p>
-              <p><strong>Статус:</strong> Ожидает подтверждения</p>
-              <p><strong>Магазин самовывоза:</strong> ${getStoreInfo(pickupStore)}</p>
-              <p><strong>Способ оплаты:</strong> ${paymentMethod}</p>
-              <p><strong>Общая сумма:</strong> ₪${total}</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+          <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px 25px; border-radius: 50px; margin-bottom: 20px;">
+                <span style="color: white; font-size: 24px; font-weight: bold;">🎪 Kids Toys Shop</span>
+              </div>
+              <h1 style="color: #3f51b5; margin: 0; font-size: 28px;">🛒 Заказ оформлен!</h1>
             </div>
             
-            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <h3 style="color: #333; margin-top: 0;">Товары:</h3>
-              <div style="white-space: pre-line; color: #555;">${orderItems}</div>
+            <div style="margin-bottom: 25px;">
+              <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
+                Уважаемый(ая) <strong>${order.user.name || order.user.surname || 'клиент'}</strong>!
+              </p>
             </div>
             
-            <p style="color: #555; font-size: 16px;">Мы свяжемся с вами в ближайшее время для подтверждения заказа.</p>
+            <div style="margin-bottom: 25px;">
+              <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
+                Ваш заказ успешно оформлен и принят в обработку. Мы свяжемся с вами в ближайшее время для подтверждения.
+              </p>
+            </div>
             
-            <p style="text-align: center; margin-top: 30px;">
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/profile" style="background-color: #4CAF50; color: white; padding: 12px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px; font-size: 16px;">
-                Перейти в профиль
-              </a>
-            </p>
+            <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 25px 0;">
+              <h3 style="color: #3f51b5; margin: 0 0 15px 0; font-size: 18px;">📋 Детали заказа</h3>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
+                <div><strong>Номер заказа:</strong> #${order.id}</div>
+                <div><strong>Дата заказа:</strong> ${new Date().toLocaleString('ru-RU')}</div>
+                <div><strong>Самовывоз из:</strong> ${getStoreInfo(pickupStore).name}</div>
+                <div><strong>Способ оплаты:</strong> ${paymentMethod === 'card' ? '💳 Карта' : '💰 Наличные'}</div>
+              </div>
+              <div style="margin-top: 10px; font-size: 14px;">
+                <strong>Адрес магазина:</strong><br>
+                ${getStoreInfo(pickupStore).address}
+              </div>
+            </div>
             
-            <p style="color: #888; font-size: 14px; text-align: center; margin-top: 20px;">С уважением, Команда Kids Toys Shop</p>
+            <div style="background-color: #fff3e0; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #ff9800;">
+              <h3 style="color: #e65100; margin: 0 0 15px 0; font-size: 18px;">📦 Ваши товары</h3>
+              <div style="margin-bottom: 15px;">
+                ${order.items.map(item => `
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #ffe0b2;">
+                    <div style="flex: 1;">
+                      <div style="font-weight: bold; color: #333;">${item.product.name}</div>
+                      <div style="font-size: 12px; color: #666;">Количество: ${item.quantity} шт.</div>
+                    </div>
+                    <div style="font-weight: bold; color: #e65100; font-size: 16px;">
+                      ${item.price * item.quantity} ₪
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+              <div style="text-align: right; padding-top: 15px; border-top: 2px solid #ffcc02;">
+                <div style="font-size: 20px; font-weight: bold; color: #e65100;">
+                  Итого: ${total} ₪
+                </div>
+              </div>
+            </div>
+            
+            <div style="background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #4caf50;">
+              <h3 style="color: #2e7d32; margin: 0 0 15px 0; font-size: 18px;">✅ Что дальше?</h3>
+              <ul style="margin: 0; padding-left: 20px; color: #2e7d32;">
+                <li>Мы проверим наличие товаров</li>
+                <li>Свяжемся с вами для подтверждения</li>
+                <li>Сообщим о готовности к самовывозу</li>
+                <li>Вы сможете забрать заказ в удобное время</li>
+              </ul>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+              <p style="color: #666; font-size: 14px; margin: 0;">
+                Спасибо за покупку в <strong>Kids Toys Shop</strong>! 🎉
+              </p>
+              <p style="color: #999; font-size: 12px; margin: 5px 0 0 0;">
+                Если у вас есть вопросы, свяжитесь с нами
+              </p>
+            </div>
           </div>
-        `;
+        </div>
+      `;
         
         await sendEmail(
           order.user.email,
