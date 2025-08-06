@@ -7188,11 +7188,7 @@ function CMSOrders() {
                         borderRadius: 2,
                         border: '2px solid #e1bee7',
                         backgroundImage: item.product?.imageUrls && item.product.imageUrls.length > 0 
-                          ? `url(${item.product.imageUrls[0].startsWith('/uploads/') 
-                              ? `${API_BASE_URL}${item.product.imageUrls[0]}`
-                              : item.product.imageUrls[0].startsWith('/') 
-                                ? item.product.imageUrls[0] 
-                                : `${API_BASE_URL}${item.product.imageUrls[0]}`})`
+                          ? `url(${getImageUrl(item.product.imageUrls[0])})`
                           : 'url(/photography.jpg)',
                         backgroundSize: '100% 100%',
                         backgroundPosition: 'center',
@@ -8368,9 +8364,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
           type: 'review',
           productName: review.product?.name || 'Товар',
           productImage: review.product?.imageUrls?.[0] ? 
-            (review.product.imageUrls[0].startsWith('http') ? 
-              review.product.imageUrls[0] : 
-              `${API_BASE_URL}${review.product.imageUrls[0]}`) : 
+            getImageUrl(review.product.imageUrls[0]) : 
             'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjRjBGMEYwIi8+CjxwYXRoIGQ9Ik0yNSAyNUMzMi4xODM0IDI1IDM4IDMxLjgxNjYgMzggMzlDMzggNDYuMTgzNCAzMi4xODM0IDUzIDI1IDUzQzE3LjgxNjYgNTMgMTIgNDYuMTgzNCAxMiAzOUMxMiAzMS44MTY2IDE3LjgxNjYgMjUgMjUgMjVaIiBmaWxsPSIjQ0NDIi8+CjxwYXRoIGQ9Ik0yNSAzMUMyNy43NjE0IDMxIDMwIDMzLjIzODYgMzAgMzZDMzAgMzguNzYxNCAyNy43NjE0IDQxIDI1IDQxQzIyLjIzODYgNDEgMjAgMzguNzYxNCAyMCAzNkMyMCAzMy4yMzg2IDIyLjIzODYgMzEgMjUgMzFaIiBmaWxsPSIjOTk5Ii8+Cjwvc3ZnPgo='
         })),
         ...shopReviews.map(review => ({
@@ -9442,7 +9436,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                                 height: 70,
                                 borderRadius: 3,
                                 background: item.product?.imageUrls && item.product.imageUrls.length > 0
-                                  ? `center/cover no-repeat url(${API_BASE_URL}${item.product.imageUrls[0]})` 
+                                  ? `center/cover no-repeat url(${getImageUrl(item.product.imageUrls[0])})` 
                                   : '#f0f0f0',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -9583,7 +9577,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                               width: 50,
                               height: 50,
                               borderRadius: 2,
-                              backgroundImage: `url(${review.productImage})`,
+                              backgroundImage: `url(${getImageUrl(review.productImage)})`,
                               backgroundSize: 'cover',
                               backgroundPosition: 'center',
                               backgroundColor: '#f0f0f0'
