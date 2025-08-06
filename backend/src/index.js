@@ -932,7 +932,7 @@ app.post('/api/auth/register', async (req, res) => {
     console.log(`Пользователь создан с ID: ${user.id}, emailVerified: ${user.emailVerified}`);
 
     // Отправка письма с подтверждением через Brevo
-    const confirmUrl = `http://localhost:3000/confirm-email?token=${verificationToken}`;
+    const confirmUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/confirm-email?token=${verificationToken}`;
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
         <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -1131,7 +1131,7 @@ app.get('/api/auth/google/callback', passport.authenticate('google', { session: 
     res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/oauth-success?token=${token}`);
   } catch (error) {
     console.error('Google OAuth callback error:', error);
-    res.redirect(`http://localhost:3000/oauth-error?error=authentication_failed`);
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/oauth-error?error=authentication_failed`);
   }
 });
 
@@ -1139,7 +1139,7 @@ app.get('/api/auth/google/callback', passport.authenticate('google', { session: 
 app.get('/api/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
 app.get('/api/auth/facebook/callback', passport.authenticate('facebook', { session: false }), (req, res) => {
   const token = jwt.sign({ userId: req.user.id, email: req.user.email, name: req.user.name, role: req.user.role }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '7d' });
-  res.redirect(`http://localhost:3000/oauth-success?token=${token}`);
+  res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/oauth-success?token=${token}`);
 });
 
 // Middleware для проверки JWT
@@ -1316,7 +1316,7 @@ app.post('/api/auth/forgot', async (req, res) => {
     const resetToken = crypto.randomBytes(32).toString('hex');
     await prisma.user.update({ where: { id: user.id }, data: { verificationToken: resetToken } });
     // Отправка письма
-    const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
         <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -2412,7 +2412,7 @@ app.put('/api/admin/orders/:id', authMiddleware, async (req, res) => {
             type: 'review_request',
             title: 'Оставьте отзыв о вашей покупке',
             message: 'Пожалуйста, уделите пару минут вашего времени, оцените магазин и товары. Ваше мнение важно для нас, и других покупателей!',
-            actionUrl: `http://localhost:3000/review-order?orderId=${order.id}`,
+            actionUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/review-order?orderId=${order.id}`,
             actionText: 'Оставить отзыв'
           }
         });
@@ -3745,7 +3745,7 @@ app.post('/api/admin/notifications/test', authMiddleware, async (req, res) => {
         type: 'review_request',
         title: 'Оставьте отзыв о вашей покупке (тест)',
         message: 'Пожалуйста, уделите пару минут вашего времени, оцените магазин и товары. Ваше мнение важно для нас, и других покупателей!',
-        actionUrl: `http://localhost:3000/review-order?orderId=${order.id}`,
+        actionUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/review-order?orderId=${order.id}`,
         actionText: 'Оставить отзыв'
       }
     });
