@@ -308,7 +308,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="md" sx={{ mt: 8, mb: 4 }}>
       <Typography variant="h4" gutterBottom>
         Оформление заказа
       </Typography>
