@@ -232,7 +232,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
       ) : (
         <Grid container spacing={3}>
           <Grid gridColumn="span 12" xl="span 8">
-            <Paper sx={{ p: 3 }}>
+            <Paper sx={{ p: 3, boxShadow: 'none' }}>
               <Typography variant="h5" sx={{ mb: 3, color: '#FF6B6B', fontWeight: 'bold' }}>
                 🛒 Товары в корзине ({items.length})
               </Typography>
