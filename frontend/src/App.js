@@ -8029,9 +8029,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
           }}>
             {subcategory.name}
           </Typography>
-          <Typography variant="body1" sx={{ color: '#666' }}>
-            {subcategoryProducts.length} товаров
-          </Typography>
+
         </Box>
 
         {/* Строка поиска удалена по просьбе пользователя */}
