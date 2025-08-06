@@ -19,7 +19,7 @@ import {
 import { 
   Add as AddIcon, 
   Remove as RemoveIcon, 
-  Delete as DeleteIcon,
+  Delete,
   ShoppingCart as CartIcon,
   LocalShipping as ShippingIcon,
   Payment as PaymentIcon,
@@ -415,7 +415,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                                   '&:hover': { background: '#FFCDD2' }
                                 }}
                               >
-                                <DeleteIcon />
+                                <Delete />
                               </IconButton>
                             </Tooltip>
                           </Box>
