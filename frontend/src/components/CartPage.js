@@ -148,8 +148,8 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
       width: '90%',
       mx: 'auto', 
       mt: 16, 
-      p: 3,
-      pt: { xs: 20, md: 22 },
+      p: 2,
+      pt: { xs: 4, md: 6 },
       background: 'white',
       borderRadius: 4,
       border: '1px solid #e0e0e0'
