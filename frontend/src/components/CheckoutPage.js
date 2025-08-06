@@ -50,11 +50,25 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
         setUserData(data.user);
         
         // Автоматически заполняем форму данными пользователя
+        let phoneNumber = data.user.phone || '';
+        
+        // Очищаем номер телефона от кода страны, если он есть
+        if (phoneNumber.startsWith('+972')) {
+          phoneNumber = phoneNumber.substring(4);
+        } else if (phoneNumber.startsWith('972')) {
+          phoneNumber = phoneNumber.substring(3);
+        }
+        
+        // Убираем ведущий ноль, если есть
+        if (phoneNumber.startsWith('0')) {
+          phoneNumber = phoneNumber.substring(1);
+        }
+        
         setFormData({
           firstName: data.user.name || '',
           lastName: data.user.surname || '',
           email: data.user.email || '',
-          phone: data.user.phone || '',
+          phone: phoneNumber,
           city: '',
           zipCode: ''
         });
@@ -76,9 +90,32 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
   }, []);
 
   const handleInputChange = (e) => {
+    let value = e.target.value;
+    
+    // Специальная обработка для поля телефона
+    if (e.target.name === 'phone') {
+      // Убираем все символы кроме цифр
+      value = value.replace(/\D/g, '');
+      
+      // Если номер начинается с 972, убираем его (чтобы избежать дублирования)
+      if (value.startsWith('972')) {
+        value = value.substring(3);
+      }
+      
+      // Если номер начинается с 0, убираем его
+      if (value.startsWith('0')) {
+        value = value.substring(1);
+      }
+      
+      // Ограничиваем длину номера (без кода страны)
+      if (value.length > 9) {
+        value = value.substring(0, 9);
+      }
+    }
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     });
   };
 
