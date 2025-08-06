@@ -2312,7 +2312,20 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
         pl: { md: '270px' }
       }}>
         <Box sx={{ mb: 4, pt: { xs: 8, md: 10 } }}>
-          <Typography variant="h2" sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography variant="h2" sx={{ 
+            textAlign: 'center', 
+            mb: 4,
+            fontWeight: 800, 
+            color: '#ff6600',
+            fontFamily: '"Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
+            fontSize: '2.5rem',
+            textShadow: '0 2px 4px rgba(255, 102, 0, 0.2)',
+            letterSpacing: '0.5px',
+            background: 'linear-gradient(135deg, #ff6600 0%, #ff8533 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
             Каталог товаров
           </Typography>
           {/* Плитки категорий каталога */}
