@@ -1849,7 +1849,7 @@ ${cart.items.map(item => `• ${item.product.name} x${item.quantity} - ${item.pr
         </div>
       `;
       
-      await sendEmail(user.email, emailSubject, emailHtml);
+      await sendEmail(order.user.email, emailSubject, emailHtml);
     } catch (emailError) {
       console.error('Error sending order confirmation email:', emailError);
     }
