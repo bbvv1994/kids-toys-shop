@@ -386,6 +386,13 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    onKeyPress={(e) => {
+                      // Разрешаем только цифры и клавиши навигации
+                      const charCode = e.which ? e.which : e.keyCode;
+                      if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                        e.preventDefault();
+                      }
+                    }}
                     required
                     variant="outlined"
                     InputProps={{
