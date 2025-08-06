@@ -1433,21 +1433,22 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             onClick={() => setGalleryOpen(false)} 
             sx={{ 
               mt: 2,
-              background: 'linear-gradient(90deg, #e53e3e 0%, #c53030 100%)',
-              boxShadow: '0 4px 16px 0 rgba(229, 62, 62, 0.25)',
+              background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
               color: '#fff',
-              borderRadius: 20,
-              fontWeight: 'bold',
-              textShadow: '0 1px 2px rgba(0,0,0,0.08)',
-              transition: 'background 0.2s, box-shadow 0.2s, transform 0.2s',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 15,
+              px: 3,
+              py: 1.5,
+              height: 44,
+              boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+              textTransform: 'none',
+              minWidth: 120,
               '&:hover': {
-                background: 'linear-gradient(90deg, #c53030 0%, #e53e3e 100%)',
-                boxShadow: '0 8px 24px 0 rgba(229, 62, 62, 0.35)',
-                transform: 'scale(1.05)'
+                background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                transform: 'translateY(-1px)'
               },
-              '&:active': {
-                transform: 'scale(0.95)'
-              }
             }}
           >
             Закрыть
