@@ -256,14 +256,12 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                     <Card 
                       sx={{ 
                         borderRadius: 3,
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
                         border: removingItem === item.product.id ? '2px solid #f44336' : '2px solid #E0E0E0',
                         background: 'linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%)',
                         transform: removingItem === item.product.id ? 'scale(0.95)' : 'scale(1)',
                         transition: 'all 0.3s ease',
                         width: { xs: '100%', md: 600 },
                         '&:hover': {
-                          boxShadow: '0 8px 30px rgba(255, 179, 0, 0.2)',
                           transform: 'translateY(-2px)'
                         }
                       }}
