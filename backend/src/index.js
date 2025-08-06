@@ -1618,7 +1618,7 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
                 <div><strong>Номер заказа:</strong> #${order.id}</div>
                 <div><strong>Дата заказа:</strong> ${new Date().toLocaleString('ru-RU')}</div>
                 <div><strong>Самовывоз из:</strong> ${getStoreInfo(pickupStore).name}</div>
-                <div><strong>Способ оплаты:</strong> ${paymentMethod === 'card' ? '💳 Карта' : '💰 Наличные'}</div>
+                <div><strong>Способ оплаты:</strong> ${paymentMethod === 'card' ? '💳 Карта' : '💰 Наличными или картой'}</div>
               </div>
               <div style="margin-top: 10px; font-size: 14px;">
                 <strong>Адрес магазина:</strong><br>
@@ -1801,7 +1801,7 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
 📧 <b>Email:</b> ${user.email || customerInfo?.email || 'Не указано'}
 📱 <b>Телефон:</b> ${user.phone || customerInfo?.phone || 'Не указано'}
 🏬 <b>Самовывоз из:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
-💳 <b>Оплата:</b> ${paymentMethod === 'card' ? 'Карта' : 'Наличные'}
+💳 <b>Оплата:</b> ${paymentMethod === 'card' ? 'Карта' : 'Наличными или картой'}
 
 📦 <b>Товары:</b>
 ${cart.items.map(item => `• ${item.product.name} x${item.quantity} - ${item.product.price * item.quantity} ₪`).join('\n')}
@@ -1845,7 +1845,7 @@ ${cart.items.map(item => `• ${item.product.name} x${item.quantity} - ${item.pr
                 <div><strong>Номер заказа:</strong> #${order.id}</div>
                 <div><strong>Дата заказа:</strong> ${new Date().toLocaleString('ru-RU')}</div>
                 <div><strong>Самовывоз из:</strong> ${getStoreInfo(pickupStore).name}</div>
-                <div><strong>Способ оплаты:</strong> ${paymentMethod === 'card' ? '💳 Карта' : '💰 Наличные'}</div>
+                <div><strong>Способ оплаты:</strong> ${paymentMethod === 'card' ? '💳 Карта' : '💰 Наличными или картой'}</div>
               </div>
               <div style="margin-top: 10px; font-size: 14px;">
                 <strong>Адрес магазина:</strong><br>
@@ -1990,7 +1990,7 @@ app.post('/api/guest/checkout', async (req, res) => {
 📧 <b>Email:</b> ${customerInfo.email}
 📱 <b>Телефон:</b> ${customerInfo.phone}
 🏬 <b>Самовывоз из:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
-💳 <b>Оплата:</b> ${paymentMethod === 'card' ? 'Карта' : 'Наличные'}
+💳 <b>Оплата:</b> ${paymentMethod === 'card' ? 'Карта' : 'Наличными или картой'}
 
 📦 <b>Товары:</b>
 ${cartItems.map(item => `• ${item.productName} x${item.quantity} - ${item.price * item.quantity} ₪`).join('\n')}
@@ -2034,7 +2034,7 @@ ${cartItems.map(item => `• ${item.productName} x${item.quantity} - ${item.pric
                 <div><strong>Номер заказа:</strong> #${order.id}</div>
                 <div><strong>Дата заказа:</strong> ${new Date().toLocaleString('ru-RU')}</div>
                 <div><strong>Самовывоз из:</strong> ${getStoreInfo(pickupStore).name}</div>
-                <div><strong>Способ оплаты:</strong> ${paymentMethod === 'card' ? '💳 Карта' : '💰 Наличные'}</div>
+                <div><strong>Способ оплаты:</strong> ${paymentMethod === 'card' ? '💳 Карта' : '💰 Наличными или картой'}</div>
               </div>
               <div style="margin-top: 10px; font-size: 14px;">
                 <strong>Адрес магазина:</strong><br>
