@@ -152,7 +152,6 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
       pt: { xs: 8, md: 10 },
       background: 'white',
       borderRadius: 4,
-      boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
       border: '1px solid #e0e0e0'
     }}>
       <motion.div
