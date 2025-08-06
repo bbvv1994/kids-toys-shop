@@ -1472,6 +1472,7 @@ const theme = createTheme({
          location.pathname !== '/reviews' && 
          location.pathname !== '/cart' && 
          location.pathname !== '/checkout' && 
+         location.pathname !== '/order-success' && 
          user?.role !== 'admin' && (
           <>
           <Box sx={{ 
@@ -1862,7 +1863,8 @@ const theme = createTheme({
 
         {/* Переношу бургер-меню под AppBar */}
         {location.pathname !== '/profile' && 
-         location.pathname !== '/checkout' && (
+         location.pathname !== '/checkout' && 
+         location.pathname !== '/order-success' && (
         <Box sx={{ display: { xs: 'block', md: 'none' }, p: 1 }}>
           <IconButton
             color="inherit"
@@ -1877,7 +1879,8 @@ const theme = createTheme({
         )}
         {/* Мобильный Drawer с категориями */}
         {location.pathname !== '/profile' && 
-         location.pathname !== '/checkout' && (
+         location.pathname !== '/checkout' && 
+         location.pathname !== '/order-success' && (
       <Drawer
         anchor="left"
         variant="temporary"
