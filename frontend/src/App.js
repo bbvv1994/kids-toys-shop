@@ -7627,7 +7627,19 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
           textAlign: 'center',
           mb: 4 
         }}>
-          <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
+          <Typography variant="h3" sx={{ 
+            fontWeight: 800, 
+            color: '#ff6600',
+            fontFamily: '"Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
+            fontSize: '3rem',
+            textShadow: '0 2px 4px rgba(255, 102, 0, 0.2)',
+            letterSpacing: '0.5px',
+            background: 'linear-gradient(135deg, #ff6600 0%, #ff8533 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            mb: 1 
+          }}>
             {category.name}
           </Typography>
         </Box>
@@ -8002,7 +8014,19 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
           textAlign: 'center',
           mb: 4 
         }}>
-          <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
+          <Typography variant="h3" sx={{ 
+            fontWeight: 800, 
+            color: '#ff6600',
+            fontFamily: '"Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
+            fontSize: '3rem',
+            textShadow: '0 2px 4px rgba(255, 102, 0, 0.2)',
+            letterSpacing: '0.5px',
+            background: 'linear-gradient(135deg, #ff6600 0%, #ff8533 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            mb: 1 
+          }}>
             {subcategory.name}
           </Typography>
           <Typography variant="body1" sx={{ color: '#666' }}>
