@@ -9121,20 +9121,20 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     onClick={handleDeleteAllNotifications} 
                     startIcon={<Delete />} 
                     sx={{ 
-                      background: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
-                      color: '#666',
+                      background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+                      color: '#fff',
                       borderRadius: 2,
                       fontWeight: 600,
                       fontSize: 15,
                       px: 3,
                       py: 1.5,
                       height: 44,
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
                       textTransform: 'none',
                       minWidth: 120,
                       '&:hover': {
-                        background: 'linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+                        boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
                         transform: 'translateY(-1px)'
                       },
                     }}
