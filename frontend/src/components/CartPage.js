@@ -408,11 +408,12 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                             </Typography>
                             <Tooltip title="Удалить из корзины">
                               <IconButton
-                                color="error"
                                 onClick={() => handleRemoveItem(item.product.id)}
                                 sx={{ 
-                                  background: '#FFEBEE',
-                                  '&:hover': { background: '#FFCDD2' }
+                                  color: '#f44336',
+                                  '&:hover': {
+                                    backgroundColor: '#ffebee'
+                                  }
                                 }}
                               >
                                 <Delete />
