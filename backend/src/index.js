@@ -1498,19 +1498,157 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
   try {
 
     
-    const { customerInfo, pickupStore, paymentMethod, total } = req.body;
+    const { customerInfo, pickupStore, paymentMethod, total, cartItems } = req.body;
     
-    // Получаем корзину пользователя
-    
-    const cart = await prisma.cart.findUnique({
-      where: { userId: req.user.userId },
-      include: { items: { include: { product: true }, orderBy: { id: 'asc' } } }
-    });
-    
-    
-    if (!cart || !cart.items.length) {
-              return res.status(400).json({ error: 'Корзина пуста' });
-    }
+    // Проверяем, есть ли cartItems в запросе
+    if (cartItems && cartItems.length > 0) {
+      console.log('📦 Using cartItems from request:', cartItems);
+      
+      // Проверяем наличие товара на складе
+      for (const item of cartItems) {
+        const product = await prisma.product.findUnique({
+          where: { id: item.productId }
+        });
+        
+        if (!product) {
+          return res.status(400).json({ error: `Товар не найден: ID ${item.productId}` });
+        }
+        
+        if (item.quantity > product.quantity) {
+          return res.status(400).json({ error: `Недостаточно товара: ${product.name}` });
+        }
+      }
+      
+      // Обновляем информацию о пользователе, если предоставлена
+      if (customerInfo) {
+        await prisma.user.update({
+          where: { id: req.user.userId },
+          data: {
+            name: customerInfo.firstName,
+            surname: customerInfo.lastName,
+            phone: customerInfo.phone
+          }
+        });
+      }
+      
+      // Создаём заказ с cartItems из запроса
+      const order = await prisma.order.create({
+        data: {
+          userId: req.user.userId,
+          status: 'pending',
+          pickupStore,
+          items: {
+            create: cartItems.map(item => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price
+            }))
+          }
+        },
+        include: { 
+          items: { include: { product: true } },
+          user: true 
+        }
+      });
+      
+      // Уменьшаем количество на складе
+      for (const item of cartItems) {
+        await prisma.product.update({
+          where: { id: item.productId },
+          data: { quantity: { decrement: item.quantity } }
+        });
+      }
+      
+      // Очищаем корзину пользователя
+      const cart = await prisma.cart.findUnique({
+        where: { userId: req.user.userId },
+        include: { items: true }
+      });
+      
+      if (cart) {
+        console.log(`Очищаем корзину ID: ${cart.id}`);
+        
+        // Сначала удаляем все элементы корзины
+        const deletedItems = await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
+        console.log(`Удалено ${deletedItems.count} элементов корзины для корзины ID: ${cart.id}`);
+        
+        // Удаляем саму корзину
+        await prisma.cart.delete({ where: { id: cart.id } });
+        console.log(`Удалена корзина ID: ${cart.id}`);
+      }
+      
+      // Отправляем уведомления
+      try {
+        await sendTelegramNotification(`🛒 Новый заказ #${order.id} от ${order.user.name} ${order.user.surname}`);
+      } catch (telegramError) {
+        console.error('Ошибка отправки в Telegram:', telegramError);
+      }
+      
+      // Отправляем email
+      try {
+        const orderItems = order.items.map(item => 
+          `${item.product.name} - ${item.quantity} шт. x ₪${item.price}`
+        ).join('\n');
+        
+        const emailContent = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+            <h2 style="color: #333; text-align: center;">Подтверждение заказа #${order.id}</h2>
+            <p style="color: #555; font-size: 16px;">Здравствуйте, ${order.user.name}!</p>
+            <p style="color: #555; font-size: 16px;">Ваш заказ успешно оформлен.</p>
+            
+            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <h3 style="color: #333; margin-top: 0;">Детали заказа:</h3>
+              <p><strong>Номер заказа:</strong> #${order.id}</p>
+              <p><strong>Статус:</strong> Ожидает подтверждения</p>
+              <p><strong>Магазин самовывоза:</strong> ${getStoreInfo(pickupStore)}</p>
+              <p><strong>Способ оплаты:</strong> ${paymentMethod}</p>
+              <p><strong>Общая сумма:</strong> ₪${total}</p>
+            </div>
+            
+            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <h3 style="color: #333; margin-top: 0;">Товары:</h3>
+              <div style="white-space: pre-line; color: #555;">${orderItems}</div>
+            </div>
+            
+            <p style="color: #555; font-size: 16px;">Мы свяжемся с вами в ближайшее время для подтверждения заказа.</p>
+            
+            <p style="text-align: center; margin-top: 30px;">
+              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/profile" style="background-color: #4CAF50; color: white; padding: 12px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px; font-size: 16px;">
+                Перейти в профиль
+              </a>
+            </p>
+            
+            <p style="color: #888; font-size: 14px; text-align: center; margin-top: 20px;">С уважением, Команда Kids Toys Shop</p>
+          </div>
+        `;
+        
+        await sendEmail(
+          order.user.email,
+          `Подтверждение заказа #${order.id} - Kids Toys Shop`,
+          emailContent
+        );
+      } catch (emailError) {
+        console.error('Ошибка отправки email:', emailError);
+      }
+      
+      res.json({ 
+        success: true, 
+        order,
+        message: 'Заказ успешно создан'
+      });
+      
+    } else {
+      // Fallback: получаем корзину пользователя из базы данных
+      console.log('📦 Using cart from database');
+      
+      const cart = await prisma.cart.findUnique({
+        where: { userId: req.user.userId },
+        include: { items: { include: { product: true }, orderBy: { id: 'asc' } } }
+      });
+      
+      if (!cart || !cart.items.length) {
+        return res.status(400).json({ error: 'Корзина пуста' });
+      }
     
     
     

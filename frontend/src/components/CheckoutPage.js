@@ -195,6 +195,22 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
           phone: formData.phone.startsWith('+972') ? formData.phone : `+972${formData.phone.replace(/^0/, '')}`
         };
 
+        // Подготавливаем данные корзины для авторизованных пользователей
+        const cartItems = cart.items
+          .filter(item => item.product && item.product.id)
+          .map(item => ({
+            productId: parseInt(item.product.id),
+            quantity: item.quantity,
+            price: item.product.price,
+            productName: item.product.name
+          }));
+
+        if (cartItems.length === 0) {
+          setError('В корзине нет доступных товаров для заказа');
+          setLoading(false);
+          return;
+        }
+
         const response = await fetch(`${API_BASE_URL}/api/profile/checkout`, {
           method: 'POST',
           headers: {
@@ -205,7 +221,8 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
             customerInfo: customerInfoWithPhone,
             pickupStore,
             paymentMethod,
-            total: calculateTotal()
+            total: calculateTotal(),
+            cartItems
           })
         });
 
