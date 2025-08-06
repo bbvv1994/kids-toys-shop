@@ -2318,7 +2318,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
             fontWeight: 800, 
             color: '#ff6600',
             fontFamily: '"Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
-            fontSize: '2.5rem',
+            fontSize: '3rem',
             textShadow: '0 2px 4px rgba(255, 102, 0, 0.2)',
             letterSpacing: '0.5px',
             background: 'linear-gradient(135deg, #ff6600 0%, #ff8533 100%)',
