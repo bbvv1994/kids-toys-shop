@@ -1860,6 +1860,7 @@ ${cart.items.map(item => `• ${item.product.name} x${item.quantity} - ${item.pr
       cartCleared: true,
       message: 'Заказ успешно оформлен, корзина очищена'
     });
+    } // Closing brace for the else block
   } catch (error) {
     console.error('Checkout error:', error);
     res.status(500).json({ error: 'Ошибка оформления заказа' });
