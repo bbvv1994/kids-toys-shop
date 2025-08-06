@@ -21,6 +21,7 @@ import {
   Remove as RemoveIcon, 
   Delete,
   ShoppingCart as CartIcon,
+  ShoppingCart as ShoppingCartIcon,
   LocalShipping as ShippingIcon,
   Payment as PaymentIcon,
   EmojiEvents as TrophyIcon,
@@ -160,22 +161,32 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
         transition={{ duration: 0.6 }}
       >
         <Box sx={{ textAlign: 'center', mb: 4, mt: 2.5 }}>
-          <Typography 
-            variant="h3" 
-            sx={{ 
-              fontWeight: 800,
-              background: 'linear-gradient(45deg, #FFB300, #FF6B6B)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              mb: 1
-            }}
-          >
-            🛒 Ваша Корзина
-          </Typography>
-          <Typography variant="h6" sx={{ color: '#666', mb: 2 }}>
-            {itemCount} товар{itemCount === 1 ? '' : itemCount < 5 ? 'а' : 'ов'} на сумму {total} ₪
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 1 }}>
+            <img 
+              src="/pocket.png" 
+              alt="cart" 
+              style={{ 
+                width: 40, 
+                height: 40, 
+                display: 'block', 
+                filter: 'brightness(0)', 
+                objectFit: 'contain'
+              }} 
+            />
+            <Typography 
+              variant="h3" 
+              sx={{ 
+                fontWeight: 800,
+                background: 'linear-gradient(45deg, #FFB300, #FF6B6B)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}
+            >
+              Ваша Корзина
+            </Typography>
+          </Box>
+
           
           {discount > 0 && (
             <Paper sx={{ 
@@ -209,7 +220,6 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
             borderRadius: 3,
             border: '2px dashed #FFB300'
           }}>
-            <CartIcon sx={{ fontSize: 80, color: '#FFB300', mb: 2 }} />
             <Typography variant="h5" sx={{ color: '#666', mb: 2 }}>
               Ваша корзина пуста
             </Typography>
