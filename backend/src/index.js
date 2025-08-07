@@ -4631,3 +4631,62 @@ app.get('/api/test-export', async (req, res) => {
     res.status(500).json({ error: 'Ошибка в тестовом endpoint', details: error.message });
   }
 });
+
+// POST /api/migrate - принудительное применение миграций
+app.post('/api/migrate', async (req, res) => {
+  try {
+    console.log('🔄 Применение миграций...');
+    
+    // Проверяем текущее состояние
+    const currentMigrations = await prisma.$queryRaw`
+      SELECT * FROM _prisma_migrations 
+      ORDER BY finished_at DESC 
+      LIMIT 5;
+    `;
+    console.log('Текущие миграции:', currentMigrations);
+    
+    // Применяем миграции
+    const { execSync } = require('child_process');
+    execSync('npx prisma migrate deploy', { stdio: 'pipe' });
+    
+    // Генерируем Prisma Client
+    execSync('npx prisma generate', { stdio: 'pipe' });
+    
+    // Проверяем таблицу ProductQuestion
+    const tableExists = await prisma.$queryRaw`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'ProductQuestion'
+      );
+    `;
+    
+    if (tableExists[0]?.exists) {
+      console.log('✅ Таблица ProductQuestion существует');
+      const questionsCount = await prisma.productQuestion.count();
+      console.log(`📊 Вопросов в базе: ${questionsCount}`);
+    } else {
+      console.log('❌ Таблица ProductQuestion не существует');
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Миграции применены успешно',
+      tableExists: tableExists[0]?.exists || false
+    });
+  } catch (error) {
+    console.error('❌ Ошибка применения миграций:', error);
+    res.status(500).json({ 
+      error: 'Ошибка применения миграций', 
+      details: error.message 
+    });
+  }
+});
+
+app.listen(PORT, (err) => {
+  if (err) {
+    console.error('Server failed to start:', err);
+  } else {
+    
+  }
+});
