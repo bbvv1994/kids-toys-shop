@@ -660,6 +660,157 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+// === ВОПРОСЫ О ТОВАРАХ ===
+
+// Получить вопросы по товару (только published)
+app.get('/api/products/:id/questions', async (req, res) => {
+  try {
+    const questions = await prisma.productQuestion.findMany({
+      where: { productId: parseInt(req.params.id), status: 'published' },
+      include: { user: { select: { id: true, name: true } } },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(questions);
+  } catch (error) {
+    console.error('Error fetching questions:', error);
+    res.status(500).json({ error: 'Failed to fetch questions' });
+  }
+});
+
+// Задать вопрос о товаре
+app.post('/api/products/:id/questions', authMiddleware, async (req, res) => {
+  try {
+    const { question } = req.body;
+    const productId = parseInt(req.params.id);
+    const userId = req.user.userId;
+
+    if (!question || !question.trim()) {
+      return res.status(400).json({ error: 'Вопрос обязателен' });
+    }
+
+    // Проверяем, что товар существует
+    const product = await prisma.product.findUnique({
+      where: { id: productId }
+    });
+
+    if (!product) {
+      return res.status(404).json({ error: 'Товар не найден' });
+    }
+
+    const productQuestion = await prisma.productQuestion.create({
+      data: { 
+        productId, 
+        userId, 
+        question: question.trim(), 
+        status: 'pending' 
+      },
+      include: { user: { select: { id: true, name: true } } }
+    });
+
+    // Отправляем уведомление в Telegram
+    try {
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      const telegramMessage = `
+❓ <b>Новый вопрос о товаре</b>
+
+🛍️ <b>Товар:</b> ${product.name}
+👤 <b>Пользователь:</b> ${user?.name || 'Не указано'}
+📧 <b>Email:</b> ${user?.email || 'Не указано'}
+❓ <b>Вопрос:</b> ${question.trim()}
+📅 <b>Дата:</b> ${new Date().toLocaleString('ru-RU')}
+      `.trim();
+      await sendTelegramNotification(telegramMessage);
+    } catch (telegramError) {
+      console.error('Error sending Telegram notification:', telegramError);
+    }
+
+    res.status(201).json(productQuestion);
+  } catch (error) {
+    console.error('Error creating question:', error);
+    res.status(500).json({ error: 'Failed to create question' });
+  }
+});
+
+// Получить все вопросы (для админа, с фильтрацией по статусу)
+app.get('/api/admin/questions', authMiddleware, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+  }
+  try {
+    const { status } = req.query;
+    const questions = await prisma.productQuestion.findMany({
+      where: status ? { status } : {},
+      include: { 
+        product: { select: { id: true, name: true, imageUrls: true } }, 
+        user: { select: { id: true, name: true, email: true } } 
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(questions);
+  } catch (error) {
+    console.error('Error fetching all questions:', error);
+    res.status(500).json({ error: 'Failed to fetch questions' });
+  }
+});
+
+// Получить все опубликованные вопросы (публичный доступ)
+app.get('/api/questions', async (req, res) => {
+  try {
+    const questions = await prisma.productQuestion.findMany({
+      where: { status: 'published' },
+      include: { 
+        product: { select: { id: true, name: true, imageUrls: true } }, 
+        user: { select: { id: true, name: true } } 
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(questions);
+  } catch (error) {
+    console.error('Error fetching public questions:', error);
+    res.status(500).json({ error: 'Failed to fetch questions' });
+  }
+});
+
+// Ответить на вопрос (для админа)
+app.put('/api/admin/questions/:id', authMiddleware, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+  }
+  try {
+    const { answer, status } = req.body;
+    
+    if (!answer || !answer.trim()) {
+      return res.status(400).json({ error: 'Ответ обязателен' });
+    }
+
+    if (!['pending', 'published', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Некорректный статус' });
+    }
+
+    const question = await prisma.productQuestion.update({
+      where: { id: parseInt(req.params.id) },
+      data: { 
+        answer: answer.trim(),
+        status,
+        updatedAt: new Date()
+      },
+      include: { 
+        product: { select: { id: true, name: true } }, 
+        user: { select: { id: true, name: true, email: true } } 
+      }
+    });
+
+    // Уведомления в Telegram отключены - только для новых вопросов
+
+    res.json(question);
+  } catch (error) {
+    console.error('Error answering question:', error);
+    res.status(500).json({ error: 'Failed to answer question' });
+  }
+});
+
 app.get('/api/products/:id', async (req, res) => {
   try {
     const { admin } = req.query;
@@ -1806,30 +1957,7 @@ ${order.items.map(item => `• ${item.product.name} x${item.quantity} - ${item.p
       // Продолжаем выполнение, даже если очистка корзины не удалась
     }
     
-    // Отправляем уведомление в Telegram
-    try {
-      const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
-      const totalAmount = cart.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-      
-      const telegramMessage = `
-🛒 <b>Новый заказ #${order.id}</b>
 
-👤 <b>Клиент:</b> ${(user.name || customerInfo?.firstName || '').trim() || 'Не указано'}
-📧 <b>Email:</b> ${user.email || customerInfo?.email || 'Не указано'}
-📱 <b>Телефон:</b> ${user.phone || customerInfo?.phone || 'Не указано'}
-🏬 <b>Самовывоз из:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
-💳 <b>Оплата:</b> ${paymentMethod === 'card' ? 'Карта' : 'Наличными или картой'}
-
-📦 <b>Товары:</b>
-${cart.items.map(item => `• ${item.product.name} x${item.quantity} - ${item.product.price * item.quantity} ₪`).join('\n')}
-
-💰 <b>Итого:</b> ${totalAmount} ₪
-📅 <b>Дата:</b> ${new Date().toLocaleString('ru-RU')}
-      `.trim();
-      await sendTelegramNotification(telegramMessage);
-    } catch (telegramError) {
-      console.error('Error sending Telegram notification:', telegramError);
-    }
     
     // Отправляем email подтверждения заказа покупателю
     try {
@@ -2574,35 +2702,7 @@ app.put('/api/admin/orders/:id', authMiddleware, async (req, res) => {
       }
     });
     
-    // Отправляем уведомление в Telegram об изменении статуса
-    try {
-              const statusText = {
-          'pending': 'Ожидает подтверждения',
-          'confirmed': 'Подтвержден',
-          'ready': 'Готов к выдаче',
-          'pickedup': 'Получен',
-          'cancelled': 'Отменен'
-        }[status] || status;
-      
-      const totalAmount = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      
-      const telegramMessage = `
-🔄 <b>Статус заказа изменен</b>
-
-📦 <b>Заказ #${order.id}</b>
-👤 <b>Клиент:</b> ${order.user?.name || 'Не указано'}
-📧 <b>Email:</b> ${order.user?.email || 'Не указано'}
-🏬 <b>Магазин:</b> ${getStoreInfo(order.pickupStore).name} (${getStoreInfo(order.pickupStore).address})
-
-💰 <b>Сумма:</b> ${totalAmount} ₪
-📅 <b>Новый статус:</b> ${statusText}
-⏰ <b>Время изменения:</b> ${new Date().toLocaleString('ru-RU')}
-      `.trim();
-      
-      await sendTelegramNotification(telegramMessage);
-    } catch (telegramError) {
-      console.error('Error sending Telegram notification:', telegramError);
-    }
+    // Уведомления в Telegram отключены - только для новых заказов и новых вопросов
     
     // В endpoint смены статуса заказа (например, PUT /api/admin/orders/:id):
     // После успешного обновления статуса на 'delivered':
@@ -4167,5 +4267,59 @@ app.post('/api/admin/fix-category-images', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error fixing category images:', error);
     res.status(500).json({ error: 'Ошибка исправления изображений категорий' });
+  }
+});
+
+// === Получить избранное пользователя ===
+app.get('/api/profile/wishlist', authMiddleware, async (req, res) => {
+  try {
+    let wishlist = await prisma.wishlist.findUnique({
+      where: { userId: req.user.userId },
+      include: { items: { include: { product: true } } }
+    });
+    if (!wishlist) {
+      wishlist = await prisma.wishlist.create({ data: { userId: req.user.userId } });
+      wishlist.items = [];
+    }
+    res.json(wishlist);
+  } catch (error) {
+    console.error('Wishlist fetch error:', error);
+    res.status(500).json({ error: 'Ошибка получения избранного' });
+  }
+});
+
+// === Добавить товар в избранное ===
+app.post('/api/profile/wishlist/add', authMiddleware, async (req, res) => {
+  try {
+    const { productId } = req.body;
+    if (!productId) return res.status(400).json({ error: 'productId обязателен' });
+    let wishlist = await prisma.wishlist.findUnique({ where: { userId: req.user.userId } });
+    if (!wishlist) {
+      wishlist = await prisma.wishlist.create({ data: { userId: req.user.userId } });
+    }
+    const existing = await prisma.wishlistItem.findFirst({ where: { wishlistId: wishlist.id, productId } });
+    if (existing) return res.status(400).json({ error: 'Товар уже в избранном' });
+    await prisma.wishlistItem.create({ data: { wishlistId: wishlist.id, productId } });
+    const updated = await prisma.wishlist.findUnique({ where: { id: wishlist.id }, include: { items: { include: { product: true } } } });
+    res.json(updated);
+  } catch (error) {
+    console.error('Wishlist add error:', error);
+    res.status(500).json({ error: 'Ошибка добавления в избранное' });
+  }
+});
+
+// === Удалить товар из избранного ===
+app.post('/api/profile/wishlist/remove', authMiddleware, async (req, res) => {
+  try {
+    const { productId } = req.body;
+    if (!productId) return res.status(400).json({ error: 'productId обязателен' });
+    let wishlist = await prisma.wishlist.findUnique({ where: { userId: req.user.userId } });
+    if (!wishlist) return res.status(404).json({ error: 'Избранное не найдено' });
+    await prisma.wishlistItem.deleteMany({ where: { wishlistId: wishlist.id, productId } });
+    const updated = await prisma.wishlist.findUnique({ where: { id: wishlist.id }, include: { items: { include: { product: true } } } });
+    res.json(updated);
+  } catch (error) {
+    console.error('Wishlist remove error:', error);
+    res.status(500).json({ error: 'Ошибка удаления из избранного' });
   }
 });

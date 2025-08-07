@@ -9,6 +9,8 @@ import RateReviewIcon from '@mui/icons-material/RateReview';
 import EditIcon from '@mui/icons-material/Edit';
 import HomeIcon from '@mui/icons-material/Home';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import Lottie from 'lottie-react';
 import addToCartAnim from '../lottie/cart checkout - fast.json';
 import wishlistHeartAnim from '../lottie/wishlist-heart.json';
@@ -70,6 +72,13 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [cartAnimKey, setCartAnimKey] = useState(0);
   const [wishlistAnimPlaying, setWishlistAnimPlaying] = useState(false);
   const [wishlistAnimKey, setWishlistAnimKey] = useState(0); // eslint-disable-line no-unused-vars
+
+  // Состояния для вопросов о товарах
+  const [questions, setQuestions] = useState([]);
+  const [questionText, setQuestionText] = useState('');
+  const [questionError, setQuestionError] = useState('');
+  const [questionSuccess, setQuestionSuccess] = useState('');
+  const [questionLoading, setQuestionLoading] = useState(false);
 
   // Безопасно ищем товар в корзине только если product загружен
   const cartItem = product ? cart?.items?.find(item => item.product.id === product.id) : null;
@@ -165,6 +174,29 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         console.error('ProductPage: Ошибка загрузки отзывов:', error);
       });
   }, [id, reviewSuccess]);
+
+  useEffect(() => {
+    console.log('ProductPage: Загружаем вопросы для товара ID:', id);
+    const loadQuestions = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/products/${id}/questions`);
+        console.log('ProductPage: Ответ API вопросов:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('ProductPage: Полученные вопросы:', data);
+        setQuestions(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('ProductPage: Ошибка загрузки вопросов:', error);
+        setQuestions([]);
+      }
+    };
+    
+    loadQuestions();
+  }, [id]);
 
   useEffect(() => {
     async function checkCanReview() {
@@ -357,6 +389,51 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     }
     
     setReviewLoading(false);
+  };
+
+  const handleQuestionSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!user || !user.token) {
+      setQuestionError('Необходимо войти в аккаунт для задавания вопроса');
+      return;
+    }
+    
+    if (!questionText.trim()) {
+      setQuestionError('Пожалуйста, напишите вопрос');
+      return;
+    }
+    
+    setQuestionError('');
+    setQuestionSuccess('');
+    setQuestionLoading(true);
+    
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/products/${id}/questions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`
+        },
+        body: JSON.stringify({ question: questionText.trim() })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        setQuestionSuccess('Ваш вопрос отправлен! Мы ответим на него в ближайшее время.');
+        setQuestionText('');
+        // Обновляем список вопросов
+        setQuestions(prevQuestions => [...prevQuestions, data]);
+      } else {
+        setQuestionError(data.error || 'Ошибка отправки вопроса');
+      }
+    } catch (e) {
+      console.error('ProductPage: Ошибка отправки вопроса:', e);
+      setQuestionError('Ошибка отправки вопроса. Попробуйте еще раз.');
+    }
+    
+    setQuestionLoading(false);
   };
 
   const handleAddToCartWithQuantity = () => {
@@ -1212,8 +1289,12 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           fontWeight: 600,
           color: '#333',
           borderBottom: '2px solid #4ECDC4',
-          pb: 1
+          pb: 1,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
         }}>
+          <RateReviewIcon sx={{ color: '#4ECDC4', fontSize: 28 }} />
           Отзывы о товаре
         </Typography>
         {reviews.length === 0 && <Typography>Пока нет отзывов.</Typography>}
@@ -1251,7 +1332,10 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         {/* Форма для отзыва */}
         {user && user.token && canReview && !alreadyReviewed && (
           <Box component="form" onSubmit={handleReviewSubmit} sx={{ mt: 3, p: 2, background: '#fffbe7', borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 1 }}>Оставить отзыв</Typography>
+            <Typography variant="h6" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <RateReviewIcon sx={{ color: '#4ECDC4', fontSize: 20 }} />
+              Оставить отзыв
+            </Typography>
             <Rating value={reviewRating} onChange={(_, v) => setReviewRating(v)} sx={{ mb: 1 }} />
             <TextField
               label="Ваш отзыв"
@@ -1307,6 +1391,164 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           <Typography sx={{ mt: 2, color: '#888' }}>Войдите в аккаунт, чтобы оставить отзыв.</Typography>
         )}
       </Box>
+
+      {/* Вопросы о товаре */}
+      <Box sx={{ 
+        mt: 5, 
+        background: 'white', 
+        borderRadius: 3, 
+        p: { xs: 2, md: 4 }, 
+        boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+        border: '1px solid #e9ecef'
+      }}>
+        <Typography variant="h5" sx={{ 
+          mb: 3, 
+          fontWeight: 600,
+          color: '#333',
+          borderBottom: '2px solid #2196F3',
+          pb: 1,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}>
+          <HelpOutlineIcon sx={{ color: '#2196F3', fontSize: 28 }} />
+          Вопросы о товаре ({questions.length})
+        </Typography>
+        {questions.length === 0 ? (
+          <Typography sx={{ color: '#666', fontStyle: 'italic' }}>
+            Пока нет вопросов о данном товаре. Будьте первым, кто задаст вопрос!
+          </Typography>
+        ) : (
+          questions.map((question) => (
+            <Box key={question.id} sx={{ 
+              mb: 3, 
+              p: 3, 
+              background: '#f8f9fa', 
+              borderRadius: 3,
+              border: '1px solid #e9ecef',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              }
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Typography sx={{ fontWeight: 'bold', color: '#333' }}>
+                  {question.user?.name || 'Пользователь'}
+                </Typography>
+                <Typography sx={{ ml: 2, color: '#888', fontSize: '0.9rem' }}>
+                  {new Date(question.createdAt).toLocaleDateString('ru-RU', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </Typography>
+              </Box>
+              <Typography sx={{ 
+                color: '#555', 
+                lineHeight: 1.6,
+                fontSize: '0.95rem',
+                fontWeight: 500,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 1
+              }}>
+                <HelpOutlineIcon sx={{ color: '#2196F3', fontSize: 20, mt: 0.2 }} />
+                {question.question}
+              </Typography>
+              {question.answer && (
+                <Box sx={{ mt: 2, p: 2, background: '#e3f2fd', borderRadius: 2, borderLeft: '4px solid #2196F3' }}>
+                  <Typography sx={{ 
+                    color: '#1976d2', 
+                    lineHeight: 1.6,
+                    fontSize: '0.95rem',
+                    fontWeight: 500,
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 1
+                  }}>
+                    <ChatBubbleOutlineIcon sx={{ color: '#1976d2', fontSize: 20, mt: 0.2 }} />
+                    <strong>Ответ:</strong> {question.answer}
+                  </Typography>
+                  {question.updatedAt && question.updatedAt !== question.createdAt && (
+                    <Typography sx={{ 
+                      color: '#666', 
+                      fontSize: '0.8rem',
+                      mt: 1,
+                      fontStyle: 'italic'
+                    }}>
+                      Ответ дан: {new Date(question.updatedAt).toLocaleDateString('ru-RU', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </Typography>
+                  )}
+                </Box>
+              )}
+            </Box>
+          ))
+        )}
+        {/* Форма для вопроса */}
+        {user && user.token && (
+          <Box component="form" onSubmit={handleQuestionSubmit} sx={{ mt: 3, p: 2, background: '#f3f8ff', borderRadius: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <HelpOutlineIcon sx={{ color: '#2196F3', fontSize: 20 }} />
+              Задать вопрос
+            </Typography>
+            <TextField
+              label="Ваш вопрос"
+              value={questionText}
+              onChange={e => setQuestionText(e.target.value)}
+              fullWidth
+              multiline
+              minRows={2}
+              sx={{ mb: 1 }}
+              required
+            />
+            <Button 
+              type="submit" 
+              variant="contained" 
+              disabled={questionLoading || !questionText}
+              sx={{
+                background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+                color: '#fff',
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: 15,
+                px: 3,
+                py: 1.5,
+                height: 44,
+                boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
+                textTransform: 'none',
+                minWidth: 120,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #1976D2 0%, #2196F3 100%)',
+                  boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+                '&:disabled': {
+                  background: '#ccc',
+                  boxShadow: 'none',
+                  transform: 'none'
+                }
+              }}
+            >
+              Отправить
+            </Button>
+            {questionError && <Typography color="error" sx={{ mt: 1 }}>{questionError}</Typography>}
+            {questionSuccess && <Typography color="success.main" sx={{ mt: 1 }}>{questionSuccess}</Typography>}
+          </Box>
+        )}
+        {!user && (
+          <Typography sx={{ mt: 2, color: '#888' }}>Войдите в аккаунт, чтобы задать вопрос.</Typography>
+        )}
+      </Box>
+
       {/* Модальное окно для просмотра всех изображений товара */}
       <Modal 
         open={galleryOpen} 

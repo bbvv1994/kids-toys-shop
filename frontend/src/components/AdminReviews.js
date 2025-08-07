@@ -94,6 +94,24 @@ export default function AdminReviews() {
     setActionLoading(null);
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending': return '#ff9800';
+      case 'approved': return '#4caf50';
+      case 'rejected': return '#f44336';
+      default: return '#666';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'pending': return 'На модерации';
+      case 'approved': return 'Одобрен';
+      case 'rejected': return 'Отклонен';
+      default: return status;
+    }
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
@@ -168,34 +186,90 @@ export default function AdminReviews() {
                     <Typography variant="caption" color="text.secondary">
                       {new Date(review.createdAt).toLocaleDateString('ru-RU')}
                     </Typography>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Box sx={{ display: 'flex', gap: 0.5, flexDirection: 'column' }}>
                       {review.status === 'pending' && (
                         <>
                           <Button
                             size="small"
                             variant="contained"
-                            color="success"
                             onClick={() => handleModerate(review.id, 'approved')}
-                            sx={{ backgroundColor: '#4CAF50', '&:hover': { backgroundColor: '#45a049' } }}
+                            sx={{
+                              background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                              color: '#fff',
+                              borderRadius: 2,
+                              fontWeight: 600,
+                              fontSize: 13,
+                              px: 2,
+                              py: 0.8,
+                              height: 32,
+                              boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                              textTransform: 'none',
+                              minWidth: 80,
+                              '&:hover': {
+                                background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                                transform: 'translateY(-1px)'
+                              },
+                            }}
                           >
                             Одобрить
                           </Button>
                           <Button
                             size="small"
                             variant="contained"
-                            color="error"
                             onClick={() => handleModerate(review.id, 'rejected')}
-                            sx={{ backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}
+                            sx={{
+                              background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+                              color: '#fff',
+                              borderRadius: 2,
+                              fontWeight: 600,
+                              fontSize: 13,
+                              px: 2,
+                              py: 0.8,
+                              height: 32,
+                              boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
+                              textTransform: 'none',
+                              minWidth: 80,
+                              '&:hover': {
+                                background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+                                boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                                transform: 'translateY(-1px)'
+                              },
+                            }}
                           >
                             Отклонить
                           </Button>
                         </>
                       )}
                       {review.status === 'approved' && (
-                        <Chip label="Одобрен" color="success" size="small" />
+                        <Box sx={{ 
+                          display: 'inline-block', 
+                          px: 2, 
+                          py: 0.5, 
+                          borderRadius: 1, 
+                          backgroundColor: getStatusColor(review.status) + '20',
+                          color: getStatusColor(review.status),
+                          fontSize: '0.875rem',
+                          fontWeight: 'medium',
+                          mt: 1
+                        }}>
+                          {getStatusText(review.status)}
+                        </Box>
                       )}
                       {review.status === 'rejected' && (
-                        <Chip label="Отклонен" color="error" size="small" />
+                        <Box sx={{ 
+                          display: 'inline-block', 
+                          px: 2, 
+                          py: 0.5, 
+                          borderRadius: 1, 
+                          backgroundColor: getStatusColor(review.status) + '20',
+                          color: getStatusColor(review.status),
+                          fontSize: '0.875rem',
+                          fontWeight: 'medium',
+                          mt: 1
+                        }}>
+                          {getStatusText(review.status)}
+                        </Box>
                       )}
                     </Box>
                   </Box>

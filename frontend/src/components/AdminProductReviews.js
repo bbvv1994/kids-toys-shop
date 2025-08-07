@@ -178,11 +178,11 @@ const AdminProductReviews = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'warning';
-      case 'published': return 'success';
-      case 'rejected': return 'error';
-      case 'hidden': return 'default';
-      default: return 'default';
+      case 'pending': return '#ff9800';
+      case 'published': return '#4caf50';
+      case 'rejected': return '#f44336';
+      case 'hidden': return '#666';
+      default: return '#666';
     }
   };
 
@@ -245,7 +245,7 @@ const AdminProductReviews = () => {
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
             Статистика отзывов о товарах
           </Typography>
-          <Grid container spacing={2}>
+          <Grid container spacing={4}>
             <Grid item xs={12} sm={2}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
@@ -335,7 +335,7 @@ const AdminProductReviews = () => {
                     </Box>
                   }
                   secondary={
-                    <Box>
+                    <Box sx={{ maxWidth: 'calc(100% - 200px)' }}>
                       <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
                         Товар: {review.product?.name || 'Неизвестный товар'}
                       </Typography>
@@ -357,7 +357,10 @@ const AdminProductReviews = () => {
                         <Typography variant="body1" sx={{ 
                           mb: 1, 
                           lineHeight: 1.6,
-                          color: review.status === 'hidden' ? '#999' : 'inherit'
+                          color: review.status === 'hidden' ? '#999' : 'inherit',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word',
+                          whiteSpace: 'pre-wrap'
                         }}>
                           "{review.text}"
                         </Typography>
@@ -371,75 +374,80 @@ const AdminProductReviews = () => {
                   }
                 />
                 <ListItemSecondaryAction>
-                  <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'flex-end' }}>
-                    {/* Статус над кнопками */}
-                    <Chip 
-                      label={getStatusText(review.status)}
-                      color={getStatusColor(review.status)}
-                      icon={getStatusIcon(review.status)}
-                      size="small"
-                      sx={{ mb: 2 }}
-                    />
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end', height: '100%', justifyContent: 'space-between' }}>
+                    {/* Статус вверху справа */}
+                    <Box sx={{ 
+                      display: 'inline-block', 
+                      px: 2, 
+                      py: 0.5, 
+                      borderRadius: 1, 
+                      backgroundColor: getStatusColor(review.status) + '20',
+                      color: getStatusColor(review.status),
+                      fontSize: '0.875rem',
+                      fontWeight: 'medium'
+                    }}>
+                      {getStatusText(review.status)}
+                    </Box>
                     
-                    {/* Кнопки действий */}
-                    <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', mt: 1 }}>
-                      {review.status === 'pending' && (
-                        <>
-                          <Button 
-                            size="small" 
-                            onClick={() => handleModerate(review.id, 'published')} 
-                            sx={{
-                              background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
-                              color: '#fff',
-                              fontWeight: 600,
-                              fontSize: 12,
-                              minWidth: 0,
-                              height: 28,
-                              borderRadius: 6,
-                              px: 2,
-                              lineHeight: '28px',
-                              whiteSpace: 'nowrap',
-                              textTransform: 'none',
-                              boxShadow: '0 2px 4px rgba(76, 175, 80, 0.2)',
-                              '&:hover': {
-                                background: 'linear-gradient(135deg, #45a049 0%, #4CAF50 100%)',
-                                boxShadow: '0 4px 8px rgba(76, 175, 80, 0.3)',
-                              },
-                              cursor: 'pointer',
-                            }}
-                            title="Одобрить"
-                          >
-                            Одобрить
-                          </Button>
-                          <Button 
-                            size="small" 
-                            onClick={() => handleModerate(review.id, 'rejected')}
-                            sx={{
-                              background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
-                              color: '#fff',
-                              fontWeight: 600,
-                              fontSize: 12,
-                              minWidth: 0,
-                              height: 28,
-                              borderRadius: 6,
-                              px: 2,
-                              lineHeight: '28px',
-                              whiteSpace: 'nowrap',
-                              textTransform: 'none',
-                              boxShadow: '0 2px 4px rgba(244, 67, 54, 0.2)',
-                              '&:hover': {
-                                background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
-                                boxShadow: '0 4px 8px rgba(244, 67, 54, 0.3)',
-                              },
-                              cursor: 'pointer',
-                            }}
-                            title="Отклонить"
-                          >
-                            Отклонить
-                          </Button>
-                        </>
-                      )}
-                      
+                    {/* Кнопки модерации в середине справа */}
+                    {review.status === 'pending' && (
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <Button 
+                          size="small" 
+                          onClick={() => handleModerate(review.id, 'published')} 
+                          sx={{
+                            background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                            color: '#fff',
+                            borderRadius: 2,
+                            fontWeight: 600,
+                            fontSize: 13,
+                            px: 2,
+                            py: 0.8,
+                            height: 32,
+                            boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                            textTransform: 'none',
+                            minWidth: 80,
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                              boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                              transform: 'translateY(-1px)'
+                            },
+                          }}
+                          title="Одобрить"
+                        >
+                          Одобрить
+                        </Button>
+                        <Button 
+                          size="small" 
+                          onClick={() => handleModerate(review.id, 'rejected')}
+                          sx={{
+                            background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+                            color: '#fff',
+                            borderRadius: 2,
+                            fontWeight: 600,
+                            fontSize: 13,
+                            px: 2,
+                            py: 0.8,
+                            height: 32,
+                            boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
+                            textTransform: 'none',
+                            minWidth: 80,
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+                              boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                              transform: 'translateY(-1px)'
+                            },
+                          }}
+                          title="Отклонить"
+                        >
+                          Отклонить
+                        </Button>
+                      </Box>
+                    )}
+                    
+                    {/* Кнопки действий внизу справа */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-end' }}>
+                      {/* Кнопка Скрыть/Показать над кнопкой удаления */}
                       {review.status === 'published' && (
                         <IconButton 
                           size="small" 
@@ -472,19 +480,20 @@ const AdminProductReviews = () => {
                         </IconButton>
                       )}
                       
-                                          <IconButton 
-                      size="small" 
-                      onClick={() => openDeleteDialog(review)}
-                      sx={{ 
-                        color: '#f44336',
-                        '&:hover': {
-                          backgroundColor: '#ffebee'
-                        }
-                      }}
-                      title="Удалить"
-                    >
-                      <Delete />
-                    </IconButton>
+                      {/* Кнопка удаления в правом нижнем углу */}
+                      <IconButton 
+                        size="small" 
+                        onClick={() => openDeleteDialog(review)}
+                        sx={{ 
+                          color: '#f44336',
+                          '&:hover': {
+                            backgroundColor: '#ffebee'
+                          }
+                        }}
+                        title="Удалить"
+                      >
+                        <Delete />
+                      </IconButton>
                     </Box>
                   </Box>
                 </ListItemSecondaryAction>

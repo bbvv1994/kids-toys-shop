@@ -1,6 +1,5 @@
  import React, { useState, useEffect, useRef } from 'react';
 import ProductCard from './components/ProductCard';
-import AdminReviews from './components/AdminReviews';
 import AdminShopReviews from './components/AdminShopReviews';
 import AdminProductReviews from './components/AdminProductReviews';
 import CustomerReviews from './components/CustomerReviews';
@@ -158,6 +157,8 @@ import MicIcon from '@mui/icons-material/Mic';
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AdminCategories from './components/AdminCategories';
+import AdminQuestions from './components/AdminQuestions';
+import PublicQuestions from './components/PublicQuestions';
 
 
 // Создаем яркую тему для детского магазина
@@ -4161,18 +4162,19 @@ function AppContent({
           <Route path="/attribution" element={<AttributionPage />} />
           <Route path="/search" element={<SearchResultsPage products={products} cart={cart} onChangeCartQuantity={handleChangeCartQuantity} />} />
           <Route path="/about" element={<AboutPage />} />
-                      <Route path="/reviews" element={<CustomerReviews />} />
+          <Route path="/reviews" element={<CustomerReviews />} />
           <Route path="/review-order" element={<ReviewPage />} />
-            <Route path="/test-reviews" element={<TestReviews />} />
-            <Route path="/test-product-reviews" element={<TestProductReviews />} />
+          <Route path="/test-reviews" element={<TestReviews />} />
+          <Route path="/test-product-reviews" element={<TestProductReviews />} />
           <Route path="/contacts" element={<ContactsPage />} />
           <Route path="/confirm-email" element={<ConfirmEmailPage />} />
           <Route path="/oauth-success" element={<OAuthSuccessPage />} />
+          <Route path="/questions" element={<PublicQuestions />} />
 
           {/* Catch-all route for unmatched paths */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-                      </div>
+      </div>
       <AuthModal 
         open={authOpen} 
         onClose={() => setAuthOpen(false)} 
@@ -4307,14 +4309,14 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
   const [section, setSection] = React.useState('products');
   const [productsSubsection, setProductsSubsection] = React.useState('list'); // 'add' | 'list'
   const [productsMenuOpen, setProductsMenuOpen] = React.useState(false);
-  const [reviewsSubsection, setReviewsSubsection] = React.useState('shop'); // 'shop' | 'product'
+  const [reviewsSubsection, setReviewsSubsection] = React.useState('shop'); // 'shop' | 'product' | 'questions'
   const [reviewsMenuOpen, setReviewsMenuOpen] = React.useState(false);
   const sections = [
     { key: 'products', label: 'Товары' },
     { key: 'categories', label: 'Категории' },
     { key: 'orders', label: 'Заказы' },
     { key: 'users', label: 'Пользователи' },
-    { key: 'reviews', label: 'Отзывы' },
+    { key: 'reviews', label: 'Отзывы и вопросы' },
   ];
 
   // Сброс состояния подменю товаров при переключении на другие разделы
@@ -4393,7 +4395,7 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
             setSection('reviews');
             setReviewsMenuOpen(o => !o);
           }} selected={section === 'reviews'} sx={{ cursor: 'pointer' }}>
-            <ListItemText primary="Отзывы" />
+            <ListItemText primary="Отзывы и вопросы" />
             <KeyboardArrowDown
               sx={{
                 transition: 'transform 0.2s',
@@ -4421,7 +4423,13 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
                 }} sx={{ cursor: 'pointer' }}>
                   <ListItemText primary="Отзывы о товарах" />
                 </ListItem>
-
+                <ListItem selected={reviewsSubsection === 'questions'} onClick={() => { 
+                  setSection('reviews'); 
+                  setReviewsSubsection('questions'); 
+                  setReviewsMenuOpen(true);
+                }} sx={{ cursor: 'pointer' }}>
+                  <ListItemText primary="Вопросы и ответы" />
+                </ListItem>
               </List>
             </Box>
           )}
@@ -4453,6 +4461,7 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
          section === 'reviews' ? (
            reviewsSubsection === 'shop' ? <AdminShopReviews /> :
            reviewsSubsection === 'product' ? <AdminProductReviews /> :
+           reviewsSubsection === 'questions' ? <AdminQuestions /> :
            <AdminShopReviews />
          ) : (
           <Box sx={{ p: 4 }}>
