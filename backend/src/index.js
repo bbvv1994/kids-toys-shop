@@ -4465,143 +4465,104 @@ app.get('/api/export-data', async (req, res) => {
     };
 
     // Экспортируем категории
-    const categories = await prisma.category.findMany({
-      include: {
-        subcategories: true
-      }
-    });
-    exportData.categories = categories;
+    try {
+      const categories = await prisma.category.findMany();
+      exportData.categories = categories;
+      console.log(`✅ Категории экспортированы: ${categories.length}`);
+    } catch (error) {
+      console.error('❌ Ошибка экспорта категорий:', error.message);
+      exportData.categories = [];
+    }
 
     // Экспортируем товары
-    const products = await prisma.product.findMany({
-      include: {
-        category: true,
-        subcategory: true,
-        reviews: true
-      }
-    });
-    exportData.products = products;
+    try {
+      const products = await prisma.product.findMany();
+      exportData.products = products;
+      console.log(`✅ Товары экспортированы: ${products.length}`);
+    } catch (error) {
+      console.error('❌ Ошибка экспорта товаров:', error.message);
+      exportData.products = [];
+    }
 
     // Экспортируем пользователей (без паролей)
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        phone: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
-    exportData.users = users;
+    try {
+      const users = await prisma.user.findMany({
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          phone: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
+      exportData.users = users;
+      console.log(`✅ Пользователи экспортированы: ${users.length}`);
+    } catch (error) {
+      console.error('❌ Ошибка экспорта пользователей:', error.message);
+      exportData.users = [];
+    }
 
     // Экспортируем заказы
-    const orders = await prisma.order.findMany({
-      include: {
-        items: true,
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true
-          }
-        }
-      }
-    });
-    exportData.orders = orders;
+    try {
+      const orders = await prisma.order.findMany();
+      exportData.orders = orders;
+      console.log(`✅ Заказы экспортированы: ${orders.length}`);
+    } catch (error) {
+      console.error('❌ Ошибка экспорта заказов:', error.message);
+      exportData.orders = [];
+    }
 
     // Экспортируем вопросы
-    const productQuestions = await prisma.productQuestion.findMany({
-      include: {
-        product: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true
-          }
-        }
-      }
-    });
-    exportData.productQuestions = productQuestions;
+    try {
+      const productQuestions = await prisma.productQuestion.findMany();
+      exportData.productQuestions = productQuestions;
+      console.log(`✅ Вопросы экспортированы: ${productQuestions.length}`);
+    } catch (error) {
+      console.error('❌ Ошибка экспорта вопросов:', error.message);
+      exportData.productQuestions = [];
+    }
 
     // Экспортируем отзывы
-    const reviews = await prisma.review.findMany({
-      include: {
-        product: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true
-          }
-        }
-      }
-    });
-    exportData.reviews = reviews;
+    try {
+      const reviews = await prisma.review.findMany();
+      exportData.reviews = reviews;
+      console.log(`✅ Отзывы экспортированы: ${reviews.length}`);
+    } catch (error) {
+      console.error('❌ Ошибка экспорта отзывов:', error.message);
+      exportData.reviews = [];
+    }
 
     // Экспортируем отзывы о магазине
-    const shopReviews = await prisma.shopReview.findMany({
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true
-          }
-        }
-      }
-    });
-    exportData.shopReviews = shopReviews;
+    try {
+      const shopReviews = await prisma.shopReview.findMany();
+      exportData.shopReviews = shopReviews;
+      console.log(`✅ Отзывы о магазине экспортированы: ${shopReviews.length}`);
+    } catch (error) {
+      console.error('❌ Ошибка экспорта отзывов о магазине:', error.message);
+      exportData.shopReviews = [];
+    }
 
     // Экспортируем избранное
-    const wishlists = await prisma.wishlist.findMany({
-      include: {
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true
-              }
-            }
-          }
-        },
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true
-          }
-        }
-      }
-    });
-    exportData.wishlists = wishlists;
+    try {
+      const wishlists = await prisma.wishlist.findMany();
+      exportData.wishlists = wishlists;
+      console.log(`✅ Избранное экспортировано: ${wishlists.length}`);
+    } catch (error) {
+      console.error('❌ Ошибка экспорта избранного:', error.message);
+      exportData.wishlists = [];
+    }
 
     // Экспортируем уведомления
-    const notifications = await prisma.notification.findMany({
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true
-          }
-        }
-      }
-    });
-    exportData.notifications = notifications;
+    try {
+      const notifications = await prisma.notification.findMany();
+      exportData.notifications = notifications;
+      console.log(`✅ Уведомления экспортированы: ${notifications.length}`);
+    } catch (error) {
+      console.error('❌ Ошибка экспорта уведомлений:', error.message);
+      exportData.notifications = [];
+    }
 
     console.log(`✅ Данные экспортированы:`, {
       categories: exportData.categories.length,
