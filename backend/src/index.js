@@ -731,14 +731,127 @@ app.post('/api/products/:id/questions', authMiddleware, async (req, res) => {
   }
 });
 
+// Тестовый endpoint для проверки работы API
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    message: 'API is working',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV
+  });
+});
+
+// Тестовый endpoint для проверки базы данных
+app.get('/api/test-db', async (req, res) => {
+  try {
+    console.log('Testing database connection...');
+    await prisma.$connect();
+    console.log('Database connection successful');
+    
+    // Проверяем, существует ли таблица ProductQuestion
+    const tableExists = await prisma.$queryRaw`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'ProductQuestion'
+      );
+    `;
+    
+    console.log('ProductQuestion table exists:', tableExists[0]?.exists);
+    
+    res.json({ 
+      message: 'Database connection successful',
+      productQuestionTableExists: tableExists[0]?.exists,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Database test failed:', error);
+    res.status(500).json({ 
+      error: 'Database test failed',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Тестовый endpoint для проверки аутентификации
+app.get('/api/test-auth', authMiddleware, async (req, res) => {
+  try {
+    console.log('Testing authentication...');
+    console.log('User ID from token:', req.user.userId);
+    
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    console.log('Found user:', user ? { id: user.id, role: user.role } : 'User not found');
+    
+    res.json({ 
+      message: 'Authentication successful',
+      user: user ? { id: user.id, role: user.role } : null,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Authentication test failed:', error);
+    res.status(500).json({ 
+      error: 'Authentication test failed',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Получить все вопросы (для админа, с фильтрацией по статусу)
 app.get('/api/admin/questions', authMiddleware, async (req, res) => {
-  const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
-  }
   try {
+    console.log('Admin questions endpoint: Starting request');
+    console.log('User ID from token:', req.user.userId);
+    
+    // Логируем переменные окружения (без секретных данных)
+    console.log('Environment check:');
+    console.log('- NODE_ENV:', process.env.NODE_ENV);
+    console.log('- DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    console.log('- JWT_SECRET exists:', !!process.env.JWT_SECRET);
+    
+    // Проверяем подключение к базе данных
+    try {
+      await prisma.$connect();
+      console.log('Database connection successful');
+    } catch (dbError) {
+      console.error('Database connection failed:', dbError);
+      return res.status(500).json({ error: 'Database connection failed' });
+    }
+    
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    console.log('Found user:', user ? { id: user.id, role: user.role } : 'User not found');
+    
+    if (!user || user.role !== 'admin') {
+      console.log('Access denied: user is not admin');
+      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    }
+    
+    console.log('User is admin, proceeding with query');
     const { status } = req.query;
+    console.log('Filter status:', status);
+    
+    // Проверяем, существует ли таблица ProductQuestion
+    try {
+      const tableExists = await prisma.$queryRaw`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public' 
+          AND table_name = 'ProductQuestion'
+        );
+      `;
+      console.log('ProductQuestion table exists:', tableExists[0]?.exists);
+    } catch (tableError) {
+      console.error('Error checking table existence:', tableError);
+    }
+    
+    // Проверяем доступность модели ProductQuestion
+    try {
+      console.log('Checking if ProductQuestion model is available...');
+      console.log('Prisma client methods:', Object.keys(prisma).filter(key => key.includes('Question')));
+    } catch (modelError) {
+      console.error('Error checking ProductQuestion model:', modelError);
+    }
+    
     const questions = await prisma.productQuestion.findMany({
       where: status ? { status } : {},
       include: { 
@@ -747,9 +860,12 @@ app.get('/api/admin/questions', authMiddleware, async (req, res) => {
       },
       orderBy: { createdAt: 'desc' }
     });
+    
+    console.log(`Found ${questions.length} questions`);
     res.json(questions);
   } catch (error) {
     console.error('Error fetching all questions:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ error: 'Failed to fetch questions' });
   }
 });
@@ -1295,20 +1411,26 @@ app.get('/api/auth/facebook/callback', passport.authenticate('facebook', { sessi
 
 // Middleware для проверки JWT
 function authMiddleware(req, res, next) {
-  
+  console.log('Auth middleware: Starting authentication check');
   
   const auth = req.headers.authorization;
+  console.log('Authorization header:', auth ? 'Present' : 'Missing');
+  
   if (!auth || !auth.startsWith('Bearer ')) {
+    console.log('Auth middleware: No valid Bearer token');
     return res.status(401).json({ error: 'Нет токена' });
   }
   
   const token = auth.slice(7);
+  console.log('Token extracted, length:', token.length);
   
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+    console.log('Token verified successfully, user ID:', payload.userId);
     req.user = payload;
     next();
   } catch (error) {
+    console.error('Token verification failed:', error.message);
     return res.status(401).json({ error: 'Некорректный токен' });
   }
 }
@@ -4321,5 +4443,181 @@ app.post('/api/profile/wishlist/remove', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Wishlist remove error:', error);
     res.status(500).json({ error: 'Ошибка удаления из избранного' });
+  }
+});
+
+// === Экспорт данных ===
+app.get('/api/export-data', async (req, res) => {
+  try {
+    console.log('📤 Экспорт данных через API...');
+    
+    const exportData = {
+      categories: [],
+      products: [],
+      users: [],
+      orders: [],
+      productQuestions: [],
+      reviews: [],
+      shopReviews: [],
+      wishlists: [],
+      notifications: [],
+      exportDate: new Date().toISOString()
+    };
+
+    // Экспортируем категории
+    const categories = await prisma.category.findMany({
+      include: {
+        subcategories: true
+      }
+    });
+    exportData.categories = categories;
+
+    // Экспортируем товары
+    const products = await prisma.product.findMany({
+      include: {
+        category: true,
+        subcategory: true,
+        reviews: true
+      }
+    });
+    exportData.products = products;
+
+    // Экспортируем пользователей (без паролей)
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+    exportData.users = users;
+
+    // Экспортируем заказы
+    const orders = await prisma.order.findMany({
+      include: {
+        items: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      }
+    });
+    exportData.orders = orders;
+
+    // Экспортируем вопросы
+    const productQuestions = await prisma.productQuestion.findMany({
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      }
+    });
+    exportData.productQuestions = productQuestions;
+
+    // Экспортируем отзывы
+    const reviews = await prisma.review.findMany({
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      }
+    });
+    exportData.reviews = reviews;
+
+    // Экспортируем отзывы о магазине
+    const shopReviews = await prisma.shopReview.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      }
+    });
+    exportData.shopReviews = shopReviews;
+
+    // Экспортируем избранное
+    const wishlists = await prisma.wishlist.findMany({
+      include: {
+        items: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      }
+    });
+    exportData.wishlists = wishlists;
+
+    // Экспортируем уведомления
+    const notifications = await prisma.notification.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      }
+    });
+    exportData.notifications = notifications;
+
+    console.log(`✅ Данные экспортированы:`, {
+      categories: exportData.categories.length,
+      products: exportData.products.length,
+      users: exportData.users.length,
+      orders: exportData.orders.length,
+      productQuestions: exportData.productQuestions.length,
+      reviews: exportData.reviews.length,
+      shopReviews: exportData.shopReviews.length,
+      wishlists: exportData.wishlists.length,
+      notifications: exportData.notifications.length
+    });
+
+    res.json(exportData);
+  } catch (error) {
+    console.error('❌ Ошибка при экспорте данных:', error);
+    res.status(500).json({ error: 'Ошибка при экспорте данных', details: error.message });
   }
 });

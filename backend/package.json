@@ -10,7 +10,17 @@
     "build": "npx prisma generate && npx prisma migrate deploy",
     "postinstall": "npx prisma generate",
     "init-db": "node init-db.js",
-    "fix-categories": "node fix-category-images-on-render.js"
+    "fix-categories": "node fix-category-images-on-render.js",
+    "check-status": "node check-server-status.js",
+    "force-update": "node force-update-server.js",
+    "fix-questions": "node fix-questions-issue.js",
+    "quick-check": "node quick-questions-check.js",
+    "restore-data": "node restore-data.js",
+    "export-server": "node export-server-data.js",
+    "restore-server": "node restore-server-data.js",
+    "safe-update": "node safe-server-update.js",
+    "download-server": "node download-server-data.js",
+    "download-api": "node download-data-via-api.js"
   },
   "keywords": [],
   "author": "",
