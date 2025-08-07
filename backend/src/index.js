@@ -4582,3 +4582,52 @@ app.get('/api/export-data', async (req, res) => {
     res.status(500).json({ error: 'Ошибка при экспорте данных', details: error.message });
   }
 });
+
+// === Тестовый endpoint ===
+app.get('/api/test-export', async (req, res) => {
+  try {
+    console.log('🧪 Тестовый endpoint для экспорта...');
+    
+    // Простая проверка подключения к базе данных
+    const testData = {
+      message: 'Тестовый endpoint работает',
+      timestamp: new Date().toISOString(),
+      database: 'connected'
+    };
+
+    // Попробуем получить количество товаров
+    try {
+      const productCount = await prisma.product.count();
+      testData.productCount = productCount;
+      console.log(`✅ Количество товаров: ${productCount}`);
+    } catch (error) {
+      console.error('❌ Ошибка подсчета товаров:', error.message);
+      testData.productCount = 'error';
+    }
+
+    // Попробуем получить количество категорий
+    try {
+      const categoryCount = await prisma.category.count();
+      testData.categoryCount = categoryCount;
+      console.log(`✅ Количество категорий: ${categoryCount}`);
+    } catch (error) {
+      console.error('❌ Ошибка подсчета категорий:', error.message);
+      testData.categoryCount = 'error';
+    }
+
+    // Попробуем получить количество вопросов
+    try {
+      const questionCount = await prisma.productQuestion.count();
+      testData.questionCount = questionCount;
+      console.log(`✅ Количество вопросов: ${questionCount}`);
+    } catch (error) {
+      console.error('❌ Ошибка подсчета вопросов:', error.message);
+      testData.questionCount = 'error';
+    }
+
+    res.json(testData);
+  } catch (error) {
+    console.error('❌ Ошибка в тестовом endpoint:', error);
+    res.status(500).json({ error: 'Ошибка в тестовом endpoint', details: error.message });
+  }
+});
