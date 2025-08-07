@@ -1,86 +1,6 @@
 {
   "categories": [
     {
-      "id": 375,
-      "name": "Конструкторы",
-      "active": true,
-      "image": "constructor.png",
-      "parentId": null,
-      "order": 1
-    },
-    {
-      "id": 376,
-      "name": "Пазлы",
-      "active": true,
-      "image": "puzzle.png",
-      "parentId": null,
-      "order": 2
-    },
-    {
-      "id": 377,
-      "name": "Творчество",
-      "active": true,
-      "image": "creativity.png",
-      "parentId": null,
-      "order": 3
-    },
-    {
-      "id": 378,
-      "name": "Игрушки",
-      "active": true,
-      "image": "toys.png",
-      "parentId": null,
-      "order": 4
-    },
-    {
-      "id": 379,
-      "name": "Транспорт",
-      "active": true,
-      "image": "bicycle.png",
-      "parentId": null,
-      "order": 5
-    },
-    {
-      "id": 380,
-      "name": "Отдых на воде",
-      "active": true,
-      "image": "voda.png",
-      "parentId": null,
-      "order": 6
-    },
-    {
-      "id": 381,
-      "name": "Канцтовары",
-      "active": true,
-      "image": "stationery.png",
-      "parentId": null,
-      "order": 7
-    },
-    {
-      "id": 382,
-      "name": "Настольные игры",
-      "active": true,
-      "image": "1754311209853.webp",
-      "parentId": null,
-      "order": 8
-    },
-    {
-      "id": 383,
-      "name": "Развивающие игры",
-      "active": true,
-      "image": "edu_game.png",
-      "parentId": null,
-      "order": 9
-    },
-    {
-      "id": 384,
-      "name": "Акции",
-      "active": true,
-      "image": "sale.png",
-      "parentId": null,
-      "order": 10
-    },
-    {
       "id": 385,
       "name": "Lego для мальчиков",
       "active": true,
@@ -153,30 +73,6 @@
       "order": 19
     },
     {
-      "id": 394,
-      "name": "Рисование",
-      "active": true,
-      "image": "art.png",
-      "parentId": 377,
-      "order": 20
-    },
-    {
-      "id": 395,
-      "name": "Наборы для творчества",
-      "active": true,
-      "image": "art.png",
-      "parentId": 377,
-      "order": 21
-    },
-    {
-      "id": 396,
-      "name": "Раскраски",
-      "active": true,
-      "image": "art.png",
-      "parentId": 377,
-      "order": 22
-    },
-    {
       "id": 397,
       "name": "Наборы для лепки",
       "active": true,
@@ -217,14 +113,6 @@
       "order": 27
     },
     {
-      "id": 402,
-      "name": "Куклы",
-      "active": true,
-      "image": "doll.png",
-      "parentId": 378,
-      "order": 28
-    },
-    {
       "id": 403,
       "name": "Оружие игрушечное",
       "active": true,
@@ -241,28 +129,12 @@
       "order": 30
     },
     {
-      "id": 405,
-      "name": "Мягкие игрушки",
-      "active": true,
-      "image": "soft-toys.png",
-      "parentId": 378,
-      "order": 31
-    },
-    {
       "id": 406,
       "name": "Игрушки - антистресс и сквиши",
       "active": true,
       "image": "toys.png",
       "parentId": 378,
       "order": 32
-    },
-    {
-      "id": 407,
-      "name": "Активные игры",
-      "active": true,
-      "image": "sports.png",
-      "parentId": 378,
-      "order": 33
     },
     {
       "id": 408,
@@ -273,28 +145,12 @@
       "order": 34
     },
     {
-      "id": 409,
-      "name": "Декоративная косметика и украшения",
-      "active": true,
-      "image": "cosmetics.png",
-      "parentId": 378,
-      "order": 35
-    },
-    {
       "id": 410,
       "name": "Машинки и другой транспорт",
       "active": true,
       "image": "toys.png",
       "parentId": 378,
       "order": 36
-    },
-    {
-      "id": 411,
-      "name": "Роботы и трансформеры",
-      "active": true,
-      "image": "electronic.png",
-      "parentId": 378,
-      "order": 37
     },
     {
       "id": 412,
@@ -495,528 +351,240 @@
       "image": "stationery.png",
       "parentId": 381,
       "order": 62
+    },
+    {
+      "id": 395,
+      "name": "Наборы для творчества",
+      "active": true,
+      "image": "creativity.png",
+      "parentId": 377,
+      "order": 21
+    },
+    {
+      "id": 396,
+      "name": "Раскраски",
+      "active": true,
+      "image": "creativity.png",
+      "parentId": 377,
+      "order": 22
+    },
+    {
+      "id": 402,
+      "name": "Куклы",
+      "active": true,
+      "image": "toys.png",
+      "parentId": 378,
+      "order": 28
+    },
+    {
+      "id": 405,
+      "name": "Мягкие игрушки",
+      "active": true,
+      "image": "toys.png",
+      "parentId": 378,
+      "order": 31
+    },
+    {
+      "id": 407,
+      "name": "Активные игры",
+      "active": true,
+      "image": "sport.png",
+      "parentId": 378,
+      "order": 33
+    },
+    {
+      "id": 409,
+      "name": "Декоративная косметика и украшения",
+      "active": true,
+      "image": "toys.png",
+      "parentId": 378,
+      "order": 35
+    },
+    {
+      "id": 411,
+      "name": "Роботы и трансформеры",
+      "active": true,
+      "image": "toys.png",
+      "parentId": 378,
+      "order": 37
+    },
+    {
+      "id": 377,
+      "name": "Творчество",
+      "active": true,
+      "image": "creativity.png",
+      "parentId": null,
+      "order": 9
+    },
+    {
+      "id": 384,
+      "name": "Акции",
+      "active": true,
+      "image": "1754474092124-7vmptc9baei.webp",
+      "parentId": null,
+      "order": 8
+    },
+    {
+      "id": 394,
+      "name": "Рисование",
+      "active": true,
+      "image": "creativity.png",
+      "parentId": 377,
+      "order": 20
+    },
+    {
+      "id": 376,
+      "name": "Пазлы",
+      "active": true,
+      "image": "puzzle.png",
+      "parentId": null,
+      "order": 0
+    },
+    {
+      "id": 375,
+      "name": "Конструкторы",
+      "active": true,
+      "image": "constructor.png",
+      "parentId": null,
+      "order": 1
+    },
+    {
+      "id": 378,
+      "name": "Игрушки",
+      "active": true,
+      "image": "toys.png",
+      "parentId": null,
+      "order": 2
+    },
+    {
+      "id": 379,
+      "name": "Транспорт",
+      "active": true,
+      "image": "bicycle.png",
+      "parentId": null,
+      "order": 3
+    },
+    {
+      "id": 380,
+      "name": "Отдых на воде",
+      "active": true,
+      "image": "voda.png",
+      "parentId": null,
+      "order": 4
+    },
+    {
+      "id": 381,
+      "name": "Канцтовары",
+      "active": true,
+      "image": "stationery.png",
+      "parentId": null,
+      "order": 5
+    },
+    {
+      "id": 382,
+      "name": "Настольные игры",
+      "active": true,
+      "image": "nastolka.png",
+      "parentId": null,
+      "order": 6
+    },
+    {
+      "id": 383,
+      "name": "Развивающие игры",
+      "active": true,
+      "image": "edu_game.png",
+      "parentId": null,
+      "order": 7
     }
   ],
   "products": [
     {
-      "id": 2,
-      "name": "Кукла Барби",
-      "description": "Красивая кукла Барби для девочек",
-      "price": 199.99,
-      "ageGroup": "3-5",
-      "createdAt": "2025-07-30T10:35:11.246Z",
-      "updatedAt": "2025-08-04T12:42:19.367Z",
-      "imageUrls": [
-        "doll.png"
-      ],
-      "quantity": 12,
-      "article": "BARBIE001",
-      "brand": "Barbie",
-      "country": "США",
-      "height": null,
-      "length": null,
-      "width": null,
-      "subcategoryId": 402,
-      "isHidden": false,
-      "gender": "девочка",
-      "categoryId": 402,
-      "categoryName": "",
-      "category": {
-        "id": 402,
-        "name": "Куклы",
-        "active": true,
-        "image": "doll.png",
-        "parentId": 378,
-        "order": 28
-      },
-      "subcategory": {
-        "id": 402,
-        "name": "Куклы",
-        "active": true,
-        "image": "doll.png",
-        "parentId": 378,
-        "order": 28
-      }
-    },
-    {
-      "id": 7,
-      "name": "Конструктор LEGO",
-      "description": "Набор для сборки домика",
-      "price": 500,
-      "ageGroup": "5-7 лет",
-      "createdAt": "2025-07-30T10:36:44.774Z",
-      "updatedAt": "2025-08-04T12:42:19.385Z",
-      "imageUrls": [
-        "constructor.png"
-      ],
-      "quantity": 4,
-      "article": "ART9319",
-      "brand": "Детские товары",
-      "country": "Израиль",
-      "height": null,
-      "length": null,
-      "width": null,
-      "subcategoryId": 385,
-      "isHidden": false,
-      "gender": "универсальный",
-      "categoryId": 385,
-      "categoryName": null,
-      "category": {
-        "id": 385,
-        "name": "Lego для мальчиков",
-        "active": true,
-        "image": "constructor.png",
-        "parentId": 375,
-        "order": 11
-      },
-      "subcategory": {
-        "id": 385,
-        "name": "Lego для мальчиков",
-        "active": true,
-        "image": "constructor.png",
-        "parentId": 375,
-        "order": 11
-      }
-    },
-    {
-      "id": 4,
-      "name": "Пазл 100 деталей",
-      "description": "Красивый пазл для развития логики",
-      "price": 89.99,
-      "ageGroup": "5-7",
-      "createdAt": "2025-07-30T10:35:11.251Z",
-      "updatedAt": "2025-08-04T12:42:19.390Z",
-      "imageUrls": [
-        "puzzle.png"
-      ],
-      "quantity": 20,
-      "article": "PUZZLE001",
-      "brand": "Ravensburger",
-      "country": "Германия",
-      "height": null,
-      "length": null,
-      "width": null,
-      "subcategoryId": 390,
-      "isHidden": false,
-      "gender": "универсальный",
-      "categoryId": 390,
-      "categoryName": "",
-      "category": {
-        "id": 390,
-        "name": "Пазлы для детей",
-        "active": true,
-        "image": "puzzle.png",
-        "parentId": 376,
-        "order": 16
-      },
-      "subcategory": {
-        "id": 390,
-        "name": "Пазлы для детей",
-        "active": true,
-        "image": "puzzle.png",
-        "parentId": 376,
-        "order": 16
-      }
-    },
-    {
-      "id": 11,
-      "name": "Пазл",
-      "description": "Пазл 100 деталей с животными",
-      "price": 120,
-      "ageGroup": "5-7 лет",
-      "createdAt": "2025-07-30T10:36:44.782Z",
-      "updatedAt": "2025-08-04T12:42:19.394Z",
-      "imageUrls": [
-        "puzzle.png"
-      ],
-      "quantity": 9,
-      "article": "ART2331",
-      "brand": "Детские товары",
-      "country": "Израиль",
-      "height": null,
-      "length": null,
-      "width": null,
-      "subcategoryId": 390,
-      "isHidden": false,
-      "gender": "универсальный",
-      "categoryId": 390,
-      "categoryName": "",
-      "category": {
-        "id": 390,
-        "name": "Пазлы для детей",
-        "active": true,
-        "image": "puzzle.png",
-        "parentId": 376,
-        "order": 16
-      },
-      "subcategory": {
-        "id": 390,
-        "name": "Пазлы для детей",
-        "active": true,
-        "image": "puzzle.png",
-        "parentId": 376,
-        "order": 16
-      }
-    },
-    {
-      "id": 5,
-      "name": "Набор для рисования",
-      "description": "Полный набор для творчества",
-      "price": 149.99,
-      "ageGroup": "3-5",
-      "createdAt": "2025-07-30T10:35:11.253Z",
-      "updatedAt": "2025-08-04T12:42:19.400Z",
-      "imageUrls": [
-        "art.png"
-      ],
-      "quantity": 12,
-      "article": "ART001",
-      "brand": "Crayola",
-      "country": "США",
-      "height": null,
-      "length": null,
-      "width": null,
-      "subcategoryId": 394,
-      "isHidden": false,
-      "gender": "универсальный",
-      "categoryId": 394,
-      "categoryName": "",
-      "category": {
-        "id": 394,
-        "name": "Рисование",
-        "active": true,
-        "image": "art.png",
-        "parentId": 377,
-        "order": 20
-      },
-      "subcategory": {
-        "id": 394,
-        "name": "Рисование",
-        "active": true,
-        "image": "art.png",
-        "parentId": 377,
-        "order": 20
-      }
-    },
-    {
-      "id": 3,
-      "name": "Машинка радиоуправляемая",
-      "description": "Быстрая машинка на радиоуправлении",
-      "price": 399.99,
-      "ageGroup": "7-10",
-      "createdAt": "2025-07-30T10:35:11.249Z",
-      "updatedAt": "2025-08-04T12:42:19.405Z",
-      "imageUrls": [
-        "car.png"
-      ],
-      "quantity": 7,
-      "article": "RC001",
-      "brand": "Hot Wheels",
-      "country": "Китай",
-      "height": null,
-      "length": null,
-      "width": null,
-      "subcategoryId": 415,
-      "isHidden": false,
-      "gender": "мальчик",
-      "categoryId": 415,
-      "categoryName": "",
-      "category": {
-        "id": 415,
-        "name": "Игрушки на радиоуправлении",
-        "active": true,
-        "image": "toys.png",
-        "parentId": 378,
-        "order": 41
-      },
-      "subcategory": {
-        "id": 415,
-        "name": "Игрушки на радиоуправлении",
-        "active": true,
-        "image": "toys.png",
-        "parentId": 378,
-        "order": 41
-      }
-    },
-    {
-      "id": 12,
+      "id": 1,
       "name": "Мяч",
-      "description": "Резиновый мяч для игр",
-      "price": 60,
-      "ageGroup": "3-5 лет",
-      "createdAt": "2025-07-30T10:36:44.785Z",
-      "updatedAt": "2025-08-04T12:42:19.409Z",
+      "description": "резиновый мячик для игр",
+      "price": 4,
+      "ageGroup": "5-7 лет",
+      "createdAt": "2025-08-04T20:13:56.682Z",
+      "updatedAt": "2025-08-07T20:56:32.371Z",
       "imageUrls": [
-        "ball.png"
+        "https://res.cloudinary.com/dndh7ujaj/image/upload/v1754429484/kids-toys-shop/kids-toys-shop/1754429483990-4uzg00nlb4f.jpg",
+        "https://res.cloudinary.com/dndh7ujaj/image/upload/v1754430036/kids-toys-shop/kids-toys-shop/1754430036058-pikjl05wvri.png"
       ],
-      "quantity": 20,
-      "article": "ART3831",
-      "brand": "Детские товары",
-      "country": "Израиль",
-      "height": null,
-      "length": null,
-      "width": null,
+      "quantity": 416,
+      "article": "3434ацувуа",
+      "brand": "Wilson",
+      "country": "китай",
+      "height": 34,
+      "length": 34,
+      "width": 34,
       "subcategoryId": 407,
       "isHidden": false,
-      "gender": "универсальный",
-      "categoryId": 407,
-      "categoryName": "Отдых на воде",
-      "category": {
-        "id": 407,
-        "name": "Активные игры",
-        "active": true,
-        "image": "sports.png",
-        "parentId": 378,
-        "order": 33
-      },
-      "subcategory": {
-        "id": 407,
-        "name": "Активные игры",
-        "active": true,
-        "image": "sports.png",
-        "parentId": 378,
-        "order": 33
-      }
+      "gender": "Универсальный",
+      "categoryId": 378,
+      "categoryName": "Игрушки"
     },
     {
-      "id": 6,
-      "name": "Игрушечный медведь",
-      "description": "Мягкий плюшевый медведь коричневого цвета",
-      "price": 150,
-      "ageGroup": "1-3 года",
-      "createdAt": "2025-07-30T10:36:44.737Z",
-      "updatedAt": "2025-08-04T12:42:19.374Z",
+      "id": 2,
+      "name": "укп",
+      "description": "fvdfv",
+      "price": 34,
+      "ageGroup": "12-14 лет",
+      "createdAt": "2025-08-04T21:29:41.692Z",
+      "updatedAt": "2025-08-07T20:56:32.375Z",
       "imageUrls": [
-        "soft-toys.png"
+        "https://res.cloudinary.com/dndh7ujaj/image/upload/v1754429497/kids-toys-shop/kids-toys-shop/1754429497292-v50qx1208j.jpg",
+        "https://res.cloudinary.com/dndh7ujaj/image/upload/v1754430047/kids-toys-shop/kids-toys-shop/1754430047367-gx6h3m4rfsg.jpg"
       ],
-      "quantity": 10,
-      "article": "ART6761",
-      "brand": "Детские товары",
-      "country": "Израиль",
-      "height": null,
-      "length": null,
-      "width": null,
-      "subcategoryId": 405,
-      "isHidden": false,
-      "gender": "универсальный",
-      "categoryId": 405,
-      "categoryName": "Творчество",
-      "category": {
-        "id": 405,
-        "name": "Мягкие игрушки",
-        "active": true,
-        "image": "soft-toys.png",
-        "parentId": 378,
-        "order": 31
-      },
-      "subcategory": {
-        "id": 405,
-        "name": "Мягкие игрушки",
-        "active": true,
-        "image": "soft-toys.png",
-        "parentId": 378,
-        "order": 31
-      }
-    },
-    {
-      "id": 16,
-      "name": "Игрушечный робот",
-      "description": "Интерактивный игрушечный робот для детей",
-      "price": 255,
-      "ageGroup": "5-7 лет",
-      "createdAt": "2025-07-30T12:59:26.939Z",
-      "updatedAt": "2025-08-07T21:18:33.596Z",
-      "imageUrls": [
-        "/uploads/1754601513580.webp"
-      ],
-      "quantity": 228,
-      "article": "купаив",
+      "quantity": 32,
+      "article": "укпк24к",
       "brand": "апвпуваа",
-      "country": "китайпа",
-      "height": 23,
-      "length": 26,
-      "width": 26,
-      "subcategoryId": 411,
+      "country": "Израиль",
+      "height": 124,
+      "length": 23,
+      "width": 124,
+      "subcategoryId": 416,
       "isHidden": false,
       "gender": "Девочка",
-      "categoryId": 378,
-      "categoryName": "Игрушки",
-      "category": {
-        "id": 378,
-        "name": "Игрушки",
-        "active": true,
-        "image": "toys.png",
-        "parentId": null,
-        "order": 4
-      },
-      "subcategory": {
-        "id": 411,
-        "name": "Роботы и трансформеры",
-        "active": true,
-        "image": "electronic.png",
-        "parentId": 378,
-        "order": 37
-      }
-    },
-    {
-      "id": 14,
-      "name": "Робот",
-      "description": "Интерактивный робот-игрушка",
-      "price": 400,
-      "ageGroup": "7-10 лет",
-      "createdAt": "2025-07-30T10:36:44.792Z",
-      "updatedAt": "2025-08-07T21:19:48.773Z",
-      "imageUrls": [
-        "robot.png"
-      ],
-      "quantity": 2338,
-      "article": "ART2804",
-      "brand": "Детские товары",
-      "country": "Израиль",
-      "height": null,
-      "length": null,
-      "width": null,
-      "subcategoryId": 411,
-      "isHidden": false,
-      "gender": "Универсальный",
-      "categoryId": 411,
-      "categoryName": "Канцтовары",
-      "category": {
-        "id": 411,
-        "name": "Роботы и трансформеры",
-        "active": true,
-        "image": "electronic.png",
-        "parentId": 378,
-        "order": 37
-      },
-      "subcategory": {
-        "id": 411,
-        "name": "Роботы и трансформеры",
-        "active": true,
-        "image": "electronic.png",
-        "parentId": 378,
-        "order": 37
-      }
-    },
-    {
-      "id": 13,
-      "name": "Книжка",
-      "description": "Книжка с картинками для малышей",
-      "price": 90,
-      "ageGroup": "1-3 года",
-      "createdAt": "2025-07-30T10:36:44.789Z",
-      "updatedAt": "2025-08-07T21:19:48.777Z",
-      "imageUrls": [
-        "book.png"
-      ],
-      "quantity": 10,
-      "article": "ART9519",
-      "brand": "Детские товары",
-      "country": "Израиль",
-      "height": null,
-      "length": null,
-      "width": null,
-      "subcategoryId": 431,
-      "isHidden": false,
-      "gender": "универсальный",
-      "categoryId": 431,
-      "categoryName": "Конструкторы",
-      "category": {
-        "id": 431,
-        "name": "Ручки и карандаши",
-        "active": true,
-        "image": "stationery.png",
-        "parentId": 381,
-        "order": 57
-      },
-      "subcategory": {
-        "id": 431,
-        "name": "Ручки и карандаши",
-        "active": true,
-        "image": "stationery.png",
-        "parentId": 381,
-        "order": 57
-      }
+      "categoryId": 379,
+      "categoryName": "Транспорт"
     }
   ],
   "users": [
     {
-      "id": 20,
-      "email": "orpm45409@gmail.com",
-      "name": "орпм",
-      "surname": null,
-      "phone": null,
-      "role": "user",
-      "emailVerified": true,
-      "googleId": "112244194562851225545",
-      "facebookId": null,
-      "createdAt": "2025-07-31T19:00:42.155Z",
-      "updatedAt": "2025-07-31T19:00:42.155Z"
-    },
-    {
-      "id": 21,
-      "email": "vkerovknvkenvke@gmail.com",
-      "name": "вкенвке вкеровкн",
-      "surname": "авиаив",
-      "phone": "+38(066) 435-1501",
-      "role": "user",
-      "emailVerified": true,
-      "googleId": "112802422456597267610",
-      "facebookId": null,
-      "createdAt": "2025-07-31T19:06:26.184Z",
-      "updatedAt": "2025-07-31T20:16:59.729Z"
-    },
-    {
-      "id": 22,
-      "email": "rpsrpmdlrtlsd@gmail.com",
-      "name": "рпсрпм длртлщд",
-      "surname": null,
-      "phone": null,
-      "role": "user",
-      "emailVerified": true,
-      "googleId": "115975521058716085992",
-      "facebookId": null,
-      "createdAt": "2025-07-31T22:02:09.533Z",
-      "updatedAt": "2025-07-31T22:02:09.533Z"
-    },
-    {
       "id": 23,
       "email": "ypyaryapyar@gmail.com",
       "name": "ыпыар ыапыар",
-      "surname": null,
-      "phone": null,
       "role": "user",
-      "emailVerified": true,
-      "googleId": "107542457484475522938",
-      "facebookId": null,
+      "phone": null,
       "createdAt": "2025-07-31T22:02:22.344Z",
       "updatedAt": "2025-07-31T22:02:22.344Z"
     },
     {
-      "id": 24,
+      "id": 3,
       "email": "wexkwasexort@gmail.com",
-      "name": "Салтан Марина Михайлівна",
-      "surname": "Салтан",
-      "phone": "+38 (066) 435 - 15 - 01",
+      "name": "new",
       "role": "user",
-      "emailVerified": true,
-      "googleId": "110593230384765352412",
-      "facebookId": null,
-      "createdAt": "2025-07-31T22:02:30.300Z",
-      "updatedAt": "2025-08-02T19:17:58.838Z"
+      "phone": "+9722465656вап",
+      "createdAt": "2025-08-06T10:29:38.829Z",
+      "updatedAt": "2025-08-06T13:32:35.499Z"
+    },
+    {
+      "id": 4,
+      "email": "karlzeiss4@gmail.com",
+      "name": "прт",
+      "role": "user",
+      "phone": "+972455644563",
+      "createdAt": "2025-08-06T15:43:23.968Z",
+      "updatedAt": "2025-08-06T16:02:06.644Z"
     },
     {
       "id": 6,
       "email": "24523452354d@gmail.com",
-      "name": "Администратор",
-      "surname": "112вцв",
-      "phone": "+9722у212",
+      "name": "Admin",
       "role": "admin",
-      "emailVerified": true,
-      "googleId": null,
-      "facebookId": null,
+      "phone": "+9723453564758",
       "createdAt": "2025-07-30T11:21:29.334Z",
-      "updatedAt": "2025-08-07T21:19:48.753Z"
+      "updatedAt": "2025-08-07T20:56:32.355Z"
     }
   ],
   "orders": [
@@ -1028,8 +596,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 5,
@@ -1039,8 +606,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 3,
@@ -1050,8 +616,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 2,
@@ -1061,8 +626,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 10,
@@ -1072,8 +636,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 11,
@@ -1083,8 +646,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 12,
@@ -1094,8 +656,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 14,
@@ -1105,8 +666,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 13,
@@ -1116,8 +676,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 15,
@@ -1127,8 +686,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 16,
@@ -1138,8 +696,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 17,
@@ -1149,8 +706,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 18,
@@ -1160,8 +716,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 19,
@@ -1171,8 +726,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 21,
@@ -1182,8 +736,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 20,
@@ -1193,8 +746,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 22,
@@ -1204,8 +756,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 32,
@@ -1215,8 +766,7 @@
       "status": "cancelled",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 29,
@@ -1226,41 +776,7 @@
       "status": "pickedup",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
-    },
-    {
-      "id": 28,
-      "userId": 24,
-      "createdAt": "2025-08-01T14:08:42.398Z",
-      "pickupStore": "store1",
-      "status": "pickedup",
-      "guestName": null,
-      "guestEmail": null,
-      "guestPhone": null,
-      "items": []
-    },
-    {
-      "id": 26,
-      "userId": 21,
-      "createdAt": "2025-07-31T19:12:44.737Z",
-      "pickupStore": "store1",
-      "status": "pickedup",
-      "guestName": null,
-      "guestEmail": null,
-      "guestPhone": null,
-      "items": []
-    },
-    {
-      "id": 27,
-      "userId": 21,
-      "createdAt": "2025-07-31T20:16:59.731Z",
-      "pickupStore": "store1",
-      "status": "pickedup",
-      "guestName": null,
-      "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 25,
@@ -1270,8 +786,7 @@
       "status": "pickedup",
       "guestName": "ыкыап впывп",
       "guestEmail": "orpm45409@gmail.com",
-      "guestPhone": "+38 (066) 435 - 15 - 01",
-      "items": []
+      "guestPhone": "+38 (066) 435 - 15 - 01"
     },
     {
       "id": 36,
@@ -1281,8 +796,7 @@
       "status": "pending",
       "guestName": "пвапр впрврп",
       "guestEmail": "bbvv1994mart@gmail.com",
-      "guestPhone": "+38(066) 435-1501",
-      "items": []
+      "guestPhone": "+38(066) 435-1501"
     },
     {
       "id": 23,
@@ -1292,19 +806,7 @@
       "status": "pickedup",
       "guestName": "Ігор впывп",
       "guestEmail": "bbvv1994mart@gmail.com",
-      "guestPhone": "+38(066) 435-1501",
-      "items": []
-    },
-    {
-      "id": 30,
-      "userId": 24,
-      "createdAt": "2025-08-01T15:14:04.947Z",
-      "pickupStore": "store1",
-      "status": "pickedup",
-      "guestName": null,
-      "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": "+38(066) 435-1501"
     },
     {
       "id": 37,
@@ -1314,19 +816,7 @@
       "status": "pending",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
-    },
-    {
-      "id": 38,
-      "userId": 24,
-      "createdAt": "2025-08-02T19:17:58.840Z",
-      "pickupStore": "store2",
-      "status": "pending",
-      "guestName": null,
-      "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 39,
@@ -1336,207 +826,447 @@
       "status": "pending",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
-    },
-    {
-      "id": 40,
-      "userId": 6,
-      "createdAt": "2025-08-02T20:22:07.497Z",
-      "pickupStore": "store1",
-      "status": "ready",
-      "guestName": null,
-      "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
     },
     {
       "id": 41,
       "userId": 6,
       "createdAt": "2025-08-03T23:26:52.066Z",
       "pickupStore": "store1",
-      "status": "pending",
+      "status": "ready",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": []
+      "guestPhone": null
+    },
+    {
+      "id": 40,
+      "userId": 6,
+      "createdAt": "2025-08-02T20:22:07.497Z",
+      "pickupStore": "store1",
+      "status": "pickedup",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
     },
     {
       "id": 1,
       "userId": 6,
-      "createdAt": "2025-08-07T21:19:48.755Z",
+      "createdAt": "2025-08-04T21:43:42.322Z",
+      "pickupStore": "store1",
+      "status": "pickedup",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 6,
+      "userId": null,
+      "createdAt": "2025-08-04T22:48:44.547Z",
+      "pickupStore": "store1",
+      "status": "pending",
+      "guestName": "Ігор 112вцв",
+      "guestEmail": "bbvv1994@gmail.com",
+      "guestPhone": "2у212"
+    },
+    {
+      "id": 8,
+      "userId": null,
+      "createdAt": "2025-08-05T15:38:18.211Z",
+      "pickupStore": "store1",
+      "status": "pending",
+      "guestName": "czvzc zcvz",
+      "guestEmail": "karlzeiss4@gmail.com",
+      "guestPhone": "756746345"
+    },
+    {
+      "id": 7,
+      "userId": 6,
+      "createdAt": "2025-08-05T11:11:19.777Z",
+      "pickupStore": "store1",
+      "status": "pickedup",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 9,
+      "userId": 6,
+      "createdAt": "2025-08-05T17:46:51.264Z",
       "pickupStore": "store1",
       "status": "pending",
       "guestName": null,
       "guestEmail": null,
-      "guestPhone": null,
-      "items": [
-        {
-          "id": 1,
-          "orderId": 1,
-          "productId": 14,
-          "quantity": 1,
-          "price": 400,
-          "product": {
-            "id": 14,
-            "name": "Робот",
-            "description": "Интерактивный робот-игрушка",
-            "price": 400,
-            "ageGroup": "7-10 лет",
-            "createdAt": "2025-07-30T10:36:44.792Z",
-            "updatedAt": "2025-08-07T21:19:48.773Z",
-            "imageUrls": [
-              "robot.png"
-            ],
-            "quantity": 2338,
-            "article": "ART2804",
-            "brand": "Детские товары",
-            "country": "Израиль",
-            "height": null,
-            "length": null,
-            "width": null,
-            "subcategoryId": 411,
-            "isHidden": false,
-            "gender": "Универсальный",
-            "categoryId": 411,
-            "categoryName": "Канцтовары"
-          }
-        },
-        {
-          "id": 2,
-          "orderId": 1,
-          "productId": 13,
-          "quantity": 1,
-          "price": 90,
-          "product": {
-            "id": 13,
-            "name": "Книжка",
-            "description": "Книжка с картинками для малышей",
-            "price": 90,
-            "ageGroup": "1-3 года",
-            "createdAt": "2025-07-30T10:36:44.789Z",
-            "updatedAt": "2025-08-07T21:19:48.777Z",
-            "imageUrls": [
-              "book.png"
-            ],
-            "quantity": 10,
-            "article": "ART9519",
-            "brand": "Детские товары",
-            "country": "Израиль",
-            "height": null,
-            "length": null,
-            "width": null,
-            "subcategoryId": 431,
-            "isHidden": false,
-            "gender": "универсальный",
-            "categoryId": 431,
-            "categoryName": "Конструкторы"
-          }
-        }
-      ]
+      "guestPhone": null
+    },
+    {
+      "id": 26,
+      "userId": null,
+      "createdAt": "2025-07-31T19:12:44.737Z",
+      "pickupStore": "store1",
+      "status": "pickedup",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 27,
+      "userId": null,
+      "createdAt": "2025-07-31T20:16:59.731Z",
+      "pickupStore": "store1",
+      "status": "pickedup",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 28,
+      "userId": null,
+      "createdAt": "2025-08-01T14:08:42.398Z",
+      "pickupStore": "store1",
+      "status": "pickedup",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 30,
+      "userId": null,
+      "createdAt": "2025-08-01T15:14:04.947Z",
+      "pickupStore": "store1",
+      "status": "pickedup",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 38,
+      "userId": null,
+      "createdAt": "2025-08-02T19:17:58.840Z",
+      "pickupStore": "store2",
+      "status": "pending",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 24,
+      "userId": 3,
+      "createdAt": "2025-08-06T11:23:35.610Z",
+      "pickupStore": "store1",
+      "status": "pending",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 31,
+      "userId": 3,
+      "createdAt": "2025-08-06T11:39:06.971Z",
+      "pickupStore": "store1",
+      "status": "pending",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 33,
+      "userId": 3,
+      "createdAt": "2025-08-06T11:39:31.845Z",
+      "pickupStore": "store1",
+      "status": "pending",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 34,
+      "userId": 3,
+      "createdAt": "2025-08-06T11:39:50.448Z",
+      "pickupStore": "store2",
+      "status": "pending",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 35,
+      "userId": 3,
+      "createdAt": "2025-08-06T11:59:32.260Z",
+      "pickupStore": "store1",
+      "status": "pending",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 42,
+      "userId": 3,
+      "createdAt": "2025-08-06T12:25:47.379Z",
+      "pickupStore": "store1",
+      "status": "pending",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 43,
+      "userId": 3,
+      "createdAt": "2025-08-06T13:32:35.505Z",
+      "pickupStore": "store1",
+      "status": "pending",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 46,
+      "userId": 4,
+      "createdAt": "2025-08-06T16:02:06.649Z",
+      "pickupStore": "store1",
+      "status": "pickedup",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 45,
+      "userId": 4,
+      "createdAt": "2025-08-06T15:54:28.201Z",
+      "pickupStore": "store1",
+      "status": "ready",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 44,
+      "userId": 4,
+      "createdAt": "2025-08-06T15:46:07.581Z",
+      "pickupStore": "store1",
+      "status": "confirmed",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
+    },
+    {
+      "id": 47,
+      "userId": 6,
+      "createdAt": "2025-08-07T20:56:32.359Z",
+      "pickupStore": "store1",
+      "status": "confirmed",
+      "guestName": null,
+      "guestEmail": null,
+      "guestPhone": null
     }
   ],
   "productQuestions": [],
-  "reviews": [],
-  "shopReviews": [],
-  "wishlists": [
+  "reviews": [
+    {
+      "id": 1,
+      "productId": 1,
+      "userId": 6,
+      "rating": 3,
+      "text": "ывмывмым",
+      "status": "published",
+      "createdAt": "2025-08-04T21:44:07.372Z",
+      "updatedAt": "2025-08-04T21:44:27.704Z",
+      "orderId": 1
+    },
+    {
+      "id": 2,
+      "productId": 2,
+      "userId": 6,
+      "rating": 5,
+      "text": ",jkguiyzrdxcv ghjbjknk",
+      "status": "published",
+      "createdAt": "2025-08-05T17:34:12.668Z",
+      "updatedAt": "2025-08-05T17:34:51.559Z",
+      "orderId": 7
+    },
+    {
+      "id": 3,
+      "productId": 1,
+      "userId": 3,
+      "rating": 5,
+      "text": "ваиваи",
+      "status": "pending",
+      "createdAt": "2025-08-06T13:35:52.531Z",
+      "updatedAt": "2025-08-06T13:35:52.531Z",
+      "orderId": 0
+    },
+    {
+      "id": 4,
+      "productId": 1,
+      "userId": 4,
+      "rating": 5,
+      "text": "fjgnlfn jgnjkg",
+      "status": "published",
+      "createdAt": "2025-08-06T15:47:44.052Z",
+      "updatedAt": "2025-08-07T20:55:04.450Z",
+      "orderId": 0
+    }
+  ],
+  "shopReviews": [
+    {
+      "id": 1,
+      "userId": 6,
+      "orderId": 41,
+      "rating": 3,
+      "text": "ыкпып",
+      "status": "published",
+      "createdAt": "2025-08-04T21:32:57.133Z"
+    },
     {
       "id": 2,
       "userId": 6,
-      "items": [
-        {
-          "id": 1,
-          "wishlistId": 2,
-          "productId": 14,
-          "createdAt": "2025-08-07T21:19:33.588Z",
-          "product": {
-            "id": 14,
-            "name": "Робот",
-            "description": "Интерактивный робот-игрушка",
-            "price": 400,
-            "ageGroup": "7-10 лет",
-            "createdAt": "2025-07-30T10:36:44.792Z",
-            "updatedAt": "2025-08-07T21:19:48.773Z",
-            "imageUrls": [
-              "robot.png"
-            ],
-            "quantity": 2338,
-            "article": "ART2804",
-            "brand": "Детские товары",
-            "country": "Израиль",
-            "height": null,
-            "length": null,
-            "width": null,
-            "subcategoryId": 411,
-            "isHidden": false,
-            "gender": "Универсальный",
-            "categoryId": 411,
-            "categoryName": "Канцтовары"
-          }
-        },
-        {
-          "id": 2,
-          "wishlistId": 2,
-          "productId": 13,
-          "createdAt": "2025-08-07T21:19:34.949Z",
-          "product": {
-            "id": 13,
-            "name": "Книжка",
-            "description": "Книжка с картинками для малышей",
-            "price": 90,
-            "ageGroup": "1-3 года",
-            "createdAt": "2025-07-30T10:36:44.789Z",
-            "updatedAt": "2025-08-07T21:19:48.777Z",
-            "imageUrls": [
-              "book.png"
-            ],
-            "quantity": 10,
-            "article": "ART9519",
-            "brand": "Детские товары",
-            "country": "Израиль",
-            "height": null,
-            "length": null,
-            "width": null,
-            "subcategoryId": 431,
-            "isHidden": false,
-            "gender": "универсальный",
-            "categoryId": 431,
-            "categoryName": "Конструкторы"
-          }
-        },
-        {
-          "id": 3,
-          "wishlistId": 2,
-          "productId": 12,
-          "createdAt": "2025-08-07T21:19:35.883Z",
-          "product": {
-            "id": 12,
-            "name": "Мяч",
-            "description": "Резиновый мяч для игр",
-            "price": 60,
-            "ageGroup": "3-5 лет",
-            "createdAt": "2025-07-30T10:36:44.785Z",
-            "updatedAt": "2025-08-04T12:42:19.409Z",
-            "imageUrls": [
-              "ball.png"
-            ],
-            "quantity": 20,
-            "article": "ART3831",
-            "brand": "Детские товары",
-            "country": "Израиль",
-            "height": null,
-            "length": null,
-            "width": null,
-            "subcategoryId": 407,
-            "isHidden": false,
-            "gender": "универсальный",
-            "categoryId": 407,
-            "categoryName": "Отдых на воде"
-          }
-        }
-      ]
+      "orderId": 40,
+      "rating": 3,
+      "text": "ывмым",
+      "status": "published",
+      "createdAt": "2025-08-04T21:42:45.503Z"
+    },
+    {
+      "id": 3,
+      "userId": 6,
+      "orderId": 1,
+      "rating": 3,
+      "text": "ывмывм",
+      "status": "published",
+      "createdAt": "2025-08-04T21:44:02.578Z"
+    },
+    {
+      "id": 4,
+      "userId": 6,
+      "orderId": 7,
+      "rating": 5,
+      "text": "jhbjvvv",
+      "status": "published",
+      "createdAt": "2025-08-05T17:34:06.815Z"
     }
   ],
-  "notifications": [],
-  "exportDate": "2025-08-07T21:23:29.510Z"
+  "wishlists": [
+    {
+      "id": 1,
+      "userId": 6
+    },
+    {
+      "id": 2,
+      "userId": 3
+    },
+    {
+      "id": 3,
+      "userId": 4
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "userId": 6,
+      "type": "review_request",
+      "title": "Оставьте отзыв о вашей покупке",
+      "message": "Пожалуйста, уделите пару минут вашего времени, оцените магазин и товары. Ваше мнение важно для нас, и других покупателей!",
+      "isRead": false,
+      "createdAt": "2025-08-04T19:22:17.274Z",
+      "readAt": null,
+      "actionText": "Оставить отзыв",
+      "actionUrl": "http://localhost:3000/review-order?orderId=41"
+    },
+    {
+      "id": 2,
+      "userId": 6,
+      "type": "review_request",
+      "title": "Оставьте отзыв о вашей покупке",
+      "message": "Пожалуйста, уделите пару минут вашего времени, оцените магазин и товары. Ваше мнение важно для нас, и других покупателей!",
+      "isRead": false,
+      "createdAt": "2025-08-04T19:22:18.275Z",
+      "readAt": null,
+      "actionText": "Оставить отзыв",
+      "actionUrl": "http://localhost:3000/review-order?orderId=41"
+    },
+    {
+      "id": 3,
+      "userId": 6,
+      "type": "review_request",
+      "title": "Оставьте отзыв о вашей покупке",
+      "message": "Пожалуйста, уделите пару минут вашего времени, оцените магазин и товары. Ваше мнение важно для нас, и других покупателей!",
+      "isRead": false,
+      "createdAt": "2025-08-04T19:22:18.276Z",
+      "readAt": null,
+      "actionText": "Оставить отзыв",
+      "actionUrl": "http://localhost:3000/review-order?orderId=41"
+    },
+    {
+      "id": 4,
+      "userId": 6,
+      "type": "admin",
+      "title": "Сообщение от администратора",
+      "message": "ывывм",
+      "isRead": false,
+      "createdAt": "2025-08-04T21:41:54.115Z",
+      "readAt": null,
+      "actionText": null,
+      "actionUrl": null
+    },
+    {
+      "id": 5,
+      "userId": 6,
+      "type": "admin",
+      "title": "Сообщение от администратора",
+      "message": "ываыаы",
+      "isRead": false,
+      "createdAt": "2025-08-04T21:42:17.265Z",
+      "readAt": null,
+      "actionText": null,
+      "actionUrl": null
+    },
+    {
+      "id": 6,
+      "userId": 6,
+      "type": "review_request",
+      "title": "Оставьте отзыв о вашей покупке",
+      "message": "Пожалуйста, уделите пару минут вашего времени, оцените магазин и товары. Ваше мнение важно для нас, и других покупателей!",
+      "isRead": false,
+      "createdAt": "2025-08-04T21:42:37.400Z",
+      "readAt": null,
+      "actionText": "Оставить отзыв",
+      "actionUrl": "http://localhost:3000/review-order?orderId=40"
+    },
+    {
+      "id": 7,
+      "userId": 6,
+      "type": "review_request",
+      "title": "Оставьте отзыв о вашей покупке",
+      "message": "Пожалуйста, уделите пару минут вашего времени, оцените магазин и товары. Ваше мнение важно для нас, и других покупателей!",
+      "isRead": false,
+      "createdAt": "2025-08-04T21:43:54.825Z",
+      "readAt": null,
+      "actionText": "Оставить отзыв",
+      "actionUrl": "http://localhost:3000/review-order?orderId=1"
+    },
+    {
+      "id": 8,
+      "userId": 6,
+      "type": "review_request",
+      "title": "Оставьте отзыв о вашей покупке",
+      "message": "Пожалуйста, уделите пару минут вашего времени, оцените магазин и товары. Ваше мнение важно для нас, и других покупателей!",
+      "isRead": false,
+      "createdAt": "2025-08-05T17:32:58.284Z",
+      "readAt": null,
+      "actionText": "Оставить отзыв",
+      "actionUrl": "http://localhost:3000/review-order?orderId=7"
+    },
+    {
+      "id": 9,
+      "userId": 4,
+      "type": "review_request",
+      "title": "Оставьте отзыв о вашей покупке",
+      "message": "Пожалуйста, уделите пару минут вашего времени, оцените магазин и товары. Ваше мнение важно для нас, и других покупателей!",
+      "isRead": false,
+      "createdAt": "2025-08-07T20:56:14.923Z",
+      "readAt": null,
+      "actionText": "Оставить отзыв",
+      "actionUrl": "https://kids-toys-shop.vercel.app/review-order?orderId=46"
+    }
+  ],
+  "exportDate": "2025-08-07T21:55:31.169Z"
 }
