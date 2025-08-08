@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL, getImageUrl } from '../config';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, Button, Typography, Container, Modal, Rating, TextField, Chip, IconButton, Breadcrumbs } from '@mui/material';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import Favorite from '@mui/icons-material/Favorite';
@@ -29,7 +30,97 @@ const ageIcons = {
 
 // Новый современный дизайн страницы товара
 export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuantity, onEditProduct, dbCategories, productId }) {
+  const { t } = useTranslation();
   const isAdmin = user?.role === 'admin';
+  
+  // Функция для перевода категорий
+  const translateCategory = (categoryName) => {
+    const categoryMap = {
+      'Игрушки': 'toys',
+      'Конструкторы': 'constructors', 
+      'Пазлы': 'puzzles',
+      'Творчество': 'creativity',
+      'Канцтовары': 'stationery',
+      'Транспорт': 'transport',
+      'Отдых на воде': 'water_recreation',
+      'Настольные игры': 'board_games',
+      'Развивающие игры': 'educational_games',
+      'Акции': 'sales'
+    };
+    
+    const categoryKey = categoryMap[categoryName];
+    return categoryKey ? t(`categories.${categoryKey}`) : categoryName;
+  };
+
+  // Функция для перевода подкатегорий
+  const translateSubcategory = (parentCategory, subcategoryName) => {
+    const categoryMap = {
+      'Игрушки': 'toys',
+      'Конструкторы': 'constructors', 
+      'Пазлы': 'puzzles',
+      'Творчество': 'creativity',
+      'Канцтовары': 'stationery',
+      'Транспорт': 'transport',
+      'Отдых на воде': 'water_recreation',
+      'Настольные игры': 'board_games',
+      'Развивающие игры': 'educational_games',
+      'Акции': 'sales'
+    };
+    
+    const subcategoryMap = {
+      // Игрушки
+      'Игрушки для самых маленьких': 'for_babies',
+      'Куклы': 'dolls',
+      'Оружие игрушечное': 'toy_weapons',
+      'Треки, паркинги и жд': 'tracks_parking_railway',
+      'Мягкие игрушки': 'soft_toys',
+      'Игрушки - антистресс и сквиши': 'antistress_squishy',
+      'Активные игры': 'active_games',
+      'Тематические игровые наборы': 'thematic_sets',
+      'Декоративная косметика и украшения': 'decorative_cosmetics',
+      'Машинки и другой транспорт': 'cars_transport',
+      'Роботы и трансформеры': 'robots_transformers',
+      'Игровые фигурки': 'game_figures',
+      'Игрушки для песочницы': 'sandbox_toys',
+      'Шарики': 'balls',
+      'Игрушки на радиоуправлении': 'radio_controlled',
+      // Конструкторы
+      'Lego для мальчиков': 'lego_boys',
+      'Lego для девочек': 'lego_girls',
+      'Металлические конструкторы': 'metal_constructors',
+      'Lego крупные блоки': 'lego_large_blocks',
+      // Пазлы
+      'Пазлы для взрослых': 'for_adults',
+      'Пазлы для детей': 'for_children',
+      'Магнитные пазлы': 'magnetic',
+      'Пазлы напольные': 'floor',
+      'Пазлы для малышей': 'for_babies',
+      // Творчество
+      'Наборы для лепки': 'modeling_sets',
+      'Наклейки': 'stickers',
+      'Лизуны и слаймы': 'slimes',
+      'Кинетический песок': 'kinetic_sand',
+      'Рисование': 'drawing',
+      'Наборы для творчества': 'creativity_sets',
+      'Раскраски': 'coloring'
+    };
+    
+    const parentKey = categoryMap[parentCategory];
+    const subcategoryKey = subcategoryMap[subcategoryName];
+    
+    if (parentKey && subcategoryKey) {
+      return t(`categories.subcategories.${parentKey}.${subcategoryKey}`);
+    }
+    
+    return subcategoryName;
+  };
+
+  // Вспомогательная функция для получения имени категории
+  const getCategoryName = (category) => {
+    if (typeof category === 'string') return category;
+    if (typeof category === 'object' && category?.name) return category.name;
+    return null;
+  };
   const handleChangeCartQuantity = onChangeCartQuantity; // Переименовываем для совместимости
   const { id } = useParams();
   const navigate = useNavigate();
@@ -613,7 +704,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             onMouseLeave={(e) => e.target.style.color = '#666'}
           >
             <HomeIcon sx={{ fontSize: 18 }} />
-            Главная
+            {t('breadcrumbs.home')}
           </Link>
           {product.category && typeof product.category === 'string' && (
             <Link 
@@ -628,7 +719,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
               onMouseLeave={(e) => e.target.style.color = '#666'}
             >
-              {product.category}
+              {translateCategory(product.category)}
             </Link>
           )}
           {product.category && typeof product.category === 'object' && product.category?.name && (
@@ -644,7 +735,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
               onMouseLeave={(e) => e.target.style.color = '#666'}
             >
-              {product.category?.name}
+              {translateCategory(product.category?.name)}
             </Link>
           )}
           {product.subcategory && typeof product.subcategory === 'string' && (
@@ -660,7 +751,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
               onMouseLeave={(e) => e.target.style.color = '#666'}
             >
-              {product.subcategory}
+              {translateSubcategory(getCategoryName(product.category), product.subcategory)}
             </Link>
           )}
           {product.subcategory && typeof product.subcategory === 'object' && product.subcategory.name && (
@@ -676,7 +767,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
               onMouseLeave={(e) => e.target.style.color = '#666'}
             >
-              {product.subcategory.name}
+              {translateSubcategory(getCategoryName(product.category), product.subcategory.name)}
             </Link>
           )}
           <Typography color="text.primary" sx={{ fontWeight: 600, fontSize: '14px' }}>

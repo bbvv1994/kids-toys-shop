@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Favorite, FavoriteBorder, Edit, Delete, Visibility, VisibilityOff } from '@mui/icons-material';
 import { Box, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import ProductCard from './ProductCard';
 
 // Универсальная функция для генерации CSS-класса категории
@@ -34,6 +35,7 @@ function renderStars(rating, max = 5) {
 function ProductList({ products, onProductDeleted, onRefresh, user, onProductClick, searchQuery, filterCategory, filterAgeGroup, selectedGenders = [], viewMode = 'grid', lottiePlayingMap, setLottiePlayingMap, wishlist = [] }) {
   const [sortBy, setSortBy] = useState('newest');
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const categories = ['all', ...new Set(products.map(p => p.category).filter(Boolean))];
   const ageGroups = ['all', ...new Set(products.map(p => p.ageGroup).filter(Boolean))];
@@ -134,8 +136,8 @@ function ProductList({ products, onProductDeleted, onRefresh, user, onProductCli
 
       {filteredProducts.length === 0 ? (
         <div className="no-products">
-          <h3>Товары не найдены</h3>
-          <p>Попробуйте изменить фильтры или добавьте новый товар</p>
+          <h3>{t('common.noProducts')}</h3>
+          <p>{t('common.noProductsDescription')}</p>
         </div>
       ) : (
         <div className={viewMode === 'grid' ? 'products-grid' : 'products-list'}>

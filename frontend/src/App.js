@@ -1,8 +1,10 @@
- import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import ProductCard from './components/ProductCard';
 import AdminShopReviews from './components/AdminShopReviews';
 import AdminProductReviews from './components/AdminProductReviews';
 import CustomerReviews from './components/CustomerReviews';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import { getImageUrl, API_BASE_URL } from './config';
 import { 
   DndContext,
@@ -249,6 +251,7 @@ const theme = createTheme({
 
   // Компонент навигации
   function Navigation({ cartCount, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups }) {
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
@@ -429,315 +432,420 @@ const theme = createTheme({
     return iconMap[categoryName] || '/toys.png';
   };
 
-  // Функция для преобразования dbCategories в формат для Navigation
-  const transformCategoriesForNavigation = (dbCats) => {
-    // Убеждаемся, что dbCats - это массив
-    if (!dbCats || !Array.isArray(dbCats)) {
+  // Функция для преобразования dbCategories в формат для Navigation (локально вычисленная)
+  const navCategoriesComputed = useMemo(() => {
+    // Функция для перевода категорий
+    const translateCategory = (categoryName) => {
+      const categoryMap = {
+        'Игрушки': t('categories.toys'),
+        'Конструкторы': t('categories.constructors'),
+        'Пазлы': t('categories.puzzles'),
+        'Творчество': t('categories.creativity'),
+        'Канцтовары': t('categories.stationery'),
+        'Транспорт': t('categories.transport'),
+        'Отдых на воде': t('categories.water_recreation'),
+        'Настольные игры': t('categories.board_games'),
+        'Развивающие игры': t('categories.educational_games'),
+        'Акции': t('categories.sales')
+      };
+      return categoryMap[categoryName] || categoryName;
+    };
+
+    // Функция для перевода подкатегорий
+    const translateSubcategory = (categoryName, subcategoryName) => {
+      const subcategoryMap = {
+        'Игрушки': {
+          'Игрушки для самых маленьких': t('categories.subcategories.toys.for_babies'),
+          'Куклы': t('categories.subcategories.toys.dolls'),
+          'Оружие игрушечное': t('categories.subcategories.toys.toy_weapons'),
+          'Треки, паркинги и жд': t('categories.subcategories.toys.tracks_parking_railway'),
+          'Мягкие игрушки': t('categories.subcategories.toys.soft_toys'),
+          'Игрушки - антистресс и сквиши': t('categories.subcategories.toys.antistress_squishy'),
+          'Активные игры': t('categories.subcategories.toys.active_games'),
+          'Тематические игровые наборы': t('categories.subcategories.toys.thematic_sets'),
+          'Декоративная косметика и украшения': t('categories.subcategories.toys.decorative_cosmetics'),
+          'Машинки и другой транспорт': t('categories.subcategories.toys.cars_transport'),
+          'Роботы и трансформеры': t('categories.subcategories.toys.robots_transformers'),
+          'Игровые фигурки': t('categories.subcategories.toys.game_figures'),
+          'Игрушки для песочницы': t('categories.subcategories.toys.sandbox_toys'),
+          'Шарики': t('categories.subcategories.toys.balls'),
+          'Игрушки на радиоуправлении': t('categories.subcategories.toys.radio_controlled')
+        },
+        'Конструкторы': {
+          'Lego для мальчиков': t('categories.subcategories.constructors.lego_boys'),
+          'Lego для девочек': t('categories.subcategories.constructors.lego_girls'),
+          'Металлические конструкторы': t('categories.subcategories.constructors.metal_constructors'),
+          'Lego крупные блоки': t('categories.subcategories.constructors.lego_large_blocks')
+        },
+        'Пазлы': {
+          'Пазлы для взрослых': t('categories.subcategories.puzzles.for_adults'),
+          'Пазлы для детей': t('categories.subcategories.puzzles.for_children'),
+          'Магнитные пазлы': t('categories.subcategories.puzzles.magnetic'),
+          'Пазлы напольные': t('categories.subcategories.puzzles.floor'),
+          'Пазлы для малышей': t('categories.subcategories.puzzles.for_babies')
+        },
+        'Творчество': {
+          'Наборы для лепки': t('categories.subcategories.creativity.modeling_sets'),
+          'Наклейки': t('categories.subcategories.creativity.stickers'),
+          'Лизуны и слаймы': t('categories.subcategories.creativity.slimes'),
+          'Кинетический песок': t('categories.subcategories.creativity.kinetic_sand'),
+          'Рисование': t('categories.subcategories.creativity.drawing'),
+          'Наборы для творчества': t('categories.subcategories.creativity.creativity_sets'),
+          'Раскраски': t('categories.subcategories.creativity.coloring')
+        },
+        'Канцтовары': {
+          'Портфели для школы': t('categories.subcategories.stationery.school_bags'),
+          'Портфели для детских садов': t('categories.subcategories.stationery.kindergarten_bags'),
+          'Пеналы': t('categories.subcategories.stationery.pencil_cases'),
+          'Ручки и карандаши': t('categories.subcategories.stationery.pens_pencils'),
+          'Точилки': t('categories.subcategories.stationery.sharpeners'),
+          'Фломастеры и маркеры': t('categories.subcategories.stationery.markers'),
+          'Краски': t('categories.subcategories.stationery.paints'),
+          'Кисточки и принадлежности': t('categories.subcategories.stationery.brushes_accessories'),
+          'Брелки': t('categories.subcategories.stationery.keychains')
+        },
+        'Транспорт': {
+          'Детские самокаты': t('categories.subcategories.transport.scooters'),
+          'Велосипеды': t('categories.subcategories.transport.bicycles'),
+          'Ходунки': t('categories.subcategories.transport.walkers'),
+          'Беговелы': t('categories.subcategories.transport.balance_bikes')
+        },
+        'Отдых на воде': {
+          'Бассейны': t('categories.subcategories.water_recreation.pools'),
+          'Матрасы и плотики': t('categories.subcategories.water_recreation.mattresses_floats'),
+          'Круги надувные': t('categories.subcategories.water_recreation.inflatable_circles'),
+          'Нарукавники и жилеты': t('categories.subcategories.water_recreation.armbands_vests'),
+          'Аксессуары для плавания': t('categories.subcategories.water_recreation.swimming_accessories'),
+          'Ракетки': t('categories.subcategories.water_recreation.rackets'),
+          'Пляжные мячи и игрушки для плавания': t('categories.subcategories.water_recreation.beach_balls'),
+          'Насосы для матрасов': t('categories.subcategories.water_recreation.pumps')
+        },
+        'Настольные игры': {
+          'Настольные игры': t('categories.subcategories.board_games.board_games')
+        },
+        'Развивающие игры': {
+          'Развивающие игры': t('categories.subcategories.educational_games.educational_games')
+        },
+        'Акции': {
+          'Скидки недели': t('categories.subcategories.sales.weekly_discounts'),
+          'Товары по акции': t('categories.subcategories.sales.sale_items')
+        }
+      };
+      
+      const categorySubs = subcategoryMap[categoryName];
+      if (categorySubs && categorySubs[subcategoryName]) {
+        return categorySubs[subcategoryName];
+      }
+      return subcategoryName;
+    };
+
+    // Убеждаемся, что dbCategories - это массив
+    if (!dbCategories || !Array.isArray(dbCategories)) {
       return [
         {
           id: 1,
-          name: 'Игрушки',
-          label: 'Игрушки',
+          name: translateCategory('Игрушки'),
+          label: translateCategory('Игрушки'),
           icon: '/toys.png',
           active: true,
           sub: [
-            'Игрушки для самых маленьких',
-            'Куклы',
-            'Оружие игрушечное',
-            'Треки, паркинги и жд',
-            'Мягкие игрушки',
-            'Игрушки - антистресс и сквиши',
-            'Активные игры',
-            'Тематические игровые наборы',
-            'Декоративная косметика и украшения',
-            'Машинки и другой транспорт',
-            'Роботы и трансформеры',
-            'Игровые фигурки',
-            'Игрушки для песочницы',
-            'Шарики',
-            'Игрушки на радиоуправлении'
+            translateSubcategory('Игрушки', 'Игрушки для самых маленьких'),
+            translateSubcategory('Игрушки', 'Куклы'),
+            translateSubcategory('Игрушки', 'Оружие игрушечное'),
+            translateSubcategory('Игрушки', 'Треки, паркинги и жд'),
+            translateSubcategory('Игрушки', 'Мягкие игрушки'),
+            translateSubcategory('Игрушки', 'Игрушки - антистресс и сквиши'),
+            translateSubcategory('Игрушки', 'Активные игры'),
+            translateSubcategory('Игрушки', 'Тематические игровые наборы'),
+            translateSubcategory('Игрушки', 'Декоративная косметика и украшения'),
+            translateSubcategory('Игрушки', 'Машинки и другой транспорт'),
+            translateSubcategory('Игрушки', 'Роботы и трансформеры'),
+            translateSubcategory('Игрушки', 'Игровые фигурки'),
+            translateSubcategory('Игрушки', 'Игрушки для песочницы'),
+            translateSubcategory('Игрушки', 'Шарики'),
+            translateSubcategory('Игрушки', 'Игрушки на радиоуправлении')
           ]
         },
         {
           id: 2,
-          name: 'Конструкторы',
-          label: 'Конструкторы',
+          name: translateCategory('Конструкторы'),
+          label: translateCategory('Конструкторы'),
           icon: '/constructor.png',
           active: true,
           sub: [
-            'Lego для мальчиков',
-            'Lego для девочек',
-            'Металлические конструкторы',
-            'Lego крупные блоки'
+            translateSubcategory('Конструкторы', 'Lego для мальчиков'),
+            translateSubcategory('Конструкторы', 'Lego для девочек'),
+            translateSubcategory('Конструкторы', 'Металлические конструкторы'),
+            translateSubcategory('Конструкторы', 'Lego крупные блоки')
           ]
         },
         {
           id: 3,
-          name: 'Пазлы',
-          label: 'Пазлы',
+          name: translateCategory('Пазлы'),
+          label: translateCategory('Пазлы'),
           icon: '/puzzle.png',
           active: true,
           sub: [
-            'Пазлы для взрослых',
-            'Пазлы для детей',
-            'Магнитные пазлы',
-            'Пазлы напольные',
-            'Пазлы для малышей'
+            translateSubcategory('Пазлы', 'Пазлы для взрослых'),
+            translateSubcategory('Пазлы', 'Пазлы для детей'),
+            translateSubcategory('Пазлы', 'Магнитные пазлы'),
+            translateSubcategory('Пазлы', 'Пазлы напольные'),
+            translateSubcategory('Пазлы', 'Пазлы для малышей')
           ]
         },
         {
           id: 4,
-          name: 'Творчество',
-          label: 'Творчество',
+          name: translateCategory('Творчество'),
+          label: translateCategory('Творчество'),
           icon: '/creativity.png',
           active: true,
           sub: [
-            'Наборы для лепки',
-            'Наклейки',
-            'Лизуны и слаймы',
-            'Кинетический песок',
-            'Рисование',
-            'Наборы для творчества',
-            'Раскраски'
+            translateSubcategory('Творчество', 'Наборы для лепки'),
+            translateSubcategory('Творчество', 'Наклейки'),
+            translateSubcategory('Творчество', 'Лизуны и слаймы'),
+            translateSubcategory('Творчество', 'Кинетический песок'),
+            translateSubcategory('Творчество', 'Рисование'),
+            translateSubcategory('Творчество', 'Наборы для творчества'),
+            translateSubcategory('Творчество', 'Раскраски')
           ]
         },
         {
           id: 5,
-          name: 'Канцтовары',
-          label: 'Канцтовары',
+          name: translateCategory('Канцтовары'),
+          label: translateCategory('Канцтовары'),
           icon: '/stationery.png',
           active: true,
           sub: [
-            'Портфели для школы',
-            'Портфели для детских садов',
-            'Пеналы',
-            'Ручки и карандаши',
-            'Точилки',
-            'Фломастеры и маркеры',
-            'Краски',
-            'Кисточки и принадлежности',
-            'Брелки'
+            translateSubcategory('Канцтовары', 'Портфели для школы'),
+            translateSubcategory('Канцтовары', 'Портфели для детских садов'),
+            translateSubcategory('Канцтовары', 'Пеналы'),
+            translateSubcategory('Канцтовары', 'Ручки и карандаши'),
+            translateSubcategory('Канцтовары', 'Точилки'),
+            translateSubcategory('Канцтовары', 'Фломастеры и маркеры'),
+            translateSubcategory('Канцтовары', 'Краски'),
+            translateSubcategory('Канцтовары', 'Кисточки и принадлежности'),
+            translateSubcategory('Канцтовары', 'Брелки')
           ]
         },
         {
           id: 6,
-          name: 'Транспорт',
-          label: 'Транспорт',
+          name: translateCategory('Транспорт'),
+          label: translateCategory('Транспорт'),
           icon: '/bicycle.png',
           active: true,
           sub: [
-            'Детские самокаты',
-            'Велосипеды',
-            'Ходунки',
-            'Беговелы'
+            translateSubcategory('Транспорт', 'Детские самокаты'),
+            translateSubcategory('Транспорт', 'Велосипеды'),
+            translateSubcategory('Транспорт', 'Ходунки'),
+            translateSubcategory('Транспорт', 'Беговелы')
           ]
         },
         {
           id: 7,
-          name: 'Отдых на воде',
-          label: 'Отдых на воде',
+          name: translateCategory('Отдых на воде'),
+          label: translateCategory('Отдых на воде'),
           icon: '/voda.png',
           active: true,
           sub: [
-            'Бассейны',
-            'Матрасы и плотики',
-            'Круги надувные',
-            'Нарукавники и жилеты',
-            'Аксессуары для плавания',
-            'Ракетки',
-            'Пляжные мячи и игрушки для плавания',
-            'Насосы для матрасов'
+            translateSubcategory('Отдых на воде', 'Бассейны'),
+            translateSubcategory('Отдых на воде', 'Матрасы и плотики'),
+            translateSubcategory('Отдых на воде', 'Круги надувные'),
+            translateSubcategory('Отдых на воде', 'Нарукавники и жилеты'),
+            translateSubcategory('Отдых на воде', 'Аксессуары для плавания'),
+            translateSubcategory('Отдых на воде', 'Ракетки'),
+            translateSubcategory('Отдых на воде', 'Пляжные мячи и игрушки для плавания'),
+            translateSubcategory('Отдых на воде', 'Насосы для матрасов')
           ]
         },
         {
           id: 8,
-          name: 'Настольные игры',
-          label: 'Настольные игры',
+          name: translateCategory('Настольные игры'),
+          label: translateCategory('Настольные игры'),
           icon: '/nastolka.png',
           active: true,
           sub: [
-            'Настольные игры'
+            translateSubcategory('Настольные игры', 'Настольные игры')
           ]
         },
         {
           id: 9,
-          name: 'Развивающие игры',
-          label: 'Развивающие игры',
+          name: translateCategory('Развивающие игры'),
+          label: translateCategory('Развивающие игры'),
           icon: '/edu_game.png',
           active: true,
           sub: [
-            'Развивающие игры'
+            translateSubcategory('Развивающие игры', 'Развивающие игры')
           ]
         },
         {
           id: 10,
-          name: 'Акции',
-          label: 'Акции',
+          name: translateCategory('Акции'),
+          label: translateCategory('Акции'),
           icon: '/sale.png',
           active: true,
           sub: [
-            'Скидки недели',
-            'Товары по акции'
+            translateSubcategory('Акции', 'Скидки недели'),
+            translateSubcategory('Акции', 'Товары по акции')
           ]
         }
       ];
     }
     
-    const categories = dbCats?.value || dbCats;
+    const categories = dbCategories?.value || dbCategories;
     
     if (!categories || categories.length === 0) {
       // Fallback на статические категории, если dbCategories пустые
       return [
         {
           id: 1,
-          name: 'Игрушки',
-          label: 'Игрушки',
+          name: translateCategory('Игрушки'),
+          label: translateCategory('Игрушки'),
           icon: '/toys.png',
           active: true,
           sub: [
-            'Игрушки для самых маленьких',
-            'Куклы',
-            'Оружие игрушечное',
-            'Треки, паркинги и жд',
-            'Мягкие игрушки',
-            'Игрушки - антистресс и сквиши',
-            'Активные игры',
-            'Тематические игровые наборы',
-            'Декоративная косметика и украшения',
-            'Машинки и другой транспорт',
-            'Роботы и трансформеры',
-            'Игровые фигурки',
-            'Игрушки для песочницы',
-            'Шарики',
-            'Игрушки на радиоуправлении'
+            translateSubcategory('Игрушки', 'Игрушки для самых маленьких'),
+            translateSubcategory('Игрушки', 'Куклы'),
+            translateSubcategory('Игрушки', 'Оружие игрушечное'),
+            translateSubcategory('Игрушки', 'Треки, паркинги и жд'),
+            translateSubcategory('Игрушки', 'Мягкие игрушки'),
+            translateSubcategory('Игрушки', 'Игрушки - антистресс и сквиши'),
+            translateSubcategory('Игрушки', 'Активные игры'),
+            translateSubcategory('Игрушки', 'Тематические игровые наборы'),
+            translateSubcategory('Игрушки', 'Декоративная косметика и украшения'),
+            translateSubcategory('Игрушки', 'Машинки и другой транспорт'),
+            translateSubcategory('Игрушки', 'Роботы и трансформеры'),
+            translateSubcategory('Игрушки', 'Игровые фигурки'),
+            translateSubcategory('Игрушки', 'Игрушки для песочницы'),
+            translateSubcategory('Игрушки', 'Шарики'),
+            translateSubcategory('Игрушки', 'Игрушки на радиоуправлении')
           ]
         },
         {
           id: 2,
-          name: 'Конструкторы',
-          label: 'Конструкторы',
+          name: translateCategory('Конструкторы'),
+          label: translateCategory('Конструкторы'),
           icon: '/constructor.png',
           active: true,
           sub: [
-            'Lego для мальчиков',
-            'Lego для девочек',
-            'Металлические конструкторы',
-            'Lego крупные блоки'
+            translateSubcategory('Конструкторы', 'Lego для мальчиков'),
+            translateSubcategory('Конструкторы', 'Lego для девочек'),
+            translateSubcategory('Конструкторы', 'Металлические конструкторы'),
+            translateSubcategory('Конструкторы', 'Lego крупные блоки')
           ]
         },
         {
           id: 3,
-          name: 'Пазлы',
-          label: 'Пазлы',
+          name: translateCategory('Пазлы'),
+          label: translateCategory('Пазлы'),
           icon: '/puzzle.png',
           active: true,
           sub: [
-            'Пазлы для взрослых',
-            'Пазлы для детей',
-            'Магнитные пазлы',
-            'Пазлы напольные',
-            'Пазлы для малышей'
+            translateSubcategory('Пазлы', 'Пазлы для взрослых'),
+            translateSubcategory('Пазлы', 'Пазлы для детей'),
+            translateSubcategory('Пазлы', 'Магнитные пазлы'),
+            translateSubcategory('Пазлы', 'Пазлы напольные'),
+            translateSubcategory('Пазлы', 'Пазлы для малышей')
           ]
         },
         {
           id: 4,
-          name: 'Творчество',
-          label: 'Творчество',
+          name: translateCategory('Творчество'),
+          label: translateCategory('Творчество'),
           icon: '/creativity.png',
           active: true,
           sub: [
-            'Наборы для лепки',
-            'Наклейки',
-            'Лизуны и слаймы',
-            'Кинетический песок',
-            'Рисование',
-            'Наборы для творчества',
-            'Раскраски'
+            translateSubcategory('Творчество', 'Наборы для лепки'),
+            translateSubcategory('Творчество', 'Наклейки'),
+            translateSubcategory('Творчество', 'Лизуны и слаймы'),
+            translateSubcategory('Творчество', 'Кинетический песок'),
+            translateSubcategory('Творчество', 'Рисование'),
+            translateSubcategory('Творчество', 'Наборы для творчества'),
+            translateSubcategory('Творчество', 'Раскраски')
           ]
         },
         {
           id: 5,
-          name: 'Канцтовары',
-          label: 'Канцтовары',
+          name: translateCategory('Канцтовары'),
+          label: translateCategory('Канцтовары'),
           icon: '/stationery.png',
           active: true,
           sub: [
-            'Портфели для школы',
-            'Портфели для детских садов',
-            'Пеналы',
-            'Ручки и карандаши',
-            'Точилки',
-            'Фломастеры и маркеры',
-            'Краски',
-            'Кисточки и принадлежности',
-            'Брелки'
+            translateSubcategory('Канцтовары', 'Портфели для школы'),
+            translateSubcategory('Канцтовары', 'Портфели для детских садов'),
+            translateSubcategory('Канцтовары', 'Пеналы'),
+            translateSubcategory('Канцтовары', 'Ручки и карандаши'),
+            translateSubcategory('Канцтовары', 'Точилки'),
+            translateSubcategory('Канцтовары', 'Фломастеры и маркеры'),
+            translateSubcategory('Канцтовары', 'Краски'),
+            translateSubcategory('Канцтовары', 'Кисточки и принадлежности'),
+            translateSubcategory('Канцтовары', 'Брелки')
           ]
         },
         {
           id: 6,
-          name: 'Транспорт',
-          label: 'Транспорт',
+          name: translateCategory('Транспорт'),
+          label: translateCategory('Транспорт'),
           icon: '/bicycle.png',
           active: true,
           sub: [
-            'Детские самокаты',
-            'Велосипеды',
-            'Ходунки',
-            'Беговелы'
+            translateSubcategory('Транспорт', 'Детские самокаты'),
+            translateSubcategory('Транспорт', 'Велосипеды'),
+            translateSubcategory('Транспорт', 'Ходунки'),
+            translateSubcategory('Транспорт', 'Беговелы')
           ]
         },
         {
           id: 7,
-          name: 'Отдых на воде',
-          label: 'Отдых на воде',
+          name: translateCategory('Отдых на воде'),
+          label: translateCategory('Отдых на воде'),
           icon: '/voda.png',
           active: true,
           sub: [
-            'Бассейны',
-            'Матрасы и плотики',
-            'Круги надувные',
-            'Нарукавники и жилеты',
-            'Аксессуары для плавания',
-            'Ракетки',
-            'Пляжные мячи и игрушки для плавания',
-            'Насосы для матрасов'
+            translateSubcategory('Отдых на воде', 'Бассейны'),
+            translateSubcategory('Отдых на воде', 'Матрасы и плотики'),
+            translateSubcategory('Отдых на воде', 'Круги надувные'),
+            translateSubcategory('Отдых на воде', 'Нарукавники и жилеты'),
+            translateSubcategory('Отдых на воде', 'Аксессуары для плавания'),
+            translateSubcategory('Отдых на воде', 'Ракетки'),
+            translateSubcategory('Отдых на воде', 'Пляжные мячи и игрушки для плавания'),
+            translateSubcategory('Отдых на воде', 'Насосы для матрасов')
           ]
         },
         {
           id: 8,
-          name: 'Настольные игры',
-          label: 'Настольные игры',
+          name: translateCategory('Настольные игры'),
+          label: translateCategory('Настольные игры'),
           icon: '/nastolka.png',
           active: true,
           sub: [
-            'Настольные игры'
+            translateSubcategory('Настольные игры', 'Настольные игры')
           ]
         },
         {
           id: 9,
-          name: 'Развивающие игры',
-          label: 'Развивающие игры',
+          name: translateCategory('Развивающие игры'),
+          label: translateCategory('Развивающие игры'),
           icon: '/edu_game.png',
           active: true,
           sub: [
-            'Развивающие игры'
+            translateSubcategory('Развивающие игры', 'Развивающие игры')
           ]
         },
         {
           id: 10,
-          name: 'Акции',
-          label: 'Акции',
+          name: translateCategory('Акции'),
+          label: translateCategory('Акции'),
           icon: '/sale.png',
           active: true,
           sub: [
-            'Скидки недели',
-            'Товары по акции'
+            translateSubcategory('Акции', 'Скидки недели'),
+            translateSubcategory('Акции', 'Товары по акции')
           ]
         }
       ];
     }
 
-    // Если уже дерево (есть sub), рекурсивно обрабатываем
+    // Если уже дерево (есть sub), рекурсивно обрабатываем и добавляем переводы
     if (categories[0] && categories[0].sub) {
       const processTree = (cats) => {
         if (!Array.isArray(cats)) return [];
@@ -760,10 +868,17 @@ const theme = createTheme({
           
           return {
             ...cat,
+            label: translateCategory(cat.name),
             icon: iconPath,
-            sub: Array.isArray(cat.sub) ? cat.sub.map(subcat => 
-              typeof subcat === 'string' ? subcat : (subcat.name || subcat.label || 'Подкатегория')
-            ) : []
+            sub: Array.isArray(cat.sub)
+              ? cat.sub.map(subcat => {
+                  if (typeof subcat === 'string') {
+                    return { id: null, name: subcat, label: translateSubcategory(cat.name, subcat) };
+                  }
+                  const subName = subcat.name || subcat.label || 'Подкатегория';
+                  return { ...subcat, label: translateSubcategory(cat.name, subName) };
+                })
+              : []
           };
         });
       };
@@ -795,28 +910,34 @@ const theme = createTheme({
       return {
         id: cat.id,
         name: cat.name,
-        label: cat.name,
+        label: translateCategory(cat.name),
         icon: iconPath,
         image: cat.image, // сохраняем оригинальное поле image
-        sub: Array.isArray(subcategories) ? subcategories.map(subcat => subcat.name) : []
+        sub: Array.isArray(subcategories)
+          ? subcategories.map(subcat => ({
+              id: subcat.id,
+              name: subcat.name,
+              label: translateSubcategory(cat.name, subcat.name)
+            }))
+          : []
       };
     });
     
     return Array.isArray(result) ? result : [];
-  };
+  }, [dbCategories, t, i18n.language]);
 
   // Получаем категории в нужном формате для Navigation
-  const navCategories = transformCategoriesForNavigation(dbCategories);
+  const navCategories = navCategoriesComputed;
   
   // Дополнительная проверка безопасности
   const safeCategories = Array.isArray(navCategories) ? navCategories : [];
 
   const navItems = [
-    { text: 'Главная', path: '/', icon: <Home /> },
-    { text: 'Каталог товаров', path: '/catalog', icon: <FormatListBulleted /> },
-    { text: 'Отзывы клиентов', path: '/reviews', icon: <RateReview /> },
-    { text: 'Контакты', path: '/contacts', icon: <ContactMail /> },
-    { text: 'О нас', path: '/about', icon: <Info /> },
+    { text: t('navigation.home'), path: '/', icon: <Home /> },
+    { text: t('navigation.catalog'), path: '/catalog', icon: <FormatListBulleted /> },
+    { text: t('navigation.reviews'), path: '/reviews', icon: <RateReview /> },
+    { text: t('navigation.contacts'), path: '/contacts', icon: <ContactMail /> },
+    { text: t('navigation.about'), path: '/about', icon: <Info /> },
   ];
 
 
@@ -924,10 +1045,10 @@ const theme = createTheme({
     }
   }, [drawerOpen]);
 
-  // Получаем только корневые категории
-  const rootCategories = (dbCategories || []).filter(cat => !cat.parentId && cat.active !== false);
-  // Для поиска подкатегорий
-  const getSubcategories = (cat) => (dbCategories || []).filter(sub => sub.parentId === cat.id && sub.active !== false);
+  // Получаем только корневые категории (используем уже преобразованные и переведенные)
+  const rootCategories = (safeCategories || []).filter(cat => !cat.parentId && cat.active !== false || cat.parentId === undefined);
+  // Для поиска подкатегорий из преобразованной структуры
+  const getSubcategories = (cat) => Array.isArray(cat?.sub) ? cat.sub : [];
 
   // Получаем дерево категорий с подкатегориями-объектами
   const treeCategories = transformCategoriesForNavigation(dbCategories || []);
@@ -1207,20 +1328,33 @@ const theme = createTheme({
               <form id="appbar-search-form" onSubmit={handleSearch} style={{ flex: 1, maxWidth: 260, margin: '0 24px', display: 'flex', alignItems: 'center' }}>
                 <TextField
                   size="small"
-                  placeholder="Поиск товаров..."
+                  placeholder={t('header.searchPlaceholder')}
                   value={isListening && interimTranscript ? interimTranscript : searchValue}
                   onChange={e => setSearchValue(e.target.value)}
                   InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={handleMicClick} size="small" color={isListening ? 'primary' : 'default'} title="Голосовой ввод">
-                          <MicIcon />
-                        </IconButton>
-                        <IconButton type="submit" size="small">
-                          <SearchIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    )
+                    ...(i18n.language === 'he' ? {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <IconButton type="submit" size="small">
+                            <SearchIcon />
+                          </IconButton>
+                          <IconButton onClick={handleMicClick} size="small" color={isListening ? 'primary' : 'default'} title="Голосовой ввод">
+                            <MicIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    } : {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={handleMicClick} size="small" color={isListening ? 'primary' : 'default'} title="Голосовой ввод">
+                            <MicIcon />
+                          </IconButton>
+                          <IconButton type="submit" size="small">
+                            <SearchIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    })
                   }}
                   sx={{ background: 'white', borderRadius: 2, minWidth: 140, maxWidth: 260, flex: 1 }}
                 />
@@ -1427,7 +1561,7 @@ const theme = createTheme({
                       }
                       
                       return displayName;
-                    })() : 'Вход'}
+                    })() : t('header.login')}
                   </Typography>
                 </Box>
               )}
@@ -1460,7 +1594,16 @@ const theme = createTheme({
    </Badge>
                 </IconButton>
                 <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#fff', mt: 0.5, textAlign: 'center', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  Корзина
+                  {t('navigation.cart')}
+                </Typography>
+              </Box>
+              {/* Переключатель языка */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: 80, justifyContent: 'center', mt: 2.125 }}>
+                <Box sx={{ mt: '7px' }}>
+                  <LanguageSwitcher />
+                </Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#fff', mt: 0.5, textAlign: 'center', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {t('header.language')}
                 </Typography>
               </Box>
             </Box>
@@ -1508,7 +1651,7 @@ const theme = createTheme({
               }}
             >
               <CategoryIcon sx={{ fontSize: 28, color: 'inherit', mr: 1 }} />
-              Категории
+              {t('catalog.categoriesButton')}
             </button>
           </Box>
           {/* Кнопка Фильтры */}
@@ -1544,7 +1687,7 @@ const theme = createTheme({
               }}
             >
               <FilterAltRounded sx={{ fontSize: 28, mr: 1 }} />
-              Фильтры
+              {t('catalog.filtersButton')}
             </button>
           </Box>
           {/* Выпадающее меню фильтров */}
@@ -1696,7 +1839,7 @@ const theme = createTheme({
                 gap: 1
               }}>
                 <CategoryIcon sx={{ fontSize: 24, color: 'inherit' }} />
-                Категории
+                {t('catalog.categoriesButton')}
               </Box>
             )}
             <List sx={{ pt: '8px', background: '#fff', height: '100%' }}>
@@ -1740,8 +1883,8 @@ const theme = createTheme({
               
               if (activeSub) {
                 // Для основного меню (activeSub)
-                cat = rootCategories.find(c => c.id === activeSub);
-                subcats = cat ? getSubcategories(cat) : [];
+                 cat = rootCategories.find(c => c.id === activeSub);
+                 subcats = cat ? getSubcategories(cat) : [];
               } else if (hoveredCategory) {
                 // Для мобильного меню (hoveredCategory)
                 cat = safeCategories.find(c => c.label === hoveredCategory);
@@ -1807,12 +1950,17 @@ const theme = createTheme({
                   {subcats.map((subcat, i) => (
                     <Box
                       key={subcat.id || i}
-                      onClick={() => {
+                       onClick={() => {
                         setInstantClose(true);
                         
                         if (activeSub) {
                           // Для основного меню
-                          navigate(`/subcategory/${subcat.id}`);
+                           if (subcat && subcat.id) {
+                             navigate(`/subcategory/${subcat.id}`);
+                           } else {
+                             // Fallback если нет id
+                             navigate(`/category/${cat.id}`);
+                           }
                           setActiveSub(null);
                           if (!isHome) setMenuOpen(false);
                         } else if (hoveredCategory) {
@@ -1907,7 +2055,7 @@ const theme = createTheme({
             sx={{ mb: 2, borderRadius: 2, fontWeight: 'bold' }}
             disabled
           >
-            Категории
+            {t('catalog.categoriesButton')}
           </Button>
           <List className="catalog-sidebar-categories">
             {navItems.map((item) => (
@@ -1949,6 +2097,7 @@ const theme = createTheme({
 
 // Главная страница
 function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChangeCartQuantity, onEditProduct, wishlist }) {
+  const { t } = useTranslation();
   const isAdmin = user?.role === 'admin';
   // Новинки — сортировка по дате создания (createdAt), самые новые первые
   const newProducts = React.useMemo(() =>
@@ -1964,7 +2113,7 @@ function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChang
   return (
     <Box sx={{ minHeight: '80vh', pt: 4, flexDirection: 'column' }}>
       <ProductCarousel
-        title="Новинки"
+        title={t('home.newArrivals')}
         products={newProducts}
         onAddToCart={onAddToCart}
         cart={cart}
@@ -1976,7 +2125,7 @@ function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChang
         isAdmin={isAdmin}
       />
       <ProductCarousel
-        title="Популярное"
+        title={t('home.popular')}
         products={popularProducts}
         onAddToCart={onAddToCart}
         cart={cart}
@@ -1994,6 +2143,7 @@ function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChang
 
 // Каталог
 function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, user, wishlist, onWishlistToggle, onEditProduct, dbCategories, selectedGenders, selectedBrands, selectedAgeGroups }) {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -2019,19 +2169,29 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
     setSearchQuery(search);
   }, [location.search]);
   
-  // 10 основных категорий каталога
-  const catalogCategories = [
-    { label: 'Игрушки', icon: '/igrushki.webp' },
-    { label: 'Конструкторы', icon: '/lego1.webp' },
-    { label: 'Пазлы', icon: '/puzzle.webp' },
-    { label: 'Творчество', icon: '/tvorchestvo.webp' },
-    { label: 'Канцтовары', icon: '/karandash.webp' },
-    { label: 'Транспорт', icon: '/samokat.webp' },
-    { label: 'Отдых на воде', icon: '/voda.webp' },
-    { label: 'Настольные игры', icon: '/nastolnie-igri.webp' },
-    { label: 'Развивающие игры', icon: '/razvitie.webp' },
-    { label: 'Акции', icon: '/sale.webp' }
+  // Базовые категории каталога (ключ + оригинальное имя в БД + иконка)
+  const baseCatalogCategories = [
+    { key: 'toys', baseName: 'Игрушки', icon: '/igrushki.webp' },
+    { key: 'constructors', baseName: 'Конструкторы', icon: '/lego1.webp' },
+    { key: 'puzzles', baseName: 'Пазлы', icon: '/puzzle.webp' },
+    { key: 'creativity', baseName: 'Творчество', icon: '/tvorchestvo.webp' },
+    { key: 'stationery', baseName: 'Канцтовары', icon: '/karandash.webp' },
+    { key: 'transport', baseName: 'Транспорт', icon: '/samokat.webp' },
+    { key: 'water_recreation', baseName: 'Отдых на воде', icon: '/voda.webp' },
+    { key: 'board_games', baseName: 'Настольные игры', icon: '/nastolnie-igri.webp' },
+    { key: 'educational_games', baseName: 'Развивающие игры', icon: '/razvitie.webp' },
+    { key: 'sales', baseName: 'Акции', icon: '/sale.webp' }
   ];
+
+  // Локализованные категории для отображения
+  const catalogCategories = React.useMemo(() =>
+    baseCatalogCategories.map(cat => ({
+      ...cat,
+      label: t(`categories.${cat.key}`)
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [i18n.language]
+  );
 
   // Статические категории для fallback
   const staticCategories = [
@@ -2333,7 +2493,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
           }}>
-            Каталог товаров
+            {t('catalog.title')}
           </Typography>
           {/* Плитки категорий каталога */}
           <Box sx={{
@@ -2352,17 +2512,17 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
           }}>
             {catalogCategories.map(cat => (
               <Box
-                key={cat.label}
+                key={cat.key}
                 className="category-tile"
                 onClick={() => {
                   if (dbCategories && dbCategories.length > 0) {
-                    const dbCat = dbCategories.find(c => c.name === cat.label && !c.parentId);
+                    const dbCat = dbCategories.find(c => c.name === cat.baseName && !c.parentId);
                     if (dbCat) {
                       navigate(`/category/${dbCat.id}`);
                       return;
                     }
                   }
-                  const staticCat = staticCategories.find(c => c.label === cat.label);
+                  const staticCat = staticCategories.find(c => c.label === cat.baseName);
                   if (staticCat) {
                     navigate(`/category/${staticCat.id}`);
                   }
@@ -2435,7 +2595,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
               fontSize: '1rem',
               fontWeight: 500
             }}>
-              Найдено товаров: {filteredProducts.length}
+              {t('catalog.foundProducts', { count: filteredProducts.length })}
             </Typography>
           )}
           {/* Блок сортировки, количества и вида — как на скриншоте */}
@@ -2452,22 +2612,22 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
           }}>
             {/* Сортировка и количество — слева */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-              <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#222', mr: 1 }}>Сортировать по:</Typography>
+              <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#222', mr: 1 }}>{t('catalog.sortBy')}:</Typography>
               <CustomSelect
                 value={sortBy}
                 onChange={setSortBy}
                 width={180}
                 options={[
-                  { value: 'popular', label: 'По популярному' },
-                  { value: 'newest', label: 'По новинкам' },
-                  { value: 'price-low', label: 'От дешевых к дорогим' },
-                  { value: 'price-high', label: 'От дорогих к дешевым' },
-                  { value: 'name-az', label: 'По названию А-Я' },
-                  { value: 'name-za', label: 'По названию Я-А' },
+                  { value: 'popular', label: t('catalog.sortOptions.popular') },
+                  { value: 'newest', label: t('catalog.sortOptions.newest') },
+                  { value: 'price-low', label: t('catalog.sortOptions.priceLow') },
+                  { value: 'price-high', label: t('catalog.sortOptions.priceHigh') },
+                  { value: 'name-az', label: t('catalog.sortOptions.nameAZ') },
+                  { value: 'name-za', label: t('catalog.sortOptions.nameZA') },
                 ]}
                 sx={{ minWidth: 160 }}
               />
-              <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#222', ml: 3, mr: 1 }}>Показать на странице:</Typography>
+              <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#222', ml: 3, mr: 1 }}>{t('catalog.itemsPerPage')}:</Typography>
               <CustomSelect
                 value={pageSize}
                 onChange={v => setPageSize(Number(v))}
@@ -2486,7 +2646,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                 color={viewMode === 'grid' ? 'primary' : 'default'}
                 onClick={() => setViewMode('grid')}
                 sx={{ border: viewMode === 'grid' ? '2px solid #ff6600' : '2px solid transparent', background: viewMode === 'grid' ? '#fff7f0' : 'transparent', borderRadius: 2, p: 0.5 }}
-                title="Плиткой"
+                title={t('catalog.viewMode.grid')}
               >
                 <ViewModule sx={{ fontSize: 28, color: viewMode === 'grid' ? '#ff6600' : '#888' }} />
               </IconButton>
@@ -2494,7 +2654,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                 color={viewMode === 'list' ? 'primary' : 'default'}
                 onClick={() => setViewMode('list')}
                 sx={{ border: viewMode === 'list' ? '2px solid #ff6600' : '2px solid transparent', background: viewMode === 'list' ? '#fff7f0' : 'transparent', borderRadius: 2, p: 0.5 }}
-                title="Списком"
+                title={t('catalog.viewMode.list')}
               >
                 <ViewList sx={{ fontSize: 28, color: viewMode === 'list' ? '#ff6600' : '#888' }} />
               </IconButton>
@@ -2532,7 +2692,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                 ))
               ) : (
                 <Typography sx={{ gridColumn: '1/-1', textAlign: 'center', color: '#888', fontSize: 20 }}>
-                  {searchQuery ? `По запросу "${searchQuery}" ничего не найдено` : 'Товары не найдены'}
+                  {searchQuery ? t('catalog.noResults.search', { query: searchQuery }) : t('catalog.noResults.default')}
                 </Typography>
               )}
             </Box>
@@ -2556,7 +2716,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                 ))
               ) : (
                 <Typography sx={{ gridColumn: '1/-1', textAlign: 'center', color: '#888', fontSize: 20 }}>
-                  {searchQuery ? `По запросу "${searchQuery}" ничего не найдено` : 'Нет товаров для отображения'}
+                  {searchQuery ? t('catalog.noResults.search', { query: searchQuery }) : t('catalog.noResults.noItems')}
                 </Typography>
               )}
             </Box>
@@ -2564,9 +2724,9 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
           {/* Пагинация */}
           {totalPages > 1 && (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mb: 4 }}>
-              <Button variant="outlined" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Назад</Button>
-              <Typography sx={{ fontWeight: 500, fontSize: 16 }}>Страница {page} из {totalPages}</Typography>
-              <Button variant="outlined" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Вперёд</Button>
+              <Button variant="outlined" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>{t('catalog.pagination.prev')}</Button>
+              <Typography sx={{ fontWeight: 500, fontSize: 16 }}>{t('catalog.pagination.page', { current: page, total: totalPages })}</Typography>
+              <Button variant="outlined" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>{t('catalog.pagination.next')}</Button>
             </Box>
           )}
         </Box>
@@ -2596,7 +2756,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
               boxShadow: '0 8px 24px rgba(255,102,0,0.12)',
             },
           }}
-          title="Наверх"
+          title={t('catalog.scrollToTop')}
         >
           <KeyboardArrowUpIcon sx={{ color: '#ff6600', fontSize: 36 }} />
         </Box>
@@ -2983,6 +3143,8 @@ function OAuthSuccessPage() {
 
 // Главный компонент приложения
 function App() {
+  const { i18n } = useTranslation();
+  
   // Локальные состояния для устранения ошибок no-undef
   const [cart, setCart] = useState({ items: [] });
   const [wishlist, setWishlist] = useState([]);
@@ -2996,6 +3158,11 @@ function App() {
   const appBarRef = useRef(null);
   const [user, setUser] = useState(null);
   const [submenuTimeout, setSubmenuTimeout] = useState(null);
+  
+  // Поддержка RTL для иврита - только для текста, не для компоновки
+  useEffect(() => {
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language]);
   
   // Делаем setUser доступным глобально для ConfirmEmailPage
   useEffect(() => {
@@ -4476,6 +4643,7 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
 
 // Вынесем форму и таблицу в отдельные компоненты внутри CMSProducts
 function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, setEditingProduct, dbCategories }) {
+  const { t } = useTranslation();
   const categories = dbCategories || categoriesData;
   const [products, setProducts] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -5566,7 +5734,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         <Box sx={{ mb: 3, p: 2, background: '#fff', borderRadius: 2, boxShadow: 1 }}>
           <TextField
             fullWidth
-            placeholder="Поиск товаров по названию, артикулу, бренду, стране или категории..."
+            placeholder={t('header.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             variant="outlined"
@@ -7398,6 +7566,7 @@ function CMSOrders() {
 
 // Страница категории (показывает подкатегории)
 function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, user, wishlist, onWishlistToggle, onEditProduct }) {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [category, setCategory] = useState(null);
@@ -7541,13 +7710,13 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
     return (
       <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
         <Box sx={{ mb: 4, pt: { xs: 8, md: 10 }, textAlign: 'center' }}>
-          <Typography variant="h4" color="error">Категория не найдена</Typography>
+          <Typography variant="h4" color="error">{t('category.notFound')}</Typography>
           <Button 
             variant="contained" 
             onClick={() => navigate('/catalog')}
             sx={{ mt: 2 }}
           >
-            Вернуться в каталог
+            {t('category.backToCatalog')}
           </Button>
         </Box>
       </Container>
@@ -7584,6 +7753,88 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
     // Всегда используем только маппинг, если нет — возвращаем заглушку
     return subcategoryImageMap[subCategory] || 'toys.png';
   }
+
+  // Функция для перевода категорий
+  const translateCategory = (categoryName) => {
+    const categoryMap = {
+      'Игрушки': 'toys',
+      'Конструкторы': 'constructors', 
+      'Пазлы': 'puzzles',
+      'Творчество': 'creativity',
+      'Канцтовары': 'stationery',
+      'Транспорт': 'transport',
+      'Отдых на воде': 'water_recreation',
+      'Настольные игры': 'board_games',
+      'Развивающие игры': 'educational_games',
+      'Акции': 'sales'
+    };
+    
+    const categoryKey = categoryMap[categoryName];
+    return categoryKey ? t(`categories.${categoryKey}`) : categoryName;
+  };
+
+  // Функция для перевода подкатегорий
+  const translateSubcategory = (parentCategory, subcategoryName) => {
+    const categoryMap = {
+      'Игрушки': 'toys',
+      'Конструкторы': 'constructors', 
+      'Пазлы': 'puzzles',
+      'Творчество': 'creativity',
+      'Канцтовары': 'stationery',
+      'Транспорт': 'transport',
+      'Отдых на воде': 'water_recreation',
+      'Настольные игры': 'board_games',
+      'Развивающие игры': 'educational_games',
+      'Акции': 'sales'
+    };
+    
+    const subcategoryMap = {
+      // Игрушки
+      'Игрушки для самых маленьких': 'for_babies',
+      'Куклы': 'dolls',
+      'Оружие игрушечное': 'toy_weapons',
+      'Треки, паркинги и жд': 'tracks_parking_railway',
+      'Мягкие игрушки': 'soft_toys',
+      'Игрушки - антистресс и сквиши': 'antistress_squishy',
+      'Активные игры': 'active_games',
+      'Тематические игровые наборы': 'thematic_sets',
+      'Декоративная косметика и украшения': 'decorative_cosmetics',
+      'Машинки и другой транспорт': 'cars_transport',
+      'Роботы и трансформеры': 'robots_transformers',
+      'Игровые фигурки': 'game_figures',
+      'Игрушки для песочницы': 'sandbox_toys',
+      'Шарики': 'balls',
+      'Игрушки на радиоуправлении': 'radio_controlled',
+      // Конструкторы
+      'Lego для мальчиков': 'lego_boys',
+      'Lego для девочек': 'lego_girls',
+      'Металлические конструкторы': 'metal_constructors',
+      'Lego крупные блоки': 'lego_large_blocks',
+      // Пазлы
+      'Пазлы для взрослых': 'for_adults',
+      'Пазлы для детей': 'for_children',
+      'Магнитные пазлы': 'magnetic',
+      'Пазлы напольные': 'floor',
+      'Пазлы для малышей': 'for_babies',
+      // Творчество
+      'Наборы для лепки': 'modeling_sets',
+      'Наклейки': 'stickers',
+      'Лизуны и слаймы': 'slimes',
+      'Кинетический песок': 'kinetic_sand',
+      'Рисование': 'drawing',
+      'Наборы для творчества': 'creativity_sets',
+      'Раскраски': 'coloring'
+    };
+    
+    const parentKey = categoryMap[parentCategory];
+    const subcategoryKey = subcategoryMap[subcategoryName];
+    
+    if (parentKey && subcategoryKey) {
+      return t(`categories.subcategories.${parentKey}.${subcategoryKey}`);
+    }
+    
+    return subcategoryName;
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
@@ -7623,7 +7874,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
               onMouseLeave={(e) => e.target.style.color = '#666'}
             >
               <Home sx={{ fontSize: 18 }} />
-              Главная
+              {t('breadcrumbs.home')}
             </Link>
             <Link 
               to="/catalog"
@@ -7637,10 +7888,10 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
               onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
               onMouseLeave={(e) => e.target.style.color = '#666'}
             >
-              Каталог
+              {t('breadcrumbs.catalog')}
             </Link>
             <Typography color="text.primary" sx={{ fontWeight: 600, fontSize: '14px' }}>
-              {category?.name || 'Категория'}
+              {category?.name ? translateCategory(category.name) : t('breadcrumbs.category')}
             </Typography>
           </Breadcrumbs>
         </Box>
@@ -7666,7 +7917,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
             backgroundClip: 'text',
             mb: 1 
           }}>
-            {category.name}
+            {translateCategory(category.name)}
           </Typography>
         </Box>
 
@@ -7679,7 +7930,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
             fontSize: '1rem',
             fontWeight: 500
           }}>
-            Найдено подкатегорий: {filteredSubcategories.length}
+            {t('category.foundSubcategories', { count: filteredSubcategories.length })}
           </Typography>
         )}
 
@@ -7744,7 +7995,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
                       m: 0,
                       p: 0,
                     }}>
-                      {subcat.name}
+                      {translateSubcategory(category.name, subcat.name)}
                     </Typography>
                   </Box>
                 </Box>
@@ -7781,7 +8032,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
             ))
           ) : (
             <Typography sx={{ gridColumn: '1/-1', textAlign: 'center', color: '#888', fontSize: 20 }}>
-              {searchQuery ? `По запросу "${searchQuery}" ничего не найдено` : 'Товары не найдены'}
+              {searchQuery ? t('category.noProductsSearch', { query: searchQuery }) : t('category.noProducts')}
             </Typography>
           )}
         </Box>
@@ -7792,6 +8043,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
 
 // Страница подкатегории (показывает товары)
 function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, user, wishlist, onWishlistToggle, onEditProduct, selectedGenders }) {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [subcategory, setSubcategory] = useState(null);
@@ -7943,18 +8195,100 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
     return (
       <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
         <Box sx={{ mb: 4, pt: { xs: 8, md: 10 }, textAlign: 'center' }}>
-          <Typography variant="h4" color="error">Подкатегория не найдена</Typography>
+          <Typography variant="h4" color="error">{t('subcategory.notFound')}</Typography>
           <Button 
             variant="contained" 
             onClick={() => navigate('/catalog')}
             sx={{ mt: 2 }}
           >
-            Вернуться в каталог
+            {t('subcategory.backToCatalog')}
           </Button>
         </Box>
       </Container>
     );
   }
+
+  // Функция для перевода категорий
+  const translateCategory = (categoryName) => {
+    const categoryMap = {
+      'Игрушки': 'toys',
+      'Конструкторы': 'constructors', 
+      'Пазлы': 'puzzles',
+      'Творчество': 'creativity',
+      'Канцтовары': 'stationery',
+      'Транспорт': 'transport',
+      'Отдых на воде': 'water_recreation',
+      'Настольные игры': 'board_games',
+      'Развивающие игры': 'educational_games',
+      'Акции': 'sales'
+    };
+    
+    const categoryKey = categoryMap[categoryName];
+    return categoryKey ? t(`categories.${categoryKey}`) : categoryName;
+  };
+
+  // Функция для перевода подкатегорий
+  const translateSubcategory = (parentCategory, subcategoryName) => {
+    const categoryMap = {
+      'Игрушки': 'toys',
+      'Конструкторы': 'constructors', 
+      'Пазлы': 'puzzles',
+      'Творчество': 'creativity',
+      'Канцтовары': 'stationery',
+      'Транспорт': 'transport',
+      'Отдых на воде': 'water_recreation',
+      'Настольные игры': 'board_games',
+      'Развивающие игры': 'educational_games',
+      'Акции': 'sales'
+    };
+    
+    const subcategoryMap = {
+      // Игрушки
+      'Игрушки для самых маленьких': 'for_babies',
+      'Куклы': 'dolls',
+      'Оружие игрушечное': 'toy_weapons',
+      'Треки, паркинги и жд': 'tracks_parking_railway',
+      'Мягкие игрушки': 'soft_toys',
+      'Игрушки - антистресс и сквиши': 'antistress_squishy',
+      'Активные игры': 'active_games',
+      'Тематические игровые наборы': 'thematic_sets',
+      'Декоративная косметика и украшения': 'decorative_cosmetics',
+      'Машинки и другой транспорт': 'cars_transport',
+      'Роботы и трансформеры': 'robots_transformers',
+      'Игровые фигурки': 'game_figures',
+      'Игрушки для песочницы': 'sandbox_toys',
+      'Шарики': 'balls',
+      'Игрушки на радиоуправлении': 'radio_controlled',
+      // Конструкторы
+      'Lego для мальчиков': 'lego_boys',
+      'Lego для девочек': 'lego_girls',
+      'Металлические конструкторы': 'metal_constructors',
+      'Lego крупные блоки': 'lego_large_blocks',
+      // Пазлы
+      'Пазлы для взрослых': 'for_adults',
+      'Пазлы для детей': 'for_children',
+      'Магнитные пазлы': 'magnetic',
+      'Пазлы напольные': 'floor',
+      'Пазлы для малышей': 'for_babies',
+      // Творчество
+      'Наборы для лепки': 'modeling_sets',
+      'Наклейки': 'stickers',
+      'Лизуны и слаймы': 'slimes',
+      'Кинетический песок': 'kinetic_sand',
+      'Рисование': 'drawing',
+      'Наборы для творчества': 'creativity_sets',
+      'Раскраски': 'coloring'
+    };
+    
+    const parentKey = categoryMap[parentCategory];
+    const subcategoryKey = subcategoryMap[subcategoryName];
+    
+    if (parentKey && subcategoryKey) {
+      return t(`categories.subcategories.${parentKey}.${subcategoryKey}`);
+    }
+    
+    return subcategoryName;
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
@@ -7994,7 +8328,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
               onMouseLeave={(e) => e.target.style.color = '#666'}
             >
               <Home sx={{ fontSize: 18 }} />
-              Главная
+              {t('breadcrumbs.home')}
             </Link>
             <Link 
               to="/catalog"
@@ -8008,7 +8342,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
               onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
               onMouseLeave={(e) => e.target.style.color = '#666'}
             >
-              Каталог
+              {t('breadcrumbs.catalog')}
             </Link>
             {category && (
               <Link 
@@ -8023,11 +8357,11 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
                 onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
                 onMouseLeave={(e) => e.target.style.color = '#666'}
               >
-                {category.name}
+                {translateCategory(category.name)}
               </Link>
             )}
             <Typography color="text.primary" sx={{ fontWeight: 600, fontSize: '14px' }}>
-              {subcategory?.name || 'Подкатегория'}
+              {subcategory?.name ? (category ? translateSubcategory(category.name, subcategory.name) : subcategory.name) : t('breadcrumbs.subcategory')}
             </Typography>
           </Breadcrumbs>
         </Box>
@@ -8053,7 +8387,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
             backgroundClip: 'text',
             mb: 1 
           }}>
-            {subcategory.name}
+            {category ? translateSubcategory(category.name, subcategory.name) : subcategory.name}
           </Typography>
 
         </Box>
@@ -8067,7 +8401,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
             fontSize: '1rem',
             fontWeight: 500
           }}>
-            Найдено товаров: {filteredProducts.length}
+            {t('catalog.foundProducts', { count: filteredProducts.length })}
           </Typography>
         )}
 
@@ -8099,7 +8433,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
             ))
           ) : (
             <Typography sx={{ gridColumn: '1/-1', textAlign: 'center', color: '#888', fontSize: 20 }}>
-              {searchQuery ? `По запросу "${searchQuery}" ничего не найдено` : 'Нет товаров для отображения'}
+              {searchQuery ? t('subcategory.noProductsSearch', { query: searchQuery }) : t('subcategory.noProducts')}
             </Typography>
           )}
         </Box>
@@ -8110,6 +8444,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
 
 // Новый компонент личного кабинета
 function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, cart, handleAddToCart, handleChangeCartQuantity, onEditProduct, handleUserUpdate, handleOpenReviewForm }) {
+  const { t } = useTranslation();
   const [selectedSection, setSelectedSection] = useState('myprofile');
   
     // Проверяем флаг для открытия вкладки уведомлений при загрузке
@@ -8768,15 +9103,15 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
     setDeleteProfileDialogOpen(false);
   };
   const menuItems = [
-    { key: 'myprofile', label: 'Мой профиль', icon: <PersonIcon /> },
-    { key: 'notifications', label: 'Уведомления', icon: <NotificationsIcon /> },
-    { key: 'orders', label: 'Мои заказы', icon: <ShoppingCartIcon /> },
-    { key: 'wishlist', label: 'Список желаний', icon: <FavoriteIcon /> },
-    { key: 'viewed', label: 'Просмотренные товары', icon: <VisibilityIcon /> },
-    { key: 'profile', label: 'Личные данные', icon: <PersonIcon /> },
-    { key: 'reviews', label: 'Мои отзывы и вопросы', icon: <QuestionAnswerIcon /> },
-    { key: 'auth', label: 'Настройки авторизации', icon: <SettingsIcon /> },
-    { key: 'logout', label: 'Выйти из аккаунта', icon: <ExitToAppIcon /> },
+    { key: 'myprofile', label: t('profile.menu.myProfile'), icon: <PersonIcon /> },
+    { key: 'notifications', label: t('profile.menu.notifications'), icon: <NotificationsIcon /> },
+    { key: 'orders', label: t('profile.menu.orders'), icon: <ShoppingCartIcon /> },
+    { key: 'wishlist', label: t('profile.menu.wishlist'), icon: <FavoriteIcon /> },
+    { key: 'viewed', label: t('profile.menu.viewed'), icon: <VisibilityIcon /> },
+    { key: 'profile', label: t('profile.menu.personalData'), icon: <PersonIcon /> },
+    { key: 'reviews', label: t('profile.menu.reviews'), icon: <QuestionAnswerIcon /> },
+    { key: 'auth', label: t('profile.menu.authSettings'), icon: <SettingsIcon /> },
+    { key: 'logout', label: t('profile.menu.logout'), icon: <ExitToAppIcon /> },
   ];
 
   const handleMenuClick = (key) => {
@@ -8834,7 +9169,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 borderBottom: '2px solid #f0f0f0',
                 pb: 2
               }}>
-                {createHeader('Мой профиль')}
+                {createHeader(t('profile.header.myProfile'))}
                 
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   <Button
@@ -8860,7 +9195,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       },
                     }}
                   >
-                    Редактировать
+                    {t('profile.buttons.edit')}
                   </Button>
                   <Button
                     variant="contained"
@@ -8885,7 +9220,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       },
                     }}
                   >
-                    Удалить профиль
+                    {t('profile.buttons.deleteProfile')}
                   </Button>
                 </Box>
               </Box>
@@ -8895,7 +9230,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 {/* Левая колонка - личная информация */}
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 3 }}>
-                    Личная информация
+                    {t('profile.sections.personalInfo')}
                   </Typography>
                   
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -8903,9 +9238,9 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <PersonIcon sx={{ color: '#4caf50', fontSize: 24 }} />
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>Имя</Typography>
+                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.fields.firstName')}</Typography>
                         <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500 }}>
-                          {profileData?.name || user?.name || 'Не указано'}
+                          {profileData?.name || user?.name || t('profile.value.notSpecified')}
                         </Typography>
                       </Box>
                     </Box>
@@ -8914,9 +9249,9 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Box sx={{ width: 24 }}></Box>
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>Фамилия</Typography>
+                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.fields.lastName')}</Typography>
                         <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500 }}>
-                          {profileData?.surname || user?.surname || 'Не указана'}
+                          {profileData?.surname || user?.surname || t('profile.value.notSpecifiedF')}
                         </Typography>
                       </Box>
                     </Box>
@@ -8936,9 +9271,9 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <PhoneIcon sx={{ color: '#4caf50', fontSize: 24 }} />
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>Телефон</Typography>
+                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.fields.phone')}</Typography>
                         <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500 }}>
-                          {profileData?.phone || user?.phone || 'Не указан'}
+                          {profileData?.phone || user?.phone || t('profile.value.notSpecified')}
                         </Typography>
                       </Box>
                     </Box>
@@ -8947,9 +9282,9 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <LocationOnIcon sx={{ color: '#4caf50', fontSize: 24 }} />
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>Адрес доставки</Typography>
+                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.fields.address')}</Typography>
                         <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500 }}>
-                          {profileData?.address || user?.address || 'Не указан'}
+                          {profileData?.address || user?.address || t('profile.value.notSpecified')}
                         </Typography>
                       </Box>
                     </Box>
@@ -8958,9 +9293,9 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <CalendarTodayIcon sx={{ color: '#4caf50', fontSize: 24 }} />
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>Дата регистрации</Typography>
+                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.fields.registeredAt')}</Typography>
                         <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500 }}>
-                          {profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString('ru-RU') : user?.createdAt ? new Date(user.createdAt).toLocaleDateString('ru-RU') : 'Не указана'}
+                          {profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString('ru-RU') : user?.createdAt ? new Date(user.createdAt).toLocaleDateString('ru-RU') : t('profile.value.notSpecifiedF')}
                         </Typography>
                       </Box>
                     </Box>
@@ -8970,7 +9305,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 {/* Правая колонка - статистика */}
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 3 }}>
-                    Статистика
+                    {t('profile.sections.stats')}
                   </Typography>
                   
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -8986,7 +9321,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     }}>
                       <ShoppingCartIcon sx={{ color: '#4caf50', fontSize: 24 }} />
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>Товаров в корзине</Typography>
+                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.stats.cartItems')}</Typography>
                         <Typography sx={{ color: '#333', fontSize: 18, fontWeight: 600 }}>
                           {cart?.length || 0}
                         </Typography>
@@ -9005,7 +9340,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     }}>
                       <FavoriteIcon sx={{ color: '#4caf50', fontSize: 24 }} />
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>Избранных товаров</Typography>
+                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.stats.wishlistItems')}</Typography>
                         <Typography sx={{ color: '#333', fontSize: 18, fontWeight: 600 }}>
                           {localWishlist?.length || 0}
                         </Typography>
@@ -9024,7 +9359,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     }}>
                       <VisibilityIcon sx={{ color: '#4caf50', fontSize: 24 }} />
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>Просмотренных товаров</Typography>
+                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.stats.viewedItems')}</Typography>
                         <Typography sx={{ color: '#333', fontSize: 18, fontWeight: 600 }}>
                           {localViewed?.length || 0}
                         </Typography>
@@ -9210,7 +9545,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               left: '-110px',
             }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, borderBottom: '2px solid #f0f0f0', pb: 2 }}>
-                {createHeader('Уведомления')}
+              {createHeader(t('profile.header.notifications'))}
                 {notifications.length > 0 && (
                   <Button 
                     variant="contained" 
@@ -9235,7 +9570,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       },
                     }}
                   >
-                    Удалить все
+                    {t('profile.notifications.deleteAll')}
                   </Button>
                 )}
               </Box>
@@ -9419,7 +9754,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 borderBottom: '2px solid #f0f0f0',
                 pb: 2
               }}>
-                {createHeader('Мои заказы')}
+              {createHeader(t('profile.header.orders'))}
               </Box>
               
               {ordersLoading ? (
@@ -9428,7 +9763,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 </Box>
               ) : orders.length === 0 ? (
                 <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>
-                  У вас пока нет заказов
+                  {t('profile.orders.empty')}
                 </Typography>
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -9471,7 +9806,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       }}>
                         <Box>
                           <Typography sx={{ fontWeight: 600, color: '#333', fontSize: 16 }}>
-                            Заказ #{order.id}
+                            {t('profile.orders.orderN', { id: order.id })}
                           </Typography>
                           <Typography sx={{ color: '#666', fontSize: 14 }}>
                             {new Date(order.createdAt).toLocaleDateString('ru-RU')}
@@ -9502,7 +9837,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                                 color: '#d50000'
                               }
                             }} 
-                            title="Удалить заказ из списка"
+                              title={t('profile.orders.removeFromList')}
                           >
                             <Delete fontSize="small" />
                           </IconButton>
@@ -9579,8 +9914,8 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         pt: 2,
                         borderTop: '1px solid #e0e0e0'
                       }}>
-                        <Typography sx={{ fontWeight: 600, color: '#333', fontSize: 16 }}>
-                          Итого:
+                               <Typography sx={{ fontWeight: 600, color: '#333', fontSize: 16 }}>
+                          {t('profile.orders.total')}
                         </Typography>
                         <Typography sx={{ fontWeight: 700, color: '#ff0844', fontSize: 18 }}>
                           {formatPrice(order.items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0)}
@@ -9636,7 +9971,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 borderBottom: '2px solid #f0f0f0',
                 pb: 2
               }}>
-                {createHeader('Мои отзывы и вопросы')}
+              {createHeader(t('profile.header.reviews'))}
               </Box>
               
               {reviewsLoading ? (
@@ -9787,7 +10122,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   borderBottom: '2px solid #f0f0f0',
                   pb: 2
                 }}>
-                  {createHeader('Список желаний')}
+              {createHeader(t('profile.header.wishlist'))}
                   
                   {localWishlist && localWishlist.length > 0 && (
                     <Button
@@ -9814,7 +10149,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         },
                       }}
                     >
-                      Очистить список желаний
+                      {t('profile.wishlist.clearButton')}
                     </Button>
                   )}
                 </Box>
@@ -9876,7 +10211,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   borderBottom: '2px solid #f0f0f0',
                   pb: 2
                 }}>
-                  {createHeader('Просмотренные товары')}
+              {createHeader(t('profile.header.viewed'))}
                   
                   {localViewed && localViewed.length > 0 && (
                     <Button
@@ -9903,7 +10238,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         },
                       }}
                     >
-                      Очистить список просмотренного
+                      {t('profile.viewed.clearButton')}
                     </Button>
                   )}
                 </Box>
@@ -9966,14 +10301,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 pb: 2,
                 width: '100%'
               }}>
-                {createHeader('Личные данные')}
+              {createHeader(t('profile.header.personalData'))}
               </Box>
               <Typography sx={{ color: '#888', fontSize: 16, mb: 3, textAlign: 'center' }}>
-                {profileLoading ? 'Загрузка данных профиля...' : 'Сохраняйте актуальную информацию, чтобы сэкономить время при новых заказах'}
+                {profileLoading ? t('profile.personal.loading') : t('profile.personal.hint')}
               </Typography>
               <Box component="form" onSubmit={handleProfileSave} sx={{ width: '100%', maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 3 }}>
                 <TextField 
-                  label="Имя" 
+                  label={t('profile.fields.firstName')} 
                   name="name" 
                   value={profileForm.name} 
                   onChange={handleProfileInput} 
@@ -9982,7 +10317,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   disabled={profileLoading}
                 />
                 <TextField 
-                  label="Фамилия" 
+                  label={t('profile.fields.lastName')} 
                   name="surname" 
                   value={profileForm.surname} 
                   onChange={handleProfileInput} 
@@ -10001,7 +10336,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   disabled={profileLoading}
                 />
                 <TextField 
-                  label="Телефон" 
+                  label={t('profile.fields.phone')} 
                   name="phone" 
                   value={profileForm.phone} 
                   onChange={handleProfileInput} 
@@ -10011,7 +10346,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   disabled={profileLoading}
                 />
                 <TextField 
-                  label="Адрес доставки" 
+                  label={t('profile.fields.address')} 
                   name="address" 
                   value={profileForm.address} 
                   onChange={handleProfileInput} 
@@ -10044,7 +10379,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     },
                   }}
                 >
-                  {profileLoading ? <CircularProgress size={24} color="inherit" /> : 'Сохранить'}
+                  {profileLoading ? <CircularProgress size={24} color="inherit" /> : t('common.save')}
                 </Button>
               </Box>
             </Box>
@@ -10076,7 +10411,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 borderBottom: '2px solid #f0f0f0',
                 pb: 2
               }}>
-                {createHeader('Настройки авторизации')}
+              {createHeader(t('profile.header.authSettings'))}
               </Box>
               
               {/* Смена пароля */}
@@ -10084,7 +10419,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                   <Lock sx={{ color: '#ff0844', fontSize: 28 }} />
                   <Typography variant="h5" sx={{ fontWeight: 600, color: '#333' }}>
-                    Смена пароля
+                    {t('profile.auth.changePassword')}
                   </Typography>
                 </Box>
                 
@@ -10092,7 +10427,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   {/* Показываем поле "Текущий пароль" только для пользователей с паролем */}
                   {profileData?.hasPassword && (
                     <TextField
-                      label="Текущий пароль"
+                      label={t('profile.auth.currentPassword')}
                       name="currentPassword"
                       type={showPasswords.current ? 'text' : 'password'}
                       value={passwordForm.currentPassword}
@@ -10127,14 +10462,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       border: '1px solid #e3f2fd' 
                     }}>
                       <Typography sx={{ color: '#1976d2', fontSize: 14, fontWeight: 500 }}>
-                        💡 Вы зарегистрировались через {profileData?.googleId ? 'Google' : 'Facebook'}. 
-                        Для установки пароля просто введите новый пароль ниже.
+                        {t('profile.auth.oauthInfo', { provider: profileData?.googleId ? 'Google' : 'Facebook' })}
                       </Typography>
                     </Box>
                   )}
                   
                   <TextField
-                    label="Новый пароль"
+                    label={t('profile.auth.newPassword')}
                     name="newPassword"
                     type={showPasswords.new ? 'text' : 'password'}
                     value={passwordForm.newPassword}
@@ -10159,7 +10493,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   />
                   
                   <TextField
-                    label="Подтвердите новый пароль"
+                    label={t('profile.auth.confirmNewPassword')}
                     name="confirmPassword"
                     type={showPasswords.confirm ? 'text' : 'password'}
                     value={passwordForm.confirmPassword}
@@ -10206,7 +10540,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       },
                     }}
                   >
-                    {passwordLoading ? <CircularProgress size={24} color="inherit" /> : 'Сменить пароль'}
+                    {passwordLoading ? <CircularProgress size={24} color="inherit" /> : t('profile.auth.changePassword')}
                   </Button>
                 </Box>
               </Box>
@@ -10216,7 +10550,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                   <AccountCircle sx={{ color: '#ff0844', fontSize: 28 }} />
                   <Typography variant="h5" sx={{ fontWeight: 600, color: '#333' }}>
-                    Подключенные аккаунты
+                    {t('profile.auth.connectedAccounts')}
                   </Typography>
                 </Box>
                 
@@ -10238,7 +10572,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           Google
                         </Typography>
                         <Typography sx={{ color: '#666', fontSize: 14 }}>
-                          {profileData?.googleId ? 'Подключен' : 'Не подключен'}
+                          {profileData?.googleId ? t('profile.auth.connected') : t('profile.auth.notConnected')}
                         </Typography>
                       </Box>
                     </Box>
@@ -10263,7 +10597,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           },
                         }}
                       >
-                        {profileData?.googleId ? 'Отключить' : 'Подключить'}
+                        {profileData?.googleId ? t('profile.auth.disconnect') : t('profile.auth.connect')}
                       </Button>
                   </Box>
                   
@@ -10284,7 +10618,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           Facebook
                         </Typography>
                         <Typography sx={{ color: '#666', fontSize: 14 }}>
-                          {profileData?.facebookId ? 'Подключен' : 'Не подключен'}
+                          {profileData?.facebookId ? t('profile.auth.connected') : t('profile.auth.notConnected')}
                         </Typography>
                       </Box>
                     </Box>
@@ -10309,7 +10643,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           },
                         }}
                       >
-                        {profileData?.facebookId ? 'Отключить' : 'Подключить'}
+                        {profileData?.facebookId ? t('profile.auth.disconnect') : t('profile.auth.connect')}
                       </Button>
                   </Box>
                 </Box>
@@ -10437,11 +10771,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
           borderBottom: '2px solid #f0f0f0',
           mb: 2
         }}>
-          Выйти из аккаунта?
+            {t('profile.dialogs.logout.title')}
         </DialogTitle>
         <DialogContent sx={{ textAlign: 'center', pb: 3, px: 4 }}>
           <Typography sx={{ fontSize: 16, color: '#666', lineHeight: 1.5 }}>
-            Вы уверены, что хотите выйти из аккаунта?
+            {t('profile.dialogs.logout.message')}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', pb: 3, px: 4, gap: 2 }}>
@@ -10467,7 +10801,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             }}
             variant="contained"
           >
-            Отмена
+            {t('common.cancel')}
           </Button>
           <Button 
             onClick={handleLogoutConfirm} 
@@ -10491,7 +10825,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             }}
             variant="contained"
           >
-            Выйти
+            {t('profile.dialogs.logout.confirm')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -10518,11 +10852,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
           borderBottom: '2px solid #ffebee',
           mb: 2
         }}>
-          Удалить профиль?
+            {t('profile.dialogs.deleteProfile.title')}
         </DialogTitle>
         <DialogContent sx={{ textAlign: 'center', pb: 3, px: 4 }}>
           <Typography sx={{ fontSize: 16, color: '#666', lineHeight: 1.5, mb: 2 }}>
-            Вы уверены, что хотите полностью удалить свой профиль?
+            {t('profile.dialogs.deleteProfile.message')}
           </Typography>
           <Typography sx={{ 
             color: '#d32f2f', 
@@ -10533,7 +10867,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             borderRadius: 2,
             border: '1px solid #ffcdd2'
           }}>
-            ⚠️ Это действие нельзя отменить. Все ваши данные будут удалены безвозвратно.
+            {t('profile.dialogs.deleteProfile.warning')}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', pb: 3, px: 4, gap: 2 }}>
@@ -10559,7 +10893,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             }}
             variant="contained"
           >
-            Отмена
+            {t('common.cancel')}
           </Button>
           <Button 
             onClick={handleDeleteProfileConfirm} 
@@ -10583,7 +10917,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             }}
             variant="contained"
           >
-            Удалить
+            {t('common.delete')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -10610,11 +10944,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
           borderBottom: '2px solid #f0f0f0',
           mb: 2
         }}>
-          Очистить список желаний?
+            {t('profile.dialogs.clearWishlist.title')}
         </DialogTitle>
         <DialogContent sx={{ textAlign: 'center', pb: 3, px: 4 }}>
           <Typography sx={{ fontSize: 16, color: '#666', lineHeight: 1.5 }}>
-            Вы уверены, что хотите полностью очистить список желаний?
+            {t('profile.dialogs.clearWishlist.message')}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', pb: 3, px: 4, gap: 2 }}>
@@ -10640,7 +10974,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             }}
             variant="contained"
           >
-            Отмена
+            {t('common.cancel')}
           </Button>
           <Button 
             onClick={handleClearConfirm} 
@@ -10664,7 +10998,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             }}
             variant="contained"
           >
-            Очистить
+            {t('common.clear')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -10691,11 +11025,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
           borderBottom: '2px solid #f0f0f0',
           mb: 2
         }}>
-          Очистить список просмотренного?
+            {t('profile.dialogs.clearViewed.title')}
         </DialogTitle>
         <DialogContent sx={{ textAlign: 'center', pb: 3, px: 4 }}>
           <Typography sx={{ fontSize: 16, color: '#666', lineHeight: 1.5 }}>
-            Вы уверены, что хотите очистить список просмотренных товаров?
+            {t('profile.dialogs.clearViewed.message')}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', pb: 3, px: 4, gap: 2 }}>
@@ -10721,7 +11055,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             }}
             variant="contained"
           >
-            Отмена
+            {t('common.cancel')}
           </Button>
           <Button 
             onClick={handleClearViewedConfirm} 
@@ -10745,19 +11079,19 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             }}
             variant="contained"
           >
-            Очистить
+            {t('common.clear')}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Snackbar open={profileSaved} autoHideDuration={3000} onClose={() => setProfileSaved(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} sx={{ zIndex: 20000 }}>
         <Alert onClose={() => setProfileSaved(false)} severity="success" sx={{ width: '100%', fontWeight: 600, fontSize: 16 }}>
-          Личные данные сохранены
+          {t('profile.toasts.profileSaved')}
         </Alert>
       </Snackbar>
       <Snackbar open={passwordSaved} autoHideDuration={3000} onClose={() => setPasswordSaved(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} sx={{ zIndex: 20000 }}>
         <Alert onClose={() => setPasswordSaved(false)} severity="success" sx={{ width: '100%', fontWeight: 600, fontSize: 16 }}>
-          Пароль успешно изменен
+          {t('profile.toasts.passwordChanged')}
         </Alert>
       </Snackbar>
     </>

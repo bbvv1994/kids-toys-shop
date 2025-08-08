@@ -1,0 +1,390 @@
+{
+  "common": {
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "cancel": "ביטול",
+    "clear": "נקה",
+    "save": "שמור",
+    "edit": "ערוך",
+    "delete": "מחק",
+    "add": "הוסף",
+    "search": "חיפוש",
+    "filter": "סינון",
+    "sort": "מיון",
+    "price": "מחיר",
+    "quantity": "כמות",
+    "total": "סה\"כ",
+    "back": "חזור",
+    "next": "הבא",
+    "previous": "קודם",
+    "close": "סגור",
+    "confirm": "אישור",
+    "yes": "כן",
+    "no": "לא"
+  },
+  "profile": {
+    "menu": {
+      "myProfile": "הפרופיל שלי",
+      "notifications": "התראות",
+      "orders": "ההזמנות שלי",
+      "wishlist": "רשימת מועדפים",
+      "viewed": "מוצרים שנצפו",
+      "personalData": "פרטים אישיים",
+      "reviews": "הביקורות והשאלות שלי",
+      "authSettings": "הגדרות התחברות",
+      "logout": "התנתק מהחשבון"
+    },
+    "header": {
+      "myProfile": "הפרופיל שלי",
+      "notifications": "התראות",
+      "orders": "ההזמנות שלי",
+      "reviews": "הביקורות והשאלות שלי",
+      "wishlist": "רשימת מועדפים",
+      "viewed": "מוצרים שנצפו",
+      "personalData": "פרטים אישיים",
+      "authSettings": "הגדרות התחברות"
+    },
+    "buttons": {
+      "edit": "ערוך",
+      "deleteProfile": "מחק פרופיל"
+    },
+    "sections": {
+      "personalInfo": "מידע אישי",
+      "stats": "סטטיסטיקה"
+    },
+    "personal": {
+      "loading": "טוען נתוני פרופיל...",
+      "hint": "שמור פרטים מעודכנים כדי לחסוך זמן בהזמנות חדשות"
+    },
+    "orders": {
+      "empty": "עדיין אין לך הזמנות",
+      "orderN": "הזמנה #{{id}}",
+      "removeFromList": "הסר הזמנה מהרשימה",
+      "total": "סך הכל:"
+    },
+    "notifications": {
+      "deleteAll": "מחק הכל"
+    },
+    "auth": {
+      "changePassword": "שינוי סיסמה",
+      "oauthInfo": "💡 נרשמת באמצעות {{provider}}. כדי להגדיר סיסמה הזן סיסמה חדשה למטה.",
+      "currentPassword": "סיסמה נוכחית",
+      "newPassword": "סיסמה חדשה",
+      "confirmNewPassword": "אשר סיסמה חדשה",
+      "connectedAccounts": "חשבונות מחוברים",
+      "connected": "מחובר",
+      "notConnected": "לא מחובר",
+      "connect": "חבר",
+      "disconnect": "נתק"
+    },
+    "fields": {
+      "firstName": "שם",
+      "lastName": "שם משפחה",
+      "phone": "טלפון",
+      "address": "כתובת משלוח",
+      "registeredAt": "תאריך הרשמה"
+    },
+    "stats": {
+      "cartItems": "מוצרים בעגלה",
+      "wishlistItems": "מועדפים",
+      "viewedItems": "מוצרים שנצפו"
+    },
+    "value": {
+      "notSpecified": "לא צוין",
+      "notSpecifiedF": "לא צוינה"
+    },
+    "dialogs": {
+      "logout": {
+        "title": "להתנתק מהחשבון?",
+        "message": "האם אתה בטוח שברצונך להתנתק?",
+        "confirm": "התנתק"
+      },
+      "deleteProfile": {
+        "title": "למחוק פרופיל?",
+        "message": "האם אתה בטוח שברצונך למחוק את הפרופיל?",
+        "warning": "⚠️ פעולה זו אינה ניתנת לביטול. כל הנתונים יימחקו לצמיתות."
+      },
+      "clearWishlist": {
+        "title": "לנקות את רשימת המועדפים?",
+        "message": "האם אתה בטוח שברצונך לנקות את רשימת המועדפים?"
+      },
+      "clearViewed": {
+        "title": "לנקות את רשימת הנצפים?",
+        "message": "האם אתה בטוח שברצונך לנקות את רשימת המוצרים שנצפו?"
+      }
+    },
+    "toasts": {
+      "profileSaved": "הנתונים האישיים נשמרו",
+      "passwordChanged": "הסיסמה שונתה בהצלחה"
+    },
+    "wishlist": {
+      "clearButton": "נקה רשימת מועדפים"
+    },
+    "viewed": {
+      "clearButton": "נקה רשימת נצפים"
+    },
+    "noProducts": "לא נמצאו מוצרים",
+    "noProductsDescription": "נסה לשנות את המסננים או להוסיף מוצר חדש"
+  },
+  "navigation": {
+    "home": "דף הבית",
+    "catalog": "קטלוג",
+    "reviews": "ביקורות לקוחות",
+    "about": "אודות",
+    "contacts": "צור קשר",
+    "cart": "עגלת קניות",
+    "wishlist": "רשימת מועדפים",
+    "account": "חשבון",
+    "login": "התחבר",
+    "register": "הרשמה",
+    "logout": "התנתק",
+    "admin": "פאנל מנהל"
+  },
+  "header": {
+    "searchPlaceholder": "חיפוש מוצרים...",
+    "language": "שפה",
+    "currency": "מטבע",
+    "login": "כניסה"
+  },
+  "footer": {
+    "about": "אודות החברה",
+    "delivery": "משלוח",
+    "payment": "תשלום",
+    "returns": "החזרות",
+    "support": "תמיכה",
+    "privacy": "פרטיות",
+    "terms": "תנאי שימוש"
+  },
+  "home": {
+    "newArrivals": "חדשים",
+    "popular": "פופולריים"
+  },
+  "catalog": {
+    "title": "קטלוג מוצרים",
+    "foundProducts": "נמצאו מוצרים: {{count}}",
+    "sortBy": "מיין לפי",
+    "sortOptions": {
+      "popular": "לפי פופולריות",
+      "newest": "לפי חדשות",
+      "priceLow": "מזול ליקר",
+      "priceHigh": "מיקר לזול",
+      "nameAZ": "לפי שם א-ת",
+      "nameZA": "לפי שם ת-א"
+    },
+    "itemsPerPage": "הצג בעמוד",
+    "viewMode": {
+      "grid": "בתיבות",
+      "list": "ברשימה"
+    },
+    "noResults": {
+      "search": "לא נמצא כלום לחיפוש \"{{query}}\"",
+      "default": "לא נמצאו מוצרים",
+      "noItems": "אין מוצרים להצגה"
+    },
+    "pagination": {
+      "prev": "קודם",
+      "next": "הבא",
+      "page": "עמוד {{current}} מתוך {{total}}"
+    },
+    "scrollToTop": "למעלה",
+    "categoriesButton": "קטגוריות",
+    "filtersButton": "מסננים"
+  },
+  "breadcrumbs": {
+    "home": "דף הבית",
+    "catalog": "קטלוג",
+    "category": "קטגוריה",
+    "subcategory": "תת קטגוריה"
+  },
+  "category": {
+    "title": "קטגוריות",
+    "backToCatalog": "חזור לקטלוג",
+    "foundSubcategories": "נמצאו תת קטגוריות: {{count}}",
+    "subcategoriesCount": "תת קטגוריות ({{count}}):",
+    "selectCategory": "בחר קטגוריה",
+    "selectCategoryDescription": "בחר קטגוריה מהרשימה השמאלית לצפייה במידע מפורט",
+    "notFound": "קטגוריה לא נמצאה",
+    "noSubcategories": "אין תת קטגוריות בקטגוריה זו",
+    "noProductsSearch": "לא נמצאו תוצאות עבור \"{{query}}\"",
+    "noProducts": "לא נמצאו מוצרים"
+  },
+  "subcategory": {
+    "notFound": "תת קטגוריה לא נמצאה",
+    "backToCatalog": "חזור לקטלוג",
+    "noProductsSearch": "לא נמצאו תוצאות עבור \"{{query}}\"",
+    "noProducts": "אין מוצרים להצגה"
+  },
+  "product": {
+    "addToCart": "הוסף לעגלה",
+    "addToWishlist": "הוסף למועדפים",
+    "removeFromWishlist": "הסר מהמועדפים",
+    "outOfStock": "אזל המלאי",
+    "inStock": "במלאי",
+    "description": "תיאור",
+    "characteristics": "מאפיינים",
+    "reviews": "ביקורות",
+    "questions": "שאלות ותשובות",
+    "relatedProducts": "מוצרים דומים",
+    "brand": "מותג",
+    "country": "מדינה",
+    "article": "מאמר",
+    "ageGroup": "קבוצת גיל",
+    "gender": "מגדר",
+    "dimensions": "מידות",
+    "height": "גובה",
+    "length": "אורך",
+    "width": "רוחב"
+  },
+  "cart": {
+    "title": "עגלת קניות",
+    "empty": "העגלה ריקה",
+    "items": "פריטים",
+    "item": "פריט",
+    "items_2_4": "פריטים",
+    "items_5_20": "פריטים",
+    "subtotal": "סכום ביניים",
+    "shipping": "משלוח",
+    "tax": "מס",
+    "total": "סה\"כ",
+    "checkout": "השלם הזמנה",
+    "continueShopping": "המשך בקניות",
+    "removeItem": "הסר פריט",
+    "updateQuantity": "עדכן כמות"
+  },
+  "checkout": {
+    "title": "השלמת הזמנה",
+    "personalInfo": "מידע אישי",
+    "deliveryInfo": "מידע משלוח",
+    "paymentInfo": "מידע תשלום",
+    "orderSummary": "סיכום הזמנה",
+    "firstName": "שם פרטי",
+    "lastName": "שם משפחה",
+    "email": "אימייל",
+    "phone": "טלפון",
+    "address": "כתובת",
+    "city": "עיר",
+    "postalCode": "מיקוד",
+    "country": "מדינה",
+    "notes": "הערות",
+    "placeOrder": "השלם הזמנה"
+  },
+  "auth": {
+    "login": "התחברות",
+    "register": "הרשמה",
+    "email": "אימייל",
+    "password": "סיסמה",
+    "confirmPassword": "אישור סיסמה",
+    "forgotPassword": "שכחת סיסמה?",
+    "rememberMe": "זכור אותי",
+    "loginButton": "התחבר",
+    "registerButton": "הירשם",
+    "alreadyHaveAccount": "כבר יש לך חשבון?",
+    "dontHaveAccount": "אין לך חשבון?",
+    "invalidCredentials": "אימייל או סיסמה שגויים",
+    "passwordMismatch": "הסיסמאות אינן תואמות"
+  },
+  "admin": {
+    "dashboard": "לוח בקרה",
+    "products": "מוצרים",
+    "categories": "קטגוריות",
+    "orders": "הזמנות",
+    "users": "משתמשים",
+    "reviews": "ביקורות",
+    "settings": "הגדרות",
+    "addProduct": "הוסף מוצר",
+    "editProduct": "ערוך מוצר",
+    "addCategory": "הוסף קטגוריה",
+    "editCategory": "ערוך קטגוריה"
+  },
+  "categories": {
+    "toys": "צעצועים",
+    "constructors": "קונסטרוקטורים",
+    "puzzles": "פאזלים",
+    "creativity": "יצירה",
+    "stationery": "כלי כתיבה",
+    "transport": "תחבורה",
+    "water_recreation": "נופש במים",
+    "board_games": "משחקי קופסה",
+    "educational_games": "משחקים חינוכיים",
+    "sales": "מבצעים",
+    "subcategories": {
+      "toys": {
+        "for_babies": "צעצועיםטנטנים",
+        "dolls": "בובות",
+        "toy_weapons": "נשק צעצוע",
+        "tracks_parking_railway": "מסלולים, חניות ורכבות",
+        "soft_toys": "צעצועים רכים",
+        "antistress_squishy": "צעצועים נגד לחץ וסקווישי",
+        "active_games": "משחקים פעילים",
+        "thematic_sets": "ערכות משחק תמטיות",
+        "decorative_cosmetics": "קוסמטיקה דקורטיבית ותכשיטים",
+        "cars_transport": "מכוניות ותחבורה אחרת",
+        "robots_transformers": "רובוטים וטרנספורמרים",
+        "game_figures": "דמויות משחק",
+        "sandbox_toys": "צעצועים לארגז חול",
+        "balls": "כדורים",
+        "radio_controlled": "צעצועים בשלט רחוק"
+      },
+      "constructors": {
+        "lego_boys": "לגו לבנים",
+        "lego_girls": "לגו לבנות",
+        "metal_constructors": "קונסטרוקטורים מתכתיים",
+        "lego_large_blocks": "לגו בלוקים גדולים"
+      },
+      "puzzles": {
+        "for_adults": "פאזלים למבוגרים",
+        "for_children": "פאזלים לילדים",
+        "magnetic": "פאזלים מגנטיים",
+        "floor": "פאזלים לרצפה",
+        "for_babies": "פאזליםטנטנים"
+      },
+      "creativity": {
+        "modeling_sets": "ערכות פיסול",
+        "stickers": "מדבקות",
+        "slimes": "סליים וסליימס",
+        "kinetic_sand": "חול קינטי",
+        "drawing": "ציור",
+        "creativity_sets": "ערכות יצירה",
+        "coloring": "ספרי צביעה"
+      },
+      "stationery": {
+        "school_bags": "תיקים לבית ספר",
+        "kindergarten_bags": "תיקים לגני ילדים",
+        "pencil_cases": "קלמרים",
+        "pens_pencils": "עטים ועיפרונות",
+        "sharpeners": "מחדדים",
+        "markers": "טושים ומרקרים",
+        "paints": "צבעים",
+        "brushes_accessories": "מברשות ואביזרים",
+        "keychains": "מחזיקי מפתחות"
+      },
+      "transport": {
+        "scooters": "קורקינטים לילדים",
+        "bicycles": "אופניים",
+        "walkers": "הליכונים",
+        "balance_bikes": "אופני איזון"
+      },
+      "water_recreation": {
+        "pools": "בריכות",
+        "mattresses_floats": "מזרנים ורפסודות",
+        "inflatable_circles": "עיגולים מתנפחים",
+        "armbands_vests": "שרוולים וגופיות",
+        "swimming_accessories": "אביזרי שחייה",
+        "rackets": "מחבטים",
+        "beach_balls": "כדורי חוף וצעצועי שחייה",
+        "pumps": "משאבות למזרנים"
+      },
+      "board_games": {
+        "board_games": "משחקי קופסה"
+      },
+      "educational_games": {
+        "educational_games": "משחקים חינוכיים"
+      },
+      "sales": {
+        "weekly_discounts": "הנחות השבוע",
+        "sale_items": "מוצרים במבצע"
+      }
+    }
+  }
+} 

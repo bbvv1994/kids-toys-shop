@@ -2,6 +2,8 @@ import React from 'react';
 import { Box, Typography, Card, CardContent, Grid } from '@mui/material';
 import { Category as CategoryIcon } from '@mui/icons-material';
 import { getCategoryClassName } from './ProductList';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 // Маппинг: подкатегория -> реальное имя файла в public
 const subcategoryImageMap = {
@@ -28,6 +30,58 @@ function getSubcategoryImageFileName(subCategory) {
 }
 
 function CategoryDetails({ category }) {
+  const { t } = useTranslation();
+  
+  // Функция для перевода подкатегорий
+  const translateSubcategory = (parentCategory, subcategoryName) => {
+    const categoryMap = {
+      'Игрушки': 'toys',
+      'Конструкторы': 'constructors', 
+      'Пазлы': 'puzzles',
+      'Творчество': 'creativity',
+      'Канцтовары': 'stationery',
+      'Транспорт': 'transport',
+      'Отдых на воде': 'water_recreation',
+      'Настольные игры': 'board_games',
+      'Развивающие игры': 'educational_games',
+      'Акции': 'sales'
+    };
+    
+    const subcategoryMap = {
+      // Игрушки
+      'Игрушки для самых маленьких': 'for_babies',
+      'Куклы': 'dolls',
+      'Оружие игрушечное': 'toy_weapons',
+      'Треки, паркинги и жд': 'tracks_parking_railway',
+      'Мягкие игрушки': 'soft_toys',
+      'Игрушки - антистресс и сквиши': 'antistress_squishy',
+      'Активные игры': 'active_games',
+      'Тематические игровые наборы': 'thematic_sets',
+      'Декоративная косметика и украшения': 'decorative_cosmetics',
+      'Машинки и другой транспорт': 'cars_transport',
+      'Роботы и трансформеры': 'robots_transformers',
+      'Игровые фигурки': 'game_figures',
+      'Игрушки для песочницы': 'sandbox_toys',
+      'Шарики': 'balls',
+      'Игрушки на радиоуправлении': 'radio_controlled',
+      // Конструкторы
+      'Lego для мальчиков': 'lego_boys',
+      'Lego для девочек': 'lego_girls',
+      'Металлические конструкторы': 'metal_constructors',
+      'Lego крупные блоки': 'lego_large_blocks',
+      // Другие категории могут быть добавлены по аналогии
+    };
+    
+    const parentKey = categoryMap[parentCategory];
+    const subcategoryKey = subcategoryMap[subcategoryName];
+    
+    if (parentKey && subcategoryKey) {
+      return t(`categories.subcategories.${parentKey}.${subcategoryKey}`, subcategoryName);
+    }
+    
+    return subcategoryName;
+  };
+  
   if (!category) {
     return (
       <Box sx={{
@@ -40,10 +94,10 @@ function CategoryDetails({ category }) {
       }}>
         <CategoryIcon sx={{ fontSize: 64, mb: 2, opacity: 0.5 }} />
         <Typography variant="h6" sx={{ mb: 1 }}>
-          Выберите категорию
+          {t('category.selectCategory')}
         </Typography>
         <Typography variant="body2">
-          Выберите категорию из списка слева для просмотра подробной информации
+          {t('category.selectCategoryDescription')}
         </Typography>
       </Box>
     );
@@ -66,7 +120,7 @@ function CategoryDetails({ category }) {
       {category.sub && category.sub.length > 0 ? (
         <Box>
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#34495e' }}>
-            Подкатегории ({category.sub.length}):
+            {t('category.subcategoriesCount', { count: category.sub.length })}
           </Typography>
           <Grid container spacing={3} sx={{
             pl: { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 },
@@ -101,7 +155,7 @@ function CategoryDetails({ category }) {
                         }}
                       />
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {subCategory}
+                        {translateSubcategory(category.name, subCategory)}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -112,7 +166,7 @@ function CategoryDetails({ category }) {
         </Box>
       ) : (
         <Typography variant="body1" sx={{ color: '#7f8c8d' }}>
-          В этой категории нет подкатегорий
+          {t('category.noSubcategories')}
         </Typography>
       )}
     </Box>
