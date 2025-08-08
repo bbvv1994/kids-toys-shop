@@ -39,12 +39,23 @@ function ProductList({ products, onProductDeleted, onRefresh, user, onProductCli
 
   const categories = ['all', ...new Set(products.map(p => p.category).filter(Boolean))];
   const ageGroups = ['all', ...new Set(products.map(p => p.ageGroup).filter(Boolean))];
+  
+  // Маппинг английских кодов на русские названия (как хранятся в БД)
+  const genderMapping = {
+    'boy': 'Мальчик',
+    'girl': 'Девочка', 
+    'unisex': 'Универсальный'
+  };
 
   const filteredProducts = products
     .filter(product => {
       if (filterCategory !== 'all' && product.category !== filterCategory) return false;
       if (filterAgeGroup !== 'all' && product.ageGroup !== filterAgeGroup) return false;
-      if (selectedGenders.length > 0 && !selectedGenders.includes(product.gender)) return false;
+      if (selectedGenders.length > 0) {
+        // Преобразуем выбранные английские коды в русские названия
+        const selectedRussianGenders = selectedGenders.map(code => genderMapping[code]);
+        if (!selectedRussianGenders.includes(product.gender)) return false;
+      }
       return true;
     })
     .sort((a, b) => {

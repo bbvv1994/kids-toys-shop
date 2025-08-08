@@ -76,11 +76,34 @@ class ProductionImageHandler {
     
     for (const file of files) {
       if (this.isImageFile(file.originalname)) {
+        // Проверяем, есть ли buffer
+        if (!file.buffer) {
+          console.error(`❌ No buffer available for file: ${file.originalname}`);
+          results.push({
+            success: false,
+            error: 'No file buffer available',
+            originalName: file.originalname
+          });
+          continue;
+        }
+        
         const result = await this.processImageFromBuffer(file.buffer, file.originalname);
         results.push(result);
       } else {
         // Для не-изображений просто сохраняем как есть
         const filename = `${Date.now()}-${Math.random().toString(36).substring(2)}${path.extname(file.originalname)}`;
+        
+        // Проверяем, есть ли buffer
+        if (!file.buffer) {
+          console.error(`❌ No buffer available for file: ${file.originalname}`);
+          results.push({
+            success: false,
+            error: 'No file buffer available',
+            originalName: file.originalname
+          });
+          continue;
+        }
+        
         results.push({
           success: true,
           filename,
@@ -103,8 +126,11 @@ class ProductionImageHandler {
     const errors = [];
     
     for (const file of files) {
-      if (file.size > this.maxFileSize) {
-        errors.push(`File ${file.originalname} is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is ${this.maxFileSize / 1024 / 1024}MB`);
+      // Проверяем размер файла (может быть в file.size или file.buffer.length)
+      const fileSize = file.size || (file.buffer ? file.buffer.length : 0);
+      
+      if (fileSize > this.maxFileSize) {
+        errors.push(`File ${file.originalname} is too large (${(fileSize / 1024 / 1024).toFixed(1)}MB). Maximum size is ${this.maxFileSize / 1024 / 1024}MB`);
       }
     }
 

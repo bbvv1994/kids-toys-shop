@@ -101,8 +101,30 @@ class ProductionUploadMiddleware {
 
       console.log(`Processing single file: ${req.file.originalname}`);
 
+      // Проверяем, есть ли buffer (production) или нужно читать с диска (development)
+      let fileBuffer = req.file.buffer;
+      if (!fileBuffer && req.file.path) {
+        // В development режиме читаем файл с диска
+        console.log(`Reading file from disk: ${req.file.path}`);
+        fileBuffer = fs.readFileSync(req.file.path);
+      }
+
+      if (!fileBuffer) {
+        console.error('No file buffer or path available');
+        return res.status(400).json({ 
+          error: 'File processing failed', 
+          details: 'No file data available' 
+        });
+      }
+
+      // Создаем временный объект файла для проверки размера
+      const tempFile = {
+        ...req.file,
+        buffer: fileBuffer
+      };
+
       // Проверяем размер файла
-      const sizeErrors = this.imageHandler.checkFileSizes([req.file]);
+      const sizeErrors = this.imageHandler.checkFileSizes([tempFile]);
       if (sizeErrors.length > 0) {
         return res.status(400).json({ 
           error: 'File size validation failed', 
@@ -111,7 +133,7 @@ class ProductionUploadMiddleware {
       }
 
       // Обрабатываем файл
-      const results = await this.imageHandler.processMultipleImages([req.file]);
+      const results = await this.imageHandler.processMultipleImages([tempFile]);
       const result = results[0];
 
       if (result.success) {

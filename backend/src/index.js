@@ -3192,7 +3192,7 @@ app.post('/api/categories', authMiddleware, upload.single('image'), productionUp
   }
 });
 
-app.patch('/api/categories/:id/image', authMiddleware, upload.single('image'), imageMiddleware.processSingleImage.bind(imageMiddleware), async (req, res) => {
+app.patch('/api/categories/:id/image', authMiddleware, upload.single('image'), productionUploadMiddleware.processSingleImage.bind(productionUploadMiddleware), async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
@@ -3207,6 +3207,7 @@ app.patch('/api/categories/:id/image', authMiddleware, upload.single('image'), i
     });
     res.json(updated);
   } catch (e) {
+    console.error('API: Ошибка загрузки изображения категории:', e);
     res.status(500).json({ error: 'Ошибка загрузки изображения категории' });
   }
 });

@@ -162,6 +162,12 @@ import AdminCategories from './components/AdminCategories';
 import AdminQuestions from './components/AdminQuestions';
 import PublicQuestions from './components/PublicQuestions';
 
+// Глобальный маппинг английских кодов на русские названия для фильтра по полу
+const genderMapping = {
+  'boy': 'Мальчик',
+  'girl': 'Девочка', 
+  'unisex': 'Универсальный'
+};
 
 // Создаем яркую тему для детского магазина
 const theme = createTheme({
@@ -1761,8 +1767,11 @@ const theme = createTheme({
                           <Checkbox
                             checked={selectedGenders.includes(opt.value)}
                             onChange={e => {
-                              if (e.target.checked) onGendersChange([...selectedGenders, opt.value]);
-                              else onGendersChange(selectedGenders.filter(g => g !== opt.value));
+                              if (e.target.checked) {
+                                onGendersChange([...selectedGenders, opt.value]);
+                              } else {
+                                onGendersChange(selectedGenders.filter(g => g !== opt.value));
+                              }
                             }}
                           />
                         }
@@ -2411,13 +2420,20 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   };
 
   // Фильтрация товаров по поисковому запросу
+
   const filteredProducts = products.filter(product => {
     // Фильтр по брендам
     if (selectedBrands && selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) return false;
     // Фильтр по возрасту
     if (selectedAgeGroups && selectedAgeGroups.length > 0 && !selectedAgeGroups.includes(product.ageGroup)) return false;
     // Фильтр по полу
-    if (selectedGenders && selectedGenders.length > 0 && !selectedGenders.includes(product.gender)) return false;
+    if (selectedGenders && selectedGenders.length > 0) {
+      // Преобразуем выбранные английские коды в русские названия
+      const selectedRussianGenders = selectedGenders.map(code => genderMapping[code]);
+      if (!selectedRussianGenders.includes(product.gender)) {
+        return false;
+      }
+    }
     // Поиск (если есть)
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase();
