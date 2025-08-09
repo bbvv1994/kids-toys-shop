@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -24,6 +25,7 @@ import {
 import { Star, Store, ThumbUp, ThumbDown, CheckCircle, Cancel, Visibility, VisibilityOff, Delete } from '@mui/icons-material';
 
 const AdminShopReviews = () => {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -52,10 +54,10 @@ const AdminShopReviews = () => {
         const data = await response.json();
         setReviews(data);
       } else {
-        setError('Ошибка загрузки отзывов');
+        setError(t('reviews.admin.loadError'));
       }
     } catch (err) {
-      setError('Ошибка сети');
+      setError(t('reviews.admin.networkError'));
     } finally {
       setLoading(false);
     }
@@ -84,10 +86,10 @@ const AdminShopReviews = () => {
       } else {
         const errorData = await response.json();
         console.error('Moderation error:', errorData);
-        setError(errorData.error || 'Ошибка модерации отзыва');
+        setError(errorData.error || t('reviews.admin.moderationError'));
       }
     } catch (err) {
-      setError('Ошибка сети');
+      setError(t('reviews.admin.networkError'));
     } finally {
       setModerating(false);
     }
@@ -117,10 +119,10 @@ const AdminShopReviews = () => {
         await loadReviews();
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Ошибка изменения видимости отзыва');
+        setError(errorData.error || t('reviews.admin.moderationError'));
       }
     } catch (err) {
-      setError('Ошибка сети');
+      setError(t('reviews.admin.networkError'));
     } finally {
       setModerating(false);
     }
@@ -146,10 +148,10 @@ const AdminShopReviews = () => {
       } else {
         const errorData = await response.json();
         console.error('Delete error:', errorData);
-        setError(errorData.error || 'Ошибка удаления отзыва');
+        setError(errorData.error || t('reviews.admin.deleteError'));
       }
     } catch (err) {
-      setError('Ошибка сети');
+      setError(t('reviews.admin.networkError'));
     } finally {
       setModerating(false);
     }
@@ -188,10 +190,10 @@ const AdminShopReviews = () => {
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'pending': return 'На модерации';
-      case 'published': return 'Опубликован';
-      case 'rejected': return 'Отклонен';
-      case 'hidden': return 'Скрыт';
+      case 'pending': return t('reviews.admin.status.pending');
+      case 'published': return t('reviews.admin.status.approved');
+      case 'rejected': return t('reviews.admin.status.rejected');
+      case 'hidden': return t('reviews.admin.status.hidden');
       default: return status;
     }
   };
@@ -232,10 +234,10 @@ const AdminShopReviews = () => {
           <Store color="primary" sx={{ fontSize: 40 }} />
           <Box>
             <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: '#3f51b5' }}>
-              Модерация отзывов о магазине
+              {t('reviews.admin.shopReviews')}
             </Typography>
             <Typography variant="body1" color="textSecondary">
-              Управление отзывами клиентов о магазине
+              {t('reviews.admin.shopReviews')}
             </Typography>
           </Box>
         </Box>
@@ -243,7 +245,7 @@ const AdminShopReviews = () => {
         {/* Статистика */}
         <Box sx={{ mb: 4, p: 3, bgcolor: '#f5f5f5', borderRadius: 2 }}>
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-            Статистика отзывов
+            {t('reviews.admin.shopReviews')}
           </Typography>
           <Grid container spacing={4}>
             <Grid item xs={12} sm={2}>
@@ -252,7 +254,7 @@ const AdminShopReviews = () => {
                   {reviews.filter(r => r.status !== 'archived').length}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Всего отзывов
+                  {t('reviews.admin.shopReviews')}
                 </Typography>
               </Box>
             </Grid>
@@ -262,7 +264,7 @@ const AdminShopReviews = () => {
                   {reviews.filter(r => r.status === 'pending').length}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  На модерации
+                  {t('reviews.admin.status.pending')}
                 </Typography>
               </Box>
             </Grid>
@@ -272,7 +274,7 @@ const AdminShopReviews = () => {
                   {reviews.filter(r => r.status === 'published').length}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Опубликовано
+                  {t('reviews.admin.status.approved')}
                 </Typography>
               </Box>
             </Grid>
@@ -282,7 +284,7 @@ const AdminShopReviews = () => {
                   {reviews.filter(r => r.status === 'rejected').length}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Отклонено
+                  {t('reviews.admin.status.rejected')}
                 </Typography>
               </Box>
             </Grid>
@@ -292,7 +294,7 @@ const AdminShopReviews = () => {
                   {reviews.filter(r => r.status === 'hidden').length}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Скрыто
+                  {t('reviews.admin.status.hidden')}
                 </Typography>
               </Box>
             </Grid>
@@ -304,10 +306,10 @@ const AdminShopReviews = () => {
         {reviews.filter(r => r.status !== 'archived').length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 6, minHeight: '400px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <Typography variant="h6" color="textSecondary" sx={{ mb: 2 }}>
-              Нет отзывов для модерации
+              {t('reviews.shop.noReviews')}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              Все отзывы обработаны
+              {t('reviews.shop.noReviews')}
             </Typography>
           </Box>
         ) : (
@@ -330,7 +332,7 @@ const AdminShopReviews = () => {
                       <Typography variant="h6" component="h3" sx={{ 
                         color: review.status === 'hidden' ? '#999' : 'inherit'
                       }}>
-                        {review.user?.name || 'Анонимный пользователь'}
+                        {review.user?.name || t('reviews.shop.anonymousUser')}
                       </Typography>
                     </Box>
                   }
@@ -347,7 +349,7 @@ const AdminShopReviews = () => {
                         <Typography variant="body2" sx={{ 
                           color: review.status === 'hidden' ? '#999' : 'inherit'
                         }}>
-                          {review.rating}/5
+                          {t('reviews.shop.rating', { rating: review.rating })}
                         </Typography>
                       </Box>
                       {review.text && (
@@ -365,7 +367,7 @@ const AdminShopReviews = () => {
                       <Typography variant="caption" sx={{ 
                         color: review.status === 'hidden' ? '#bbb' : 'textSecondary'
                       }}>
-                        {formatDate(review.createdAt)}
+                        {t('reviews.shop.dateFormat', { date: formatDate(review.createdAt) })}
                       </Typography>
                     </Box>
                   }
@@ -410,9 +412,9 @@ const AdminShopReviews = () => {
                               transform: 'translateY(-1px)'
                             },
                           }}
-                          title="Одобрить"
+                          title={t('reviews.admin.approve')}
                         >
-                          Одобрить
+                          {t('reviews.admin.approve')}
                         </Button>
                         <Button 
                           size="small" 
@@ -435,9 +437,9 @@ const AdminShopReviews = () => {
                               transform: 'translateY(-1px)'
                             },
                           }}
-                          title="Отклонить"
+                          title={t('reviews.admin.reject')}
                         >
-                          Отклонить
+                          {t('reviews.admin.reject')}
                         </Button>
                       </Box>
                     )}
@@ -455,7 +457,7 @@ const AdminShopReviews = () => {
                               backgroundColor: '#fff3e0'
                             }
                           }}
-                          title="Скрыть"
+                          title={t('reviews.admin.status.hidden')}
                         >
                           <VisibilityOff />
                         </IconButton>
@@ -471,7 +473,7 @@ const AdminShopReviews = () => {
                               backgroundColor: '#e8f5e8'
                             }
                           }}
-                          title="Показать"
+                          title={t('reviews.admin.status.approved')}
                         >
                           <Visibility />
                         </IconButton>
@@ -487,7 +489,7 @@ const AdminShopReviews = () => {
                             backgroundColor: '#ffebee'
                           }
                         }}
-                        title="Удалить"
+                        title={t('reviews.admin.delete')}
                       >
                         <Delete />
                       </IconButton>
@@ -503,24 +505,24 @@ const AdminShopReviews = () => {
       {/* Диалог модерации */}
       <Dialog open={moderationDialog} onClose={() => setModerationDialog(false)}>
         <DialogTitle>
-          Модерация отзыва
+          {t('reviews.admin.moderate')}
         </DialogTitle>
         <DialogContent>
           {selectedReview && (
             <Box>
               <Typography variant="body1" sx={{ mb: 2 }}>
-                <strong>Автор:</strong> {selectedReview.user?.name || 'Анонимный пользователь'}
+                <strong>{t('reviews.page.user')}:</strong> {selectedReview.user?.name || t('reviews.shop.anonymousUser')}
               </Typography>
               <Typography variant="body1" sx={{ mb: 2 }}>
-                <strong>Оценка:</strong> {selectedReview.rating}/5
+                <strong>{t('reviews.form.rating')}:</strong> {t('reviews.shop.rating', { rating: selectedReview.rating })}
               </Typography>
               {selectedReview.text && (
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  <strong>Текст:</strong> "{selectedReview.text}"
+                  <strong>{t('reviews.form.reviewText')}:</strong> "{selectedReview.text}"
                 </Typography>
               )}
               <Typography variant="body2" color="textSecondary">
-                <strong>Дата:</strong> {formatDate(selectedReview.createdAt)}
+                <strong>{t('reviews.shop.dateFormat', { date: '' })}:</strong> {formatDate(selectedReview.createdAt)}
               </Typography>
             </Box>
           )}
@@ -530,7 +532,7 @@ const AdminShopReviews = () => {
             onClick={() => setModerationDialog(false)}
             disabled={moderating}
           >
-            Отмена
+            {t('reviews.form.cancel')}
           </Button>
           <Button
             variant="contained"
@@ -539,7 +541,7 @@ const AdminShopReviews = () => {
             disabled={moderating}
             startIcon={<ThumbUp />}
           >
-            {moderating ? 'Одобрение...' : 'Одобрить'}
+            {moderating ? t('reviews.admin.approve') + '...' : t('reviews.admin.approve')}
           </Button>
           <Button
             variant="contained"
@@ -548,7 +550,7 @@ const AdminShopReviews = () => {
             disabled={moderating}
             startIcon={<ThumbDown />}
           >
-            {moderating ? 'Отклонение...' : 'Отклонить'}
+            {moderating ? t('reviews.admin.reject') + '...' : t('reviews.admin.reject')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -556,27 +558,27 @@ const AdminShopReviews = () => {
       {/* Диалог удаления */}
       <Dialog open={deleteDialog} onClose={closeDeleteDialog}>
         <DialogTitle>
-          Подтверждение удаления
+          {t('reviews.admin.deleteConfirm')}
         </DialogTitle>
         <DialogContent>
           {reviewToDelete && (
             <Box>
               <Typography variant="body1" sx={{ mb: 2 }}>
-                Вы действительно хотите удалить отзыв от <strong>{reviewToDelete.user?.name || 'Анонимного пользователя'}</strong>?
+                {t('reviews.admin.deleteConfirm')} <strong>{reviewToDelete.user?.name || t('reviews.shop.anonymousUser')}</strong>?
               </Typography>
               <Typography variant="body1" sx={{ mb: 2 }}>
-                <strong>Оценка:</strong> {reviewToDelete.rating}/5
+                <strong>{t('reviews.form.rating')}:</strong> {t('reviews.shop.rating', { rating: reviewToDelete.rating })}
               </Typography>
               {reviewToDelete.text && (
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  <strong>Текст:</strong> "{reviewToDelete.text}"
+                  <strong>{t('reviews.form.reviewText')}:</strong> "{reviewToDelete.text}"
                 </Typography>
               )}
               <Typography variant="body2" color="textSecondary">
-                <strong>Дата:</strong> {formatDate(reviewToDelete.createdAt)}
+                <strong>{t('reviews.shop.dateFormat', { date: '' })}:</strong> {formatDate(reviewToDelete.createdAt)}
               </Typography>
               <Alert severity="warning" sx={{ mt: 2 }}>
-                Это действие нельзя отменить. Отзыв будет удален навсегда.
+                {t('reviews.admin.deleteConfirm')}
               </Alert>
             </Box>
           )}
@@ -586,7 +588,7 @@ const AdminShopReviews = () => {
             onClick={closeDeleteDialog}
             disabled={moderating}
           >
-            Отмена
+            {t('reviews.form.cancel')}
           </Button>
           <Button
             variant="contained"
@@ -595,7 +597,7 @@ const AdminShopReviews = () => {
             disabled={moderating}
             startIcon={<Delete />}
           >
-            {moderating ? 'Удаление...' : 'Удалить'}
+            {moderating ? t('reviews.admin.delete') + '...' : t('reviews.admin.delete')}
           </Button>
         </DialogActions>
       </Dialog>

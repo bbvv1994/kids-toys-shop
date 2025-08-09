@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -18,6 +19,7 @@ import {
 import { Star, Send, ArrowBack } from '@mui/icons-material';
 
 const ReviewForm = ({ open, onClose, productId = null, productName = null, productImage = null }) => {
+  const { t } = useTranslation();
   const [rating, setRating] = useState(0);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,12 +30,12 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
     e.preventDefault();
     
     if (rating === 0) {
-      setError('Пожалуйста, поставьте оценку');
+      setError(t('reviews.form.ratingRequired'));
       return;
     }
     
     if (!text.trim()) {
-      setError('Пожалуйста, напишите отзыв');
+      setError(t('reviews.form.textRequired'));
       return;
     }
 
@@ -63,10 +65,10 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
         }, 2000);
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Ошибка при отправке отзыва');
+        setError(errorData.error || t('reviews.form.submitError'));
       }
     } catch (error) {
-      setError('Ошибка сети при отправке отзыва');
+      setError(t('reviews.form.networkError'));
     } finally {
       setLoading(false);
     }
@@ -107,15 +109,15 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
               },
             }}
           >
-            Назад
+            {t('reviews.form.back')}
           </Button>
           <Typography variant="h5" component="h1">
-            {isProductReview ? 'Отзыв о товаре' : 'Отзыв о магазине'}
+            {isProductReview ? t('reviews.form.productReview') : t('reviews.form.shopReview')}
           </Typography>
         </Box>
 
         {/* Информация о товаре */}
-        {isProductReview && productName && (
+        {isProductReview && (
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Grid container spacing={2} alignItems="center">
@@ -137,7 +139,7 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
                     {productName}
                   </Typography>
                   <Chip 
-                    label="Отзыв о товаре" 
+                    label={t('reviews.form.productReviewLabel')} 
                     color="primary" 
                     size="small" 
                     sx={{ mt: 1 }}
@@ -153,7 +155,7 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
           {/* Оценка */}
           <Box sx={{ mb: 3 }}>
             <Typography component="legend" variant="h6" sx={{ mb: 1 }}>
-              Ваша оценка
+              {t('reviews.form.rating')}
             </Typography>
             <Rating
               name="rating"
@@ -165,19 +167,19 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
               sx={{ fontSize: '2rem' }}
             />
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              {rating === 0 && 'Поставьте оценку от 1 до 5 звезд'}
-              {rating === 1 && 'Плохо'}
-              {rating === 2 && 'Не очень'}
-              {rating === 3 && 'Нормально'}
-              {rating === 4 && 'Хорошо'}
-              {rating === 5 && 'Отлично!'}
+              {rating === 0 && t('reviews.form.ratingHint')}
+              {rating === 1 && t('reviews.form.rating1')}
+              {rating === 2 && t('reviews.form.rating2')}
+              {rating === 3 && t('reviews.form.rating3')}
+              {rating === 4 && t('reviews.form.rating4')}
+              {rating === 5 && t('reviews.form.rating5')}
             </Typography>
           </Box>
 
           {/* Текст отзыва */}
           <Box sx={{ mb: 3 }}>
             <Typography component="legend" variant="h6" sx={{ mb: 1 }}>
-              Ваш отзыв
+              {t('reviews.form.reviewText')}
             </Typography>
             <TextField
               fullWidth
@@ -185,8 +187,8 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
               rows={4}
               variant="outlined"
               placeholder={isProductReview 
-                ? "Расскажите о ваших впечатлениях от товара. Что понравилось, что можно улучшить?"
-                : "Расскажите о ваших впечатлениях от магазина. Качество обслуживания, ассортимент, доставка?"
+                ? t('reviews.form.productPlaceholder')
+                : t('reviews.form.shopPlaceholder')
               }
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -196,7 +198,7 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
           </Box>
 
           {/* Сообщения об ошибках */}
-          {error && !error.includes('напишите отзыв') && !error.includes('поставьте оценку') && (
+          {error && !error.includes(t('reviews.form.textRequired')) && !error.includes(t('reviews.form.ratingRequired')) && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
             </Alert>
@@ -205,7 +207,7 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
           {/* Сообщение об успехе */}
           {success && (
             <Alert severity="success" sx={{ mb: 2 }}>
-              Отзыв успешно отправлен! Спасибо за ваше мнение.
+              {t('reviews.form.success')}
             </Alert>
           )}
 
@@ -234,8 +236,9 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
                 },
               }}
             >
-              Отмена
+              {t('reviews.form.cancel')}
             </Button>
+            
             <Button
               type="submit"
               variant="contained"
@@ -265,7 +268,7 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
                 }
               }}
             >
-              {loading ? 'Отправка...' : 'Отправить отзыв'}
+              {loading ? t('reviews.form.submitting') : t('reviews.form.submit')}
             </Button>
           </Box>
         </Box>

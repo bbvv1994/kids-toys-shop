@@ -386,5 +386,93 @@
         "sale_items": "מוצרים במבצע"
       }
     }
+  },
+  "reviews": {
+    "shop": {
+      "title": "ביקורות על החנות שלנו",
+      "listTitle": "רשימת ביקורות",
+      "noReviews": "עדיין אין ביקורות",
+      "beFirst": "היה הראשון לכתוב ביקורת על החנות שלנו!",
+      "loadError": "שגיאה בטעינת ביקורות",
+      "networkError": "שגיאת רשת",
+      "anonymousUser": "משתמש אנונימי",
+      "rating": "{{rating}}/5",
+      "dateFormat": "{{date}}"
+    },
+    "product": {
+      "title": "ביקורות על המוצר",
+      "noReviews": "עדיין אין ביקורות על המוצר",
+      "beFirst": "היה הראשון לכתוב ביקורת על מוצר זה!"
+    },
+    "form": {
+      "shopReview": "ביקורת על החנות",
+      "productReview": "ביקורת על המוצר",
+      "back": "חזור",
+      "rating": "הדירוג שלך",
+      "ratingHint": "תן דירוג מ-1 עד 5 כוכבים",
+      "rating1": "גרוע",
+      "rating2": "לא טוב",
+      "rating3": "בסדר",
+      "rating4": "טוב",
+      "rating5": "מעולה!",
+      "reviewText": "הביקורת שלך",
+      "shopPlaceholder": "ספר לנו על החוויה שלך מהחנות. איכות השירות, המבחר, המשלוח?",
+      "productPlaceholder": "ספר לנו על החוויה שלך מהמוצר. מה אהבת, מה אפשר לשפר?",
+      "ratingRequired": "אנא תן דירוג",
+      "textRequired": "אנא כתוב ביקורת",
+      "submitError": "שגיאה בשליחת הביקורת",
+      "networkError": "שגיאת רשת בשליחת הביקורת",
+      "success": "הביקורת נשלחה בהצלחה! תודה על דעתך.",
+      "cancel": "ביטול",
+      "submit": "שלח ביקורת",
+      "submitting": "שולח...",
+      "productInfo": "מידע על המוצר",
+      "productReviewLabel": "ביקורת על המוצר"
+    },
+    "modal": {
+      "title": "כתוב ביקורת על הקנייה",
+      "rateShop": "דרג את החנות",
+      "shopComment": "הערה על החנות",
+      "submitShopReview": "שלח ביקורת על החנות",
+      "shopReviewSent": "הביקורת נשלחה",
+      "rateProducts": "דרג את המוצרים",
+      "productComment": "הערה על המוצר",
+      "leaveReview": "כתוב ביקורת",
+      "productReviewSent": "הביקורת נשלחה",
+      "close": "סגור"
+    },
+    "page": {
+      "title": "ביקורות על החנות",
+      "noReviews": "עדיין אין ביקורות.",
+      "user": "משתמש"
+    },
+    "admin": {
+      "shopReviews": "ביקורות על החנות",
+      "productReviews": "ביקורות על מוצרים",
+      "loadError": "שגיאה בטעינת ביקורות",
+      "networkError": "שגיאת רשת",
+      "moderationError": "שגיאה במודרציה של הביקורת",
+      "deleteConfirm": "האם אתה בטוח שברצונך למחוק ביקורת זו?",
+      "deleteSuccess": "הביקורת נמחקה בהצלחה",
+      "deleteError": "שגיאה במחיקת הביקורת",
+      "visibilityToggle": "החלף נראות",
+      "moderate": "מודר",
+      "delete": "מחק",
+      "approve": "אשר",
+      "reject": "דחה",
+      "status": {
+        "pending": "בהמתנה למודרציה",
+        "approved": "אושר",
+        "rejected": "נדחה",
+        "hidden": "מוסתר"
+      },
+      "tryAgain": "נסה שוב"
+    },
+    "test": {
+      "title": "בדיקת ביקורות",
+      "testing": "בודק API...",
+      "shopReviews": "ביקורות על החנות ({{count}})",
+      "productReviews": "ביקורות על המוצר ({{count}})"
+    }
   }
 } 

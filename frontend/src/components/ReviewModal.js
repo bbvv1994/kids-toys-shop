@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { API_BASE_URL } from '../config';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Typography, Box, Button, TextField, Rating, Divider, CircularProgress, Alert
 } from '@mui/material';
 
 export default function ReviewModal({ open, onClose, orderId, user }) {
+  const { t } = useTranslation();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -18,50 +21,37 @@ export default function ReviewModal({ open, onClose, orderId, user }) {
 
   useEffect(() => {
     console.log('ReviewModal useEffect:', { open, orderId, user: !!user?.token });
-    
     if (open && orderId && user?.token) {
-      console.log('Fetching order data for orderId:', orderId);
-      setLoading(true);
-      setError('');
-      
-      fetch(`${API_BASE_URL}/api/profile/orders/${orderId}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      })
-        .then(res => {
-          console.log('Response status:', res.status);
-          if (!res.ok) {
-            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-          }
-          return res.json();
-        })
-        .then(data => {
-          console.log('Order data received:', data);
-          setOrder(data);
-          setProductReviews(
-            (data.items || []).map(item => ({
-              productId: item.productId,
-              name: item.product?.name || '',
-              rating: 0,
-              text: ''
-            }))
-          );
-        })
-        .catch(err => {
-          console.error('Error fetching order:', err);
-          setError(`Ошибка загрузки заказа: ${err.message}`);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      console.log('ReviewModal conditions not met:', { 
-        open, 
-        orderId, 
-        hasUser: !!user, 
-        hasToken: !!user?.token 
-      });
+      loadOrder();
     }
   }, [open, orderId, user]);
 
+  const loadOrder = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/profile/orders/${orderId}`, {
+        headers: {
+          Authorization: `Bearer ${user.token}`
+        }
+      });
+      if (!res.ok) throw new Error('Ошибка загрузки заказа');
+      const orderData = await res.json();
+      setOrder(orderData);
+      
+      // Инициализируем отзывы для товаров
+      const initialReviews = orderData.items.map(item => ({
+        productId: item.productId,
+        name: item.product.name,
+        rating: 0,
+        text: ''
+      }));
+      setProductReviews(initialReviews);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
   const handleShopReview = async () => {
+    if (!shopRating) return;
     setLoading(true);
     setError('');
     try {
@@ -106,20 +96,20 @@ export default function ReviewModal({ open, onClose, orderId, user }) {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Оставьте отзыв о покупке</DialogTitle>
+      <DialogTitle>{t('reviews.modal.title')}</DialogTitle>
       <DialogContent>
         {loading && <Box sx={{ textAlign: 'center', py: 2 }}><CircularProgress /></Box>}
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         {/* Отзыв о магазине */}
         <Box sx={{ mb: 3 }}>
-          <Typography variant="h6" sx={{ mb: 1 }}>Оцените магазин</Typography>
+          <Typography variant="h6" sx={{ mb: 1 }}>{t('reviews.modal.rateShop')}</Typography>
           <Rating
             value={shopRating}
             onChange={(_, v) => setShopRating(v)}
             size="large"
           />
           <TextField
-            label="Комментарий о магазине"
+            label={t('reviews.modal.shopComment')}
             multiline
             minRows={2}
             fullWidth
@@ -135,12 +125,12 @@ export default function ReviewModal({ open, onClose, orderId, user }) {
             disabled={shopSent || !shopRating || loading}
             fullWidth
           >
-            {shopSent ? 'Отзыв отправлен' : 'Отправить отзыв о магазине'}
+            {shopSent ? t('reviews.modal.shopReviewSent') : t('reviews.modal.submitShopReview')}
           </Button>
         </Box>
         <Divider sx={{ mb: 2 }} />
         {/* Отзывы о товарах */}
-        <Typography variant="h6" sx={{ mb: 2 }}>Оцените товары</Typography>
+        <Typography variant="h6" sx={{ mb: 2 }}>{t('reviews.modal.rateProducts')}</Typography>
         {productReviews.map((review, idx) => (
           <Box key={review.productId} sx={{ mb: 3, p: 2, border: '1px solid #eee', borderRadius: 2 }}>
             <Typography sx={{ fontWeight: 500, mb: 1 }}>{review.name}</Typography>
@@ -149,7 +139,7 @@ export default function ReviewModal({ open, onClose, orderId, user }) {
               onChange={(_, v) => setProductReviews(r => r.map((pr, i) => i === idx ? { ...pr, rating: v } : pr))}
             />
             <TextField
-              label="Комментарий к товару"
+              label={t('reviews.modal.productComment')}
               multiline
               minRows={2}
               fullWidth
@@ -165,13 +155,13 @@ export default function ReviewModal({ open, onClose, orderId, user }) {
               disabled={productSent[review.productId] || !review.rating || loading}
               fullWidth
             >
-              {productSent[review.productId] ? 'Отзыв отправлен' : 'Оставить отзыв'}
+              {productSent[review.productId] ? t('reviews.modal.productReviewSent') : t('reviews.modal.leaveReview')}
             </Button>
           </Box>
         ))}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Закрыть</Button>
+        <Button onClick={onClose}>{t('reviews.modal.close')}</Button>
       </DialogActions>
     </Dialog>
   );

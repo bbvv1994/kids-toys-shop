@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, Rating, CircularProgress } from '@mui/material';
 import { API_BASE_URL } from '../config';
+import { useTranslation } from 'react-i18next';
 
 export default function TestReviews() {
+  const { t } = useTranslation();
   const [shopReviews, setShopReviews] = useState([]);
   const [productReviews, setProductReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,22 +44,22 @@ export default function TestReviews() {
     return (
       <Box sx={{ p: 4, textAlign: 'center' }}>
         <CircularProgress />
-        <Typography>Тестирование API...</Typography>
+        <Typography>{t('reviews.test.testing')}</Typography>
       </Box>
     );
   }
 
   return (
     <Box sx={{ p: 4, maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>Тестирование отзывов</Typography>
+      <Typography variant="h4" sx={{ mb: 3 }}>{t('reviews.test.title')}</Typography>
       
-      <Typography variant="h5" sx={{ mb: 2 }}>Отзывы о магазине ({shopReviews.length})</Typography>
+      <Typography variant="h5" sx={{ mb: 2 }}>{t('reviews.test.shopReviews', { count: shopReviews.length })}</Typography>
       {shopReviews.map((review) => (
         <Paper key={review.id} sx={{ mb: 2, p: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <Rating value={review.rating} readOnly size="small" />
             <Typography sx={{ ml: 2, fontWeight: 'bold' }}>
-              {review.user?.name || 'Пользователь'}
+              {review.user?.name || t('reviews.page.user')}
             </Typography>
             <Typography sx={{ ml: 2, color: '#888' }}>
               {new Date(review.createdAt).toLocaleDateString()}
@@ -67,13 +69,13 @@ export default function TestReviews() {
         </Paper>
       ))}
       
-      <Typography variant="h5" sx={{ mb: 2, mt: 4 }}>Отзывы о товаре ({productReviews.length})</Typography>
+      <Typography variant="h5" sx={{ mb: 2, mt: 4 }}>{t('reviews.test.productReviews', { count: productReviews.length })}</Typography>
       {productReviews.map((review) => (
         <Paper key={review.id} sx={{ mb: 2, p: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <Rating value={review.rating} readOnly size="small" />
             <Typography sx={{ ml: 2, fontWeight: 'bold' }}>
-              {review.user?.name || 'Пользователь'}
+              {review.user?.name || t('reviews.page.user')}
             </Typography>
             <Typography sx={{ ml: 2, color: '#888' }}>
               {new Date(review.createdAt).toLocaleDateString()}
