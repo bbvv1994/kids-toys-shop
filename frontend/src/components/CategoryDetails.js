@@ -248,9 +248,9 @@ function CategoryDetails({ category }) {
                         src={src}
                         alt={subCategory}
                         style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}
-                        onError={e => {
-                          if (e.target.src !== window.location.origin + '/toys.png') e.target.src = '/toys.png';
-                        }}
+                                                    onError={e => {
+                              if (e.target.src !== window.location.origin + '/toys.png') e.target.src = '/toys.png';
+                            }}
                       />
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {translateSubcategory(category.name, subCategory)}
