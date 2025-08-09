@@ -7748,26 +7748,82 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
   }
   // Маппинг: подкатегория -> реальное имя файла в public
   const subcategoryImageMap = {
-    'Куклы': 'Kukly_11zon.webp',
-    'Игрушки для самых маленьких': 'Igrushki-dlya-samyh-malenkih_11zon.webp',
-    'Игрушки - антистресс и сквиши': 'antistress.webp',
-    'Треки, паркинги и жд': 'treki11.webp',
-    'Мягкие игрушки': 'Myagkie-igrushki_11zon.webp',
-    'Тематические игровые наборы': 'Tematicheskie.webp',
-    'Декоративная косметика и украшения': 'Dekorativnaya-kosmetika-i-ukrasheniya_11zon.webp',
-    'Машинки и другой транспорт': 'Mashinki.webp',
-    'Игровые фигурки': 'figurki.webp',
-    'Игрушки для песочницы': 'pesochnicy.webp',
-    'Оружие игрушечное': 'Oruzhie.webp',
-    'Роботы и трансформеры': 'Roboty.webp',
-    'Шарики': 'shariki.webp',
-    'Активные игры': 'Aktivnye-igry_11zon.webp',
-    'Игрушки на радиоуправлении': 'Igrushki-na-radioupravlenii_11zon.webp',
+    // Игрушки
+    'Куклы': 'podkategorii/igruhki/kukly.webp',
+    'Игрушки для самых маленьких': 'podkategorii/igruhki/igruhki-dlya-samyh-malenkih.webp',
+    'Игрушки - антистресс и сквиши': 'podkategorii/igruhki/antistress-i-squishy.webp',
+    'Треки, паркинги и жд': 'podkategorii/igruhki/treki-parkingi-i-jdz.webp',
+    'Мягкие игрушки': 'podkategorii/igruhki/myagkie-igrushki.webp',
+    'Тематические игровые наборы': 'podkategorii/igruhki/tematicheskie-igrovye-nabory.webp',
+    'Декоративная косметика и украшения': 'podkategorii/igruhki/dekorativnaya-kosmetika-i-ukrasheniya.webp',
+    'Машинки и другой транспорт': 'podkategorii/igruhki/mashinki-i-drugoi-transport.webp',
+    'Игровые фигурки': 'podkategorii/igruhki/igrovye-figurki.webp',
+    'Игрушки для песочницы': 'podkategorii/igruhki/igrushki-dlya-pesochnicy.webp',
+    'Оружие игрушечное': 'podkategorii/igruhki/oruzhie-igruhchnoe.webp',
+    'Роботы и трансформеры': 'podkategorii/igruhki/roboty-i-transformery.webp',
+    'Шарики': 'podkategorii/igruhki/shariki.webp',
+    'Активные игры': 'podkategorii/igruhki/aktivnye-igry.webp',
+    'Игрушки на радиоуправлении': 'podkategorii/igruhki/igrushki-na-radioupravlenii.webp',
+    
+    // Конструкторы
+    'Lego для мальчиков': 'podkategorii/konstruktor/legomalchiki.webp',
+    'Lego для девочек': 'podkategorii/konstruktor/legdevochki.webp',
+    'Металлические конструкторы': 'podkategorii/konstruktor/metalkonstruktor.webp',
+    'Lego крупные блоки': 'podkategorii/konstruktor/legoblokikrupnie.webp',
+    
+    // Пазлы
+    'Пазлы для взрослых': 'podkategorii/puzzle/pazlyvzrosliy.webp',
+    'Пазлы для детей': 'podkategorii/puzzle/pazlydeti.webp',
+    'Магнитные пазлы': 'podkategorii/puzzle/magnotpazzle.webp',
+    'Пазлы напольные': 'podkategorii/puzzle/napolnie.webp',
+    'Пазлы для малышей': 'podkategorii/puzzle/babypazzle.webp',
+    
+                  // Творчество
+              'Рисование': 'podkategorii/tvorchestvo/risovanie.webp',
+              'Раскраски': 'podkategorii/tvorchestvo/raskraski.webp',
+              'Наклейки': 'podkategorii/tvorchestvo/nakleyki.webp',
+              'Наборы для творчества': 'podkategorii/tvorchestvo/tvorchestvanabor.webp',
+              'Кинетический песок': 'podkategorii/tvorchestvo/kineticheskiypesok.webp',
+              'Наборы для лепки': 'podkategorii/tvorchestvo/lepka.webp',
+              'Лизуны и слаймы': 'podkategorii/tvorchestvo/lizun.webp',
+    
+                    // Канцтовары
+                'Портфели для школы': 'podkategorii/kanstovary/portfel.webp',
+                'Портфели для детских садов': 'podkategorii/kanstovary/portfelisadikj.webp',
+                'Пеналы': 'podkategorii/kanstovary/penaly.webp',
+                'Ручки и карандаши': 'podkategorii/kanstovary/ruchkikarandashi.webp',
+                'Точилки': 'podkategorii/kanstovary/tochilki.webp',
+                'Фломастеры и маркеры': 'podkategorii/kanstovary/flomastery.webp',
+                'Краски': 'podkategorii/kanstovary/kraski.webp',
+                'Кисточки и принадлежности': 'podkategorii/kanstovary/kistochki.webp',
+                'Брелки': 'podkategorii/kanstovary/brelki.webp',
+    
+                    // Транспорт
+                'Детские самокаты': 'podkategorii/transport/samokat.webp',
+                'Велосипеды': 'podkategorii/transport/velosiped.webp',
+                'Ходунки': 'podkategorii/transport/hodunki.webp',
+                'Беговелы': 'podkategorii/transport/begovely.webp',
+    
+                    // Отдых на воде
+                              'Бассейны': 'podkategorii/otdyh_na_vode/basseiny.webp',
+              'Матрасы и плотики': 'podkategorii/otdyh_na_vode/matrasyiplotiki.webp',
+              'Круги надувные': 'podkategorii/otdyh_na_vode/kruginaduvnie.webp',
+              'Нарукавники и жилеты': 'podkategorii/otdyh_na_vode/zhilety.webp',
+              'Аксессуары для плавания': 'podkategorii/otdyh_na_vode/aksesuary.webp',
+              'Ракетки': 'podkategorii/otdyh_na_vode/raketki.webp',
+              'Пляжные мячи и игрушки для плавания': 'podkategorii/otdyh_na_vode/miachi.webp',
+              'Насосы для матрасов': 'podkategorii/otdyh_na_vode/nasosy.webp',
   };
 
   function getSubcategoryImageFileName(subCategory) {
-    // Всегда используем только маппинг, если нет — возвращаем заглушку
-    return subcategoryImageMap[subCategory] || 'toys.png';
+    // Проверяем, есть ли изображение в маппинге
+    const mappedImage = subcategoryImageMap[subCategory];
+    if (mappedImage) {
+      return mappedImage;
+    }
+    
+    // Если изображения нет в маппинге, возвращаем заглушку
+    return 'toys.png';
   }
 
   // Функция для перевода категорий
