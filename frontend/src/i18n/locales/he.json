@@ -130,7 +130,7 @@
   "navigation": {
     "home": "דף הבית",
     "catalog": "קטלוג",
-    "reviews": "ביקורות לקוחות",
+    "reviews": "ביקורות על החנות",
     "about": "אודות",
     "contacts": "צור קשר",
     "cart": "עגלת קניות",
@@ -445,6 +445,15 @@
       "title": "ביקורות על החנות",
       "noReviews": "עדיין אין ביקורות.",
       "user": "משתמש"
+    },
+    "customerReviews": {
+      "title": "ביקורות על החנות שלנו",
+      "noReviews": "עדיין אין ביקורות",
+      "beFirst": "היה הראשון לכתוב ביקורת על החנות שלנו!",
+      "reviewsList": "רשימת ביקורות",
+      "anonymousUser": "משתמש אנונימי",
+      "loadError": "שגיאה בטעינת ביקורות",
+      "networkError": "שגיאת רשת"
     },
     "admin": {
       "shopReviews": "ביקורות על החנות",
