@@ -7895,7 +7895,34 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
       'Кинетический песок': 'kinetic_sand',
       'Рисование': 'drawing',
       'Наборы для творчества': 'creativity_sets',
-      'Раскраски': 'coloring'
+      'Раскраски': 'coloring',
+      
+      // Канцтовары
+      'Портфели для школы': 'school_bags',
+      'Портфели для детских садов': 'kindergarten_bags',
+      'Пеналы': 'pencil_cases',
+      'Ручки и карандаши': 'pens_pencils',
+      'Точилки': 'sharpeners',
+      'Фломастеры и маркеры': 'markers',
+      'Краски': 'paints',
+      'Кисточки и принадлежности': 'brushes_accessories',
+      'Брелки': 'keychains',
+      
+      // Транспорт
+      'Детские самокаты': 'scooters',
+      'Велосипеды': 'bicycles',
+      'Ходунки': 'walkers',
+      'Беговелы': 'balance_bikes',
+      
+      // Отдых на воде
+      'Бассейны': 'pools',
+      'Матрасы и плотики': 'mattresses_floats',
+      'Круги надувные': 'inflatable_circles',
+      'Нарукавники и жилеты': 'armbands_vests',
+      'Аксессуары для плавания': 'swimming_accessories',
+      'Ракетки': 'rackets',
+      'Пляжные мячи и игрушки для плавания': 'beach_balls',
+      'Насосы для матрасов': 'pumps'
     };
     
     const parentKey = categoryMap[parentCategory];
@@ -8349,7 +8376,34 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
       'Кинетический песок': 'kinetic_sand',
       'Рисование': 'drawing',
       'Наборы для творчества': 'creativity_sets',
-      'Раскраски': 'coloring'
+      'Раскраски': 'coloring',
+      
+      // Канцтовары
+      'Портфели для школы': 'school_bags',
+      'Портфели для детских садов': 'kindergarten_bags',
+      'Пеналы': 'pencil_cases',
+      'Ручки и карандаши': 'pens_pencils',
+      'Точилки': 'sharpeners',
+      'Фломастеры и маркеры': 'markers',
+      'Краски': 'paints',
+      'Кисточки и принадлежности': 'brushes_accessories',
+      'Брелки': 'keychains',
+      
+      // Транспорт
+      'Детские самокаты': 'scooters',
+      'Велосипеды': 'bicycles',
+      'Ходунки': 'walkers',
+      'Беговелы': 'balance_bikes',
+      
+      // Отдых на воде
+      'Бассейны': 'pools',
+      'Матрасы и плотики': 'mattresses_floats',
+      'Круги надувные': 'inflatable_circles',
+      'Нарукавники и жилеты': 'armbands_vests',
+      'Аксессуары для плавания': 'swimming_accessories',
+      'Ракетки': 'rackets',
+      'Пляжные мячи и игрушки для плавания': 'beach_balls',
+      'Насосы для матрасов': 'pumps'
     };
     
     const parentKey = categoryMap[parentCategory];

@@ -121,12 +121,55 @@ function CategoryDetails({ category }) {
       'Игрушки для песочницы': 'sandbox_toys',
       'Шарики': 'balls',
       'Игрушки на радиоуправлении': 'radio_controlled',
+      
       // Конструкторы
       'Lego для мальчиков': 'lego_boys',
       'Lego для девочек': 'lego_girls',
       'Металлические конструкторы': 'metal_constructors',
       'Lego крупные блоки': 'lego_large_blocks',
-      // Другие категории могут быть добавлены по аналогии
+      
+      // Пазлы
+      'Пазлы для взрослых': 'for_adults',
+      'Пазлы для детей': 'for_children',
+      'Магнитные пазлы': 'magnetic',
+      'Пазлы напольные': 'floor',
+      'Пазлы для малышей': 'for_babies',
+      
+      // Творчество
+      'Рисование': 'drawing',
+      'Раскраски': 'coloring',
+      'Наклейки': 'stickers',
+      'Наборы для творчества': 'creativity_sets',
+      'Кинетический песок': 'kinetic_sand',
+      'Наборы для лепки': 'modeling_sets',
+      'Лизуны и слаймы': 'slimes',
+      
+      // Канцтовары
+      'Портфели для школы': 'school_bags',
+      'Портфели для детских садов': 'kindergarten_bags',
+      'Пеналы': 'pencil_cases',
+      'Ручки и карандаши': 'pens_pencils',
+      'Точилки': 'sharpeners',
+      'Фломастеры и маркеры': 'markers',
+      'Краски': 'paints',
+      'Кисточки и принадлежности': 'brushes_accessories',
+      'Брелки': 'keychains',
+      
+      // Транспорт
+      'Детские самокаты': 'scooters',
+      'Велосипеды': 'bicycles',
+      'Ходунки': 'walkers',
+      'Беговелы': 'balance_bikes',
+      
+      // Отдых на воде
+      'Бассейны': 'pools',
+      'Матрасы и плотики': 'mattresses_floats',
+      'Круги надувные': 'inflatable_circles',
+      'Нарукавники и жилеты': 'armbands_vests',
+      'Аксессуары для плавания': 'swimming_accessories',
+      'Ракетки': 'rackets',
+      'Пляжные мячи и игрушки для плавания': 'beach_balls',
+      'Насосы для матрасов': 'pumps'
     };
     
     const parentKey = categoryMap[parentCategory];
