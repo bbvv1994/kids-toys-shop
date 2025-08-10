@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, IconButton, Typography } from '@mui/material';
 import { Language as LanguageIcon } from '@mui/icons-material';
 
-const LanguageSwitcher = () => {
+const LanguageSwitcher = ({ mobile = false }) => {
   const { i18n, t } = useTranslation();
 
   const languages = [
@@ -24,6 +24,36 @@ const LanguageSwitcher = () => {
     const nextLanguage = getNextLanguage();
     i18n.changeLanguage(nextLanguage.code);
   };
+
+  if (mobile) {
+    return (
+      <IconButton
+        onClick={handleToggleLanguage}
+        color="inherit"
+        sx={{
+          minWidth: 0,
+          p: 0,
+          overflow: 'hidden',
+          backgroundColor: 'transparent',
+          border: 'none',
+          borderRadius: '50%',
+          width: 24,
+          height: 24,
+          transition: 'all 0.2s',
+          '&:hover': {
+            backgroundColor: 'rgba(255,255,255,0.1)',
+          },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography variant="body1" sx={{ fontSize: '0.6rem', fontWeight: 'bold', color: '#fff' }}>
+          {currentLanguage.display}
+        </Typography>
+      </IconButton>
+    );
+  }
 
   return (
     <IconButton

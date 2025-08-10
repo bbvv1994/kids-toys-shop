@@ -133,13 +133,15 @@
     "reviews": "ביקורות על החנות",
     "about": "אודות",
     "contacts": "צור קשר",
+    "profile": "פרופיל",
     "cart": "עגלת קניות",
     "wishlist": "רשימת מועדפים",
     "account": "חשבון",
     "login": "התחבר",
     "register": "הרשמה",
     "logout": "התנתק",
-    "admin": "פאנל מנהל"
+    "admin": "פאנל מנהל",
+    "menu": "תפריט"
   },
   "header": {
     "searchPlaceholder": "חיפוש מוצרים...",
@@ -189,7 +191,14 @@
     },
     "scrollToTop": "למעלה",
     "categoriesButton": "קטגוריות",
-    "filtersButton": "מסננים"
+    "filtersButton": "מסננים",
+    "categories": "קטגוריות",
+    "filters": "מסננים",
+    "gender": "מין",
+    "ageGroup": "קבוצת גיל",
+    "brands": "מותגים",
+    "clearFilters": "נקה",
+    "applyFilters": "החל"
   },
   "breadcrumbs": {
     "home": "דף הבית",
@@ -387,6 +396,77 @@
       }
     }
   },
+  "productCard": {
+    "addToCart": "הוסף לעגלה",
+    "inCart": "בעגלה",
+    "edit": "ערוך",
+    "sku": "מק״ט",
+    "brand": "מותג",
+    "country": "מדינה",
+    "dimensions": "מידות",
+    "noPhoto": "אין תמונה",
+    "units": {
+      "cm": "ס״מ",
+      "mm": "מ״מ",
+      "m": "מ׳",
+      "kg": "ק״ג",
+      "g": "גרם",
+      "l": "ליטר",
+      "ml": "מ״ל",
+      "pcs": "יח׳",
+      "set": "ערכה",
+      "box": "קופסה",
+      "pack": "חבילה"
+    },
+    "additionalInfo": "מידע נוסף",
+    "length": "אורך",
+    "width": "רוחב",
+    "height": "גובה",
+    "manufacturer": "יצרן",
+    "article": "מק״ט",
+    "category": "קטגוריה",
+    "subcategory": "תת קטגוריה",
+    "ageGroup": "קבוצת גיל",
+    "gender": "מגדר",
+    "material": "חומר",
+    "weight": "משקל",
+    "color": "צבע",
+    "package": "אריזה",
+    "warranty": "אחריות",
+    "delivery": "משלוח",
+    "payment": "תשלום",
+    "returns": "החזרות",
+    "specifications": "מפרט טכני",
+    "description": "תיאור",
+    "reviews": "ביקורות",
+    "questions": "שאלות",
+    "relatedProducts": "מוצרים דומים",
+    "status": {
+      "new": "חדש",
+      "sale": "מבצע",
+      "hit": "רב מכר",
+      "popular": "פופולרי",
+      "limited": "מהדורה מוגבלת",
+      "exclusive": "אקסקלוסיבי",
+      "discount": "הנחה",
+      "clearance": "ניקוי מלאי"
+    },
+    "availability": {
+      "inStock": "במלאי",
+      "outOfStock": "אזל המלאי",
+      "lowStock": "נשארו מעט",
+      "preOrder": "הזמנה מוקדמת",
+      "available": "זמין",
+      "unavailable": "לא זמין",
+      "onWarehouse": "במחסן: {{quantity}}",
+      "expectedDelivery": "צפוי: {{date}}"
+    },
+    "gender": {
+      "boy": "לבנים",
+      "girl": "לבנות",
+      "unisex": "אוניברסלי"
+    }
+  },
   "reviews": {
     "shop": {
       "title": "ביקורות על החנות שלנו",
@@ -483,5 +563,21 @@
       "shopReviews": "ביקורות על החנות ({{count}})",
       "productReviews": "ביקורות על המוצר ({{count}})"
     }
+  },
+  "productDetails": {
+    "technicalSpecs": "מפרט טכני",
+    "physicalSpecs": "מפרט פיזי",
+    "packageInfo": "מידע על אריזה",
+    "safetyInfo": "מידע על בטיחות",
+    "ageRecommendation": "גיל מומלץ",
+    "skillLevel": "רמת קושי",
+    "playTime": "זמן משחק",
+    "playersCount": "מספר שחקנים",
+    "batteryRequired": "נדרשות סוללות",
+    "assemblyRequired": "נדרשת הרכבה",
+    "washable": "ניתן לכביסה",
+    "ecoFriendly": "ידידותי לסביבה",
+    "madeIn": "מיוצר ב{{country}}",
+    "importedBy": "מיובא על ידי {{company}}"
   }
 } 

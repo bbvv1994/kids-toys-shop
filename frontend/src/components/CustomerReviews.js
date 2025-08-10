@@ -114,7 +114,6 @@ const CustomerReviews = () => {
                         px: 4,
                         py: 3,
                         width: '100%',
-                        minWidth: '800px',
                         maxWidth: '1200px'
                       }}
                     >

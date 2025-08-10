@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { API_BASE_URL, getImageUrl } from '../config';
 import Lenis from 'lenis';
 import {
@@ -28,6 +29,7 @@ import { Close, Delete, CloudUpload, Toys, Add as AddIcon, DragIndicator, Star }
 
 
 function EditProductModal(props) {
+  const { t } = useTranslation();
   const { open, product, onClose, onSave, onDelete, categories = [] } = props;
   console.log('=== EditProductModal RENDER ===');
   console.log('open:', open);
@@ -870,7 +872,7 @@ function EditProductModal(props) {
                     size="medium"
                   />
                   <TextField 
-                    label="Артикул" 
+                    label={t('productCard.sku')} 
                     name="article" 
                     value={formData.article} 
                     onChange={handleInputChange} 

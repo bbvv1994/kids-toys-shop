@@ -1886,10 +1886,10 @@ const theme = createTheme({
               }}
               sx={{
                 position: 'fixed',
-                top: 96,
+                top: 'var(--appbar-height)',
                 left: 250,
                 width: 250,
-                height: 'calc(100vh - 96px - 67px)',
+                height: 'calc(100vh - var(--appbar-height) - 67px)',
                 background: '#fff',
                 zIndex: 1403,
                 boxShadow: 'none',
@@ -4460,7 +4460,7 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', background: '#f7f7f7', pt: '96px', boxSizing: 'border-box' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', background: '#f7f7f7', pt: 'var(--appbar-height)', boxSizing: 'border-box' }}>
       <Box sx={{ width: 220, background: '#fff', borderRight: '1px solid #eee', p: 0 }}>
         <Typography variant="h6" sx={{ p: 2, fontWeight: 'bold', color: '#1976d2' }}>CMS</Typography>
         <List>
@@ -10597,7 +10597,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             sx={{
               width: 260,
               flexShrink: 0,
-              [`& .MuiDrawer-paper`]: { width: 260, boxSizing: 'border-box', borderRight: '1px solid #eee', background: '#fafbfc', top: '96px', height: 'calc(100vh - 96px - 64px)' },
+              [`& .MuiDrawer-paper`]: { width: 260, boxSizing: 'border-box', borderRight: '1px solid #eee', background: '#fafbfc', top: 'var(--appbar-height)', height: 'calc(100vh - var(--appbar-height) - 64px)' },
               display: { xs: 'none', md: 'block' },
             }}
             open

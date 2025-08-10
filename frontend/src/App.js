@@ -5,6 +5,7 @@ import AdminShopReviews from './components/AdminShopReviews';
 import AdminProductReviews from './components/AdminProductReviews';
 import CustomerReviews from './components/CustomerReviews';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import { useDeviceType } from './utils/deviceDetection';
 import { getImageUrl, API_BASE_URL } from './config';
 import { 
   DndContext,
@@ -60,8 +61,8 @@ import {
   Slider,
   Checkbox,
   FormControlLabel,
-  Menu as MuiMenu,
-  MenuItem as MuiMenuItem,
+  Menu,
+  Divider,
   ListItemIcon,
   ListItemText as MuiListItemText,
   Grid,
@@ -98,6 +99,8 @@ import {
   FilterAltRounded,
   ViewModule,
   ViewList,
+  Menu as MenuIcon,
+  Mic as MicIcon,
   Lock,
   Google,
   CheckCircle as CheckCircleIcon,
@@ -155,9 +158,6 @@ import AuthModal from './components/AuthModal';
 import EditProductModal from './components/EditProductModal';
 import ReviewForm from './components/ReviewForm';
 import ReviewPage from './components/ReviewPage';
-import MicIcon from '@mui/icons-material/Mic';
-import InfoIcon from '@mui/icons-material/Info';
-import DeleteIcon from '@mui/icons-material/Delete';
 import AdminCategories from './components/AdminCategories';
 import AdminQuestions from './components/AdminQuestions';
 import PublicQuestions from './components/PublicQuestions';
@@ -259,7 +259,11 @@ const theme = createTheme({
   function Navigation({ cartCount, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups }) {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const deviceType = useDeviceType();
+  // Viewport-based breakpoints
+  const isDesktop = useMediaQuery(theme.breakpoints.up('lg')); // >= 1200px
+  const isNarrow = useMediaQuery(theme.breakpoints.down('lg')); // < 1200px
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm')); // < 600px
   const location = useLocation();
   const navigate = useNavigate();
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -282,6 +286,7 @@ const theme = createTheme({
   const [submenuAnchorEl, setSubmenuAnchorEl] = useState(null);
   const [activeSub, setActiveSub] = useState(null);
   const [openCatIdx, setOpenCatIdx] = React.useState(null);
+
   const categoryBtnRef = React.useRef(null);
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [menuAnchorPos, setMenuAnchorPos] = React.useState({ top: 0, left: 0 });
@@ -293,7 +298,64 @@ const theme = createTheme({
   const lenisSubcategoriesMenuRef = useRef(null);
   const [instantClose, setInstantClose] = React.useState(false);
   const [filtersMenuOpen, setFiltersMenuOpen] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = React.useState(false);
+  const [mobileCategoriesOpen, setMobileCategoriesOpen] = React.useState(false);
+  const [profileMenuAnchor, setProfileMenuAnchor] = React.useState(null);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+  
+  // Закрытие мобильного меню категорий при клике вне его
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mobileCategoriesOpen) {
+        const button = document.querySelector('[data-mobile-categories-button]');
+        const popper = document.querySelector('[role="tooltip"]');
+        
+        if (button && !button.contains(event.target) && 
+            popper && !popper.contains(event.target)) {
+          setMobileCategoriesOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileCategoriesOpen]);
+
+  // Сброс состояния открытых категорий при открытии мобильного меню
+  useEffect(() => {
+    if (mobileCategoriesOpen) {
+      setOpenCatIdx(null);
+    }
+  }, [mobileCategoriesOpen]);
+
+  // Функции для управления контекстным меню профиля
+  const handleProfileMenuOpen = (event) => {
+    setProfileMenuAnchor(event.currentTarget);
+  };
+
+  const handleProfileMenuClose = () => {
+    setProfileMenuAnchor(null);
+  };
+
+  const handleProfileMenuClick = (section) => {
+    handleProfileMenuClose();
+    if (section === 'logout') {
+      handleLogout();
+    } else {
+      navigate('/profile');
+      // Устанавливаем выбранную секцию в localStorage для передачи в профиль
+      localStorage.setItem('selectedProfileSection', section);
+      // Принудительно обновляем состояние через небольшую задержку
+      setTimeout(() => {
+        const event = new CustomEvent('profileSectionChanged', { detail: section });
+        window.dispatchEvent(event);
+      }, 100);
+    }
+  };
+
   const [notificationsCleared, setNotificationsCleared] = useState(() => {
     // Инициализируем из localStorage
     return localStorage.getItem('notificationsCleared') === 'true';
@@ -437,7 +499,6 @@ const theme = createTheme({
     };
     return iconMap[categoryName] || '/toys.png';
   };
-
   // Функция для преобразования dbCategories в формат для Navigation (локально вычисленная)
   const navCategoriesComputed = useMemo(() => {
     // Функция для перевода категорий
@@ -1216,7 +1277,6 @@ const theme = createTheme({
   // 1. В начало компонента Navigation добавь:
   const filtersPanelRef = useRef(null);
   const lenisFiltersRef = useRef(null);
-
   // 2. Добавь useEffect для инициализации Lenis на фильтрах:
   useEffect(() => {
     if (filtersMenuOpen && filtersPanelRef.current) {
@@ -1294,14 +1354,78 @@ const theme = createTheme({
             backgroundSize: 'cover',
           }}
         >
-          <Toolbar sx={{ width: '100%', minHeight: '60px !important' }}>
+          <Toolbar sx={{ 
+            width: '100%', 
+            minHeight: { xs: '64px', lg: '96px' },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'nowrap',
+            gap: 1,
+            px: 2
+          }}>
             {/* Логотип */}
             <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-              <img src="/lion-logo.png..png" alt="Логотип магазина" style={{ width: 96, height: 96 }} />
+              <img src="/lion-logo.png..png" alt="Логотип магазина" style={{ width: isDesktop ? 96 : 56, height: isDesktop ? 96 : 56 }} />
             </Box>
+            {/* Кнопка меню при узком вьюпорте (и на мобильных) */}
+            {isNarrow && (
+              <IconButton
+                color="inherit"
+                onClick={() => setMobileMenuOpen(true)}
+                sx={{ 
+                  color: 'white',
+                  mr: 2,
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                  },
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
+            
+            {/* Кнопка категорий в центре для мобильных */}
+            {isNarrow && (
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                flex: 1,
+                mx: 2
+              }}>
+                <IconButton
+                  color="inherit"
+                  onClick={() => setMobileCategoriesOpen(true)}
+                  data-mobile-categories-button
+                  sx={{ 
+                    color: 'white',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    borderRadius: 2,
+                    px: 2,
+                    py: 1,
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                    },
+                  }}
+                >
+                  <CategoryIcon sx={{ mr: 1 }} />
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+                    {t('catalog.categoriesButton')}
+                  </Typography>
+                </IconButton>
+              </Box>
+            )}
             {/* Кнопки навигации: все пункты */}
-            {!isMobile && (
-              <Box sx={{ display: 'flex', gap: 2 }}>
+            {isDesktop && (
+              <Box sx={{ 
+                display: 'flex', 
+                gap: 2,
+                flexWrap: 'nowrap',
+                overflow: 'hidden',
+                minWidth: 0,
+                flexShrink: 0
+              }}>
                 {navItems.map((item) => (
                   <Button
                     key={item.text}
@@ -1315,6 +1439,8 @@ const theme = createTheme({
                       whiteSpace: 'nowrap',
                       fontSize: '0.97rem',
                       padding: '8px 18px',
+                      minWidth: 'fit-content',
+                      flexShrink: 0,
                       '&:hover': {
                         backgroundColor: 'rgba(255,255,255,0.2)',
                         transform: 'none',
@@ -1330,8 +1456,16 @@ const theme = createTheme({
               </Box>
             )}
             {/* Поисковая строка */}
-            {!isMobile && (
-              <form id="appbar-search-form" onSubmit={handleSearch} style={{ flex: 1, maxWidth: 260, margin: '0 24px', display: 'flex', alignItems: 'center' }}>
+            {isDesktop && (
+              <form id="appbar-search-form" onSubmit={handleSearch} style={{ 
+                flex: 1, 
+                maxWidth: 260, 
+                minWidth: 200,
+                margin: '0 24px', 
+                display: 'flex', 
+                alignItems: 'center',
+                flexShrink: 1
+              }}>
                 <TextField
                   size="small"
                   placeholder={t('header.searchPlaceholder')}
@@ -1366,8 +1500,8 @@ const theme = createTheme({
                 />
               </form>
             )}
-            {/* Корзина и профиль */}
-            <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 3 }}>
+            {/* Корзина и профиль - Desktop */}
+            <Box sx={{ marginLeft: 'auto', display: { xs: 'none', lg: 'flex' }, alignItems: 'center', gap: 3, flexShrink: 0 }}>
               {/* Кнопка CMS для админа */}
               {user?.role === 'admin' && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', mt: 2.5 }}>
@@ -1389,7 +1523,7 @@ const theme = createTheme({
                 </Box>
               )}
               {/* Уведомления */}
-              {!isMobile && user && (
+              {user && (
                 <Box sx={{ display: 'flex', alignItems: 'center', height: 56, mr: 1, position: 'relative' }}>
                   <Button
                     color="inherit"
@@ -1423,7 +1557,6 @@ const theme = createTheme({
                         }, 100);
                       } else {
                         // Если не на странице профиля, переходим на профиль
-                        navigate('/profile');
                       }
                     }}
                     sx={{
@@ -1474,103 +1607,101 @@ const theme = createTheme({
                 </Box>
               )}
               {/* Профиль/Войти */}
-              {!isMobile && (
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: 100, justifyContent: 'center', pt: 3.1 }}>
-                  {user ? (
-                    <Button
-                      color="inherit"
-                      component={Link}
-                      to="/profile"
-                      onClick={() => {
-                        // Мгновенно закрываем меню при переходе на профиль
-                        setInstantClose(true);
-                        // Также закрываем фиксированное меню категорий на главной странице
-                        if (isHome) {
-                          setMenuOpen(false);
-                        }
-                        // Закрываем меню фильтров
-                        setFiltersMenuOpen(false);
-                      }}
-                      sx={{
-                        minWidth: 0,
-                        p: 0,
-                        overflow: 'hidden',
-                        backgroundColor: 'transparent',
-                        border: '2px solid #fff',
-                        borderRadius: '50%',
-                        width: 40,
-                        height: 40,
-                        transition: 'border-color 0.2s',
-                        '&:hover': {
-                          borderColor: '#ffe066',
-                          backgroundColor: 'rgba(255,255,255,0.08)',
-                        },
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="8.5" r="4" stroke="white" strokeWidth="2" fill="none" />
-                        <path d="M4 20c0-3.3137 3.134-6 7-6s7 2.6863 7 6" stroke="white" strokeWidth="2" fill="none" />
-                      </svg>
-                    </Button>
-                  ) : (
-                    <Button
-                      color="inherit"
-                      onClick={() => setAuthOpen(true)}
-                      sx={{
-                        minWidth: 0,
-                        p: 0,
-                        overflow: 'hidden',
-                        backgroundColor: 'transparent',
-                        border: '2px solid #fff',
-                        borderRadius: '50%',
-                        width: 40,
-                        height: 40,
-                        transition: 'border-color 0.2s',
-                        '&:hover': {
-                          borderColor: '#ffe066',
-                          backgroundColor: 'rgba(255,255,255,0.08)',
-                        },
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="8.5" r="4" stroke="white" strokeWidth="2" fill="none" />
-                        <path d="M4 20c0-3.3137 3.134-6 7-6s7 2.6863 7 6" stroke="white" strokeWidth="2" fill="none" />
-                      </svg>
-                    </Button>
-                  )}
-                  <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#fff', mt: 0.5, textAlign: 'center', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {user ? (() => {
-                      // Используем ту же логику, что и в профиле
-                      let displayName = user.email; // По умолчанию email
-                      
-                      // Если есть имя пользователя, используем его
-                      if (user.name && user.name.length > 0) {
-                        displayName = user.name;
-                        
-                        // Декодируем имя если оно в неправильной кодировке
-                        try {
-                          // Пробуем как UTF-8 bytes (этот метод сработал)
-                          const bytes = new Uint8Array(displayName.split('').map(c => c.charCodeAt(0)));
-                          const utf8Decoded = new TextDecoder('utf-8').decode(bytes);
-                          if (utf8Decoded && utf8Decoded !== displayName) {
-                            displayName = utf8Decoded;
-                          }
-                        } catch (error) {
-                          // Игнорируем ошибки декодирования
-                        }
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: 100, justifyContent: 'center', pt: 3.1 }}>
+                {user ? (
+                  <Button
+                    color="inherit"
+                    component={Link}
+                    to="/profile"
+                    onClick={() => {
+                      // Мгновенно закрываем меню при переходе на профиль
+                      setInstantClose(true);
+                      // Также закрываем фиксированное меню категорий на главной странице
+                      if (isHome) {
+                        setMenuOpen(false);
                       }
+                      // Закрываем меню фильтров
+                      setFiltersMenuOpen(false);
+                    }}
+                    sx={{
+                      minWidth: 0,
+                      p: 0,
+                      overflow: 'hidden',
+                      backgroundColor: 'transparent',
+                      border: '2px solid #fff',
+                      borderRadius: '50%',
+                      width: 40,
+                      height: 40,
+                      transition: 'border-color 0.2s',
+                      '&:hover': {
+                        borderColor: '#ffe066',
+                        backgroundColor: 'rgba(255,255,255,0.08)',
+                      },
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="8.5" r="4" stroke="white" strokeWidth="2" fill="none" />
+                      <path d="M4 20c0-3.3137 3.134-6 7-6s7 2.6863 7 6" stroke="white" strokeWidth="2" fill="none" />
+                    </svg>
+                  </Button>
+                ) : (
+                  <Button
+                    color="inherit"
+                    onClick={() => setAuthOpen(true)}
+                    sx={{
+                      minWidth: 0,
+                      p: 0,
+                      overflow: 'hidden',
+                      backgroundColor: 'transparent',
+                      border: '2px solid #fff',
+                      borderRadius: '50%',
+                      width: 40,
+                      height: 40,
+                      transition: 'border-color 0.2s',
+                      '&:hover': {
+                        borderColor: '#ffe066',
+                        backgroundColor: 'rgba(255,255,255,0.08)',
+                      },
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="8.5" r="4" stroke="white" strokeWidth="2" fill="none" />
+                      <path d="M4 20c0-3.3137 3.134-6 7-6s7 2.6863 7 6" stroke="white" strokeWidth="2" fill="none" />
+                    </svg>
+                  </Button>
+                )}
+                <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#fff', mt: 0.5, textAlign: 'center', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {user ? (() => {
+                    // Используем ту же логику, что и в профиле
+                    let displayName = user.email; // По умолчанию email
+                    
+                    // Если есть имя пользователя, используем его
+                    if (user.name && user.name.length > 0) {
+                      displayName = user.name;
                       
-                      return displayName;
-                    })() : t('header.login')}
-                  </Typography>
-                </Box>
-              )}
+                      // Декодируем имя если оно в неправильной кодировке
+                      try {
+                        // Пробуем как UTF-8 bytes (этот метод сработал)
+                        const bytes = new Uint8Array(displayName.split('').map(c => c.charCodeAt(0)));
+                        const utf8Decoded = new TextDecoder('utf-8').decode(bytes);
+                        if (utf8Decoded && utf8Decoded !== displayName) {
+                          displayName = utf8Decoded;
+                        }
+                      } catch (error) {
+                        // Игнорируем ошибки декодирования
+                      }
+                    }
+                    
+                    return displayName;
+                  })() : t('header.login')}
+                </Typography>
+              </Box>
               {/* Корзина */}
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: 80, justifyContent: 'center', mt: 2.125 }}>
                 <IconButton
@@ -1613,9 +1744,144 @@ const theme = createTheme({
                 </Typography>
               </Box>
             </Box>
+            
+
+            {/* Корзина и язык для мобильных - справа */}
+            {isNarrow && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
+                {/* Кнопка профиля для мобильных */}
+                <IconButton
+                  color="inherit"
+                  onClick={(event) => {
+                    if (user) {
+                      handleProfileMenuOpen(event);
+                    } else {
+                      setAuthOpen(true);
+                    }
+                  }}
+                  sx={{ 
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                    },
+                  }}
+                >
+                  <PersonIcon sx={{ fontSize: 24 }} />
+                </IconButton>
+                
+                {/* Корзина для мобильных */}
+                <IconButton
+                  color="inherit"
+                  onClick={() => navigate('/cart')}
+                  ref={cartIconRef}
+                  sx={{ 
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                    },
+                  }}
+                >
+                  <Badge
+                    badgeContent={(() => {
+                      const totalItems = cart?.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+                      return totalItems > 0 ? totalItems : null;
+                    })()}
+                    sx={{
+                      '& .MuiBadge-badge': {
+                        backgroundColor: '#5cb95d',
+                        color: '#fff',
+                        fontWeight: 700,
+                        fontSize: 12,
+                        minWidth: 18,
+                        height: 18,
+                        borderRadius: '50%',
+                        boxShadow: '0 2px 6px rgba(92,185,93,0.18)',
+                      }
+                    }}
+                  >
+                    <img src="/pocket.png" alt="cart" style={{ width: 24, height: 24, display: 'block', filter: 'brightness(0) invert(1)', objectFit: 'contain' }} />
+                  </Badge>
+                </IconButton>
+                
+                {/* Переключатель языка для мобильных */}
+                <LanguageSwitcher mobile={true} />
+              </Box>
+            )}
           </Toolbar>
         </AppBar>
+
+        {/* Контекстное меню профиля */}
+        <Menu
+          anchorEl={profileMenuAnchor}
+          open={Boolean(profileMenuAnchor)}
+          onClose={handleProfileMenuClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          PaperProps={{
+            sx: {
+              mt: 1,
+              minWidth: 200,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+              borderRadius: 2,
+              '& .MuiMenuItem-root': {
+                py: 1.5,
+                px: 2,
+                fontSize: 14,
+                fontWeight: 500,
+                '&:hover': {
+                  backgroundColor: '#FFF3E0',
+                },
+              },
+            },
+          }}
+        >
+          <MenuItem onClick={() => handleProfileMenuClick('myprofile')}>
+            <PersonIcon sx={{ mr: 2, color: '#FF9800' }} />
+            {t('profile.menu.myProfile')}
+          </MenuItem>
+          <MenuItem onClick={() => handleProfileMenuClick('notifications')}>
+            <NotificationsIcon sx={{ mr: 2, color: '#FF9800' }} />
+            {t('profile.menu.notifications')}
+          </MenuItem>
+          <MenuItem onClick={() => handleProfileMenuClick('orders')}>
+            <ShoppingCartIcon sx={{ mr: 2, color: '#FF9800' }} />
+            {t('profile.menu.orders')}
+          </MenuItem>
+          <MenuItem onClick={() => handleProfileMenuClick('wishlist')}>
+            <FavoriteIcon sx={{ mr: 2, color: '#FF9800' }} />
+            {t('profile.menu.wishlist')}
+          </MenuItem>
+          <MenuItem onClick={() => handleProfileMenuClick('viewed')}>
+            <VisibilityIcon sx={{ mr: 2, color: '#FF9800' }} />
+            {t('profile.menu.viewed')}
+          </MenuItem>
+          <MenuItem onClick={() => handleProfileMenuClick('profile')}>
+            <PersonIcon sx={{ mr: 2, color: '#FF9800' }} />
+            {t('profile.menu.personalData')}
+          </MenuItem>
+          <MenuItem onClick={() => handleProfileMenuClick('reviews')}>
+            <QuestionAnswerIcon sx={{ mr: 2, color: '#FF9800' }} />
+            {t('profile.menu.reviews')}
+          </MenuItem>
+          <MenuItem onClick={() => handleProfileMenuClick('auth')}>
+            <SettingsIcon sx={{ mr: 2, color: '#FF9800' }} />
+            {t('profile.menu.authSettings')}
+          </MenuItem>
+          <Divider />
+          <MenuItem onClick={() => handleProfileMenuClick('logout')}>
+            <ExitToAppIcon sx={{ mr: 2, color: '#f44336' }} />
+            {t('profile.menu.logout')}
+          </MenuItem>
+        </Menu>
+
         {/* Кнопка категорий под AppBar */}
+        
         {location.pathname !== '/profile' && 
          location.pathname !== '/about' && 
          location.pathname !== '/contacts' && 
@@ -1623,7 +1889,7 @@ const theme = createTheme({
          location.pathname !== '/cart' && 
          location.pathname !== '/checkout' && 
          location.pathname !== '/order-success' && 
-         user?.role !== 'admin' && (
+         user?.role !== 'admin' && isDesktop && (
           <>
           <Box sx={{ 
             position: 'fixed',
@@ -1811,7 +2077,7 @@ const theme = createTheme({
           </>
         )}
         {/* Меню категорий с position: fixed */}
-        {instantClose ? null : (
+        {isDesktop && !instantClose && (
           <Paper
             ref={menuRef}
             className="category-dropdown-menu"
@@ -2020,7 +2286,7 @@ const theme = createTheme({
         )}
 
         {/* Переношу бургер-меню под AppBar */}
-        {location.pathname !== '/profile' && 
+        {isNarrow && location.pathname !== '/profile' && 
          location.pathname !== '/checkout' && 
          location.pathname !== '/order-success' && (
         <Box sx={{ display: { xs: 'block', md: 'none' }, p: 1 }}>
@@ -2036,7 +2302,7 @@ const theme = createTheme({
         </Box>
         )}
         {/* Мобильный Drawer с категориями */}
-        {location.pathname !== '/profile' && 
+        {isNarrow && location.pathname !== '/profile' && 
          location.pathname !== '/checkout' && 
          location.pathname !== '/order-success' && (
       <Drawer
@@ -2083,13 +2349,13 @@ const theme = createTheme({
                   },
                 }}
               >
-                <Box sx={{ mr: 2, color: '#FF6B6B' }}>{item.icon}</Box>
+                <Box sx={{ mr: 2, color: '#FF9800' }}>{item.icon}</Box>
                 <ListItemText
                   primary={item.text}
                   sx={{
                     '& .MuiListItemText-primary': {
                       fontWeight: 'bold',
-                      color: location.pathname === item.path ? '#FF6B6B' : '#333'
+                      color: location.pathname === item.path ? '#FF9800' : '#333'
                     }
                   }}
                 />
@@ -2099,7 +2365,452 @@ const theme = createTheme({
         </Box>
       </Drawer>
         )}
-                    </Box>
+        
+        {/* Мобильное меню */}
+        <Drawer
+          anchor="left"
+          open={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: '280px',
+              background: 'linear-gradient(180deg, #FFF8E1 0%, #FFFFFF 100%)',
+              top: '60px',
+              height: 'calc(100vh - 60px)',
+            },
+          }}
+        >
+          <Box sx={{ p: 2, pt: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#FF9800' }}>
+                {t('navigation.menu')}
+              </Typography>
+              <IconButton onClick={() => setMobileMenuOpen(false)}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            
+
+            
+            {/* Навигационные пункты */}
+            <List>
+              {navItems.map((item) => (
+                <ListItem
+                  key={item.text}
+                  component={Link}
+                  to={item.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  sx={{
+                    backgroundColor: location.pathname === item.path ? '#FFF3E0' : 'transparent',
+                    borderRadius: 2,
+                    mb: 1,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: '#FFF3E0',
+                    },
+                  }}
+                >
+                  <Box sx={{ mr: 2, color: '#FF9800' }}>{item.icon}</Box>
+                  <ListItemText
+                    primary={item.text}
+                    sx={{
+                      '& .MuiListItemText-primary': {
+                        fontWeight: 'bold',
+                        color: location.pathname === item.path ? '#FF9800' : '#333'
+                      }
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        </Drawer>
+        
+        {/* Мобильные фильтры */}
+        <Drawer
+          anchor="right"
+          open={mobileFiltersOpen}
+          onClose={() => setMobileFiltersOpen(false)}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: '280px',
+              background: 'linear-gradient(180deg, #FFF8E1 0%, #FFFFFF 100%)',
+              top: '60px',
+              height: 'calc(100vh - 60px)',
+            },
+          }}
+        >
+          <Box sx={{ p: 2, pt: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+                {t('catalog.filters')}
+              </Typography>
+              <IconButton onClick={() => setMobileFiltersOpen(false)}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            
+            {/* Фильтр по полу */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                {t('catalog.gender')}
+              </Typography>
+              {genderOptions.map((option) => (
+                <FormControlLabel
+                  key={option.value}
+                  control={
+                    <Checkbox
+                      checked={selectedGenders.includes(option.value)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          onGendersChange([...selectedGenders, option.value]);
+                        } else {
+                          onGendersChange(selectedGenders.filter(g => g !== option.value));
+                        }
+                      }}
+                    />
+                  }
+                  label={option.label}
+                  sx={{ display: 'block', mb: 0.5 }}
+                />
+              ))}
+            </Box>
+            
+            {/* Фильтр по возрасту */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                {t('catalog.ageGroup')}
+              </Typography>
+              {ageGroups.map((ageGroup) => (
+                <FormControlLabel
+                  key={ageGroup}
+                  control={
+                    <Checkbox
+                      checked={selectedAgeGroups.includes(ageGroup)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedAgeGroups([...selectedAgeGroups, ageGroup]);
+                        } else {
+                          setSelectedAgeGroups(selectedAgeGroups.filter(ag => ag !== ageGroup));
+                        }
+                      }}
+                    />
+                  }
+                  label={ageGroup}
+                  sx={{ display: 'block', mb: 0.5 }}
+                />
+              ))}
+            </Box>
+            
+            {/* Фильтр по брендам */}
+            {products && products.length > 0 && (
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                  {t('catalog.brands')}
+                </Typography>
+                {Array.from(new Set(products.map(p => p.brand).filter(Boolean))).slice(0, 10).map((brand) => (
+                  <FormControlLabel
+                    key={brand}
+                    control={
+                      <Checkbox
+                        checked={selectedBrands.includes(brand)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedBrands([...selectedBrands, brand]);
+                          } else {
+                            setSelectedBrands(selectedBrands.filter(b => b !== brand));
+                          }
+                        }}
+                      />
+                    }
+                    label={brand}
+                    sx={{ display: 'block', mb: 0.5 }}
+                  />
+                ))}
+              </Box>
+            )}
+            
+            {/* Кнопки сброса и применения */}
+            <Box sx={{ display: 'flex', gap: 1, mt: 3 }}>
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={() => {
+                  onGendersChange([]);
+                  setSelectedAgeGroups([]);
+                  setSelectedBrands([]);
+                }}
+              >
+                {t('catalog.clearFilters')}
+              </Button>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => setMobileFiltersOpen(false)}
+              >
+                {t('catalog.applyFilters')}
+              </Button>
+            </Box>
+          </Box>
+        </Drawer>
+        
+        {/* Мобильное меню категорий - выпадающее под кнопкой */}
+        {mobileCategoriesOpen && (
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 'var(--appbar-height)',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 1400,
+              width: '280px',
+              maxHeight: '70vh',
+              mt: 1,
+            }}
+          >
+          <Slide
+            in={mobileCategoriesOpen}
+            direction="down"
+            timeout={300}
+          >
+          <Paper
+            elevation={8}
+            sx={{
+              background: 'linear-gradient(180deg, #FFF8E1 0%, #FFFFFF 100%)',
+              borderRadius: 2,
+              mt: 1,
+              maxHeight: '70vh',
+              overflow: 'auto'
+            }}
+          >
+            <Box sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#FFB300' }}>
+                  {t('catalog.categoriesButton')}
+                </Typography>
+                <IconButton 
+                  size="small"
+                  onClick={() => setMobileCategoriesOpen(false)}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+              
+              {/* Список категорий с раскрывающимися подкатегориями */}
+              <List sx={{ py: 0 }}>
+                {navCategories && navCategories.map((category) => {
+                  // Функции перевода для мобильного меню
+                  const translateCategory = (categoryName) => {
+                    const categoryMap = {
+                      'Игрушки': t('categories.toys'),
+                      'Конструкторы': t('categories.constructors'),
+                      'Пазлы': t('categories.puzzles'),
+                      'Творчество': t('categories.creativity'),
+                      'Канцтовары': t('categories.stationery'),
+                      'Транспорт': t('categories.transport'),
+                      'Отдых на воде': t('categories.water_recreation'),
+                      'Настольные игры': t('categories.board_games'),
+                      'Развивающие игры': t('categories.educational_games'),
+                      'Акции': t('categories.sales')
+                    };
+                    return categoryMap[categoryName] || categoryName;
+                  };
+
+                  const translateSubcategory = (categoryName, subcategoryName) => {
+                    const subcategoryMap = {
+                      'Игрушки': {
+                        'Игрушки для самых маленьких': t('categories.subcategories.toys.for_babies'),
+                        'Куклы': t('categories.subcategories.toys.dolls'),
+                        'Оружие игрушечное': t('categories.subcategories.toys.toy_weapons'),
+                        'Треки, паркинги и жд': t('categories.subcategories.toys.tracks_parking_railway'),
+                        'Мягкие игрушки': t('categories.subcategories.toys.soft_toys'),
+                        'Игрушки - антистресс и сквиши': t('categories.subcategories.toys.antistress_squishy'),
+                        'Активные игры': t('categories.subcategories.toys.active_games'),
+                        'Тематические игровые наборы': t('categories.subcategories.toys.thematic_sets'),
+                        'Декоративная косметика и украшения': t('categories.subcategories.toys.decorative_cosmetics'),
+                        'Машинки и другой транспорт': t('categories.subcategories.toys.cars_transport'),
+                        'Роботы и трансформеры': t('categories.subcategories.toys.robots_transformers'),
+                        'Игровые фигурки': t('categories.subcategories.toys.game_figures'),
+                        'Игрушки для песочницы': t('categories.subcategories.toys.sandbox_toys'),
+                        'Шарики': t('categories.subcategories.toys.balls'),
+                        'Игрушки на радиоуправлении': t('categories.subcategories.toys.radio_controlled')
+                      },
+                      'Конструкторы': {
+                        'Lego для мальчиков': t('categories.subcategories.constructors.lego_boys'),
+                        'Lego для девочек': t('categories.subcategories.constructors.lego_girls'),
+                        'Металлические конструкторы': t('categories.subcategories.constructors.metal_constructors'),
+                        'Lego крупные блоки': t('categories.subcategories.constructors.lego_large_blocks')
+                      },
+                      'Пазлы': {
+                        'Пазлы для взрослых': t('categories.subcategories.puzzles.for_adults'),
+                        'Пазлы для детей': t('categories.subcategories.puzzles.for_children'),
+                        'Магнитные пазлы': t('categories.subcategories.puzzles.magnetic'),
+                        'Пазлы напольные': t('categories.subcategories.puzzles.floor'),
+                        'Пазлы для малышей': t('categories.subcategories.puzzles.for_babies')
+                      },
+                      'Творчество': {
+                        'Наборы для лепки': t('categories.subcategories.creativity.modeling_sets'),
+                        'Наклейки': t('categories.subcategories.creativity.stickers'),
+                        'Лизуны и слаймы': t('categories.subcategories.creativity.slimes'),
+                        'Кинетический песок': t('categories.subcategories.creativity.kinetic_sand'),
+                        'Рисование': t('categories.subcategories.creativity.drawing'),
+                        'Наборы для творчества': t('categories.subcategories.creativity.creativity_sets'),
+                        'Раскраски': t('categories.subcategories.creativity.coloring')
+                      },
+                      'Канцтовары': {
+                        'Портфели для школы': t('categories.subcategories.stationery.school_bags'),
+                        'Портфели для детских садов': t('categories.subcategories.stationery.kindergarten_bags'),
+                        'Пеналы': t('categories.subcategories.stationery.pencil_cases'),
+                        'Ручки и карандаши': t('categories.subcategories.stationery.pens_pencils'),
+                        'Точилки': t('categories.subcategories.stationery.sharpeners'),
+                        'Фломастеры и маркеры': t('categories.subcategories.stationery.markers'),
+                        'Краски': t('categories.subcategories.stationery.paints'),
+                        'Кисточки и принадлежности': t('categories.subcategories.stationery.brushes_accessories'),
+                        'Брелки': t('categories.subcategories.stationery.keychains')
+                      },
+                      'Транспорт': {
+                        'Детские самокаты': t('categories.subcategories.transport.scooters'),
+                        'Велосипеды': t('categories.subcategories.transport.bicycles'),
+                        'Ходунки': t('categories.subcategories.transport.walkers'),
+                        'Беговелы': t('categories.subcategories.transport.balance_bikes')
+                      },
+                      'Отдых на воде': {
+                        'Бассейны': t('categories.subcategories.water_recreation.pools'),
+                        'Матрасы и плотики': t('categories.subcategories.water_recreation.mattresses_floats'),
+                        'Круги надувные': t('categories.subcategories.water_recreation.inflatable_circles'),
+                        'Нарукавники и жилеты': t('categories.subcategories.water_recreation.armbands_vests'),
+                        'Аксессуары для плавания': t('categories.subcategories.water_recreation.swimming_accessories'),
+                        'Ракетки': t('categories.subcategories.water_recreation.rackets'),
+                        'Пляжные мячи и игрушки для плавания': t('categories.subcategories.water_recreation.beach_balls'),
+                        'Насосы для матрасов': t('categories.subcategories.water_recreation.pumps')
+                      },
+                      'Настольные игры': {
+                        'Настольные игры': t('categories.subcategories.board_games.board_games')
+                      },
+                      'Развивающие игры': {
+                        'Развивающие игры': t('categories.subcategories.educational_games.educational_games')
+                      },
+                      'Акции': {
+                        'Скидки недели': t('categories.subcategories.sales.weekly_discounts'),
+                        'Товары по акции': t('categories.subcategories.sales.sale_items')
+                      }
+                    };
+                    
+                    const categorySubs = subcategoryMap[categoryName];
+                    if (categorySubs && categorySubs[subcategoryName]) {
+                      return categorySubs[subcategoryName];
+                    }
+                    return subcategoryName;
+                  };
+
+                  return (
+                    <React.Fragment key={category.id}>
+                      <ListItem
+                        component="div"
+                        onClick={() => {
+                          navigate(`/category/${category.id}`);
+                          setMobileCategoriesOpen(false);
+                        }}
+                        sx={{
+                          backgroundColor: 'transparent',
+                          borderRadius: 2,
+                          mb: 1,
+                          cursor: 'pointer',
+                          width: '100%',
+                          minHeight: '48px',
+                          '&:hover': {
+                            backgroundColor: '#FFF3E0',
+                          },
+                        }}
+                      >
+                        <Box sx={{ mr: 2, color: '#FFB300' }}>
+                          <img 
+                            src={getCategoryIcon(category.name)} 
+                            alt={category.name}
+                            style={{ width: 24, height: 24, objectFit: 'contain' }}
+                          />
+                        </Box>
+                        <ListItemText
+                          primary={translateCategory(category.name)}
+                          sx={{
+                            '& .MuiListItemText-primary': {
+                              fontWeight: 'bold',
+                              color: '#333'
+                            }
+                          }}
+                        />
+                        {category.sub && category.sub.length > 0 && (
+                          <IconButton
+                            size="medium"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Предотвращаем всплытие события
+                              const newOpenCatIdx = openCatIdx === category.id ? null : category.id;
+                              setOpenCatIdx(newOpenCatIdx);
+                            }}
+                            sx={{ 
+                              color: '#FFB300',
+                              padding: 0,
+                              minWidth: 'auto',
+                              '&:hover': {
+                                backgroundColor: 'transparent',
+                              }
+                            }}
+                          >
+                            {openCatIdx === category.id ? <ExpandMore /> : <ChevronRight />}
+                          </IconButton>
+                        )}
+
+                      </ListItem>
+                      
+                      {/* Подкатегории */}
+                      {category.sub && category.sub.length > 0 && (
+                        <Collapse in={openCatIdx === category.id} timeout="auto" unmountOnExit>
+                          <List component="div" disablePadding>
+                            {category.sub.map((subcategory) => (
+                              <ListItem
+                                key={subcategory.id}
+                                component="div"
+                                onClick={() => {
+                                  navigate(`/subcategory/${subcategory.id}`);
+                                  setMobileCategoriesOpen(false);
+                                }}
+                                sx={{
+                                  pl: 4,
+                                  backgroundColor: 'transparent',
+                                  borderRadius: 2,
+                                  mb: 0.5,
+                                  cursor: 'pointer',
+                                  width: '100%',
+                                  minHeight: '40px',
+                                  '&:hover': {
+                                    backgroundColor: '#FFF3E0',
+                                  },
+                                }}
+                              >
+                                <ListItemText
+                                  primary={translateSubcategory(category.name, subcategory.name)}
+                                  sx={{
+                                    '& .MuiListItemText-primary': {
+                                      fontSize: '0.875rem',
+                                      color: '#666'
+                                    }
+                                  }}
+                                />
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Collapse>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </List>
+            </Box>
+          </Paper>
+          </Slide>
+          </Box>
+        )}
+      </Box>
     </>
   );
 }
@@ -2149,7 +2860,6 @@ function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChang
     </Box>
   );
 }
-
 // Каталог
 function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, user, wishlist, onWishlistToggle, onEditProduct, dbCategories, selectedGenders, selectedBrands, selectedAgeGroups }) {
   const { t, i18n } = useTranslation();
@@ -2159,6 +2869,10 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   const [isListening, setIsListening] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
   const recognitionRef = useRef(null);
+  const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
+  const theme = useTheme();
+  const isNarrow = useMediaQuery(theme.breakpoints.down('lg'));
   // Фильтры каталога
   const [filterAgeGroup, setFilterAgeGroup] = useState('all');
   const [filterGender, setFilterGender] = useState([]); // массив: ['boy', 'girl', 'unisex']
@@ -2166,6 +2880,14 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   const [pageSize, setPageSize] = useState(24);
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState('grid');
+  
+  // Автоматически переключаем на grid view на мобильных устройствах
+  useEffect(() => {
+   if (isNarrow && viewMode === 'list') {
+      setViewMode('grid');
+    }
+ }, [isNarrow, viewMode]);
+  
   // Определяем валюту по товарам (если есть поле currency, иначе ILS)
   const currency = products && products.length > 0
     ? (products.find(p => p.currency)?.currency || 'ILS')
@@ -2494,7 +3216,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
       <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 },
         pl: { md: '270px' }
       }}>
-        <Box sx={{ mb: 4, pt: { xs: 8, md: 10 } }}>
+        <Box sx={{ mb: 4, pt: { xs: 15, md: 10 } }}>
           <Typography variant="h2" sx={{ 
             textAlign: 'center', 
             mb: 4,
@@ -2514,10 +3236,11 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
           {/* Плитки категорий каталога */}
           <Box sx={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
             gap: 2,
             justifyItems: 'center',
             alignItems: 'center',
+            justifyContent: { xs: 'center', sm: 'start' },
             maxWidth: 1100,
             margin: '0 auto',
             overflowY: 'auto',
@@ -2549,8 +3272,8 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  width: '100%',
-                  height: 160,
+                  width: { xs: '320px', sm: '100%' },
+                  height: { xs: 156, sm: 160 },
                   p: 0,
                   background: '#f7fafc',
                   borderRadius: 3,
@@ -2657,7 +3380,14 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
               />
             </Box>
             {/* Переключатель вида — справа */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 'auto' }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 0.5, 
+              ml: 'auto',
+              // Скрываем кнопки переключения в горизонтальном положении на мобильных
+              display: { xs: 'none', sm: 'flex' }
+            }}>
               <IconButton
                 color={viewMode === 'grid' ? 'primary' : 'default'}
                 onClick={() => setViewMode('grid')}
@@ -2669,7 +3399,13 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
               <IconButton
                 color={viewMode === 'list' ? 'primary' : 'default'}
                 onClick={() => setViewMode('list')}
-                sx={{ border: viewMode === 'list' ? '2px solid #ff6600' : '2px solid transparent', background: viewMode === 'list' ? '#fff7f0' : 'transparent', borderRadius: 2, p: 0.5 }}
+                sx={{ 
+                  display: { xs: 'none', sm: 'flex' },
+                  border: viewMode === 'list' ? '2px solid #ff6600' : '2px solid transparent', 
+                  background: viewMode === 'list' ? '#fff7f0' : 'transparent', 
+                  borderRadius: 2, 
+                  p: 0.5 
+                }}
                 title={t('catalog.viewMode.list')}
               >
                 <ViewList sx={{ fontSize: 28, color: viewMode === 'list' ? '#ff6600' : '#888' }} />
@@ -2682,16 +3418,17 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
           {viewMode === 'grid' ? (
             <Box sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)', lg: 'repeat(4, 1fr)' },
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
               gap: 2,
               mt: 8,
               mb: 6,
               maxWidth: 1100,
-              margin: '0 auto'
+              margin: '0 auto',
+              justifyItems: { xs: 'center', sm: 'start' }
             }}>
               {pagedProducts.length > 0 ? (
                 pagedProducts.map(product => (
-                  <Box key={product.id} sx={{ width: '100%', minWidth: 0, maxWidth: '100%' }}>
+                  <Box key={product.id} sx={{ width: { xs: '320px', sm: '100%' }, minWidth: 0, maxWidth: '100%' }}>
                     <ProductCard
                       product={product}
                       user={user}
@@ -2701,7 +3438,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                       cart={cart}
                       onChangeCartQuantity={handleChangeCartQuantity}
                       onEditProduct={onEditProduct}
-                      viewMode="grid"
+                     viewMode={isNarrow && window.innerWidth > window.innerHeight ? "carousel" : "grid"}
                       isAdmin={user?.role === 'admin'}
                     />
                   </Box>
@@ -2713,7 +3450,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
               )}
             </Box>
           ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 6, mb: 6, maxWidth: 1100, margin: '0 auto' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 6, mb: 6, maxWidth: 1100, margin: '0 auto', alignItems: { xs: 'center', sm: 'stretch' } }}>
               {pagedProducts.length > 0 ? (
                 pagedProducts.map(product => (
                   <ProductCard
@@ -2790,6 +3527,8 @@ const lockScroll = () => {
   
   if (scrollLockCount === 1) {
     document.body.style.overflow = 'hidden';
+    // Сохраняем минимальную ширину для горизонтального скролла
+    document.body.style.minWidth = '1200px';
     
     
     // Блокируем события прокрутки на window
@@ -2848,6 +3587,8 @@ const unlockScroll = () => {
   
   if (scrollLockCount === 0) {
     document.body.style.overflow = '';
+    // Восстанавливаем горизонтальный скролл
+    document.body.style.overflowX = 'auto';
     
     
     // Удаляем обработчики событий прокрутки
@@ -2859,7 +3600,6 @@ const unlockScroll = () => {
     }
   }
 };
-
 // Делаем функции доступными глобально
 window.lockScroll = lockScroll;
 window.unlockScroll = unlockScroll;
@@ -3609,7 +4349,6 @@ function App() {
     });
     setReviewFormOpen(true);
   };
-
   // Сохранить изменения товара
   const handleSaveProduct = async (updatedProduct) => {
     if (!user || !user.token) {
@@ -4239,7 +4978,6 @@ function App() {
     </ThemeProvider>
   );
 }
-
 // Компонент для контента внутри Router
 function AppContent({ 
   cart, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, 
@@ -4251,10 +4989,83 @@ function AppContent({
   editModalOpen, setEditModalOpen, editingProduct, setEditingProduct, loadCategoriesFromAPI, selectedGenders, onGendersChange, selectedBrands, selectedAgeGroups, setSelectedBrands, setSelectedAgeGroups, handleUserUpdate, handleOpenReviewForm, reviewFormOpen, setReviewFormOpen, reviewFormData, emailConfirmModalOpen, setEmailConfirmModalOpen, emailConfirmData
 }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const isNarrow = useMediaQuery(theme.breakpoints.down('lg'));
+  
+  // Состояния для мобильного поиска и фильтров
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = React.useState(false);
+  const [isListening, setIsListening] = React.useState(false);
+  const [interimTranscript, setInterimTranscript] = React.useState('');
+  const recognitionRef = React.useRef(null);
   
   // Обработка ошибок рендера
   const [hasError, setHasError] = React.useState(false);
   const [errorInfo, setErrorInfo] = React.useState(null);
+  
+  // Функция поиска
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
+
+  // Функции для голосового поиска
+  const handleMicClick = () => {
+    if (!recognitionRef.current) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = true;
+        recognitionRef.current.lang = 'ru-RU';
+
+        recognitionRef.current.onstart = () => {
+          setIsListening(true);
+        };
+
+        recognitionRef.current.onresult = (event) => {
+          let finalTranscript = '';
+          let interimTranscript = '';
+
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript;
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+
+          if (finalTranscript) {
+            setSearchQuery(finalTranscript);
+            setIsListening(false);
+            recognitionRef.current.stop();
+          } else {
+            setInterimTranscript(interimTranscript);
+          }
+        };
+
+        recognitionRef.current.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
+          setIsListening(false);
+        };
+
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+        };
+      }
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      recognitionRef.current.start();
+    }
+  };
 
   React.useEffect(() => {
     const handleError = (error, errorInfo) => {
@@ -4330,6 +5141,58 @@ function AppContent({
           selectedAgeGroups={selectedAgeGroups}
           setSelectedAgeGroups={setSelectedAgeGroups}
         />
+        
+        {/* Мобильный поиск и фильтры под AppBar */}
+        {isNarrow && (
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 1, 
+            p: 1, 
+            width: '100%'
+          }}>
+            {/* Поисковое поле */}
+            <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} style={{ flex: 1 }}>
+              <TextField
+                size="small"
+                placeholder={t('header.searchPlaceholder')}
+                value={isListening && interimTranscript ? interimTranscript : searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleMicClick} size="small" color={isListening ? 'primary' : 'default'} title="Голосовой ввод">
+                        <MicIcon />
+                      </IconButton>
+                      <IconButton type="submit" size="small">
+                        <SearchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+                sx={{ background: 'white', borderRadius: 2, width: '100%' }}
+              />
+            </form>
+
+                                 {/* Кнопка фильтров */}
+                     <IconButton
+                       onClick={() => setMobileFiltersOpen(true)}
+                       sx={{
+                         color: '#FF9800',
+                         backgroundColor: 'white',
+                         border: '1px solid #FF9800',
+                         borderRadius: 2,
+                         width: 48,
+                         height: 40,
+                         '&:hover': {
+                           backgroundColor: 'rgba(255, 152, 0, 0.04)',
+                         },
+                       }}
+                     >
+                       <FilterList />
+                     </IconButton>
+          </Box>
+        )}
         <Routes>
           <Route path="/" element={<HomePage products={products} onAddToCart={handleAddToCart} cart={cart} user={user} onWishlistToggle={handleWishlistToggle} onChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} wishlist={wishlist} />} />
           <Route path="/product/:id" element={<ProductPage onAddToCart={handleAddToCart} cart={cart} user={user} onChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} setAuthOpen={setAuthOpen} dbCategories={dbCategories} />} />
@@ -4533,8 +5396,8 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
     </Typography>
   );
 
-  return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', background: '#f7f7f7', pt: '96px', boxSizing: 'border-box' }}>
+    return (
+      <Box sx={{ display: 'flex', minHeight: '100vh', background: '#f7f7f7', pt: 'var(--appbar-height)', boxSizing: 'border-box' }}>
       <Box sx={{ width: 220, background: '#fff', borderRight: '1px solid #eee', p: 0 }}>
         <Typography variant="h6" sx={{ p: 2, fontWeight: 'bold', color: '#1976d2' }}>CMS</Typography>
         <List>
@@ -4656,7 +5519,6 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
     </Box>
   );
 }
-
 // Вынесем форму и таблицу в отдельные компоненты внутри CMSProducts
 function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, setEditingProduct, dbCategories }) {
   const { t } = useTranslation();
@@ -5053,7 +5915,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
               <th style={{ padding: 8, border: '1px solid #eee', width: '120px' }}>Категория</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '120px' }}>Подкатегория</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Кол-во</th>
-              <th style={{ padding: 8, border: '1px solid #eee', width: '100px' }}>Артикул</th>
+              <th style={{ padding: 8, border: '1px solid #eee', width: '100px' }}>{t('productCard.sku')}</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Статус</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '120px' }}>Действия</th>
             </tr>
@@ -5161,7 +6023,6 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
       </Box>
     );
   };
-
   // Выбор отображения
   if (mode === 'add') {
     return (
@@ -5276,7 +6137,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             size="medium"
           />
           <TextField 
-            label="Артикул" 
+            label={t('productCard.sku')} 
             name="article" 
             value={form.article} 
             onChange={handleChange} 
@@ -5839,7 +6700,6 @@ const getCategoryIcon = (category) => {
   console.log(`No image for category "${category.name}", using fallback: ${fallbackIcon}`);
   return `${API_BASE_URL}/public${fallbackIcon}?t=${Date.now()}`;
 };
-
 function CMSCategories({ loadCategoriesFromAPI }) {
   console.log('CMSCategories RENDER - Component is loading');
   
@@ -6351,7 +7211,6 @@ function CMSCategories({ loadCategoriesFromAPI }) {
     });
     return result;
   };
-
   return (
     <Box sx={{ mt: 0, minHeight: 400, py: 4, px: { xs: 0, md: 0 } }}>
       <Box sx={{
@@ -6781,9 +7640,9 @@ function CMSCategories({ loadCategoriesFromAPI }) {
     </Box>
   );
 }
-
 // Компонент управления заказами в CMS
 function CMSOrders() {
+  const { t } = useTranslation();
   const [orders, setOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -7212,7 +8071,7 @@ function CMSOrders() {
                         }}
                         title="Детали заказа"
                       >
-                        <InfoIcon />
+                        <Info />
                       </IconButton>
                       <IconButton
                         size="small"
@@ -7225,7 +8084,7 @@ function CMSOrders() {
                         }}
                         title="Удалить заказ"
                       >
-                        <DeleteIcon />
+                        <Delete />
                       </IconButton>
                       <FormControl size="small" sx={{ minWidth: 120 }}>
                         <Select
@@ -7463,7 +8322,7 @@ function CMSOrders() {
                             mb: 0.5,
                             fontSize: '0.8rem'
                           }}>
-                            Артикул: {item.product?.article || '—'}
+                            {t('productCard.sku')}: {item.product?.article || '—'}
                           </Typography>
                           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                             <Chip 
@@ -7579,7 +8438,6 @@ function CMSOrders() {
     </Box>
   );
 }
-
 // Страница категории (показывает подкатегории)
 function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, user, wishlist, onWishlistToggle, onEditProduct }) {
   const { t } = useTranslation();
@@ -8041,6 +8899,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
             mb: 6,
             maxWidth: 1400,
             mx: 'auto',
+            justifyItems: { xs: 'center', sm: 'start' },
             pl: { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 },
             '@media (min-width: 1200px)': {
               pl: 9, // Отступ слева для больших экранов
@@ -8106,9 +8965,10 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
         {/* Сетка товаров из этой категории */}
         <Box sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)', lg: 'repeat(4, 1fr)' },
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
           gap: 3,
           mb: 6,
+          justifyItems: { xs: 'center', sm: 'start' },
           pl: { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 },
           '@media (min-width: 1200px)': {
             pl: 9, // Отступ слева для больших экранов
@@ -8139,7 +8999,6 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
     </Container>
   );
 }
-
 // Страница подкатегории (показывает товары)
 function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, user, wishlist, onWishlistToggle, onEditProduct, selectedGenders }) {
   const { t } = useTranslation();
@@ -8534,9 +9393,10 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
         {/* Сетка товаров */}
         <Box sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)', lg: 'repeat(4, 1fr)' },
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
           gap: 3,
           mb: 6,
+          justifyItems: { xs: 'center', sm: 'start' },
           pl: { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 },
           '@media (min-width: 1200px)': {
             pl: 9, // Отступ слева для больших экранов
@@ -8567,7 +9427,6 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
     </Container>
   );
 }
-
 // Новый компонент личного кабинета
 function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, cart, handleAddToCart, handleChangeCartQuantity, onEditProduct, handleUserUpdate, handleOpenReviewForm }) {
   const { t } = useTranslation();
@@ -8643,8 +9502,17 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
   // Проверяем localStorage для активной вкладки при загрузке
   useEffect(() => {
     const activeTab = localStorage.getItem('activeProfileTab');
+    const selectedSectionFromMenu = localStorage.getItem('selectedProfileSection');
     const skipReload = localStorage.getItem('skipReload');
     
+    // Приоритет: сначала проверяем выбранную секцию из контекстного меню
+    if (selectedSectionFromMenu && ['myprofile', 'profile', 'orders', 'reviews', 'notifications', 'wishlist', 'viewed', 'auth'].includes(selectedSectionFromMenu)) {
+      setSelectedSection(selectedSectionFromMenu);
+      localStorage.removeItem('selectedProfileSection');
+      return;
+    }
+    
+        // Затем проверяем активную вкладку
     if (activeTab && ['myprofile', 'profile', 'orders', 'reviews', 'notifications', 'wishlist', 'viewed', 'auth'].includes(activeTab)) {
       setSelectedSection(activeTab);
       // Очищаем localStorage после использования
@@ -8687,6 +9555,30 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
       return;
     }
   }, [user]);
+
+  // useEffect для обработки изменений selectedSection в реальном времени
+  useEffect(() => {
+    const selectedSectionFromMenu = localStorage.getItem('selectedProfileSection');
+    if (selectedSectionFromMenu && ['myprofile', 'profile', 'orders', 'reviews', 'notifications', 'wishlist', 'viewed', 'auth'].includes(selectedSectionFromMenu)) {
+      setSelectedSection(selectedSectionFromMenu);
+      localStorage.removeItem('selectedProfileSection');
+    }
+  }, [selectedSection]);
+
+  // Обработчик события изменения секции профиля
+  useEffect(() => {
+    const handleProfileSectionChange = (event) => {
+      const section = event.detail;
+      if (['myprofile', 'profile', 'orders', 'reviews', 'notifications', 'wishlist', 'viewed', 'auth'].includes(section)) {
+        setSelectedSection(section);
+      }
+    };
+
+    window.addEventListener('profileSectionChanged', handleProfileSectionChange);
+    return () => {
+      window.removeEventListener('profileSectionChanged', handleProfileSectionChange);
+    };
+  }, []);
   
   useEffect(() => {
     if (!user || !user.token) {
@@ -9228,25 +10120,6 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
   const handleDeleteProfileCancel = () => {
     setDeleteProfileDialogOpen(false);
   };
-  const menuItems = [
-    { key: 'myprofile', label: t('profile.menu.myProfile'), icon: <PersonIcon /> },
-    { key: 'notifications', label: t('profile.menu.notifications'), icon: <NotificationsIcon /> },
-    { key: 'orders', label: t('profile.menu.orders'), icon: <ShoppingCartIcon /> },
-    { key: 'wishlist', label: t('profile.menu.wishlist'), icon: <FavoriteIcon /> },
-    { key: 'viewed', label: t('profile.menu.viewed'), icon: <VisibilityIcon /> },
-    { key: 'profile', label: t('profile.menu.personalData'), icon: <PersonIcon /> },
-    { key: 'reviews', label: t('profile.menu.reviews'), icon: <QuestionAnswerIcon /> },
-    { key: 'auth', label: t('profile.menu.authSettings'), icon: <SettingsIcon /> },
-    { key: 'logout', label: t('profile.menu.logout'), icon: <ExitToAppIcon /> },
-  ];
-
-  const handleMenuClick = (key) => {
-    if (key === 'logout') {
-      setLogoutDialogOpen(true);
-      return;
-    }
-    setSelectedSection(key);
-  };
 
   // Функция для создания красивого заголовка
   const createHeader = (title) => (
@@ -9266,38 +10139,36 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
       {title}
     </Typography>
   );
-
   // Заглушки для разделов
   const renderSection = () => {
     switch (selectedSection) {
       case 'myprofile':
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 4, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               p: { xs: 2, md: 4 },
-              maxWidth: 1100,
-              minWidth: 1100,
+              maxWidth: { xs: '100%', md: 1100 },
               minHeight: 320,
               margin: '0 auto',
               mt: 0,
-              position: 'relative',
-              left: '-110px',
             }}>
               {/* Заголовок и кнопки в одной строке */}
               <Box sx={{ 
                 display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
+                justifyContent: { xs: 'flex-start', md: 'space-between' }, 
+                alignItems: { xs: 'flex-start', md: 'center' }, 
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: { xs: 2, md: 0 },
                 mb: 4,
                 borderBottom: '2px solid #f0f0f0',
                 pb: 2
               }}>
                 {createHeader(t('profile.header.myProfile'))}
                 
-                <Box sx={{ display: 'flex', gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, width: { xs: '100%', md: 'auto' } }}>
                   <Button
                     variant="contained"
                     startIcon={<EditIcon />}
@@ -9308,12 +10179,12 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       borderRadius: 2,
                       fontWeight: 600,
                       fontSize: 15,
-                      px: 3,
+                      px: { xs: 2, md: 3 },
                       py: 1.5,
                       height: 44,
                       boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
                       textTransform: 'none',
-                      minWidth: 120,
+                      minWidth: { xs: 'auto', md: 120 },
                       '&:hover': {
                         background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
                         boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
@@ -9352,7 +10223,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               </Box>
 
               {/* Основная информация */}
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+              <Box sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
+                gap: { xs: 2, md: 4 } 
+              }}>
                 {/* Левая колонка - личная информация */}
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 3 }}>
@@ -9434,21 +10309,25 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     {t('profile.sections.stats')}
                   </Typography>
                   
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <Box sx={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: '1fr' }, 
+                    gap: { xs: 2, md: 3 } 
+                  }}>
                     {/* Товары в корзине */}
                     <Box sx={{ 
                       display: 'flex', 
                       alignItems: 'center', 
                       gap: 2,
-                      p: 2,
+                      p: { xs: 1.5, md: 2 },
                       borderRadius: 2,
                       backgroundColor: '#f8f9fa',
                       border: '1px solid #e9ecef'
                     }}>
-                      <ShoppingCartIcon sx={{ color: '#4caf50', fontSize: 24 }} />
+                      <ShoppingCartIcon sx={{ color: '#4caf50', fontSize: { xs: 20, md: 24 } }} />
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.stats.cartItems')}</Typography>
-                        <Typography sx={{ color: '#333', fontSize: 18, fontWeight: 600 }}>
+                        <Typography sx={{ color: '#666', fontSize: { xs: 12, md: 14 } }}>{t('profile.stats.cartItems')}</Typography>
+                        <Typography sx={{ color: '#333', fontSize: { xs: 16, md: 18 }, fontWeight: 600 }}>
                           {cart?.length || 0}
                         </Typography>
                       </Box>
@@ -9459,15 +10338,15 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       display: 'flex', 
                       alignItems: 'center', 
                       gap: 2,
-                      p: 2,
+                      p: { xs: 1.5, md: 2 },
                       borderRadius: 2,
                       backgroundColor: '#f8f9fa',
                       border: '1px solid #e9ecef'
                     }}>
-                      <FavoriteIcon sx={{ color: '#4caf50', fontSize: 24 }} />
+                      <FavoriteIcon sx={{ color: '#4caf50', fontSize: { xs: 20, md: 24 } }} />
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.stats.wishlistItems')}</Typography>
-                        <Typography sx={{ color: '#333', fontSize: 18, fontWeight: 600 }}>
+                        <Typography sx={{ color: '#666', fontSize: { xs: 12, md: 14 } }}>{t('profile.stats.wishlistItems')}</Typography>
+                        <Typography sx={{ color: '#333', fontSize: { xs: 16, md: 18 }, fontWeight: 600 }}>
                           {localWishlist?.length || 0}
                         </Typography>
                       </Box>
@@ -9478,15 +10357,15 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       display: 'flex', 
                       alignItems: 'center', 
                       gap: 2,
-                      p: 2,
+                      p: { xs: 1.5, md: 2 },
                       borderRadius: 2,
                       backgroundColor: '#f8f9fa',
                       border: '1px solid #e9ecef'
                     }}>
-                      <VisibilityIcon sx={{ color: '#4caf50', fontSize: 24 }} />
+                      <VisibilityIcon sx={{ color: '#4caf50', fontSize: { xs: 20, md: 24 } }} />
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.stats.viewedItems')}</Typography>
-                        <Typography sx={{ color: '#333', fontSize: 18, fontWeight: 600 }}>
+                        <Typography sx={{ color: '#666', fontSize: { xs: 12, md: 14 } }}>{t('profile.stats.viewedItems')}</Typography>
+                        <Typography sx={{ color: '#333', fontSize: { xs: 16, md: 18 }, fontWeight: 600 }}>
                           {localViewed?.length || 0}
                         </Typography>
                       </Box>
@@ -9656,21 +10535,27 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         };
 
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 4, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               p: { xs: 2, md: 4 },
-              maxWidth: 1100,
-              minWidth: 1100,
+              maxWidth: { xs: '100%', md: 1100 },
               minHeight: 320,
               margin: '0 auto',
               mt: 0,
-              position: 'relative',
-              left: '-110px',
             }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, borderBottom: '2px solid #f0f0f0', pb: 2 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: { xs: 'flex-start', md: 'space-between' }, 
+                alignItems: { xs: 'flex-start', md: 'center' }, 
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: { xs: 2, md: 0 },
+                mb: 4, 
+                borderBottom: '2px solid #f0f0f0', 
+                pb: 2 
+              }}>
               {createHeader(t('profile.header.notifications'))}
                 {notifications.length > 0 && (
                   <Button 
@@ -9682,13 +10567,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       color: '#fff',
                       borderRadius: 2,
                       fontWeight: 600,
-                      fontSize: 15,
-                      px: 3,
+                      fontSize: { xs: 14, md: 15 },
+                      px: { xs: 2, md: 3 },
                       py: 1.5,
                       height: 44,
                       boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
                       textTransform: 'none',
-                      minWidth: 120,
+                      minWidth: { xs: '100%', md: 120 },
                       '&:hover': {
                         background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
                         boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
@@ -9722,8 +10607,8 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       sx={{
                         display: 'flex',
                         alignItems: 'flex-start',
-                        gap: 3,
-                        p: 3,
+                        gap: { xs: 2, md: 3 },
+                        p: { xs: 2, md: 3 },
                         border: isSubmitted || isCompleted ? '1px solid #e0e0e0' : (notif.isRead ? '1px solid #e0e0e0' : '2px solid #ff0844'),
                         borderRadius: 3,
                         backgroundColor: isSubmitted || isCompleted ? '#f5f5f5' : (notif.isRead ? '#fafafa' : '#fff4f4'),
@@ -9739,13 +10624,25 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     >
                       {getNotificationIcon(notif.type)}
                       <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ fontWeight: 600, color: isSubmitted || isCompleted ? '#999' : (notif.isRead ? '#888' : '#ff0844'), fontSize: 16 }}>
+                        <Typography sx={{ 
+                          fontWeight: 600, 
+                          color: isSubmitted || isCompleted ? '#999' : (notif.isRead ? '#888' : '#ff0844'), 
+                          fontSize: { xs: 14, md: 16 } 
+                        }}>
                           {notif.title}
                         </Typography>
-                        <Typography sx={{ color: '#333', fontSize: 15, mt: 1, mb: 1 }}>
+                        <Typography sx={{ 
+                          color: '#333', 
+                          fontSize: { xs: 13, md: 15 }, 
+                          mt: 1, 
+                          mb: 1 
+                        }}>
                           {getNotificationText(notif)}
                         </Typography>
-                        <Typography sx={{ color: '#999', fontSize: 13 }}>
+                        <Typography sx={{ 
+                          color: '#999', 
+                          fontSize: { xs: 11, md: 13 } 
+                        }}>
                           {notif.createdAt ? new Date(notif.createdAt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
                         </Typography>
                         {notif.actionUrl && notif.actionText && !isSubmitted && !isCompleted && (
@@ -9759,13 +10656,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                               color: '#fff',
                               borderRadius: 2,
                               fontWeight: 600,
-                              fontSize: 15,
-                              px: 3,
+                              fontSize: { xs: 14, md: 15 },
+                              px: { xs: 2, md: 3 },
                               py: 1.5,
                               height: 44,
                               boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
                               textTransform: 'none',
-                              minWidth: 120,
+                              minWidth: { xs: '100%', md: 120 },
                               '&:hover': {
                                 background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
                                 boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
@@ -9777,21 +10674,46 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           </Button>
                         )}
                         {isSubmitted && (
-                          <Typography sx={{ mt: 1, color: '#4caf50', fontSize: 12, fontWeight: 600 }}>
+                          <Typography sx={{ 
+                            mt: 1, 
+                            color: '#4caf50', 
+                            fontSize: { xs: 11, md: 12 }, 
+                            fontWeight: 600 
+                          }}>
                             ✓ Отзыв отправлен
                           </Typography>
                         )}
                         {isCompleted && !isSubmitted && (
-                          <Typography sx={{ mt: 1, color: '#2196f3', fontSize: 12, fontWeight: 600 }}>
+                          <Typography sx={{ 
+                            mt: 1, 
+                            color: '#2196f3', 
+                            fontSize: { xs: 11, md: 12 }, 
+                            fontWeight: 600 
+                          }}>
                             ✓ Выполнено
                           </Typography>
                         )}
                       </Box>
-                      <IconButton onClick={() => handleDeleteNotification(notif.id)} size="small" sx={{ ml: 1, color: '#ff1744' }} title="Удалить уведомление">
+                      <IconButton 
+                        onClick={() => handleDeleteNotification(notif.id)} 
+                        size="small" 
+                        sx={{ 
+                          ml: { xs: 0.5, md: 1 }, 
+                          color: '#ff1744',
+                          minWidth: 'auto'
+                        }} 
+                        title="Удалить уведомление"
+                      >
                         <Delete fontSize="small" />
                       </IconButton>
                       {!isSubmitted && !isCompleted && !notif.isRead && (
-                        <Box sx={{ width: 12, height: 12, borderRadius: '50%', background: '#ff0844', mt: 0.5 }} />
+                        <Box sx={{ 
+                          width: { xs: 8, md: 12 }, 
+                          height: { xs: 8, md: 12 }, 
+                          borderRadius: '50%', 
+                          background: '#ff0844', 
+                          mt: 0.5 
+                        }} />
                       )}
                     </Box>
                   );
@@ -9857,25 +10779,24 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         };
 
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 4, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               p: { xs: 2, md: 4 },
-              maxWidth: 1100,
-              minWidth: 1100,
+              maxWidth: { xs: '100%', md: 1100 },
               minHeight: 320,
               margin: '0 auto',
               mt: 0,
-              position: 'relative',
-              left: '-110px',
             }}>
               {/* Заголовок с серой линией */}
               <Box sx={{ 
                 display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
+                justifyContent: { xs: 'flex-start', md: 'space-between' }, 
+                alignItems: { xs: 'flex-start', md: 'center' }, 
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: { xs: 2, md: 0 },
                 mb: 4,
                 borderBottom: '2px solid #f0f0f0',
                 pb: 2
@@ -9899,7 +10820,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       sx={{
                         border: '1px solid #e0e0e0',
                         borderRadius: 4,
-                        p: 4,
+                        p: { xs: 2, md: 4 },
                         backgroundColor: '#fff',
                         transition: 'all 0.3s ease',
                         position: 'relative',
@@ -9924,49 +10845,63 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       {/* Заголовок заказа */}
                       <Box sx={{ 
                         display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
+                        justifyContent: { xs: 'flex-start', md: 'space-between' }, 
+                        alignItems: { xs: 'flex-start', md: 'center' },
+                        flexDirection: { xs: 'column', md: 'row' },
+                        gap: { xs: 2, md: 0 },
                         mb: 2,
                         pb: 2,
                         borderBottom: '1px solid #e0e0e0'
                       }}>
                         <Box>
-                          <Typography sx={{ fontWeight: 600, color: '#333', fontSize: 16 }}>
+                          <Typography sx={{ 
+                            fontWeight: 600, 
+                            color: '#333', 
+                            fontSize: { xs: 14, md: 16 } 
+                          }}>
                             {t('profile.orders.orderN', { id: order.id })}
                           </Typography>
-                          <Typography sx={{ color: '#666', fontSize: 14 }}>
+                          <Typography sx={{ 
+                            color: '#666', 
+                            fontSize: { xs: 12, md: 14 } 
+                          }}>
                             {new Date(order.createdAt).toLocaleDateString('ru-RU')}
                           </Typography>
                         </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: { xs: 0.5, md: 1 },
+                          flexDirection: { xs: 'row', md: 'row' }
+                        }}>
                           <Box sx={{ 
                             display: 'inline-block', 
-                            px: 2, 
+                            px: { xs: 1.5, md: 2 }, 
                             py: 0.5, 
                             borderRadius: 1, 
                             backgroundColor: getStatusColor(order.status) + '20',
                             color: getStatusColor(order.status),
-                            fontSize: '0.875rem',
+                            fontSize: { xs: '0.75rem', md: '0.875rem' },
                             fontWeight: 'medium'
                           }}>
                             {getStatusText(order.status)}
                           </Box>
                           {(order.status === 'pickedup' || order.status === 'cancelled') && (
-                                                      <IconButton 
-                            onClick={() => handleHideOrder(order.id)} 
-                            size="small" 
-                            sx={{ 
-                              ml: 1,
-                              color: '#ff1744',
-                              '&:hover': {
-                                backgroundColor: 'rgba(255, 23, 68, 0.1)',
-                                color: '#d50000'
-                              }
-                            }} 
+                            <IconButton 
+                              onClick={() => handleHideOrder(order.id)} 
+                              size="small" 
+                              sx={{ 
+                                ml: { xs: 0.5, md: 1 },
+                                color: '#ff1744',
+                                '&:hover': {
+                                  backgroundColor: 'rgba(255, 23, 68, 0.1)',
+                                  color: '#d50000'
+                                }
+                              }} 
                               title={t('profile.orders.removeFromList')}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
                           )}
                         </Box>
                       </Box>
@@ -9979,8 +10914,8 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: 3,
-                              p: 3,
+                              gap: { xs: 2, md: 3 },
+                              p: { xs: 2, md: 3 },
                               mb: 2,
                               backgroundColor: '#fafafa',
                               borderRadius: 3,
@@ -9995,8 +10930,8 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           >
                             <Box
                               sx={{
-                                width: 70,
-                                height: 70,
+                                width: { xs: 50, md: 70 },
+                                height: { xs: 50, md: 70 },
                                 borderRadius: 3,
                                 background: item.product?.imageUrls && item.product.imageUrls.length > 0
                                   ? `center/cover no-repeat url(${getImageUrl(item.product.imageUrls[0])})` 
@@ -10014,18 +10949,32 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                               }}
                             >
                               {(!item.product?.imageUrls || item.product.imageUrls.length === 0) && (
-                                <span style={{ color: '#bbb', fontSize: 28 }}>🖼️</span>
+                                <span style={{ 
+                                  color: '#bbb', 
+                                  fontSize: { xs: 20, md: 28 } 
+                                }}>🖼️</span>
                               )}
                             </Box>
                             <Box sx={{ flex: 1 }}>
-                              <Typography sx={{ fontWeight: 500, color: '#333', fontSize: 14 }}>
+                              <Typography sx={{ 
+                                fontWeight: 500, 
+                                color: '#333', 
+                                fontSize: { xs: 12, md: 14 } 
+                              }}>
                                 {item.product?.name || 'Товар не найден'}
                               </Typography>
-                              <Typography sx={{ color: '#666', fontSize: 12 }}>
+                              <Typography sx={{ 
+                                color: '#666', 
+                                fontSize: { xs: 10, md: 12 } 
+                              }}>
                                 Количество: {item.quantity}
                               </Typography>
                             </Box>
-                            <Typography sx={{ fontWeight: 600, color: '#333', fontSize: 16 }}>
+                            <Typography sx={{ 
+                              fontWeight: 600, 
+                              color: '#333', 
+                              fontSize: { xs: 14, md: 16 } 
+                            }}>
                               {formatPrice(item.price * item.quantity)}
                             </Typography>
                           </Box>
@@ -10040,10 +10989,18 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         pt: 2,
                         borderTop: '1px solid #e0e0e0'
                       }}>
-                               <Typography sx={{ fontWeight: 600, color: '#333', fontSize: 16 }}>
+                        <Typography sx={{ 
+                          fontWeight: 600, 
+                          color: '#333', 
+                          fontSize: { xs: 14, md: 16 } 
+                        }}>
                           {t('profile.orders.total')}
                         </Typography>
-                        <Typography sx={{ fontWeight: 700, color: '#ff0844', fontSize: 18 }}>
+                        <Typography sx={{ 
+                          fontWeight: 700, 
+                          color: '#ff0844', 
+                          fontSize: { xs: 16, md: 18 } 
+                        }}>
                           {formatPrice(order.items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0)}
                         </Typography>
                       </Box>
@@ -10074,25 +11031,24 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         };
 
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 4, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               p: { xs: 2, md: 4 },
-              maxWidth: 1100,
-              minWidth: 1100,
+              maxWidth: { xs: '100%', md: 1100 },
               minHeight: 320,
               margin: '0 auto',
               mt: 0,
-              position: 'relative',
-              left: '-110px',
             }}>
               {/* Заголовок с серой линией */}
               <Box sx={{ 
                 display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
+                justifyContent: { xs: 'flex-start', md: 'space-between' }, 
+                alignItems: { xs: 'flex-start', md: 'center' }, 
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: { xs: 2, md: 0 },
                 mb: 4,
                 borderBottom: '2px solid #f0f0f0',
                 pb: 2
@@ -10116,7 +11072,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       sx={{
                         border: '1px solid #e0e0e0',
                         borderRadius: 3,
-                        p: 3,
+                        p: { xs: 2, md: 3 },
                         backgroundColor: '#fafafa',
                         transition: 'all 0.2s ease',
                         '&:hover': {
@@ -10128,17 +11084,24 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       {/* Заголовок */}
                       <Box sx={{ 
                         display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'flex-start',
+                        justifyContent: { xs: 'flex-start', md: 'space-between' }, 
+                        alignItems: { xs: 'flex-start', md: 'flex-start' },
+                        flexDirection: { xs: 'column', md: 'row' },
+                        gap: { xs: 2, md: 0 },
                         mb: 2,
                         pb: 2,
                         borderBottom: '1px solid #e0e0e0'
                       }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: { xs: 1.5, md: 2 },
+                          flexDirection: { xs: 'row', md: 'row' }
+                        }}>
                           <Box
                             sx={{
-                              width: 50,
-                              height: 50,
+                              width: { xs: 40, md: 50 },
+                              height: { xs: 40, md: 50 },
                               borderRadius: 2,
                               backgroundImage: `url(${getImageUrl(review.productImage)})`,
                               backgroundSize: 'cover',
@@ -10150,18 +11113,30 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                             }}
                           />
                           <Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                            <Box sx={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: { xs: 0.5, md: 1 }, 
+                              mb: 1 
+                            }}>
                               <Typography sx={{ 
                                 color: getReviewTypeColor(review.type), 
-                                fontSize: 20 
+                                fontSize: { xs: 16, md: 20 } 
                               }}>
                                 {getReviewTypeIcon(review.type)}
                               </Typography>
-                              <Typography sx={{ fontWeight: 600, color: '#333', fontSize: 16 }}>
+                              <Typography sx={{ 
+                                fontWeight: 600, 
+                                color: '#333', 
+                                fontSize: { xs: 14, md: 16 } 
+                              }}>
                                 {review.productName}
                               </Typography>
                             </Box>
-                            <Typography sx={{ color: '#666', fontSize: 14 }}>
+                            <Typography sx={{ 
+                              color: '#666', 
+                              fontSize: { xs: 12, md: 14 } 
+                            }}>
                               {new Date(review.createdAt).toLocaleDateString('ru-RU')}
                             </Typography>
                           </Box>
@@ -10177,7 +11152,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                             }
                           }}
                           size="small" 
-                          sx={{ ml: 1, color: '#ff1744' }} 
+                          sx={{ 
+                            ml: { xs: 0, md: 1 }, 
+                            color: '#ff1744',
+                            alignSelf: { xs: 'flex-end', md: 'flex-start' }
+                          }} 
                           title="Удалить из профиля"
                         >
                           <Delete fontSize="small" />
@@ -10187,11 +11166,19 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       {/* Содержание */}
                       <Box sx={{ mb: 2 }}>
                         {review.type === 'review' && review.rating && (
-                          <Typography sx={{ color: '#ff9800', fontSize: 18, mb: 1 }}>
+                          <Typography sx={{ 
+                            color: '#ff9800', 
+                            fontSize: { xs: 16, md: 18 }, 
+                            mb: 1 
+                          }}>
                             {renderStars(review.rating)}
                           </Typography>
                         )}
-                        <Typography sx={{ color: '#666', fontSize: 14, lineHeight: 1.6 }}>
+                        <Typography sx={{ 
+                          color: '#666', 
+                          fontSize: { xs: 13, md: 14 }, 
+                          lineHeight: 1.6 
+                        }}>
                           {review.comment || review.text || 'Комментарий отсутствует'}
                         </Typography>
                       </Box>
@@ -10200,15 +11187,24 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       {review.answer && (
                         <Box sx={{ 
                           mt: 2, 
-                          p: 2, 
+                          p: { xs: 1.5, md: 2 }, 
                           backgroundColor: '#e3f2fd', 
                           borderRadius: 2,
                           border: '1px solid #2196f3'
                         }}>
-                          <Typography sx={{ fontWeight: 600, color: '#1976d2', fontSize: 14, mb: 1 }}>
+                          <Typography sx={{ 
+                            fontWeight: 600, 
+                            color: '#1976d2', 
+                            fontSize: { xs: 13, md: 14 }, 
+                            mb: 1 
+                          }}>
                             Ответ:
                           </Typography>
-                          <Typography sx={{ color: '#333', fontSize: 14, lineHeight: 1.6 }}>
+                          <Typography sx={{ 
+                            color: '#333', 
+                            fontSize: { xs: 13, md: 14 }, 
+                            lineHeight: 1.6 
+                          }}>
                             {review.answer}
                           </Typography>
                         </Box>
@@ -10222,7 +11218,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         );
       case 'wishlist':
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 4, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             {localWishlist && localWishlist.length === 0 ? (
               <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>У вас нет избранных товаров</Typography>
             ) : (
@@ -10231,19 +11227,21 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 borderRadius: 4,
                 boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
                 p: { xs: 2, md: 4 },
-                maxWidth: 1100,
-                minWidth: 1100,
+                maxWidth: { xs: '100%', md: 1100 },
+                minWidth: { xs: 'auto', md: 1100 },
                 minHeight: 320,
                 margin: '0 auto',
                 mt: 0,
                 position: 'relative',
-                left: '-110px',
+                left: { xs: 0, md: '-110px' },
               }}>
                 {/* Заголовок и кнопка в одной строке */}
                 <Box sx={{ 
                   display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
+                  justifyContent: { xs: 'flex-start', md: 'space-between' }, 
+                  alignItems: { xs: 'flex-start', md: 'center' }, 
+                  flexDirection: { xs: 'column', md: 'row' },
+                  gap: { xs: 2, md: 0 },
                   mb: 4,
                   borderBottom: '2px solid #f0f0f0',
                   pb: 2
@@ -10261,13 +11259,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         color: '#fff',
                         borderRadius: 2,
                         fontWeight: 600,
-                        fontSize: 15,
-                        px: 3,
+                        fontSize: { xs: 14, md: 15 },
+                        px: { xs: 2, md: 3 },
                         py: 1.5,
                         height: 44,
                         boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
                         textTransform: 'none',
-                        minWidth: 120,
+                        minWidth: { xs: '100%', md: 120 },
                         '&:hover': {
                           background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
                           boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
@@ -10281,11 +11279,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 </Box>
                 <Box sx={{
                   display: 'grid',
-                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)', lg: 'repeat(4, 1fr)' },
+                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
                   gap: 2,
-                  width: '100%',
+                  justifyItems: 'center',
+                  alignItems: 'center',
+                  justifyContent: { xs: 'center', sm: 'start' },
+                  maxWidth: 1100,
                   margin: '0 auto',
-                  justifyContent: 'center',
                 }}>
                   {localWishlist.map(item => (
                     <ProductCard
@@ -10311,7 +11311,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         );
       case 'viewed':
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 4, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             {localViewed && localViewed.length === 0 ? (
               <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>Вы ещё не просматривали товары</Typography>
             ) : (
@@ -10320,19 +11320,21 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 borderRadius: 4,
                 boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
                 p: { xs: 2, md: 4 },
-                maxWidth: 1100,
-                minWidth: 1100,
+                maxWidth: { xs: '100%', md: 1100 },
+                minWidth: { xs: 'auto', md: 1100 },
                 minHeight: 320,
                 margin: '0 auto',
                 mt: 0,
                 position: 'relative',
-                left: '-110px',
+                left: { xs: 0, md: '-110px' },
               }}>
                 {/* Заголовок и кнопка в одной строке */}
                 <Box sx={{ 
                   display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
+                  justifyContent: { xs: 'flex-start', md: 'space-between' }, 
+                  alignItems: { xs: 'flex-start', md: 'center' }, 
+                  flexDirection: { xs: 'column', md: 'row' },
+                  gap: { xs: 2, md: 0 },
                   mb: 4,
                   borderBottom: '2px solid #f0f0f0',
                   pb: 2
@@ -10350,13 +11352,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         color: '#fff',
                         borderRadius: 2,
                         fontWeight: 600,
-                        fontSize: 15,
-                        px: 3,
+                        fontSize: { xs: 14, md: 15 },
+                        px: { xs: 2, md: 3 },
                         py: 1.5,
                         height: 44,
                         boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
                         textTransform: 'none',
-                        minWidth: 120,
+                        minWidth: { xs: '100%', md: 120 },
                         '&:hover': {
                           background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
                           boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
@@ -10371,11 +11373,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 
                                 <Box sx={{
                   display: 'grid',
-                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)', lg: 'repeat(4, 1fr)' },
+                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
                   gap: 2,
-                  width: '100%',
+                  justifyItems: 'center',
+                  alignItems: 'center',
+                  justifyContent: { xs: 'center', sm: 'start' },
+                  maxWidth: 1100,
                   margin: '0 auto',
-                  justifyContent: 'center',
                 }}>
                   {localViewed.map(product => (
                     <ProductCard
@@ -10399,19 +11403,19 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         );
       case 'profile':
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 4, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: 0, minHeight: 400, py: 2, pt: 1, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               p: { xs: 2, md: 4 },
-              maxWidth: 1100,
-              minWidth: 1100,
+              maxWidth: { xs: '100%', md: 1100 },
+              minWidth: { xs: 'auto', md: 1100 },
               minHeight: 320,
               margin: '0 auto',
               mt: 0,
               position: 'relative',
-              left: '-110px',
+              left: { xs: 0, md: '-110px' },
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -10420,8 +11424,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               {/* Заголовок с серой линией */}
               <Box sx={{ 
                 display: 'flex', 
-                justifyContent: 'flex-start', 
-                alignItems: 'center', 
+                justifyContent: { xs: 'flex-start', md: 'flex-start' }, 
+                alignItems: { xs: 'flex-start', md: 'center' }, 
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: { xs: 2, md: 0 },
                 mb: 4,
                 borderBottom: '2px solid #f0f0f0',
                 pb: 2,
@@ -10432,7 +11438,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               <Typography sx={{ color: '#888', fontSize: 16, mb: 3, textAlign: 'center' }}>
                 {profileLoading ? t('profile.personal.loading') : t('profile.personal.hint')}
               </Typography>
-              <Box component="form" onSubmit={handleProfileSave} sx={{ width: '100%', maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Box component="form" onSubmit={handleProfileSave} sx={{ width: '100%', maxWidth: { xs: '100%', sm: 480 }, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                 <TextField 
                   label={t('profile.fields.firstName')} 
                   name="name" 
@@ -10492,12 +11498,12 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     borderRadius: 2,
                     fontWeight: 600,
                     fontSize: 15,
-                    px: 3,
+                    px: { xs: 2, md: 3 },
                     py: 1.5,
                     height: 44,
                     boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
                     textTransform: 'none',
-                    minWidth: 120,
+                    minWidth: { xs: '100%', sm: 160 },
                     '&:hover': {
                       background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
                       boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
@@ -10514,19 +11520,16 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
 
       case 'auth':
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 4, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               p: { xs: 2, md: 4 },
-              maxWidth: 1100,
-              minWidth: 1100,
+              maxWidth: { xs: '100%', md: 1100 },
               minHeight: 320,
               margin: '0 auto',
               mt: 0,
-              position: 'relative',
-              left: '-110px',
             }}>
               {/* Заголовок с серой линией */}
               <Box sx={{ 
@@ -10549,7 +11552,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   </Typography>
                 </Box>
                 
-                <Box component="form" onSubmit={handlePasswordSave} sx={{ maxWidth: 500 }}>
+                <Box component="form" onSubmit={handlePasswordSave} sx={{ maxWidth: { xs: '100%', md: 500 } }}>
                   {/* Показываем поле "Текущий пароль" только для пользователей с паролем */}
                   {profileData?.hasPassword && (
                     <TextField
@@ -10652,13 +11655,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       color: '#fff',
                       borderRadius: 2,
                       fontWeight: 600,
-                      fontSize: 15,
-                      px: 3,
+                      fontSize: { xs: 14, md: 15 },
+                      px: { xs: 2, md: 3 },
                       py: 1.5,
                       height: 44,
                       boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
                       textTransform: 'none',
-                      minWidth: 120,
+                      minWidth: { xs: '100%', md: 120 },
                       '&:hover': {
                         background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
                         boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
@@ -10685,8 +11688,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   <Box sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    p: 3,
+                    justifyContent: { xs: 'flex-start', md: 'space-between' },
+                    flexDirection: { xs: 'column', md: 'row' },
+                    gap: { xs: 2, md: 0 },
+                    p: { xs: 2, md: 3 },
                     border: '1px solid #e0e0e0',
                     borderRadius: 2,
                     background: '#fafafa'
@@ -10709,13 +11714,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           color: '#fff',
                           borderRadius: 2,
                           fontWeight: 600,
-                          fontSize: 15,
-                          px: 3,
+                          fontSize: { xs: 14, md: 15 },
+                          px: { xs: 2, md: 3 },
                           py: 1.5,
                           height: 44,
                           boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
                           textTransform: 'none',
-                          minWidth: 120,
+                          minWidth: { xs: '100%', md: 120 },
                           '&:hover': {
                             background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
                             boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
@@ -10731,8 +11736,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   <Box sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    p: 3,
+                    justifyContent: { xs: 'flex-start', md: 'space-between' },
+                    flexDirection: { xs: 'column', md: 'row' },
+                    gap: { xs: 2, md: 0 },
+                    p: { xs: 2, md: 3 },
                     border: '1px solid #e0e0e0',
                     borderRadius: 2,
                     background: '#fafafa'
@@ -10755,13 +11762,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           color: '#fff',
                           borderRadius: 2,
                           fontWeight: 600,
-                          fontSize: 15,
-                          px: 3,
+                          fontSize: { xs: 14, md: 15 },
+                          px: { xs: 2, md: 3 },
                           py: 1.5,
                           height: 44,
                           boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
                           textTransform: 'none',
-                          minWidth: 120,
+                          minWidth: { xs: '100%', md: 120 },
                           '&:hover': {
                             background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
                             boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
@@ -10795,30 +11802,29 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         mt: 0,
         mb: 0,
         px: { xs: 0, md: 0 },
-        minHeight: 'calc(100vh - 96px - 64px)',
+        minHeight: 'calc(100vh - var(--appbar-height) - 64px)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        pt: { xs: '96px', md: '96px' },
+        pt: { xs: 'var(--appbar-height)', md: 'var(--appbar-height)' },
         pb: { xs: '64px', md: '64px' },
       }}>
         <CircularProgress />
       </Container>
     );
   }
-
   return (
     <>
       <Container maxWidth="lg" disableGutters sx={{
         mt: 0,
         mb: 0,
         px: { xs: 0, md: 0 },
-        minHeight: 'calc(100vh - 96px - 64px)', // 96px AppBar + 64px Footer
+        minHeight: 'calc(100vh - var(--appbar-height) - 64px)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-start',
-        pt: { xs: '96px', md: '96px' }, // отступ сверху ровно под AppBar
+        pt: { xs: 'var(--appbar-height)', md: 'var(--appbar-height)' },
         pb: { xs: '64px', md: '64px' }, // отступ снизу ровно над футером
       }}>
         <Box sx={{ display: 'flex', flex: 1, minHeight: 0 }}>
@@ -10828,44 +11834,237 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             sx={{
               width: 260,
               flexShrink: 0,
-              [`& .MuiDrawer-paper`]: { width: 260, boxSizing: 'border-box', borderRight: '1px solid #eee', background: '#fafbfc', top: '96px', height: 'calc(100vh - 96px - 64px)' },
+              [`& .MuiDrawer-paper`]: { width: 260, boxSizing: 'border-box', borderRight: '1px solid #eee', background: '#fafbfc', top: 'var(--appbar-height)', height: 'calc(100vh - var(--appbar-height) - 64px)' },
               display: { xs: 'none', md: 'block' },
             }}
             open
           >
             <Box sx={{ overflow: 'auto', mt: 2 }}>
               <List>
-                {menuItems.map(item => (
-                  <ListItem 
-                    button 
-                    key={item.key} 
-                    selected={selectedSection === item.key} 
-                    onClick={() => handleMenuClick(item.key)}
-                    sx={selectedSection === item.key ? {
+                <ListItem 
+                  button 
+                  selected={selectedSection === 'myprofile'} 
+                  onClick={() => setSelectedSection('myprofile')}
+                  sx={selectedSection === 'myprofile' ? {
+                    backgroundColor: '#f5f5f5',
+                    color: 'primary.main',
+                    borderRadius: 2,
+                    '& .MuiListItemIcon-root': { color: 'primary.main' },
+                    '&:hover': {
+                      backgroundColor: '#f0f0f0',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  } : {
+                    borderRadius: 2,
+                    color: 'inherit',
+                    '& .MuiListItemIcon-root': { color: '#bdbdbd' },
+                    '&:hover': {
                       backgroundColor: '#f5f5f5',
                       color: 'primary.main',
-                      borderRadius: 2,
-                      '& .MuiListItemIcon-root': { color: 'primary.main' },
-                      '&:hover': {
-                        backgroundColor: '#f0f0f0',
-                        color: 'primary.main',
-                        '& .MuiListItemIcon-root': { color: 'primary.main' }
-                      }
-                    } : {
-                      borderRadius: 2,
-                      color: 'inherit',
-                      '& .MuiListItemIcon-root': { color: '#bdbdbd' },
-                      '&:hover': {
-                        backgroundColor: '#f5f5f5',
-                        color: 'primary.main',
-                        '& .MuiListItemIcon-root': { color: 'primary.main' }
-                      }
-                    }}
-                  >
-                    <ListItemIcon>{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.label} />
-                  </ListItem>
-                ))}
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  }}
+                >
+                  <ListItemIcon><PersonIcon /></ListItemIcon>
+                  <ListItemText primary={t('profile.menu.myProfile')} />
+                </ListItem>
+                <ListItem 
+                  button 
+                  selected={selectedSection === 'notifications'} 
+                  onClick={() => setSelectedSection('notifications')}
+                  sx={selectedSection === 'notifications' ? {
+                    backgroundColor: '#f5f5f5',
+                    color: 'primary.main',
+                    borderRadius: 2,
+                    '& .MuiListItemIcon-root': { color: 'primary.main' },
+                    '&:hover': {
+                      backgroundColor: '#f0f0f0',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  } : {
+                    borderRadius: 2,
+                    color: 'inherit',
+                    '& .MuiListItemIcon-root': { color: '#bdbdbd' },
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  }}
+                >
+                  <ListItemIcon><NotificationsIcon /></ListItemIcon>
+                  <ListItemText primary={t('profile.menu.notifications')} />
+                </ListItem>
+                <ListItem 
+                  button 
+                  selected={selectedSection === 'orders'} 
+                  onClick={() => setSelectedSection('orders')}
+                  sx={selectedSection === 'orders' ? {
+                    backgroundColor: '#f5f5f5',
+                    color: 'primary.main',
+                    borderRadius: 2,
+                    '& .MuiListItemIcon-root': { color: 'primary.main' },
+                    '&:hover': {
+                      backgroundColor: '#f0f0f0',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  } : {
+                    borderRadius: 2,
+                    color: 'inherit',
+                    '& .MuiListItemIcon-root': { color: '#bdbdbd' },
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  }}
+                >
+                  <ListItemIcon><ShoppingCartIcon /></ListItemIcon>
+                  <ListItemText primary={t('profile.menu.orders')} />
+                </ListItem>
+                <ListItem 
+                  button 
+                  selected={selectedSection === 'wishlist'} 
+                  onClick={() => setSelectedSection('wishlist')}
+                  sx={selectedSection === 'wishlist' ? {
+                    backgroundColor: '#f5f5f5',
+                    color: 'primary.main',
+                    borderRadius: 2,
+                    '& .MuiListItemIcon-root': { color: 'primary.main' },
+                    '&:hover': {
+                      backgroundColor: '#f0f0f0',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  } : {
+                    borderRadius: 2,
+                    color: 'inherit',
+                    '& .MuiListItemIcon-root': { color: '#bdbdbd' },
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  }}
+                >
+                  <ListItemIcon><FavoriteIcon /></ListItemIcon>
+                  <ListItemText primary={t('profile.menu.wishlist')} />
+                </ListItem>
+                <ListItem 
+                  button 
+                  selected={selectedSection === 'viewed'} 
+                  onClick={() => setSelectedSection('viewed')}
+                  sx={selectedSection === 'viewed' ? {
+                    backgroundColor: '#f5f5f5',
+                    color: 'primary.main',
+                    borderRadius: 2,
+                    '& .MuiListItemIcon-root': { color: 'primary.main' },
+                    '&:hover': {
+                      backgroundColor: '#f0f0f0',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  } : {
+                    borderRadius: 2,
+                    color: 'inherit',
+                    '& .MuiListItemIcon-root': { color: '#bdbdbd' },
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  }}
+                >
+                  <ListItemIcon><VisibilityIcon /></ListItemIcon>
+                  <ListItemText primary={t('profile.menu.viewed')} />
+                </ListItem>
+                <ListItem 
+                  button 
+                  selected={selectedSection === 'profile'} 
+                  onClick={() => setSelectedSection('profile')}
+                  sx={selectedSection === 'profile' ? {
+                    backgroundColor: '#f5f5f5',
+                    color: 'primary.main',
+                    borderRadius: 2,
+                    '& .MuiListItemIcon-root': { color: 'primary.main' },
+                    '&:hover': {
+                      backgroundColor: '#f0f0f0',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  } : {
+                    borderRadius: 2,
+                    color: 'inherit',
+                    '& .MuiListItemIcon-root': { color: '#bdbdbd' },
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  }}
+                >
+                  <ListItemIcon><PersonIcon /></ListItemIcon>
+                  <ListItemText primary={t('profile.menu.personalData')} />
+                </ListItem>
+                <ListItem 
+                  button 
+                  selected={selectedSection === 'reviews'} 
+                  onClick={() => setSelectedSection('reviews')}
+                  sx={selectedSection === 'reviews' ? {
+                    backgroundColor: '#f5f5f5',
+                    color: 'primary.main',
+                    borderRadius: 2,
+                    '& .MuiListItemIcon-root': { color: 'primary.main' },
+                    '&:hover': {
+                      backgroundColor: '#f0f0f0',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  } : {
+                    borderRadius: 2,
+                    color: 'inherit',
+                    '& .MuiListItemIcon-root': { color: '#bdbdbd' },
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  }}
+                >
+                  <ListItemIcon><QuestionAnswerIcon /></ListItemIcon>
+                  <ListItemText primary={t('profile.menu.reviews')} />
+                </ListItem>
+                <ListItem 
+                  button 
+                  selected={selectedSection === 'auth'} 
+                  onClick={() => setSelectedSection('auth')}
+                  sx={selectedSection === 'auth' ? {
+                    backgroundColor: '#f5f5f5',
+                    color: 'primary.main',
+                    borderRadius: 2,
+                    '& .MuiListItemIcon-root': { color: 'primary.main' },
+                    '&:hover': {
+                      backgroundColor: '#f0f0f0',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  } : {
+                    borderRadius: 2,
+                    color: 'inherit',
+                    '& .MuiListItemIcon-root': { color: '#bdbdbd' },
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                      color: 'primary.main',
+                      '& .MuiListItemIcon-root': { color: 'primary.main' }
+                    }
+                  }}
+                >
+                  <ListItemIcon><SettingsIcon /></ListItemIcon>
+                  <ListItemText primary={t('profile.menu.authSettings')} />
+                </ListItem>
               </List>
             </Box>
           </Drawer>
@@ -11224,5 +12423,3 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
   );
 }
 export default App;
-
-

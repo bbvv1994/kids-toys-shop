@@ -133,13 +133,15 @@
     "reviews": "Отзывы о магазине",
     "about": "О нас",
     "contacts": "Контакты",
+    "profile": "Профиль",
     "cart": "Корзина",
     "wishlist": "Избранное",
     "account": "Аккаунт",
     "login": "Войти",
     "register": "Регистрация",
     "logout": "Выйти",
-    "admin": "Админ панель"
+    "admin": "Админ панель",
+    "menu": "Меню"
   },
   "header": {
     "searchPlaceholder": "Поиск товаров...",
@@ -189,7 +191,14 @@
     },
     "scrollToTop": "Наверх",
     "categoriesButton": "Категории",
-    "filtersButton": "Фильтры"
+    "filtersButton": "Фильтры",
+    "categories": "Категории",
+    "filters": "Фильтры",
+    "gender": "Пол",
+    "ageGroup": "Возрастная группа",
+    "brands": "Бренды",
+    "clearFilters": "Очистить",
+    "applyFilters": "Применить"
   },
   "breadcrumbs": {
     "home": "Главная",
@@ -387,6 +396,77 @@
       }
     }
   },
+  "productCard": {
+    "addToCart": "В корзину",
+    "inCart": "В корзине",
+    "edit": "Редактировать",
+    "sku": "Артикул",
+    "brand": "Бренд",
+    "country": "Страна",
+    "dimensions": "Габариты",
+    "noPhoto": "Нет фото",
+    "units": {
+      "cm": "см",
+      "mm": "мм",
+      "m": "м",
+      "kg": "кг",
+      "g": "г",
+      "l": "л",
+      "ml": "мл",
+      "pcs": "шт",
+      "set": "набор",
+      "box": "коробка",
+      "pack": "упаковка"
+    },
+    "additionalInfo": "Дополнительная информация",
+    "length": "Длина",
+    "width": "Ширина",
+    "height": "Высота",
+    "manufacturer": "Производитель",
+    "article": "Артикул",
+    "category": "Категория",
+    "subcategory": "Подкатегория",
+    "ageGroup": "Возрастная группа",
+    "gender": "Пол",
+    "material": "Материал",
+    "weight": "Вес",
+    "color": "Цвет",
+    "package": "Упаковка",
+    "warranty": "Гарантия",
+    "delivery": "Доставка",
+    "payment": "Оплата",
+    "returns": "Возвраты",
+    "specifications": "Характеристики",
+    "description": "Описание",
+    "reviews": "Отзывы",
+    "questions": "Вопросы",
+    "relatedProducts": "Похожие товары",
+    "status": {
+      "new": "Новинка",
+      "sale": "Распродажа",
+      "hit": "Хит продаж",
+      "popular": "Популярный",
+      "limited": "Ограниченная серия",
+      "exclusive": "Эксклюзив",
+      "discount": "Скидка",
+      "clearance": "Распродажа"
+    },
+    "availability": {
+      "inStock": "В наличии",
+      "outOfStock": "Нет в наличии",
+      "lowStock": "Осталось мало",
+      "preOrder": "Предзаказ",
+      "available": "Доступно",
+      "unavailable": "Недоступно",
+      "onWarehouse": "На складе: {{quantity}}",
+      "expectedDelivery": "Ожидается: {{date}}"
+    },
+    "gender": {
+      "boy": "Для мальчиков",
+      "girl": "Для девочек",
+      "unisex": "Универсальный"
+    }
+  },
   "reviews": {
     "shop": {
       "title": "Отзывы о нашем магазине",
@@ -483,5 +563,41 @@
       "shopReviews": "Отзывы о магазине ({{count}})",
       "productReviews": "Отзывы о товаре ({{count}})"
     }
+  },
+  "status": {
+    "new": "Новый",
+    "sale": "Распродажа",
+    "hit": "Хит продаж",
+    "popular": "Популярный",
+    "limited": "Ограниченный тираж",
+    "exclusive": "Эксклюзивный",
+    "discount": "Скидка",
+    "clearance": "Распродажа"
+  },
+  "availability": {
+    "inStock": "В наличии",
+    "outOfStock": "Нет в наличии",
+    "lowStock": "Осталось мало",
+    "preOrder": "Предзаказ",
+    "available": "Доступно",
+    "unavailable": "Недоступно",
+    "onWarehouse": "На складе: {{quantity}}",
+    "expectedDelivery": "Ожидается: {{date}}"
+  },
+  "productDetails": {
+    "technicalSpecs": "Технические характеристики",
+    "physicalSpecs": "Физические характеристики",
+    "packageInfo": "Информация об упаковке",
+    "safetyInfo": "Информация о безопасности",
+    "ageRecommendation": "Рекомендуемый возраст",
+    "skillLevel": "Уровень сложности",
+    "playTime": "Время игры",
+    "playersCount": "Количество игроков",
+    "batteryRequired": "Требуются батарейки",
+    "assemblyRequired": "Требуется сборка",
+    "washable": "Можно стирать",
+    "ecoFriendly": "Экологически чистый",
+    "madeIn": "Сделано в {{country}}",
+    "importedBy": "Импортировано {{company}}"
   }
 } 

@@ -51,24 +51,24 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
         WebkitTextFillColor: 'transparent',
         backgroundClip: 'text'
       }}>{title}</Typography>
-      <Box sx={{ width: '100%', position: 'relative', px: { xs: 4, md: 8 } }}
+      <Box sx={{ width: '100%', position: 'relative', px: { xs: 2, md: 8 } }}
         onMouseEnter={() => { swiperInstance && swiperInstance.autoplay && swiperInstance.autoplay.stop(); }}
         onMouseLeave={() => { swiperInstance && swiperInstance.autoplay && swiperInstance.autoplay.start(); }}
       >
         {/* Стрелки как в галерее (простые HTML) */}
-        <button
+        {products.length > 3 && <button
           onClick={() => swiperInstance && swiperInstance.slidePrev()}
           style={{
             position: 'absolute',
             top: '50%',
-            left: '10px',
+            left: '5px',
             transform: 'translateY(-50%)',
-            width: 60,
-            height: 60,
+            width: 40,
+            height: 40,
             background: 'rgba(255, 255, 255, 0.9)',
             border: 'none',
             borderRadius: '50%',
-            fontSize: 28,
+            fontSize: 20,
             fontWeight: 600,
             color: '#ff6600',
             cursor: 'pointer',
@@ -81,22 +81,30 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
             transition: 'all 0.3s ease',
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
           }}
+          sx={{
+            '@media (min-width: 900px)': {
+              left: '10px',
+              width: 60,
+              height: 60,
+              fontSize: 28,
+            }
+          }}
         >
           ‹
-        </button>
-        <button
+        </button>}
+        {products.length > 3 && <button
           onClick={() => swiperInstance && swiperInstance.slideNext()}
           style={{
             position: 'absolute',
             top: '50%',
-            right: '10px',
+            right: '5px',
             transform: 'translateY(-50%)',
-            width: 60,
-            height: 60,
+            width: 40,
+            height: 40,
             background: 'rgba(255, 255, 255, 0.9)',
             border: 'none',
             borderRadius: '50%',
-            fontSize: 28,
+            fontSize: 20,
             fontWeight: 600,
             color: '#ff6600',
             cursor: 'pointer',
@@ -109,28 +117,37 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
             transition: 'all 0.3s ease',
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
           }}
+          sx={{
+            '@media (min-width: 900px)': {
+              right: '10px',
+              width: 60,
+              height: 60,
+              fontSize: 28,
+            }
+          }}
         >
           ›
-        </button>
+        </button>}
         <Swiper
           modules={[Pagination, A11y, Autoplay]}
-          spaceBetween={20}
+          spaceBetween={10}
           slidesPerView={1}
-          loop={true}
+          loop={products.length >= 3}
           pagination={{ clickable: true }}
           autoplay={{ delay: 5000, disableOnInteraction: false }}
           breakpoints={{
-            600: { slidesPerView: 2, spaceBetween: 20 },
-            900: { slidesPerView: 2, spaceBetween: 25 },
-            1200: { slidesPerView: 3, spaceBetween: 30 },
-            1400: { slidesPerView: 4, spaceBetween: 30 },
+            600: { slidesPerView: Math.min(3, products.length), spaceBetween: 8 },
+            900: { slidesPerView: Math.min(3, products.length), spaceBetween: 10 },
+            1200: { slidesPerView: Math.min(4, products.length), spaceBetween: 15 },
+            1400: { slidesPerView: Math.min(5, products.length), spaceBetween: 20 },
           }}
-          style={{ paddingBottom: 32, width: '100%' }}
+          style={{ paddingBottom: 32, width: '100%', paddingLeft: 0, paddingRight: 0 }}
           onSwiper={instance => {
             setSwiperInstance(instance);
             swiperRef.current = instance;
           }}
           onSlideChange={() => setForceUpdate(f => f + 1)}
+          centeredSlides={true}
         >
           {products.map(product => (
             <SwiperSlide key={product.id}>

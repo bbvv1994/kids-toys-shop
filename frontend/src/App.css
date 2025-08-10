@@ -2,20 +2,16 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
-  /* Учитываем ширину скроллбара */
-  padding-right: calc(100vw - 100%);
+  min-width: 1200px !important;
+  overflow-x: auto !important;
 }
 
 .main-content {
   padding-top: 1rem;
   min-height: calc(100vh - 80px);
   width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
-  /* Учитываем ширину скроллбара */
-  padding-right: calc(100vw - 100%);
+  min-width: 1200px !important;
+  overflow-x: auto !important;
 }
 
 .loading {
@@ -134,7 +130,8 @@ html, body, * {
 
 html, body {
   height: 100%;
-  /* overflow-y: scroll; */
+  min-width: 1200px;
+  overflow-x: auto !important;
 }
 
 body::-webkit-scrollbar,
@@ -165,29 +162,9 @@ html::-webkit-scrollbar-thumb:hover {
   padding-right: calc(16px + (100vw - 100%));
 }
 
-@media (max-width: 1200px) {
-  .products-grid {
-    grid-template-columns: repeat(3, 1fr);
-    padding: 0 12px;
-    padding-right: calc(12px + (100vw - 100%));
-  }
-}
-@media (max-width: 800px) {
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    padding: 0 8px;
-    padding-right: calc(8px + (100vw - 100%));
-  }
-}
-@media (max-width: 500px) {
-  .products-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 0 4px;
-    padding-right: calc(4px + (100vw - 100%));
-  }
-}
+
+
+
 
 /* Стили для Material-UI контейнеров */
 .MuiContainer-root {
@@ -195,6 +172,9 @@ html::-webkit-scrollbar-thumb:hover {
   padding-left: 16px !important;
   padding-right: calc(16px + (100vw - 100%)) !important;
   box-sizing: border-box !important;
+  /* Минимальная ширина для всего body и html */
+  min-width: 1200px !important;
+  overflow-x: auto !important;
 }
 
 .MuiContainer-maxWidthLg {
@@ -213,45 +193,63 @@ html::-webkit-scrollbar-thumb:hover {
   max-width: 1920px !important;
 }
 
-/* Стили для предотвращения горизонтального скролла */
+/* Минимальная ширина для AppBar */
+.MuiAppBar-root {
+  min-width: 1200px !important;
+  overflow-x: auto !important;
+}
+
+/* Минимальная ширина для Toolbar */
+.MuiToolbar-root {
+  min-width: 1200px !important;
+  overflow-x: auto !important;
+}
+
+/* Минимальная ширина для основного контента */
 .MuiBox-root {
-  max-width: 100%;
-  overflow-x: hidden;
+  min-width: 1200px !important;
+  overflow-x: auto !important;
 }
 
+/* Минимальная ширина для Grid контейнеров */
 .MuiGrid-root {
-  max-width: 100%;
+  min-width: 1200px !important;
+  overflow-x: auto !important;
 }
 
+/* Минимальная ширина для Card компонентов */
 .MuiCard-root {
-  max-width: 100%;
-  overflow: hidden;
+  min-width: 1200px !important;
+  overflow-x: auto !important;
 }
 
-/* Стили для мобильных устройств */
-@media (max-width: 768px) {
-  .MuiContainer-root {
-    padding-left: 8px !important;
-    padding-right: calc(8px + (100vw - 100%)) !important;
+
+
+/* Легкая адаптация для десктопа (только отступы и размеры) */
+@media (min-width: 1200px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 32px;
+    padding: 0 16px;
   }
   
-  .main-content {
-    padding-left: 8px;
-    padding-right: calc(8px + (100vw - 100%));
+  /* Легкая адаптация отступов для разных размеров десктопа */
+  @media (max-width: 1400px) {
+    .products-grid {
+      gap: 24px;
+    }
+  }
+  
+  @media (max-width: 1200px) {
+    .products-grid {
+      gap: 20px;
+    }
   }
 }
 
-@media (max-width: 480px) {
-  .MuiContainer-root {
-    padding-left: 4px !important;
-    padding-right: calc(4px + (100vw - 100%)) !important;
-  }
-  
-  .main-content {
-    padding-left: 4px;
-    padding-right: calc(4px + (100vw - 100%));
-  }
-}
+/* Мобильная версия только для реальных мобильных устройств */
+
+/* Мобильные медиа-запросы только для реальных мобильных устройств (через JS) */
 
 /* Компактное поисковое поле */
 .compact-search-field {

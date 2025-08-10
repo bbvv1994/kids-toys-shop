@@ -1077,7 +1077,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   padding: '2px 6px',
                   borderRadius: '4px'
                 }}>
-                  {product.gender === 'Мальчик' ? 'Для мальчиков' : product.gender === 'Девочка' ? 'Для девочек' : 'Универсальный'}
+                  {product.gender === 'Мальчик' ? t('productCard.gender.boy') : product.gender === 'Девочка' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}
                 </span>
               )}
             </Box>
@@ -1092,10 +1092,14 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               </Box>
             )}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 2 }}>
-              <Typography variant="body2"><b>Артикул:</b> {product.article && typeof product.article === 'string' ? product.article : '—'}</Typography>
-              <Typography variant="body2"><b>Бренд:</b> {product.brand && typeof product.brand === 'string' ? product.brand : '—'}</Typography>
-              <Typography variant="body2"><b>Страна производства:</b> {product.country && typeof product.country === 'string' ? product.country : '—'}</Typography>
-              <Typography variant="body2"><b>Размер:</b> {product.height && product.length && product.width ? `${product.length}×${product.width}×${product.height} см` : '—'}</Typography>
+              <Typography variant="body2"><b>{t('productCard.sku')}: {product.article || '—'}</b></Typography>
+              <Typography variant="body2"><b>{t('productCard.brand')}:</b> {product.brand || '—'}</Typography>
+              <Typography variant="body2"><b>{t('productCard.country')}:</b> {product.manufacturer || product.country || '—'}</Typography>
+              <Typography variant="body2" dir="rtl" style={{ textAlign: 'right' }}>
+                <b>{t('productCard.dimensions')}:</b> {product.height && product.length && product.width ? 
+                  `${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
+                  '—'}
+              </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
               {isAdmin ? (
@@ -1103,7 +1107,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   На складе: {product.quantity}
                 </Typography>
               ) : (
-                product.quantity > 0 ? <Chip label="В наличии" color="success" size="small" /> : <Chip label="Нет в наличии" color="default" size="small" />
+                product.quantity > 0 ? <Chip label={t('productCard.availability.inStock')} color="success" size="small" /> : <Chip label={t('productCard.availability.outOfStock')} color="default" size="small" />
               )}
             </Box>
             <Typography sx={{ color: '#1976d2', fontWeight: 700, fontSize: 24 }}>{formatPrice(product.price)}</Typography>
@@ -1231,7 +1235,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   disabled={!product.quantity || product.quantity <= 0}
                 >
                   {product.quantity <= 0 
-                    ? 'Нет в наличии' 
+                    ? t('productCard.availability.outOfStock') 
                     : (inCart && !cartAnimPlaying)
                       ? 'В корзине'
                       : `В корзину (${displayQuantity} шт.)`}

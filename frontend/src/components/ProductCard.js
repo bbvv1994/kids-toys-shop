@@ -1,12 +1,14 @@
 import React from 'react';
 import { Favorite, FavoriteBorder, Edit, RateReview } from '@mui/icons-material';
-import { Box, Button, IconButton, Typography, Rating, Chip } from '@mui/material';
+import { Box, Button, IconButton, Typography, Rating, Chip, useMediaQuery, useTheme } from '@mui/material';
 import { getImageUrl } from '../config';
 import { useNavigate } from 'react-router-dom';
 import { getCategoryIcon } from '../utils/categoryIcon';
+import { useDeviceType } from '../utils/deviceDetection';
 import Lottie from 'lottie-react';
 import wishlistHeartAnim from '../lottie/wishlist-heart.json';
 import addToCartAnim from '../lottie/cart checkout - fast.json';
+import { useTranslation } from 'react-i18next';
 
 const ageIcons = {
   '0-1 год': '/age-icons/0-1.png',
@@ -22,6 +24,10 @@ const ageIcons = {
 
 
 const ProductCard = React.memo(function ProductCard({ product, user, inWishlist, onWishlistToggle, onClick, isAdmin, onAddToCart, cart, onEditProduct, onChangeCartQuantity, viewMode }) {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
   const [localQuantity, setLocalQuantity] = React.useState(1);
   const [isHovered, setIsHovered] = React.useState(false);
   const cardRef = React.useRef();
@@ -77,19 +83,26 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
         sx={{
           position: 'relative',
           background: '#fff',
-          borderRadius: 3,
+          borderRadius: isMobile ? 2 : 3,
           overflow: 'visible',
           cursor: 'pointer',
           height: '100%',
+          width: viewMode === 'carousel' ? '100%' : { xs: '320px', sm: '100%' },
+          maxWidth: viewMode === 'carousel' ? 320 : undefined,
+          margin: viewMode === 'carousel' ? '0 auto' : undefined,
           display: 'flex',
-          flexDirection: 'column',
+        flexDirection: 'column',
           isolation: 'isolate',
           zIndex: isHovered ? 10 : 1,
-          transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
-          boxShadow: isHovered 
-            ? '0 12px 40px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1)' 
-            : '0 4px 6px rgba(0,0,0,0.08)',
-          transition: 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
+          transform: isMobile ? 'none' : (isHovered ? 'translateY(-8px)' : 'translateY(0)'),
+          boxShadow: isMobile 
+            ? '0 2px 8px rgba(0,0,0,0.1)' 
+            : (isHovered 
+              ? '0 12px 40px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1)' 
+              : '0 4px 6px rgba(0,0,0,0.08)'),
+          transition: isMobile 
+            ? 'none' 
+            : 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
           willChange: 'transform, box-shadow'
         }}
         onMouseEnter={() => setIsHovered(true)}
@@ -101,11 +114,11 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           <Box
             sx={{
               position: 'absolute',
-              bottom: 238, // <-- теперь сердечко ещё выше
-              right: 8,
+              bottom: isMobile ? 180 : 238,
+              right: isMobile ? 6 : 8,
               zIndex: 9999,
-              width: viewMode === 'carousel' ? 48 : 40,
-              height: viewMode === 'carousel' ? 48 : 40,
+              width: isMobile ? 36 : (viewMode === 'carousel' ? 48 : 40),
+              height: isMobile ? 36 : (viewMode === 'carousel' ? 48 : 40),
             }}
           >
             {wishlistAnimPlaying && (
@@ -133,25 +146,25 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             <IconButton
               onClick={handleWishlistClick}
               disabled={wishlistAnimPlaying}
-              sx={{
-                color: inWishlist ? '#e53e3e' : '#666',
-                zIndex: 40,
-                width: viewMode === 'carousel' ? 41 : 34,
-                height: viewMode === 'carousel' ? 41 : 34,
-                p: 0,
-                pointerEvents: wishlistAnimPlaying ? 'none' : 'auto',
-                background: 'rgba(255, 255, 255, 0.8)',
-                borderRadius: '50%',
-                '&:hover': {
-                  color: inWishlist ? '#c53030' : '#e53e3e',
-                },
-              }}
+                              sx={{
+                  color: inWishlist ? '#e53e3e' : '#666',
+                  zIndex: 40,
+                  width: isMobile ? 30 : (viewMode === 'carousel' ? 41 : 34),
+                  height: isMobile ? 30 : (viewMode === 'carousel' ? 41 : 34),
+                  p: 0,
+                  pointerEvents: wishlistAnimPlaying ? 'none' : 'auto',
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  borderRadius: '50%',
+                  '&:hover': {
+                    color: inWishlist ? '#c53030' : '#e53e3e',
+                  },
+                }}
             >
-              {!wishlistAnimPlaying && (
-                inWishlist
-                  ? <Favorite sx={{ fontSize: viewMode === 'carousel' ? 27 : 22, marginTop: '4px' }} />
-                  : <FavoriteBorder sx={{ fontSize: viewMode === 'carousel' ? 27 : 22, marginTop: '4px' }} />
-              )}
+                              {!wishlistAnimPlaying && (
+                  inWishlist
+                    ? <Favorite sx={{ fontSize: isMobile ? 18 : (viewMode === 'carousel' ? 27 : 22), marginTop: isMobile ? '2px' : '4px' }} />
+                    : <FavoriteBorder sx={{ fontSize: isMobile ? 18 : (viewMode === 'carousel' ? 27 : 22), marginTop: isMobile ? '2px' : '4px' }} />
+                )}
             </IconButton>
           </Box>
         )}
@@ -159,9 +172,9 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
         <Box sx={{ 
           position: 'relative', 
           width: '100%', 
-          height: 200, 
+          height: isMobile ? 160 : 200, 
           overflow: 'hidden', 
-          borderRadius: '8px 8px 0px 0px',
+          borderRadius: isMobile ? '6px 6px 0px 0px' : '8px 8px 0px 0px',
           backgroundColor: '#f5f5f5',
           display: 'flex',
           alignItems: 'center',
@@ -176,7 +189,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             );
             if (!imgSrc || imgError) {
               return (
-                <img src="/photography.jpg" alt="Нет фото" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px 8px 0px 0px', opacity: 0.5, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
+                <img src="/photography.jpg" alt={t('productCard.noPhoto')} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px 8px 0px 0px', opacity: 0.5, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
               );
             }
             return (
@@ -199,7 +212,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             );
           })()}
         </Box>
-        <div className="product-info" style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', height: '100%' }}>
+        <div className="product-info" style={{ padding: isMobile ? '12px' : '16px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', height: '100%' }}>
           <h3 className="product-name" style={{
             margin: '-10px 0 0px 0',
             fontSize: '1.1rem', 
@@ -234,22 +247,22 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           </div>
           {/* Цена под рейтингом */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#2d3748' }}>
+            <div style={{ fontWeight: 700, fontSize: isMobile ? '1rem' : '1.1rem', color: '#2d3748' }}>
               {formatPrice(product.price)}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {!isAdmin && (
                 <>
                   {product.quantity > 0 ? (
-                    <Chip label="В наличии" color="success" size="small" />
+                    <Chip label={t('productCard.availability.inStock')} color="success" size="small" />
                   ) : (
-                    <Chip label="Нет в наличии" color="default" size="small" />
+                    <Chip label={t('productCard.availability.outOfStock')} color="default" size="small" />
                   )}
                 </>
               )}
               {isAdmin && (
                 <div style={{ fontSize: '0.9rem', color: '#666', marginLeft: 4 }}>
-                  На складе: {product.quantity}
+                  {t('productCard.availability.onWarehouse', { quantity: product.quantity })}
                 </div>
               )}
             </div>
@@ -271,13 +284,13 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                 borderRadius: '4px',
                 marginBottom: '4px'
               }}>
-                {product.gender === 'Мальчик' ? 'Для мальчиков' : product.gender === 'Девочка' ? 'Для девочек' : 'Универсальный'}
+                {product.gender === 'Мальчик' ? t('productCard.gender.boy') : product.gender === 'Девочка' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}
               </span>
             )}
           </div>
           {/* Счетчик и кнопка — просто в потоке, без absolute */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, marginTop: 8, justifyContent: 'center', position: 'relative' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: viewMode === 'carousel' ? 18 : 8, position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: viewMode === 'carousel' ? 18 : 8, position: 'relative', flexWrap: 'wrap', justifyContent: 'center', rowGap: 6 }}>
               <button
                 style={{
                   border: '1px solid #ddd',
@@ -428,10 +441,10 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                   disabled={!product.quantity || product.quantity <= 0}
                 >
                   {!product.quantity || product.quantity <= 0
-                    ? 'В корзину'
+                    ? t('productCard.addToCart')
                     : (cart?.items?.some(item => item.product.id === product.id) && !cartAnimPlaying
-                      ? 'В корзине'
-                      : 'В корзину')}
+                      ? t('productCard.inCart')
+                      : t('productCard.addToCart'))}
                 </Button>
               )}
             </div>
@@ -448,26 +461,30 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
         sx={{
           position: 'relative',
           background: '#fff',
-          borderRadius: 3,
+          borderRadius: isMobile ? 2 : 3,
           overflow: 'visible',
           cursor: 'pointer',
-          height: 250,
-          minHeight: 250,
-          maxHeight: 250,
-          width: '100%',
+          height: isMobile ? 200 : 250,
+          minHeight: isMobile ? 200 : 250,
+          maxHeight: isMobile ? 200 : 250,
+          width: { xs: '320px', sm: '100%' },
           minWidth: 0,
           maxWidth: '100%',
           display: 'flex',
-          flexDirection: 'row',
+          flexDirection: isMobile ? 'column' : 'row',
           isolation: 'isolate',
           zIndex: isHovered ? 10 : 1,
-          transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
-          boxShadow: isHovered 
-            ? '0 12px 40px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1)' 
-            : '0 4px 6px rgba(0,0,0,0.08)',
-          transition: 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
+          transform: isMobile ? 'none' : (isHovered ? 'translateY(-8px)' : 'translateY(0)'),
+          boxShadow: isMobile 
+            ? '0 2px 8px rgba(0,0,0,0.1)' 
+            : (isHovered 
+              ? '0 12px 40px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1)' 
+              : '0 4px 6px rgba(0,0,0,0.08)'),
+          transition: isMobile 
+            ? 'none' 
+            : 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
           willChange: 'transform, box-shadow',
-          mb: 2,
+          mb: isMobile ? 1 : 2,
           alignItems: 'stretch'
         }}
         onMouseEnter={() => setIsHovered(true)}
@@ -475,7 +492,25 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
         onClick={onClick ? onClick : () => navigate(`/product/${product.id}`)}
       >
         {/* Картинка */}
-        <Box sx={{ position: 'relative', width: 250, minWidth: 250, maxWidth: 250, height: 250, minHeight: 250, maxHeight: 250, flexShrink: 0, borderRadius: 0, overflow: 'hidden', background: '#f5f5f5', display: 'flex', alignItems: 'stretch', justifyContent: 'center', m: 0, p: 0, pointerEvents: 'none' }}>
+        <Box sx={{ 
+          position: 'relative', 
+          width: isMobile ? '100%' : 250, 
+          minWidth: isMobile ? '100%' : 250, 
+          maxWidth: isMobile ? '100%' : 250, 
+          height: isMobile ? 120 : 250, 
+          minHeight: isMobile ? 120 : 250, 
+          maxHeight: isMobile ? 120 : 250, 
+          flexShrink: 0, 
+          borderRadius: isMobile ? '6px 6px 0 0' : 0, 
+          overflow: 'hidden', 
+          background: '#f5f5f5', 
+          display: 'flex', 
+          alignItems: 'stretch', 
+          justifyContent: 'center', 
+          m: 0, 
+          p: 0, 
+          pointerEvents: 'none' 
+        }}>
           {(() => {
             const imgSrc = getImageUrl(
               (Array.isArray(product.imageUrls) && product.imageUrls.length > 0 && product.imageUrls[0]) ||
@@ -485,7 +520,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             );
             if (!imgSrc || imgError) {
               return (
-                <img src="/photography.jpg" alt="Нет фото" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 0, opacity: 0.5, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
+                <img src="/photography.jpg" alt={t('productCard.noPhoto')} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 0, opacity: 0.5, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
               );
             }
             return (
@@ -598,14 +633,14 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
               {!isAdmin && (
                 <>
                   {product.quantity > 0 ? (
-                    <Chip label="В наличии" color="success" size="small" />
+                    <Chip label={t('productCard.availability.inStock')} color="success" size="small" />
                   ) : (
-                    <Chip label="Нет в наличии" color="default" size="small" />
+                    <Chip label={t('productCard.availability.outOfStock')} color="default" size="small" />
                   )}
                 </>
               )}
               {isAdmin && (
-                <Typography sx={{ fontSize: 15, color: '#666', fontWeight: 400, ml: 2 }}>На складе: {product.quantity}</Typography>
+                <Typography sx={{ fontSize: 15, color: '#666', fontWeight: 400, ml: 2 }}>{t('productCard.availability.onWarehouse', { quantity: product.quantity })}</Typography>
               )}
             </Box>
           </Box>
@@ -632,17 +667,35 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                 </span>
               )}
               {product.gender && (
-                <span style={{ display: 'inline-block', fontSize: '0.9rem', color: '#666', padding: '2px 6px', borderRadius: '4px' }}>{product.gender === 'Мальчик' ? 'Для мальчиков' : product.gender === 'Девочка' ? 'Для девочек' : 'Универсальный'}</span>
+                <span style={{ display: 'inline-block', fontSize: '0.9rem', color: '#666', padding: '2px 6px', borderRadius: '4px' }}>{product.gender === 'Мальчик' ? t('productCard.gender.boy') : product.gender === 'Девочка' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}</span>
               )}
             </Box>
           )}
         </Box>
         {/* Кнопки и счётчик — в правом нижнем углу всей карточки */}
-        <Box sx={{ position: 'absolute', right: 274, bottom: 22, zIndex: 50, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5, fontSize: 14, color: '#444', borderRadius: 2, px: 2, py: 1, minWidth: 120, wordBreak: 'break-word' }}>
-          <div>Артикул: <b>{product.sku || product.article || '-'}</b></div>
-          <div>Бренд: <b>{product.brand || '-'}</b></div>
-          <div>Страна: <b>{product.manufacturer || product.country || '-'}</b></div>
-          <div>Размер: <b>{product.height && product.length && product.width ? `${product.length}x${product.width}x${product.height} см` : product.size || '-'}</b></div>
+        <Box sx={{ 
+          position: 'absolute', 
+          right: 274, 
+          bottom: 22, 
+          zIndex: 50, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'flex-start', 
+          gap: 0.5, 
+          fontSize: 14, 
+          color: '#444', 
+          borderRadius: 2, 
+          px: 2, 
+          py: 1, 
+          minWidth: 120, 
+          wordBreak: 'break-word' 
+        }}>
+          <div>{t('productCard.sku')}: {product.article || '-'}</div>
+          <div>{t('productCard.brand')}: {product.brand || '-'}</div>
+          <div>{t('productCard.country')}: {product.manufacturer || product.country || '-'}</div>
+          <div dir="rtl" style={{ textAlign: 'right' }}>{product.height && product.length && product.width ? 
+            `${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
+            product.size || '-'}</div>
         </Box>
         <Box sx={{ position: 'absolute', right: 24, bottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
           {/* Счетчик и кнопка — просто в потоке, без absolute */}
@@ -799,10 +852,10 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                   disabled={!product.quantity || product.quantity <= 0}
                 >
                   {!product.quantity || product.quantity <= 0
-                    ? 'В корзину'
+                    ? t('productCard.addToCart')
                     : (cart?.items?.some(item => item.product.id === product.id) && !cartAnimPlaying
-                      ? 'В корзине'
-                      : 'В корзину')}
+                      ? t('productCard.inCart')
+                      : t('productCard.addToCart'))}
                 </Button>
               )}
             </div>
@@ -818,22 +871,26 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
       sx={{
         position: 'relative',
         background: '#fff',
-        borderRadius: 3,
-        overflow: 'visible',
+        borderRadius: isMobile ? 2 : 3,
+        overflow: 'hidden',
         cursor: 'pointer',
         height: '100%',
-        width: '100%',
+        width: { xs: '320px', sm: '100%' },
         minWidth: 0,
         maxWidth: '100%',
         display: 'flex',
         flexDirection: 'column',
         isolation: 'isolate',
         zIndex: isHovered ? 10 : 1,
-        transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
-        boxShadow: isHovered 
-          ? '0 12px 40px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1)' 
-          : '0 4px 6px rgba(0,0,0,0.08)',
-        transition: 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
+        transform: isMobile ? 'none' : (isHovered ? 'translateY(-8px)' : 'translateY(0)'),
+        boxShadow: isMobile 
+          ? '0 2px 8px rgba(0,0,0,0.1)' 
+          : (isHovered 
+            ? '0 12px 40px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1)' 
+            : '0 4px 6px rgba(0,0,0,0.08)'),
+        transition: isMobile 
+          ? 'none' 
+          : 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
         willChange: 'transform, box-shadow'
       }}
       onMouseEnter={() => setIsHovered(true)}
@@ -844,11 +901,11 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
         <Box
           sx={{
             position: 'absolute',
-            bottom: 243,
-            right: 12,
+            bottom: isMobile ? 180 : 243,
+            right: isMobile ? 8 : 12,
             zIndex: 9999,
-            width: viewMode === 'carousel' ? 48 : 41,
-            height: viewMode === 'carousel' ? 48 : 41,
+            width: isMobile ? 36 : (viewMode === 'carousel' ? 48 : 41),
+            height: isMobile ? 36 : (viewMode === 'carousel' ? 48 : 41),
           }}
         >
           {wishlistAnimPlaying && (
@@ -879,11 +936,11 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             sx={{
               color: inWishlist ? '#e53e3e' : '#666',
               zIndex: 40,
-              width: viewMode === 'carousel' ? 41 : 41,
-              height: viewMode === 'carousel' ? 41 : 41,
+              width: isMobile ? 30 : (viewMode === 'carousel' ? 41 : 41),
+              height: isMobile ? 30 : (viewMode === 'carousel' ? 41 : 41),
               p: 0,
               pointerEvents: wishlistAnimPlaying ? 'none' : 'auto',
-              background: 'rgba(255, 255, 255, 0.8)',
+              background: 'rgba(255, 255, 255, 0.9)',
               borderRadius: '50%',
               '&:hover': {
                 color: inWishlist ? '#c53030' : '#e53e3e',
@@ -892,8 +949,8 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           >
             {!wishlistAnimPlaying && (
               inWishlist
-                ? <Favorite sx={{ fontSize: viewMode === 'carousel' ? 27 : 28, marginTop: '4px' }} />
-                : <FavoriteBorder sx={{ fontSize: viewMode === 'carousel' ? 27 : 28, marginTop: '4px' }} />
+                ? <Favorite sx={{ fontSize: isMobile ? 18 : (viewMode === 'carousel' ? 27 : 28), marginTop: isMobile ? '2px' : '4px' }} />
+                : <FavoriteBorder sx={{ fontSize: isMobile ? 18 : (viewMode === 'carousel' ? 27 : 28), marginTop: isMobile ? '2px' : '4px' }} />
             )}
           </IconButton>
         </Box>
@@ -903,9 +960,9 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
       <Box sx={{ 
         position: 'relative', 
         width: '100%', 
-        height: 200, 
+        height: isMobile ? 160 : 200, 
         overflow: 'hidden', 
-        borderRadius: '8px 8px 0 0',
+        borderRadius: isMobile ? '6px 6px 0 0' : '8px 8px 0 0',
         backgroundColor: '#f5f5f5',
         display: 'flex',
         alignItems: 'center',
@@ -920,7 +977,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           );
           if (!imgSrc || imgError) {
             return (
-              <img src="/photography.jpg" alt="Нет фото" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, opacity: 0.5, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
+                              <img src="/photography.jpg" alt={t('productCard.noPhoto')} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, opacity: 0.5, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
             );
           }
           return (
@@ -943,23 +1000,23 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
         })()}
       </Box>
 
-      <div className="product-info" style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', height: '100%' }}>
+      <div className="product-info" style={{ padding: isMobile ? '12px' : '16px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', height: '100%' }}>
         {/* Название товара */}
         <h3 style={{ 
           margin: '-10px 0 0px 0',
-          fontSize: '1.1rem', 
+          fontSize: isMobile ? '1rem' : '1.1rem', 
           fontWeight: 600, 
           color: '#2d3748',
           lineHeight: 1.3,
           display: '-webkit-box',
-                      WebkitLineClamp: 3,
+          WebkitLineClamp: isMobile ? 2 : 3,
           WebkitBoxOrient: 'vertical',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           wordWrap: 'break-word',
           wordBreak: 'break-word',
-          minHeight: '4.5rem',
-          maxHeight: '4.5rem'
+          minHeight: isMobile ? '3rem' : '4.5rem',
+          maxHeight: isMobile ? '3rem' : '4.5rem'
         }}>
           {typeof product.name === 'string' ? product.name : String(product.name || '')}
         </h3>
@@ -979,24 +1036,24 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
         </div>
         {/* Цена под рейтингом */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#2d3748' }}>
+          <div style={{ fontWeight: 700, fontSize: isMobile ? '1rem' : '1.1rem', color: '#2d3748' }}>
             {formatPrice(product.price)}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {!isAdmin && (
               <>
                 {product.quantity > 0 ? (
-                  <Chip label="В наличии" color="success" size="small" />
+                  <Chip label={t('productCard.availability.inStock')} color="success" size="small" />
                 ) : (
-                  <Chip label="Нет в наличии" color="default" size="small" />
+                  <Chip label={t('productCard.availability.outOfStock')} color="default" size="small" />
                 )}
               </>
             )}
-            {isAdmin && (
-              <div style={{ fontSize: '0.9rem', color: '#666', marginLeft: 4 }}>
-                На складе: {product.quantity}
-              </div>
-            )}
+                          {isAdmin && (
+                <div style={{ fontSize: '0.9rem', color: '#666', marginLeft: 4 }}>
+                  {t('productCard.availability.onWarehouse', { quantity: product.quantity })}
+                </div>
+              )}
           </div>
         </div>
         <div className="product-meta" style={{ minHeight: 32, display: 'flex', alignItems: 'center' }}>
@@ -1016,13 +1073,13 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
               borderRadius: '4px',
               marginBottom: '4px'
             }}>
-              {product.gender === 'Мальчик' ? 'Для мальчиков' : product.gender === 'Девочка' ? 'Для девочек' : 'Универсальный'}
+              {product.gender === 'Мальчик' ? t('productCard.gender.boy') : product.gender === 'Девочка' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}
             </span>
           )}
         </div>
         {/* Счетчик и кнопка — просто в потоке, без absolute */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, marginTop: 8, justifyContent: 'center', position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: viewMode === 'similar' ? 6 : 8, position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: viewMode === 'similar' ? 6 : 8, position: 'relative', flexWrap: 'wrap', justifyContent: 'center', rowGap: 6, maxWidth: '100%' }}>
             {/* Надпись о наличии товара — только для списка */}
             {viewMode === 'list' && (
               <div style={{
@@ -1169,10 +1226,10 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                   fontWeight: 600,
                   fontSize: 14,
                   minWidth: 0,
-                  width: 110,
+                  width: viewMode === 'carousel' ? 100 : 110,
                   height: 32,
                   borderRadius: 6,
-                  ml: viewMode === 'similar' ? 0.375 : 0.625, // Для похожих товаров еще меньше отступ
+                  ml: viewMode === 'similar' ? 0.375 : 0.625,
                   px: 2,
                   lineHeight: '32px',
                   whiteSpace: 'nowrap',
@@ -1192,10 +1249,10 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                 disabled={!product.quantity || product.quantity <= 0}
               >
                 {!product.quantity || product.quantity <= 0
-                  ? 'В корзину'
+                  ? t('productCard.addToCart')
                   : (cart?.items?.some(item => item.product.id === product.id) && !cartAnimPlaying
-                    ? 'В корзине'
-                    : 'В корзину')}
+                    ? t('productCard.inCart')
+                    : t('productCard.addToCart'))}
               </Button>
             )}
           </div>
@@ -1220,11 +1277,17 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
               marginTop: '-4px',
             }}
           >
-            <div style={{ fontSize: 14, color: '#444' }}>
-              <div>Артикул: {product.sku || product.article || '-'}</div>
-              <div>Бренд: {product.brand || '-'}</div>
-              <div>Страна производства: {product.manufacturer || product.country || '-'}</div>
-              <div>Размер: {product.height && product.length && product.width ? `${product.length}x${product.width}x${product.height} см` : product.size || '-'}</div>
+            <div style={{ 
+              fontSize: 14, 
+              color: '#444',
+              textAlign: 'left'
+            }}>
+              <div>{t('productCard.sku')}: {product.article || '-'}</div>
+              <div>{t('productCard.brand')}: {product.brand || '-'}</div>
+              <div>{t('productCard.country')}: {product.manufacturer || product.country || '-'}</div>
+              <div dir="rtl" style={{ textAlign: 'right' }}>{product.height && product.length && product.width ? 
+                `${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
+                product.size || '-'}</div>
             </div>
           </Box>
         )}
