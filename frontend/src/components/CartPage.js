@@ -360,7 +360,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                                   }}>
                                     {(() => {
                                       const genderStr = typeof item.product.gender === 'object' ? (item.product.gender.name || '') : String(item.product.gender || '');
-                                      return genderStr === 'Мальчик' ? 'Для мальчиков' : genderStr === 'Девочка' ? 'Для девочек' : 'Универсальный';
+                                      return genderStr === 'Для мальчиков' ? 'Для мальчиков' : genderStr === 'Для девочек' ? 'Для девочек' : 'Универсальный';
                                     })()}
                                   </span>
                                 )}

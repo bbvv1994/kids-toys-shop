@@ -32,7 +32,7 @@ function renderStars(rating, max = 5) {
   );
 }
 
-function ProductList({ products, onProductDeleted, onRefresh, user, onProductClick, searchQuery, filterCategory, filterAgeGroup, selectedGenders = [], viewMode = 'grid', lottiePlayingMap, setLottiePlayingMap, wishlist = [] }) {
+function ProductList({ products, onProductDeleted, onRefresh, user, onProductClick, searchQuery, filterCategory, filterAgeGroup, selectedGenders = [], priceRange = [0, 10000], viewMode = 'grid', lottiePlayingMap, setLottiePlayingMap, wishlist = [] }) {
   const [sortBy, setSortBy] = useState('newest');
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -48,6 +48,9 @@ function ProductList({ products, onProductDeleted, onRefresh, user, onProductCli
         // Теперь selectedGenders содержит русские названия напрямую
         if (!selectedGenders.includes(product.gender)) return false;
       }
+      // Фильтрация по цене
+      const productPrice = Number(product.price);
+      if (productPrice < priceRange[0] || productPrice > priceRange[1]) return false;
       return true;
     })
     .sort((a, b) => {

@@ -21,7 +21,12 @@
     "close": "סגור",
     "confirm": "אישור",
     "yes": "כן",
-    "no": "לא"
+    "no": "לא",
+    "confirmDelete": "האם אתה בטוח שברצונך למחוק את הפריט הזה?",
+    "deleteError": "שגיאה במחיקת הפריט",
+    "loginRequired": "התחבר כדי להשתמש בתכונה זו!",
+    "selectAgeGroup": "בחר קבוצת גיל",
+    "selectGender": "בחר מגדר"
   },
   "profile": {
     "menu": {
@@ -198,7 +203,22 @@
     "ageGroup": "קבוצת גיל",
     "brands": "מותגים",
     "clearFilters": "נקה",
-    "applyFilters": "החל"
+    "applyFilters": "החל",
+    "ageGroups": {
+      "0-1_year": "0-1 שנה",
+      "1-3_years": "1-3 שנים",
+      "3-5_years": "3-5 שנים",
+      "5-7_years": "5-7 שנים",
+      "7-10_years": "7-10 שנים",
+      "10-12_years": "10-12 שנים",
+      "12-14_years": "12-14 שנים",
+      "14-16_years": "14-16 שנים"
+    },
+    "genderOptions": {
+      "boy": "לבנים",
+      "girl": "לבנות",
+      "unisex": "אוניברסלי"
+    }
   },
   "breadcrumbs": {
     "home": "דף הבית",

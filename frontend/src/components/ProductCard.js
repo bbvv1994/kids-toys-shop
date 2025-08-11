@@ -284,7 +284,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                 borderRadius: '4px',
                 marginBottom: '4px'
               }}>
-                {product.gender === 'Мальчик' ? t('productCard.gender.boy') : product.gender === 'Девочка' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}
+                {product.gender === 'Для мальчиков' ? t('productCard.gender.boy') : product.gender === 'Для девочек' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}
               </span>
             )}
           </div>
@@ -667,7 +667,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                 </span>
               )}
               {product.gender && (
-                <span style={{ display: 'inline-block', fontSize: '0.9rem', color: '#666', padding: '2px 6px', borderRadius: '4px' }}>{product.gender === 'Мальчик' ? t('productCard.gender.boy') : product.gender === 'Девочка' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}</span>
+                <span style={{ display: 'inline-block', fontSize: '0.9rem', color: '#666', padding: '2px 6px', borderRadius: '4px' }}>{product.gender === 'Для мальчиков' ? t('productCard.gender.boy') : product.gender === 'Для девочек' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}</span>
               )}
             </Box>
           )}
@@ -1073,7 +1073,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
               borderRadius: '4px',
               marginBottom: '4px'
             }}>
-              {product.gender === 'Мальчик' ? t('productCard.gender.boy') : product.gender === 'Девочка' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}
+              {product.gender === 'Для мальчиков' ? t('productCard.gender.boy') : product.gender === 'Для девочек' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}
             </span>
           )}
         </div>

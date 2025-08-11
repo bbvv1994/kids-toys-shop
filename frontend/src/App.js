@@ -257,7 +257,7 @@ const theme = createTheme({
 });
 
   // Компонент навигации
-  function Navigation({ cartCount, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups, mobileFiltersOpen, setMobileFiltersOpen }) {
+  function Navigation({ cartCount, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups, mobileFiltersOpen, setMobileFiltersOpen, priceRange, setPriceRange }) {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
   const deviceType = useDeviceType();
@@ -270,7 +270,6 @@ const theme = createTheme({
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [submenuTimeout, setSubmenuTimeout] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 10000]);
   const [priceLimits, setPriceLimits] = useState([0, 10000]);
   const cartIconRef = useRef(null);
   const drawerListRef = useRef(null); // ref для списка категорий внутри Drawer
@@ -2485,6 +2484,25 @@ const theme = createTheme({
               ))}
             </Box>
             
+            {/* Фильтр по цене */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                {t('common.price')}
+              </Typography>
+              <Slider
+                value={priceRange}
+                onChange={(_, newValue) => setPriceRange(newValue)}
+                valueLabelDisplay="auto"
+                min={priceLimits[0]}
+                max={priceLimits[1]}
+                sx={{ width: '100%', mt: 1 }}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#888', mt: 1 }}>
+                <span>{new Intl.NumberFormat('ru-RU', { style: 'currency', currency }).format(priceRange[0])}</span>
+                <span>{new Intl.NumberFormat('ru-RU', { style: 'currency', currency }).format(priceRange[1])}</span>
+              </Box>
+            </Box>
+            
             {/* Фильтр по возрасту */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
@@ -2548,6 +2566,7 @@ const theme = createTheme({
                   onGendersChange([]);
                   setSelectedAgeGroups([]);
                   setSelectedBrands([]);
+                  setPriceRange(priceLimits);
                 }}
                 sx={{
                   background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
@@ -2905,7 +2924,7 @@ function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChang
   );
 }
 // Каталог
-function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, user, wishlist, onWishlistToggle, onEditProduct, dbCategories, selectedGenders, selectedBrands, selectedAgeGroups }) {
+function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, user, wishlist, onWishlistToggle, onEditProduct, dbCategories, selectedGenders, selectedBrands, selectedAgeGroups, priceRange }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -3199,8 +3218,11 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
       if (!selectedRussianGenders.includes(product.gender)) {
         return false;
       }
-    }
-    // Поиск (если есть)
+          }
+      // Фильтр по цене
+      const productPrice = Number(product.price);
+      if (productPrice < priceRange[0] || productPrice > priceRange[1]) return false;
+      // Поиск (если есть)
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase();
       const nameMatch = product.name?.toLowerCase().includes(searchLower);
@@ -3979,6 +4001,7 @@ function App() {
   const [selectedGenders, setSelectedGenders] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedAgeGroups, setSelectedAgeGroups] = useState([]);
+  const [priceRange, setPriceRange] = useState([0, 10000]);
   
   // Состояние для формы отзывов
   const [reviewFormOpen, setReviewFormOpen] = useState(false);
@@ -5011,10 +5034,12 @@ function App() {
             reviewFormOpen={reviewFormOpen}
             setReviewFormOpen={setReviewFormOpen}
             reviewFormData={reviewFormData}
-            emailConfirmModalOpen={emailConfirmModalOpen}
-            setEmailConfirmModalOpen={setEmailConfirmModalOpen}
-            emailConfirmData={emailConfirmData}
-          />
+                      emailConfirmModalOpen={emailConfirmModalOpen}
+          setEmailConfirmModalOpen={setEmailConfirmModalOpen}
+          emailConfirmData={emailConfirmData}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+        />
         </Router>
       </Box>
       {/* Кнопка возврата вверх на всех страницах */}
@@ -5030,7 +5055,7 @@ function AppContent({
   handleRemoveFromCart, handleAddToCart, handleEditProduct, 
   handleSaveProduct, handleDeleteProduct, handleWishlistToggle, handleClearCart, wishlist, products, dbCategories, 
   authOpen, handleLogin, handleRegister,
-  editModalOpen, setEditModalOpen, editingProduct, setEditingProduct, loadCategoriesFromAPI, selectedGenders, onGendersChange, selectedBrands, selectedAgeGroups, setSelectedBrands, setSelectedAgeGroups, handleUserUpdate, handleOpenReviewForm, reviewFormOpen, setReviewFormOpen, reviewFormData, emailConfirmModalOpen, setEmailConfirmModalOpen, emailConfirmData
+  editModalOpen, setEditModalOpen, editingProduct, setEditingProduct, loadCategoriesFromAPI, selectedGenders, onGendersChange, selectedBrands, selectedAgeGroups, setSelectedBrands, setSelectedAgeGroups, handleUserUpdate, handleOpenReviewForm, reviewFormOpen, setReviewFormOpen, reviewFormData, emailConfirmModalOpen, setEmailConfirmModalOpen, emailConfirmData, priceRange, setPriceRange
 }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -5186,6 +5211,8 @@ function AppContent({
           setSelectedAgeGroups={setSelectedAgeGroups}
           mobileFiltersOpen={mobileFiltersOpen}
           setMobileFiltersOpen={setMobileFiltersOpen}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
         />
         
         {/* Мобильный поиск и фильтры под AppBar */}
@@ -5243,7 +5270,7 @@ function AppContent({
         <Routes>
           <Route path="/" element={<HomePage products={products} onAddToCart={handleAddToCart} cart={cart} user={user} onWishlistToggle={handleWishlistToggle} onChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} wishlist={wishlist} />} />
           <Route path="/product/:id" element={<ProductPage onAddToCart={handleAddToCart} cart={cart} user={user} onChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} setAuthOpen={setAuthOpen} dbCategories={dbCategories} />} />
-          <Route path="/catalog" element={<CatalogPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} dbCategories={dbCategories} selectedGenders={selectedGenders} selectedBrands={selectedBrands} selectedAgeGroups={selectedAgeGroups} />} />
+          <Route path="/catalog" element={<CatalogPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} dbCategories={dbCategories} selectedGenders={selectedGenders} selectedBrands={selectedBrands} selectedAgeGroups={selectedAgeGroups} priceRange={priceRange} />} />
           <Route path="/category/:id" element={<CategoryPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} />} />
           <Route path="/subcategory/:id" element={<SubcategoryPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} selectedGenders={selectedGenders} />} />
           <Route path="/cart" element={<CartPage cart={cart} onChangeCartQuantity={handleChangeCartQuantity} onRemoveFromCart={handleRemoveFromCart} />} />

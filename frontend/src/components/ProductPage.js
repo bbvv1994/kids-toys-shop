@@ -1077,7 +1077,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   padding: '2px 6px',
                   borderRadius: '4px'
                 }}>
-                  {product.gender === 'Мальчик' ? t('productCard.gender.boy') : product.gender === 'Девочка' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}
+                  {product.gender === 'Для мальчиков' ? t('productCard.gender.boy') : product.gender === 'Для девочек' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}
                 </span>
               )}
             </Box>
