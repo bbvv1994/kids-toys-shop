@@ -308,7 +308,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 16, mb: 4 }}>
+    <Container maxWidth="sm" sx={{ mt: { xs: 4, md: 16 }, mb: 4 }}>
 
       {loadingUserData && (
         <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -321,181 +321,159 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
 
       {!loadingUserData && (
         <form onSubmit={handleSubmit}>
-        <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
-          <Grid gridColumn="span 12" md="span 6">
-            <Paper sx={{ p: 3, background: 'white', width: '900px' }}>
-              <Typography variant="h5" sx={{ mb: 3, color: '#333', fontWeight: 'bold' }}>
-                Информация о заказе
-              </Typography>
-              
-              {isGuest ? (
-                <Alert severity="info" sx={{ mb: 3 }}>
-                  Вы оформляете заказ как гость. Пожалуйста, заполните все поля.
-                </Alert>
-              ) : userData && (
-                <Alert severity="info" sx={{ mb: 3 }}>
-                  Данные автоматически заполнены из вашего профиля. При необходимости вы можете их изменить.
-                </Alert>
-              )}
-              
-              <Grid container spacing={2}>
-                <Grid gridColumn="span 12" md="span 6">
-                  <TextField
-                    fullWidth
-                    label="Имя"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    required
-                    variant="outlined"
-                    sx={{ mb: 2 }}
-                  />
-                </Grid>
-                <Grid gridColumn="span 12" md="span 6">
-                  <TextField
-                    fullWidth
-                    label="Фамилия"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    required
-                    variant="outlined"
-                    sx={{ mb: 2 }}
-                  />
-                </Grid>
-                <Grid gridColumn="span 12" md="span 6">
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    variant="outlined"
-                    sx={{ mb: 2 }}
-                  />
-                </Grid>
-                <Grid gridColumn="span 12" md="span 6">
-                  <TextField
-                    fullWidth
-                    label="Телефон"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    onKeyPress={(e) => {
-                      // Разрешаем только цифры и клавиши навигации
-                      const charCode = e.which ? e.which : e.keyCode;
-                      if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-                        e.preventDefault();
-                      }
-                    }}
-                    required
-                    variant="outlined"
-                    InputProps={{
-                      startAdornment: <span style={{ color: '#000', marginRight: '8px' }}>+972</span>,
-                    }}
-                    sx={{ mb: 2 }}
-                  />
-                </Grid>
-                <Grid gridColumn="span 12">
-                  <FormControl fullWidth required sx={{ mb: 2 }}>
-                    <FormLabel>Магазин для самовывоза</FormLabel>
-                    <RadioGroup
-                      row
-                      value={pickupStore}
-                      onChange={e => setPickupStore(e.target.value)}
-                    >
-                      <FormControlLabel value="store1" control={<Radio />} label="רוברט סולד 8 קריית ים" />
-                      <FormControlLabel value="store2" control={<Radio />} label="ויצמן 6 קריית מוצקין" />
-                    </RadioGroup>
-                  </FormControl>
-                </Grid>
+          <Paper sx={{ p: { xs: 2, md: 3 }, background: 'white', mb: 3 }}>
+            <Typography variant="h5" sx={{ mb: 3, color: '#333', fontWeight: 'bold', textAlign: 'center' }}>
+              Информация о заказе
+            </Typography>
+            {isGuest ? (
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Вы оформляете заказ как гость. Пожалуйста, заполните все поля.
+              </Alert>
+            ) : userData && (
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Данные автоматически заполнены из вашего профиля. При необходимости вы можете их изменить.
+              </Alert>
+            )}
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Имя"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  required
+                  variant="outlined"
+                  sx={{ mb: 2 }}
+                />
               </Grid>
-            </Paper>
-          </Grid>
-          <Grid gridColumn="span 12" md="span 6">
-            <Paper sx={{ p: 3, background: 'white', width: '900px' }}>
-              <Typography variant="h6" gutterBottom>
-                Итоги заказа
-              </Typography>
-              {cart.items.map((item) => (
-                <Box key={item.id} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box sx={{ 
-                    width: 80, 
-                    height: 80, 
-                    borderRadius: 3,
-                    border: '2px solid #f0f0f0',
-                    flexShrink: 0,
-                    backgroundImage: `url(${getImageUrl(item.product.imageUrls?.[0] || '/toys.png')})`,
-                    backgroundSize: '100% 100%',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat'
-                  }} />
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
-                      {item.product.name} x {item.quantity}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                      {item.product.price} ₪ x {item.quantity} = {item.product.price * item.quantity} ₪
-                    </Typography>
-                  </Box>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Фамилия"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  required
+                  variant="outlined"
+                  sx={{ mb: 2 }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  variant="outlined"
+                  sx={{ mb: 2 }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Телефон"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  onKeyPress={(e) => {
+                    const charCode = e.which ? e.which : e.keyCode;
+                    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                      e.preventDefault();
+                    }
+                  }}
+                  required
+                  variant="outlined"
+                  InputProps={{
+                    startAdornment: <span style={{ color: '#000', marginRight: '8px' }}>+972</span>,
+                  }}
+                  sx={{ mb: 2 }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth required sx={{ mb: 2 }}>
+                  <FormLabel>Магазин для самовывоза</FormLabel>
+                  <RadioGroup
+                    row={false}
+                    value={pickupStore}
+                    onChange={e => setPickupStore(e.target.value)}
+                  >
+                    <FormControlLabel value="store1" control={<Radio />} label="רוברט סולד 8 קריית ים" />
+                    <FormControlLabel value="store2" control={<Radio />} label="ויצמן 6 קריית מוצקין" />
+                  </RadioGroup>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Paper>
+          <Paper sx={{ p: { xs: 2, md: 3 }, background: 'white', mb: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ textAlign: 'center' }}>
+              Итоги заказа
+            </Typography>
+            {cart.items.map((item) => (
+              <Box key={item.id} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ width: 60, height: 60, borderRadius: 3, border: '2px solid #f0f0f0', flexShrink: 0, backgroundImage: `url(${getImageUrl(item.product.imageUrls?.[0] || '/toys.png')})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    {item.product.name} x {item.quantity}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    {item.product.price} ₪ x {item.quantity} = {item.product.price * item.quantity} ₪
+                  </Typography>
                 </Box>
-              ))}
-              <Divider sx={{ my: 2 }} />
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                  Товары: {cart.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)} ₪
-                </Typography>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                  Самовывоз из: {pickupStore === 'store1' ? 'רוברט סולד 8 קריית ים' : 'ויצמן 6 קריית מוצקין'}
-                </Typography>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                  Оплата: Наличными или картой
-                </Typography>
               </Box>
-              <Divider sx={{ my: 2 }} />
-              <Typography variant="h6" color="primary">
-                Итого: {calculateTotal()} ₪
+            ))}
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                Товары: {cart.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)} ₪
               </Typography>
-              {error && (
-                <Alert severity="error" sx={{ mt: 2 }}>
-                  {error}
-                </Alert>
-              )}
-              <Button
-                type="submit"
-                variant="contained"
-                fullWidth
-                size="large"
-                disabled={loading}
-                sx={{ 
-                  mt: 2, 
-                  mt: 'auto',
-                  background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
-                  color: '#fff',
-                  borderRadius: 2,
-                  fontWeight: 600,
-                  fontSize: 15,
-                  px: 3,
-                  py: 1.5,
-                  height: 44,
-                  boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
-                  textTransform: 'none',
-                  minWidth: 120,
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
-                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
-                    transform: 'translateY(-1px)'
-                  },
-                }}
-              >
-                {loading ? 'Оформление...' : 'Оформить заказ'}
-              </Button>
-            </Paper>
-          </Grid>
-        </Grid>
-      </form>
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                Самовывоз из: {pickupStore === 'store1' ? 'רוברט סולד 8 קריית ים' : 'ויצמן 6 קריית מוצקין'}
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                Оплата: Наличными или картой
+              </Typography>
+            </Box>
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="h6" color="primary" sx={{ textAlign: 'center' }}>
+              Итого: {calculateTotal()} ₪
+            </Typography>
+            {error && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {error}
+              </Alert>
+            )}
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              size="large"
+              disabled={loading}
+              sx={{
+                mt: 2,
+                background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                color: '#fff',
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: 18,
+                py: 1.5,
+                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                textTransform: 'none',
+                minWidth: 120,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                  boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+              }}
+            >
+              {loading ? 'Оформление...' : 'Оформить заказ'}
+            </Button>
+          </Paper>
+        </form>
       )}
     </Container>
   );
