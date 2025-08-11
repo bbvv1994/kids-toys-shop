@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProductCard from './components/ProductCard';
@@ -164,8 +165,8 @@ import PublicQuestions from './components/PublicQuestions';
 
 // Глобальный маппинг английских кодов на русские названия для фильтра по полу
 const genderMapping = {
-  'boy': 'Мальчик',
-  'girl': 'Девочка', 
+  'boy': 'Для мальчиков',
+  'girl': 'Для девочек', 
   'unisex': 'Универсальный'
 };
 
@@ -256,7 +257,7 @@ const theme = createTheme({
 });
 
   // Компонент навигации
-  function Navigation({ cartCount, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups }) {
+  function Navigation({ cartCount, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups, mobileFiltersOpen, setMobileFiltersOpen }) {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
   const deviceType = useDeviceType();
@@ -299,7 +300,6 @@ const theme = createTheme({
   const [instantClose, setInstantClose] = React.useState(false);
   const [filtersMenuOpen, setFiltersMenuOpen] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = React.useState(false);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = React.useState(false);
   const [profileMenuAnchor, setProfileMenuAnchor] = React.useState(null);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
@@ -369,11 +369,20 @@ const theme = createTheme({
   // ВРЕМЕННЫЕ состояния и списки для фильтров
   const [selectedCategories, setSelectedCategories] = React.useState([]);
   const categories = ['Игрушки', 'Конструкторы', 'Пазлы', 'Творчество', 'Канцтовары', 'Транспорт', 'Отдых на воде', 'Настольные игры', 'Развивающие игры', 'Акции'];
-  const ageGroups = ['0-1 год', '1-3 года', '3-5 лет', '5-7 лет', '7-10 лет', '10-12 лет', '12-14 лет', '14-16 лет'];
+  const ageGroups = [
+    t('catalog.ageGroups.0-1_year'),
+    t('catalog.ageGroups.1-3_years'),
+    t('catalog.ageGroups.3-5_years'),
+    t('catalog.ageGroups.5-7_years'),
+    t('catalog.ageGroups.7-10_years'),
+    t('catalog.ageGroups.10-12_years'),
+    t('catalog.ageGroups.12-14_years'),
+    t('catalog.ageGroups.14-16_years')
+  ];
   const genderOptions = [
-    { value: 'boy', label: 'Мальчик' },
-    { value: 'girl', label: 'Девочка' },
-    { value: 'unisex', label: 'Универсальные' }
+    { value: 'boy', label: t('catalog.genderOptions.boy') },
+    { value: 'girl', label: t('catalog.genderOptions.girl') },
+    { value: 'unisex', label: t('catalog.genderOptions.unisex') }
   ];
 
   // Функция для загрузки количества непрочитанных уведомлений
@@ -1986,7 +1995,7 @@ const theme = createTheme({
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {/* Цена */}
                 <Box>
-                  <span style={{ fontWeight: 500, marginRight: 4 }}>Цена:</span>
+                  <span style={{ fontWeight: 500, marginRight: 4 }}>{t('common.price')}:</span>
                   <Slider
                     value={priceRange}
                     onChange={(_, newValue) => setPriceRange(newValue)}
@@ -2002,7 +2011,7 @@ const theme = createTheme({
                 </Box>
                 {/* Возраст */}
                 <Box>
-                  <span style={{ fontWeight: 500, marginRight: 4 }}>Возраст:</span>
+                  <span style={{ fontWeight: 500, marginRight: 4 }}>{t('catalog.ageGroup')}:</span>
                   <Box sx={{ pl: 1 }}>
                     {ageGroups.map(age => (
                       <FormControlLabel
@@ -2024,7 +2033,7 @@ const theme = createTheme({
                 </Box>
                 {/* Пол */}
                 <Box>
-                  <span style={{ fontWeight: 500, marginRight: 4 }}>Пол:</span>
+                  <span style={{ fontWeight: 500, marginRight: 4 }}>{t('catalog.gender')}:</span>
                   <Box sx={{ pl: 1 }}>
                     {genderOptions.map(opt => (
                       <FormControlLabel
@@ -2050,7 +2059,7 @@ const theme = createTheme({
                 {/* Бренды */}
                 {brandOptions.length > 0 && (
                   <Box>
-                    <span style={{ fontWeight: 500, marginRight: 4 }}>Бренд:</span>
+                    <span style={{ fontWeight: 500, marginRight: 4 }}>{t('catalog.brands')}:</span>
                     <Box sx={{ pl: 1 }}>
                       {brandOptions.map(brand => (
                         <FormControlLabel
@@ -2531,14 +2540,30 @@ const theme = createTheme({
             )}
             
             {/* Кнопки сброса и применения */}
-            <Box sx={{ display: 'flex', gap: 1, mt: 3 }}>
+            <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
               <Button
                 fullWidth
-                variant="outlined"
+                variant="contained"
                 onClick={() => {
                   onGendersChange([]);
                   setSelectedAgeGroups([]);
                   setSelectedBrands([]);
+                }}
+                sx={{
+                  background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
+                  color: '#fff',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  fontSize: 15,
+                  py: 1.5,
+                  height: 44,
+                  boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
+                  textTransform: 'none',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #ef5350 0%, #f44336 100%)',
+                    boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                    transform: 'translateY(-1px)'
+                  },
                 }}
               >
                 {t('catalog.clearFilters')}
@@ -2547,6 +2572,22 @@ const theme = createTheme({
                 fullWidth
                 variant="contained"
                 onClick={() => setMobileFiltersOpen(false)}
+                sx={{
+                  background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                  color: '#fff',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  fontSize: 15,
+                  py: 1.5,
+                  height: 44,
+                  boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                  textTransform: 'none',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                    transform: 'translateY(-1px)'
+                  },
+                }}
               >
                 {t('catalog.applyFilters')}
               </Button>
@@ -2878,7 +2919,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   const isNarrow = useMediaQuery(theme.breakpoints.down('lg'));
   // Фильтры каталога
   const [filterAgeGroup, setFilterAgeGroup] = useState('all');
-  const [filterGender, setFilterGender] = useState([]); // массив: ['boy', 'girl', 'unisex']
+  const [filterGender, setFilterGender] = useState([]); // массив: ['Для мальчиков', 'Для девочек', 'Универсальный']
   const [sortBy, setSortBy] = useState('popular');
   const [pageSize, setPageSize] = useState(24);
   const [page, setPage] = useState(1);
@@ -3219,7 +3260,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
       <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 },
         pl: { md: '270px' }
       }}>
-        <Box sx={{ mb: 4, pt: { xs: 15, md: 10 } }}>
+        <Box sx={{ mb: 4, pt: { xs: 0, md: 10 } }}>
           <Typography variant="h2" sx={{ 
             textAlign: 'center', 
             mb: 4,
@@ -5143,6 +5184,8 @@ function AppContent({
           setSelectedBrands={setSelectedBrands}
           selectedAgeGroups={selectedAgeGroups}
           setSelectedAgeGroups={setSelectedAgeGroups}
+          mobileFiltersOpen={mobileFiltersOpen}
+          setMobileFiltersOpen={setMobileFiltersOpen}
         />
         
         {/* Мобильный поиск и фильтры под AppBar */}
@@ -5915,7 +5958,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             <tr style={{ background: '#f5f5f5' }}>
               <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Картинка</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '200px' }}>Название</th>
-              <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Цена</th>
+              <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>{t('common.price')}</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '120px' }}>Категория</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '120px' }}>Подкатегория</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Кол-во</th>
@@ -6057,7 +6100,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             size="medium"
           />
           <TextField 
-            label="Цена" 
+            label={t('common.price')} 
             name="price" 
             value={form.price} 
             onChange={handleChange} 
@@ -6095,27 +6138,27 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
           </FormControl>
           {/* Добавлено: возрастная группа и пол */}
           <FormControl fullWidth>
-            <InputLabel id="age-group-label">Возрастная группа</InputLabel>
+            <InputLabel id="age-group-label">{t('product.ageGroup')}</InputLabel>
             <Select
               labelId="age-group-label"
-              label="Возрастная группа"
+              label={t('product.ageGroup')}
               name="ageGroup"
               value={form.ageGroup}
               onChange={handleChange}
             >
               <MenuItem value=""><em>Не выбрано</em></MenuItem>
-              <MenuItem value="0-1 год">0-1 год</MenuItem>
-              <MenuItem value="1-3 года">1-3 года</MenuItem>
-              <MenuItem value="3-5 лет">3-5 лет</MenuItem>
-              <MenuItem value="5-7 лет">5-7 лет</MenuItem>
-              <MenuItem value="7-10 лет">7-10 лет</MenuItem>
-              <MenuItem value="10-12 лет">10-12 лет</MenuItem>
-              <MenuItem value="12-14 лет">12-14 лет</MenuItem>
-              <MenuItem value="14-16 лет">14-16 лет</MenuItem>
+              <MenuItem value={t('catalog.ageGroups.0-1_year')}>{t('catalog.ageGroups.0-1_year')}</MenuItem>
+              <MenuItem value={t('catalog.ageGroups.1-3_years')}>{t('catalog.ageGroups.1-3_years')}</MenuItem>
+              <MenuItem value={t('catalog.ageGroups.3-5_years')}>{t('catalog.ageGroups.3-5_years')}</MenuItem>
+              <MenuItem value={t('catalog.ageGroups.5-7_years')}>{t('catalog.ageGroups.5-7_years')}</MenuItem>
+              <MenuItem value={t('catalog.ageGroups.7-10_years')}>{t('catalog.ageGroups.7-10_years')}</MenuItem>
+              <MenuItem value={t('catalog.ageGroups.10-12_years')}>{t('catalog.ageGroups.10-12_years')}</MenuItem>
+              <MenuItem value={t('catalog.ageGroups.12-14_years')}>{t('catalog.ageGroups.12-14_years')}</MenuItem>
+              <MenuItem value={t('catalog.ageGroups.14-16_years')}>{t('catalog.ageGroups.14-16_years')}</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth>
-            <InputLabel id="gender-label">Пол</InputLabel>
+            <InputLabel id="gender-label">{t('product.gender')}</InputLabel>
             <Select
               labelId="gender-label"
               label="Пол"
@@ -6124,8 +6167,8 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
               onChange={handleChange}
             >
               <MenuItem value=""><em>Не выбрано</em></MenuItem>
-              <MenuItem value="Мальчик">Для мальчиков</MenuItem>
-              <MenuItem value="Девочка">Для девочек</MenuItem>
+                                      <MenuItem value="Для мальчиков">Для мальчиков</MenuItem>
+                        <MenuItem value="Для девочек">Для девочек</MenuItem>
               <MenuItem value="Универсальный">Универсальный</MenuItem>
             </Select>
           </FormControl>
@@ -8799,7 +8842,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
-      <Box sx={{ mb: 4, pt: { xs: 8, md: 10 } }}>
+      <Box sx={{ mb: 4, pt: { xs: 0, md: 10 } }}>
                 {/* Хлебные крошки */}
         <Box sx={{ 
           mb: 3, 
@@ -9281,7 +9324,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
-      <Box sx={{ mb: 4, pt: { xs: 8, md: 10 } }}>
+      <Box sx={{ mb: 4, pt: { xs: 0, md: 10 } }}>
         {/* Хлебные крошки */}
         <Box sx={{ 
           mb: 3, 
@@ -12068,6 +12111,23 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 >
                   <ListItemIcon><SettingsIcon /></ListItemIcon>
                   <ListItemText primary={t('profile.menu.authSettings')} />
+                </ListItem>
+                <ListItem 
+                  button 
+                  onClick={() => setLogoutDialogOpen(true)}
+                  sx={{
+                    borderRadius: 2,
+                    color: '#f44336',
+                    '& .MuiListItemIcon-root': { color: '#f44336' },
+                    '&:hover': {
+                      backgroundColor: '#ffebee',
+                      color: '#d32f2f',
+                      '& .MuiListItemIcon-root': { color: '#d32f2f' }
+                    }
+                  }}
+                >
+                  <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+                  <ListItemText primary={t('profile.menu.logout')} />
                 </ListItem>
               </List>
             </Box>

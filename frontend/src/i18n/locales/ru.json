@@ -21,7 +21,12 @@
     "close": "Закрыть",
     "confirm": "Подтвердить",
     "yes": "Да",
-    "no": "Нет"
+    "no": "Нет",
+    "confirmDelete": "Вы уверены, что хотите удалить этот товар?",
+    "deleteError": "Ошибка при удалении товара",
+    "loginRequired": "Войдите, чтобы использовать избранное!",
+    "selectAgeGroup": "Выберите возрастную группу",
+    "selectGender": "Выберите пол"
   },
   "profile": {
     "menu": {
@@ -198,7 +203,41 @@
     "ageGroup": "Возрастная группа",
     "brands": "Бренды",
     "clearFilters": "Очистить",
-    "applyFilters": "Применить"
+    "applyFilters": "Применить",
+    "ageGroups": {
+      "0-1_year": "0-1 год",
+      "1-3_years": "1-3 года", 
+      "3-5_years": "3-5 лет",
+      "5-7_years": "5-7 лет",
+      "7-10_years": "7-10 лет",
+      "10-12_years": "10-12 лет",
+      "12-14_years": "12-14 лет",
+      "14-16_years": "14-16 лет"
+    },
+    "genderOptions": {
+      "boy": "Для мальчиков",
+      "girl": "Для девочек",
+      "unisex": "Универсальные"
+    },
+    "sortOptions": {
+      "newest": "По новизне",
+      "popular": "По популярности",
+      "priceLow": "По возрастанию цены",
+      "priceHigh": "По убыванию цены",
+      "nameAZ": "По названию А-Я",
+      "nameZA": "По названию Я-А"
+    },
+    "viewOptions": {
+      "grid": "Плиткой",
+      "list": "Списком"
+    },
+    "filterLabels": {
+      "all": "Все",
+      "selectAll": "Выбрать все",
+      "deselectAll": "Снять выбор",
+      "showMore": "Показать еще",
+      "showLess": "Скрыть"
+    }
   },
   "breadcrumbs": {
     "home": "Главная",

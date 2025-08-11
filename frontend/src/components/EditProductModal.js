@@ -209,7 +209,16 @@ function EditProductModal(props) {
 
 
 
-  const ageGroups = ['0-1 год', '1-3 года', '3-5 лет', '5-7 лет', '7-10 лет', '10-12 лет', '12-14 лет', '14-16 лет'];
+  const ageGroups = [
+    t('catalog.ageGroups.0-1_year'),
+    t('catalog.ageGroups.1-3_years'),
+    t('catalog.ageGroups.3-5_years'),
+    t('catalog.ageGroups.5-7_years'),
+    t('catalog.ageGroups.7-10_years'),
+    t('catalog.ageGroups.10-12_years'),
+    t('catalog.ageGroups.12-14_years'),
+    t('catalog.ageGroups.14-16_years')
+  ];
 
   // Обработчики для управления Lenis в выпадающих списках
   const handleSelectOpen = (selectName) => {
@@ -899,17 +908,17 @@ function EditProductModal(props) {
                     size="medium"
                   />
                   <FormControl fullWidth>
-                    <InputLabel id="age-group-label">Возрастная группа</InputLabel>
+                    <InputLabel id="age-group-label">{t('catalog.ageGroup')}</InputLabel>
                     <Select 
                       labelId="age-group-label" 
-                      label="Возрастная группа" 
+                                              label={t('catalog.ageGroup')} 
                       name="ageGroup" 
                       value={formData.ageGroup} 
                       onChange={handleInputChange} 
                       open={openSelects.ageGroup}
                       onOpen={() => handleSelectOpen('ageGroup')}
                       onClose={() => handleSelectClose('ageGroup')}
-                      renderValue={selected => selected || 'Выберите возрастную группу'}
+                      renderValue={selected => selected || t('common.selectAgeGroup')}
                       MenuProps={{
                         PaperProps: {
                           sx: { zIndex: 10002, maxHeight: 300 }
@@ -943,10 +952,9 @@ function EditProductModal(props) {
                         transformOrigin: { vertical: 'top', horizontal: 'left' }
                       }}
                     >
-                      <MenuItem value="Мальчик">Для мальчиков</MenuItem>
-                      <MenuItem value="Девочка">Для девочек</MenuItem>
+                                      <MenuItem value="Для мальчиков">Для мальчиков</MenuItem>
+                <MenuItem value="Для девочек">Для девочек</MenuItem>
                       <MenuItem value="Универсальный">Универсальный</MenuItem>
-                      <MenuItem value="универсальный">Универсальный</MenuItem>
                     </Select>
                   </FormControl>
                   <Box sx={{ display: 'flex', gap: 2 }}>

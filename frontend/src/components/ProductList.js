@@ -40,21 +40,13 @@ function ProductList({ products, onProductDeleted, onRefresh, user, onProductCli
   const categories = ['all', ...new Set(products.map(p => p.category).filter(Boolean))];
   const ageGroups = ['all', ...new Set(products.map(p => p.ageGroup).filter(Boolean))];
   
-  // Маппинг английских кодов на русские названия (как хранятся в БД)
-  const genderMapping = {
-    'boy': 'Мальчик',
-    'girl': 'Девочка', 
-    'unisex': 'Универсальный'
-  };
-
   const filteredProducts = products
     .filter(product => {
       if (filterCategory !== 'all' && product.category !== filterCategory) return false;
       if (filterAgeGroup !== 'all' && product.ageGroup !== filterAgeGroup) return false;
       if (selectedGenders.length > 0) {
-        // Преобразуем выбранные английские коды в русские названия
-        const selectedRussianGenders = selectedGenders.map(code => genderMapping[code]);
-        if (!selectedRussianGenders.includes(product.gender)) return false;
+        // Теперь selectedGenders содержит русские названия напрямую
+        if (!selectedGenders.includes(product.gender)) return false;
       }
       return true;
     })
@@ -64,8 +56,12 @@ function ProductList({ products, onProductDeleted, onRefresh, user, onProductCli
           return a.price - b.price;
         case 'price-high':
           return b.price - a.price;
-        case 'name':
+        case 'name-az':
           return a.name.localeCompare(b.name);
+        case 'name-za':
+          return b.name.localeCompare(a.name);
+        case 'popular':
+          return (b.rating || 0) - (a.rating || 0);
         case 'newest':
         default:
           return new Date(b.createdAt) - new Date(a.createdAt);
@@ -73,7 +69,7 @@ function ProductList({ products, onProductDeleted, onRefresh, user, onProductCli
     });
 
   const handleDelete = async (productId) => {
-    if (window.confirm('Вы уверены, что хотите удалить этот товар?')) {
+    if (window.confirm(t('common.confirmDelete'))) {
       try {
         const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
           method: 'DELETE'
@@ -82,17 +78,17 @@ function ProductList({ products, onProductDeleted, onRefresh, user, onProductCli
         if (response.ok) {
           onProductDeleted(productId);
         } else {
-          alert('Ошибка при удалении товара');
+          alert(t('common.deleteError'));
         }
       } catch (error) {
-        alert('Ошибка при удалении товара');
+        alert(t('common.deleteError'));
       }
     }
   };
 
   const handleWishlistToggle = async (productId, isInWishlist) => {
     if (!user || !user.token) {
-      alert('Войдите, чтобы использовать избранное!');
+      alert(t('common.loginRequired'));
       return;
     }
     setLottiePlayingMap(prev => ({ ...prev, [productId]: true }));
@@ -124,10 +120,10 @@ function ProductList({ products, onProductDeleted, onRefresh, user, onProductCli
       if (response.ok) {
         if (onRefresh) onRefresh();
       } else {
-        alert('Ошибка при изменении видимости товара');
+        alert(t('common.deleteError'));
       }
     } catch (error) {
-      alert('Ошибка при изменении видимости товара');
+      alert(t('common.deleteError'));
     }
   };
 
