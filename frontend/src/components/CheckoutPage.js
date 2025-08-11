@@ -6,9 +6,11 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL, getImageUrl } from '../config';
+import { useTranslation } from 'react-i18next';
 
 export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -221,7 +223,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
         // Заказ для авторизованного пользователя
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (!user.token) {
-          setError('Необходимо войти в систему');
+          setError(t('checkout.loginRequired'));
           setLoading(false);
           return;
         }
@@ -243,7 +245,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
           }));
 
         if (cartItems.length === 0) {
-          setError('В корзине нет доступных товаров для заказа');
+          setError(t('checkout.noItemsError'));
           setLoading(false);
           return;
         }
@@ -265,7 +267,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Ошибка при создании заказа');
+          throw new Error(errorData.error || t('checkout.orderError'));
         }
 
         const orderData = await response.json();
@@ -291,7 +293,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
       }
     } catch (err) {
       console.error('❌ Checkout error:', err);
-      setError('Ошибка при оформлении заказа. Попробуйте еще раз.');
+      setError(t('checkout.orderError'));
     } finally {
       setLoading(false);
     }
@@ -301,7 +303,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
     return (
       <Container maxWidth="md" sx={{ mt: 4 }}>
         <Alert severity="info">
-          Ваша корзина пуста. <Button onClick={() => navigate('/catalog')}>Перейти к товарам</Button>
+          {t('checkout.emptyCart')} <Button onClick={() => navigate('/catalog')}>{t('checkout.goToProducts')}</Button>
         </Alert>
       </Container>
     );
@@ -314,7 +316,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <CircularProgress sx={{ mb: 2 }} />
           <Typography variant="h6" sx={{ mb: 2 }}>
-            Загрузка данных пользователя...
+            {t('checkout.loadingUserData')}
           </Typography>
         </Box>
       )}
@@ -323,22 +325,22 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
         <form onSubmit={handleSubmit}>
           <Paper sx={{ p: { xs: 2, md: 3 }, background: 'white', mb: 3 }}>
             <Typography variant="h5" sx={{ mb: 3, color: '#333', fontWeight: 'bold', textAlign: 'center' }}>
-              Информация о заказе
+              {t('checkout.orderInfo')}
             </Typography>
             {isGuest ? (
               <Alert severity="info" sx={{ mb: 3 }}>
-                Вы оформляете заказ как гость. Пожалуйста, заполните все поля.
+                {t('checkout.guestCheckout')}
               </Alert>
             ) : userData && (
               <Alert severity="info" sx={{ mb: 3 }}>
-                Данные автоматически заполнены из вашего профиля. При необходимости вы можете их изменить.
+                {t('checkout.autoFilled')}
               </Alert>
             )}
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Имя"
+                  label={t('checkout.firstName')}
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
@@ -350,7 +352,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Фамилия"
+                  label={t('checkout.lastName')}
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
@@ -362,7 +364,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Email"
+                  label={t('checkout.email')}
                   name="email"
                   type="email"
                   value={formData.email}
@@ -375,7 +377,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Телефон"
+                  label={t('checkout.phone')}
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
@@ -395,14 +397,14 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
               </Grid>
               <Grid item xs={12}>
                 <FormControl fullWidth required sx={{ mb: 2 }}>
-                  <FormLabel>Магазин для самовывоза</FormLabel>
+                  <FormLabel>{t('checkout.pickupStore')}</FormLabel>
                   <RadioGroup
                     row={false}
                     value={pickupStore}
                     onChange={e => setPickupStore(e.target.value)}
                   >
-                    <FormControlLabel value="store1" control={<Radio />} label="רוברט סולד 8 קריית ים" />
-                    <FormControlLabel value="store2" control={<Radio />} label="ויצמן 6 קריית מוצקין" />
+                    <FormControlLabel value="store1" control={<Radio />} label={t('checkout.store1')} />
+                    <FormControlLabel value="store2" control={<Radio />} label={t('checkout.store2')} />
                   </RadioGroup>
                 </FormControl>
               </Grid>
@@ -410,7 +412,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
           </Paper>
           <Paper sx={{ p: { xs: 2, md: 3 }, background: 'white', mb: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ textAlign: 'center' }}>
-              Итоги заказа
+              {t('checkout.orderTotals')}
             </Typography>
             {cart.items.map((item) => (
               <Box key={item.id} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -431,15 +433,15 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
                 Товары: {cart.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)} ₪
               </Typography>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                Самовывоз из: {pickupStore === 'store1' ? 'רוברט סולד 8 קריית ים' : 'ויצמן 6 קריית מוצקין'}
+                {t('checkout.pickupFrom')} {pickupStore === 'store1' ? t('checkout.store1') : t('checkout.store2')}
               </Typography>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                Оплата: Наличными или картой
+                {t('checkout.paymentMethod')}
               </Typography>
             </Box>
             <Divider sx={{ my: 2 }} />
             <Typography variant="h6" color="primary" sx={{ textAlign: 'center' }}>
-              Итого: {calculateTotal()} ₪
+              {t('checkout.totalAmount')} {calculateTotal()} ₪
             </Typography>
             {error && (
               <Alert severity="error" sx={{ mt: 2 }}>
@@ -470,7 +472,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
                 },
               }}
             >
-              {loading ? 'Оформление...' : 'Оформить заказ'}
+              {loading ? t('checkout.processing') : t('checkout.placeOrder')}
             </Button>
           </Paper>
         </form>

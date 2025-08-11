@@ -21,6 +21,7 @@ import {
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { getImageUrl } from '../config';
+import { useTranslation } from 'react-i18next';
 
 // Иконки для возрастных групп
 const ageIcons = {
@@ -39,6 +40,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [removingItem, setRemovingItem] = useState(null);
+  const { t } = useTranslation();
   
   // Функция для очистки корзины от удаленных товаров
   const cleanupRemovedProducts = React.useCallback(() => {
@@ -83,7 +85,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
         border: '1px solid #e0e0e0'
       }}>
         <Typography variant="h3" sx={{ textAlign: 'center', color: '#666' }}>
-          Загрузка корзины...
+          {t('cart.loadingCart')}
         </Typography>
       </Box>
     );
@@ -278,7 +280,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
               <Typography variant={isMobile ? "body1" : "h6"} sx={{ fontWeight: 700, color: '#4CAF50' }}>
                 {(item.product.price * item.quantity).toFixed(2)} ₪
               </Typography>
-              <Tooltip title="Удалить из корзины">
+              <Tooltip title={t('cart.removeFromCart')}>
                 <IconButton
                   onClick={() => handleRemoveItem(item.product.id)}
                   sx={{ 
@@ -342,7 +344,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                 WebkitTextFillColor: 'transparent'
               }}
             >
-              Ваша Корзина
+              {t('cart.yourCart')}
             </Typography>
           </Box>
           
@@ -357,7 +359,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                 <TrophyIcon />
                 <Typography variant="h6">
-                  Скидка {discount}%! Экономия {Math.round(total * discount / 100)} ₪
+                  {t('cart.discountMessage', { percent: discount, saved: Math.round(total * discount / 100) })}
                 </Typography>
               </Box>
             </Paper>
@@ -379,10 +381,10 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
             border: '2px dashed #FFB300'
           }}>
             <Typography variant="h5" sx={{ color: '#666', mb: 2 }}>
-              Ваша корзина пуста
+              {t('cart.empty')}
             </Typography>
             <Typography variant="body1" sx={{ color: '#888' }}>
-              Добавьте товары из каталога, чтобы начать покупки!
+              {t('cart.emptyMessage')}
             </Typography>
             <Button
               variant="contained"
@@ -407,14 +409,14 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                 },
               }}
             >
-              Перейти к покупкам
+              {t('cart.goToShopping')}
             </Button>
           </Box>
         </motion.div>
       ) : (
             <Paper sx={{ p: 3, boxShadow: 'none' }}>
               <Typography variant="h5" sx={{ mb: 3, color: '#FF6B6B', fontWeight: 'bold' }}>
-            Товары в корзине
+            {t('cart.itemsInCart')}
               </Typography>
           
           {/* Карточки товаров */}
@@ -449,16 +451,16 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
             mt: 3
               }}>
                 <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, textAlign: 'center' }}>
-                  Ваш заказ
+                  {t('cart.yourOrder')}
                 </Typography>
                 <Box sx={{ mb: 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography>Товары ({itemCount}):</Typography>
+                    <Typography>{t('cart.itemsCount', { count: itemCount })}</Typography>
                     <Typography>{total.toFixed(2)} ₪</Typography>
                   </Box>
                   {discount > 0 && (
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography sx={{ color: '#4CAF50' }}>Скидка {discount}%:</Typography>
+                  <Typography sx={{ color: '#4CAF50' }}>{t('cart.discount', { percent: discount })}</Typography>
                       <Typography sx={{ color: '#4CAF50', fontWeight: 700 }}>
                         -{Math.round(total * discount / 100)} ₪
                       </Typography>
@@ -466,7 +468,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                   )}
                   <Divider sx={{ my: 2 }} />
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>К оплате:</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>{t('cart.toPay')}</Typography>
                     <Typography variant="h5" sx={{ fontWeight: 800, color: '#FF6B6B' }}>
                       {finalTotal.toFixed(2)} ₪
                     </Typography>
@@ -493,7 +495,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                   }}
                 >
                   <PaymentIcon sx={{ mr: 1 }} />
-                  Оформить заказ
+                  {t('cart.checkout')}
                 </Button>
                 </Box>
               </Paper>

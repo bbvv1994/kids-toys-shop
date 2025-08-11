@@ -7,21 +7,23 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function OrderSuccessPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { orderNumber, orderData } = location.state || {};
 
   if (!orderNumber) {
     return (
       <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Typography variant="h4" color="error">
-          Ошибка: данные заказа не найдены
-        </Typography>
-        <Button onClick={() => navigate('/')} sx={{ mt: 2 }}>
-          Вернуться на главную
-        </Button>
+              <Typography variant="h4" color="error">
+        {t('orderSuccess.orderDataError')}
+      </Typography>
+      <Button onClick={() => navigate('/')} sx={{ mt: 2 }}>
+        {t('orderSuccess.backToHome')}
+      </Button>
       </Container>
     );
   }
@@ -29,17 +31,17 @@ export default function OrderSuccessPage() {
   const getStatusLabel = (status) => {
     switch (status) {
       case 'pending':
-        return 'Ожидает подтверждения';
+        return t('orderSuccess.statusLabels.pending');
       case 'confirmed':
-        return 'Подтвержден';
+        return t('orderSuccess.statusLabels.confirmed');
       case 'ready':
-        return 'Готов к выдаче';
+        return t('orderSuccess.statusLabels.ready');
       case 'pickedup':
-        return 'Получен';
+        return t('orderSuccess.statusLabels.pickedup');
       case 'cancelled':
-        return 'Отменен';
+        return t('orderSuccess.statusLabels.cancelled');
       default:
-        return 'Неизвестный статус';
+        return t('orderSuccess.statusLabels.unknown');
     }
   };
 
@@ -67,30 +69,30 @@ export default function OrderSuccessPage() {
       <Box sx={{ textAlign: 'center', mb: 4, pt: 2 }}>
         <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
         <Typography variant="h5" color="success.main" gutterBottom>
-          Заказ успешно оформлен!
+          {t('orderSuccess.title')}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Номер заказа: {orderNumber}
+          {t('orderSuccess.orderNumber')} {orderNumber}
         </Typography>
         <Typography variant="body1" sx={{ mt: 2 }}>
-          <strong>Самовывоз из:</strong> {orderData?.pickupStore === 'store1' ? 'רוברט סולד 8 קריית ים' : orderData?.pickupStore === 'store2' ? 'ויצמן 6 קריית מוצקין' : 'Не выбран'}
+          <strong>{t('orderSuccess.pickupFrom')}</strong> {orderData?.pickupStore === 'store1' ? t('checkout.store1') : orderData?.pickupStore === 'store2' ? t('checkout.store2') : 'Не выбран'}
         </Typography>
         <Typography variant="body1" sx={{ mt: 2 }}>
-          Спасибо за ваш заказ! Вам было отправлено подтверждение заказа на ваш email.
+          {t('orderSuccess.thankYou')}
         </Typography>
       </Box>
       <Paper sx={{ p: { xs: 2, md: 3 }, mb: 3, background: 'linear-gradient(135deg, #E8F5E8 0%, #F1F8E9 100%)' }}>
         <Typography variant="h6" sx={{ mb: 2, color: '#2E7D32', fontWeight: 'bold', textAlign: 'center' }}>
-          📦 Информация о заказе
+          {t('orderSuccess.orderInfo')}
         </Typography>
         <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" color="text.secondary">Номер заказа:</Typography>
+          <Typography variant="body2" color="text.secondary">{t('orderSuccess.orderNumber')}</Typography>
           <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2E7D32' }}>
             #{orderNumber}
           </Typography>
         </Box>
         <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" color="text.secondary">Статус:</Typography>
+          <Typography variant="body2" color="text.secondary">{t('orderSuccess.status')}</Typography>
           <Chip 
             label={getStatusLabel('pending')} 
             color={getStatusColor('pending')}
@@ -98,7 +100,7 @@ export default function OrderSuccessPage() {
           />
         </Box>
         <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" color="text.secondary">Дата заказа:</Typography>
+          <Typography variant="body2" color="text.secondary">{t('orderSuccess.orderDate')}</Typography>
           <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
             {new Date(orderData?.createdAt).toLocaleDateString('ru-RU', {
               year: 'numeric',
@@ -112,7 +114,7 @@ export default function OrderSuccessPage() {
       </Paper>
       <Paper sx={{ p: { xs: 2, md: 3 }, mt: 3, background: 'white' }}>
         <Typography variant="h6" sx={{ mb: 3, color: '#333', fontWeight: 'bold', textAlign: 'center' }}>
-          Товары в заказе
+          {t('orderSuccess.itemsInOrder')}
         </Typography>
         {orderData?.items?.map((item, index) => (
           <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexDirection: 'row' }}>
@@ -122,7 +124,7 @@ export default function OrderSuccessPage() {
                 {item.product.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Кол-во: {item.quantity} × ₪{item.product.price}
+                {t('orderSuccess.quantity')} {item.quantity} × ₪{item.product.price}
               </Typography>
             </Box>
             <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#4CAF50', fontSize: 16 }}>
@@ -134,7 +136,7 @@ export default function OrderSuccessPage() {
         <Grid container alignItems="center" spacing={2}>
           <Grid item xs={8}>
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Итого:
+              {t('checkout.totalAmount')}
             </Typography>
           </Grid>
           <Grid item xs={4} sx={{ textAlign: 'right' }}>
@@ -168,7 +170,7 @@ export default function OrderSuccessPage() {
             },
           }}
         >
-          Продолжить покупки
+          {t('orderSuccess.continueShopping')}
         </Button>
         <Button 
           variant="contained" 
@@ -193,7 +195,7 @@ export default function OrderSuccessPage() {
             },
           }}
         >
-          Мои заказы
+          {t('orderSuccess.myOrders')}
         </Button>
         <Button 
           variant="contained" 
@@ -217,7 +219,7 @@ export default function OrderSuccessPage() {
             },
           }}
         >
-          На главную
+          {t('orderSuccess.goHome')}
         </Button>
       </Box>
     </Container>
