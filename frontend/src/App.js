@@ -1361,12 +1361,12 @@ const theme = createTheme({
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'nowrap',
-            gap: 1,
-            px: 2
+            gap: { xs: 0.25, sm: 0.5, md: 1 },
+            px: { xs: 0.5, sm: 1, md: 2 }
           }}>
             {/* Логотип */}
-            <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-              <img src="/lion-logo.png..png" alt="Логотип магазина" style={{ width: isDesktop ? 96 : 56, height: isDesktop ? 96 : 56 }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', mr: { xs: 0.5, sm: 1, md: 2 } }}>
+              <img src="/lion-logo.png..png" alt="Логотип магазина" style={{ width: isDesktop ? 96 : (isNarrow ? 68 : 56), height: isDesktop ? 96 : (isNarrow ? 68 : 56) }} />
             </Box>
             {/* Кнопка меню при узком вьюпорте (и на мобильных) */}
             {isNarrow && (
@@ -1375,7 +1375,7 @@ const theme = createTheme({
                 onClick={() => setMobileMenuOpen(true)}
                 sx={{ 
                   color: 'white',
-                  mr: 2,
+                  mr: { xs: 0.25, sm: 0.5, md: 1, lg: 2 },
                   '&:hover': {
                     backgroundColor: 'rgba(255,255,255,0.1)',
                   },
@@ -1392,7 +1392,7 @@ const theme = createTheme({
                 alignItems: 'center', 
                 justifyContent: 'center',
                 flex: 1,
-                mx: 2
+                mx: { xs: 0.25, sm: 0.5, md: 1, lg: 2 }
               }}>
                 <IconButton
                   color="inherit"
@@ -1402,14 +1402,14 @@ const theme = createTheme({
                     color: 'white',
                     backgroundColor: 'rgba(255,255,255,0.1)',
                     borderRadius: 2,
-                    px: 2,
-                    py: 1,
+                    px: { xs: 1, sm: 1.5, md: 2 },
+                    py: { xs: 0.5, sm: 0.75, md: 1 },
                     '&:hover': {
                       backgroundColor: 'rgba(255,255,255,0.2)',
                     },
                   }}
                 >
-                  <CategoryIcon sx={{ mr: 1 }} />
+                  <CategoryIcon sx={{ mr: { xs: 0.25, sm: 0.5, md: 1 } }} />
                   <Typography sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
                     {t('catalog.categoriesButton')}
                   </Typography>
@@ -1748,7 +1748,7 @@ const theme = createTheme({
 
             {/* Корзина и язык для мобильных - справа */}
             {isNarrow && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, ml: 'auto' }}>
                 {/* Кнопка профиля для мобильных */}
                 <IconButton
                   color="inherit"
@@ -2565,7 +2565,7 @@ const theme = createTheme({
               zIndex: 1400,
               width: '280px',
               maxHeight: '70vh',
-              mt: 1,
+              mt: '-4px',
             }}
           >
           <Slide
@@ -2573,16 +2573,19 @@ const theme = createTheme({
             direction="down"
             timeout={300}
           >
-          <Paper
-            elevation={8}
-            sx={{
-              background: 'linear-gradient(180deg, #FFF8E1 0%, #FFFFFF 100%)',
-              borderRadius: 2,
-              mt: 1,
-              maxHeight: '70vh',
-              overflow: 'auto'
-            }}
-          >
+                      <Paper
+              elevation={8}
+              sx={{
+                background: 'linear-gradient(180deg, #FFF8E1 0%, #FFFFFF 100%)',
+                borderRadius: 2,
+                mt: 1,
+                maxHeight: '70vh',
+                overflow: 'auto',
+                '&::-webkit-scrollbar': { display: 'none' },
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}
+            >
             <Box sx={{ p: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#FFB300' }}>
@@ -5149,7 +5152,8 @@ function AppContent({
             alignItems: 'center', 
             gap: 1, 
             p: 1, 
-            width: '100%'
+            width: '100%',
+            mt: '5px'
           }}>
             {/* Поисковое поле */}
             <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} style={{ flex: 1 }}>
