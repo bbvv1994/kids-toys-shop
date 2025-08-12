@@ -1685,29 +1685,7 @@ const theme = createTheme({
                   </Button>
                 )}
                 <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#fff', mt: 0.5, textAlign: 'center', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {user ? (() => {
-                    // Используем ту же логику, что и в профиле
-                    let displayName = user.email; // По умолчанию email
-                    
-                    // Если есть имя пользователя, используем его
-                    if (user.name && user.name.length > 0) {
-                      displayName = user.name;
-                      
-                      // Декодируем имя если оно в неправильной кодировке
-                      try {
-                        // Пробуем как UTF-8 bytes (этот метод сработал)
-                        const bytes = new Uint8Array(displayName.split('').map(c => c.charCodeAt(0)));
-                        const utf8Decoded = new TextDecoder('utf-8').decode(bytes);
-                        if (utf8Decoded && utf8Decoded !== displayName) {
-                          displayName = utf8Decoded;
-                        }
-                      } catch (error) {
-                        // Игнорируем ошибки декодирования
-                      }
-                    }
-                    
-                    return displayName;
-                  })() : t('header.login')}
+                  {user ? (user.name && user.name.trim().length > 0 ? user.name : user.email) : t('header.login')}
                 </Typography>
               </Box>
               {/* Корзина */}
