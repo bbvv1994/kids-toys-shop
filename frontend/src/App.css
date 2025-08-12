@@ -2,16 +2,14 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   width: 100%;
-  min-width: 1200px !important;
-  overflow-x: auto !important;
+  overflow-x: hidden;
 }
 
 .main-content {
   padding-top: 1rem;
   min-height: calc(100vh - 80px);
   width: 100%;
-  min-width: 1200px !important;
-  overflow-x: auto !important;
+  overflow-x: hidden;
 }
 
 .loading {
@@ -130,8 +128,7 @@ html, body, * {
 
 html, body {
   height: 100%;
-  min-width: 1200px;
-  overflow-x: auto !important;
+  overflow-x: hidden;
 }
 
 body::-webkit-scrollbar,
@@ -158,8 +155,6 @@ html::-webkit-scrollbar-thumb:hover {
   max-width: 100%;
   box-sizing: border-box;
   padding: 0 16px;
-  /* Учитываем ширину скроллбара */
-  padding-right: calc(16px + (100vw - 100%));
 }
 
 
@@ -170,11 +165,8 @@ html::-webkit-scrollbar-thumb:hover {
 .MuiContainer-root {
   max-width: 100% !important;
   padding-left: 16px !important;
-  padding-right: calc(16px + (100vw - 100%)) !important;
+  padding-right: 16px !important;
   box-sizing: border-box !important;
-  /* Минимальная ширина для всего body и html */
-  min-width: 1200px !important;
-  overflow-x: auto !important;
 }
 
 .MuiContainer-maxWidthLg {
@@ -193,78 +185,109 @@ html::-webkit-scrollbar-thumb:hover {
   max-width: 1920px !important;
 }
 
-/* Минимальная ширина для AppBar */
+/* Адаптивные стили для AppBar */
 .MuiAppBar-root {
-  min-width: 1200px !important;
-  overflow-x: auto !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
 }
 
-/* Минимальная ширина для Toolbar */
+/* Адаптивные стили для Toolbar */
 .MuiToolbar-root {
-  min-width: 1200px !important;
-  overflow-x: auto !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
 }
 
-/* Минимальная ширина для основного контента */
+/* Адаптивные стили для основного контента */
 .MuiBox-root {
-  min-width: 1200px !important;
-  overflow-x: auto !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
 }
 
-/* Минимальная ширина для Grid контейнеров */
+/* Адаптивные стили для Grid контейнеров */
 .MuiGrid-root {
-  min-width: 1200px !important;
-  overflow-x: auto !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
 }
 
-/* Минимальная ширина для Card компонентов */
+/* Адаптивные стили для Card компонентов */
 .MuiCard-root {
-  min-width: 1200px !important;
-  overflow-x: auto !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
 }
 
 
 
-/* Легкая адаптация для десктопа (только отступы и размеры) */
-@media (min-width: 1200px) {
+/* Адаптивные стили для разных размеров экрана */
+@media (max-width: 1400px) {
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 32px;
-    padding: 0 16px;
-  }
-  
-  /* Легкая адаптация отступов для разных размеров десктопа */
-  @media (max-width: 1400px) {
-    .products-grid {
-      gap: 24px;
-    }
-  }
-  
-  @media (max-width: 1200px) {
-    .products-grid {
-      gap: 20px;
-    }
+    gap: 24px;
+    padding: 0 12px;
   }
 }
 
-/* Мобильная версия только для реальных мобильных устройств */
+@media (max-width: 1200px) {
+  .products-grid {
+    gap: 20px;
+    padding: 0 8px;
+  }
+}
 
-/* Мобильные медиа-запросы только для реальных мобильных устройств (через JS) */
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    padding: 0 8px;
+  }
+}
 
-/* Компактное поисковое поле */
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 0 4px;
+  }
+}
+
+/* Адаптивное поисковое поле */
 .compact-search-field {
-  width: 300px !important;
+  width: 100% !important;
   max-width: 300px !important;
   margin: 0 auto !important;
   display: block !important;
 }
 
 .compact-search-field .MuiOutlinedInput-root {
-  width: 300px !important;
+  width: 100% !important;
   max-width: 300px !important;
+}
+
+@media (max-width: 768px) {
+  .compact-search-field {
+    max-width: 250px !important;
+  }
+  
+  .compact-search-field .MuiOutlinedInput-root {
+    max-width: 250px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .compact-search-field {
+    max-width: 200px !important;
+  }
+  
+  .compact-search-field .MuiOutlinedInput-root {
+    max-width: 200px !important;
+  }
 }
 
 .sidebar-categories {
   overflow: hidden !important;
   height: calc(100vh - 141px) !important;
+}
+
+@media (max-width: 768px) {
+  .sidebar-categories {
+    height: calc(100vh - 100px) !important;
+  }
 }

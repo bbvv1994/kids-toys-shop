@@ -1174,6 +1174,72 @@ body {
   }
 }
 
+/* Дополнительные стили для мобильной оптимизации корзины */
+@media (max-width: 480px) {
+  /* Уменьшаем отступы для очень маленьких экранов */
+  .MuiContainer-root {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+  
+  .MuiCard-root {
+    margin: 0 1px !important;
+    border-radius: 8px !important;
+  }
+  
+  .MuiButton-root {
+    font-size: 0.75rem !important;
+    padding: 4px 8px !important;
+    min-height: 36px !important;
+  }
+  
+  /* Оптимизация для корзины на очень маленьких экранах */
+  .cart-item {
+    padding: 8px !important;
+  }
+  
+  .cart-item-image {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  
+  .cart-item-info {
+    font-size: 0.8rem !important;
+  }
+  
+  .cart-quantity-controls {
+    gap: 4px !important;
+  }
+  
+  .cart-quantity-button {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 12px !important;
+  }
+  
+  .cart-total-section {
+    padding: 12px !important;
+  }
+  
+  .cart-checkout-button {
+    height: 40px !important;
+    font-size: 0.9rem !important;
+  }
+}
 
-
-
+/* Улучшения для ландшафтной ориентации на мобильных */
+@media (max-width: 767px) and (orientation: landscape) {
+  .MuiContainer-root {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+  
+  .cart-item {
+    padding: 6px !important;
+  }
+  
+  .cart-item-image {
+    width: 50px !important;
+    height: 50px !important;
+  }
+}

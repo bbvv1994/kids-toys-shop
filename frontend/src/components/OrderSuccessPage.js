@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 export default function OrderSuccessPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { orderNumber, orderData } = location.state || {};
 
   if (!orderNumber) {
@@ -72,7 +72,10 @@ export default function OrderSuccessPage() {
           {t('orderSuccess.title')}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          {t('orderSuccess.orderNumber')} {orderNumber}
+          {t('orderSuccess.orderNumber').includes('מספר הזמנה') ? 
+            `${orderNumber} ${t('orderSuccess.orderNumber')}` : 
+            `${t('orderSuccess.orderNumber')} ${orderNumber}`
+          }
         </Typography>
         <Typography variant="body1" sx={{ mt: 2 }}>
           <strong>{t('orderSuccess.pickupFrom')}</strong> {orderData?.pickupStore === 'store1' ? t('checkout.store1') : orderData?.pickupStore === 'store2' ? t('checkout.store2') : 'Не выбран'}
@@ -86,9 +89,11 @@ export default function OrderSuccessPage() {
           {t('orderSuccess.orderInfo')}
         </Typography>
         <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" color="text.secondary">{t('orderSuccess.orderNumber')}</Typography>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2E7D32' }}>
-            #{orderNumber}
+          <Typography variant="body2" color="text.secondary">
+            {t('orderSuccess.orderNumber').includes('מספר הזמנה') ? 
+              `${orderNumber} ${t('orderSuccess.orderNumber')}` : 
+              `${t('orderSuccess.orderNumber')} ${orderNumber}`
+            }
           </Typography>
         </Box>
         <Box sx={{ mb: 2 }}>
@@ -102,13 +107,27 @@ export default function OrderSuccessPage() {
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2" color="text.secondary">{t('orderSuccess.orderDate')}</Typography>
           <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-            {new Date(orderData?.createdAt).toLocaleDateString('ru-RU', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}
+            {(() => {
+              const date = new Date(orderData?.createdAt);
+              if (i18n.language === 'he') {
+                // Для иврита - только цифры в формате DD.MM.YYYY HH:MM
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                return `${day}.${month}.${year} ${hours}:${minutes}`;
+              } else {
+                // Для русского - полный формат
+                return date.toLocaleDateString('ru-RU', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+              }
+            })()}
           </Typography>
         </Box>
       </Paper>
@@ -134,16 +153,35 @@ export default function OrderSuccessPage() {
         ))}
         <Divider sx={{ my: 3 }} />
         <Grid container alignItems="center" spacing={2}>
-          <Grid item xs={8}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              {t('checkout.totalAmount')}
-            </Typography>
-          </Grid>
-          <Grid item xs={4} sx={{ textAlign: 'right' }}>
-            <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
-              ₪{total}
-            </Typography>
-          </Grid>
+          {i18n.language === 'he' ? (
+            // Для иврита: цена слева, "סה"כ" справа
+            <>
+              <Grid item xs={4} sx={{ textAlign: 'left' }}>
+                <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
+                  ₪{total}
+                </Typography>
+              </Grid>
+              <Grid item xs={8} sx={{ textAlign: 'right' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                  {t('checkout.totalAmount')}
+                </Typography>
+              </Grid>
+            </>
+          ) : (
+            // Для русского: "Итого" слева, цена справа
+            <>
+              <Grid item xs={8}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                  {t('checkout.totalAmount')}
+                </Typography>
+              </Grid>
+              <Grid item xs={4} sx={{ textAlign: 'right' }}>
+                <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
+                  ₪{total}
+                </Typography>
+              </Grid>
+            </>
+          )}
         </Grid>
       </Paper>
       <Box sx={{ textAlign: 'center', mt: 3 }}>

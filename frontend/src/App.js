@@ -3969,6 +3969,7 @@ function App() {
   
   // Локальные состояния для устранения ошибок no-undef
   const [cart, setCart] = useState({ items: [] });
+  const [cartLoading, setCartLoading] = useState(true);
   const [wishlist, setWishlist] = useState([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -4110,6 +4111,7 @@ function App() {
 
   // Load cart when user is authenticated
   useEffect(() => {
+    setCartLoading(true);
     if (user && user.token) {
       fetch(`${API_BASE_URL}/api/profile/cart`, {
         headers: {
@@ -4117,15 +4119,20 @@ function App() {
         }
       })
       .then(res => res.json())
-      .then(data => setCart(data))
+      .then(data => {
+        setCart(data);
+        setCartLoading(false);
+      })
       .catch(error => {
         console.error('Error loading cart:', error);
         setCart({ items: [] });
+        setCartLoading(false);
       });
     } else {
       // Для незарегистрированных пользователей загружаем локальную корзину
       const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');
       setCart(localCart);
+      setCartLoading(false);
     }
   }, [user]);
 
@@ -4990,6 +4997,7 @@ function App() {
         <Router>
           <AppContent 
             cart={cart}
+            cartLoading={cartLoading}
             user={user}
             handleLogout={handleLogout}
             setAuthOpen={setAuthOpen}
@@ -5049,7 +5057,7 @@ function App() {
 }
 // Компонент для контента внутри Router
 function AppContent({ 
-  cart, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, 
+  cart, cartLoading, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, 
   mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, 
   miniCartOpen, setMiniCartOpen, handleChangeCartQuantity, 
   handleRemoveFromCart, handleAddToCart, handleEditProduct, 
@@ -5274,7 +5282,7 @@ function AppContent({
           <Route path="/category/:id" element={<CategoryPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} />} />
           <Route path="/subcategory/:id" element={<SubcategoryPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} selectedGenders={selectedGenders} />} />
           <Route path="/cart" element={<CartPage cart={cart} onChangeCartQuantity={handleChangeCartQuantity} onRemoveFromCart={handleRemoveFromCart} />} />
-          <Route path="/checkout" element={<CheckoutPage cart={cart} user={user} onClearCart={handleClearCart} />} />
+          <Route path="/checkout" element={<CheckoutPage cart={cart} cartLoading={cartLoading} user={user} onClearCart={handleClearCart} />} />
           <Route path="/order-success" element={<OrderSuccessPage />} />
           <Route path="/wishlist" element={<WishlistPage user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} />} />
           <Route path="/profile" element={<UserCabinetPage user={user} handleLogout={handleLogout} wishlist={wishlist} handleWishlistToggle={handleWishlistToggle} cart={cart} handleAddToCart={handleAddToCart} handleChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} handleUserUpdate={handleUserUpdate} handleOpenReviewForm={handleOpenReviewForm} />} />

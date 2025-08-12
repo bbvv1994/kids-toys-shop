@@ -26,7 +26,14 @@
     "deleteError": "שגיאה במחיקת הפריט",
     "loginRequired": "התחבר כדי להשתמש בתכונה זו!",
     "selectAgeGroup": "בחר קבוצת גיל",
-    "selectGender": "בחר מגדר"
+    "selectGender": "בחר מגדר",
+    "validation": {
+      "required": "אנא מלא שדה זה",
+      "email": "אנא הזן כתובת אימייל תקינה",
+      "phone": "אנא הזן מספר טלפון תקין",
+      "minLength": "על השדה להכיל לפחות {{min}} תווים",
+      "maxLength": "על השדה להכיל לכל היותר {{max}} תווים"
+    }
   },
   "profile": {
     "menu": {
@@ -286,10 +293,10 @@
     "loadingCart": "טוען עגלה...",
     "itemsInCart": "מוצרים בעגלה",
     "yourOrder": "ההזמנה שלך",
-    "itemsCount": "מוצרים ({{count}}):",
+    "itemsCount": "מוצרים: ({{count}})",
     "discount": "הנחה {{percent}}%:",
     "discountMessage": "הנחה {{percent}}%! חיסכון {{saved}} ₪",
-    "toPay": "לתשלום:",
+    "toPay": ":לתשלום",
     "removeFromCart": "הסר מהעגלה"
   },
   "checkout": {
@@ -315,25 +322,28 @@
     "store1": "רוברט סולד 8 קריית ים",
     "store2": "ויצמן 6 קריית מוצקין",
     "orderTotals": "סיכום הזמנה",
+    "items": ":מוצרים",
     "pickupFrom": "איסוף עצמי מ:",
     "paymentMethod": "תשלום: במזומן או בכרטיס",
-    "totalAmount": "סה\"כ:",
+    "totalAmount": ":סה\"כ",
     "processing": "מעבד...",
     "loadingUserData": "טוען נתוני משתמש...",
+    "loadingCart": "טוען עגלה...",
     "emptyCart": "העגלה שלך ריקה.",
     "goToProducts": "עבור למוצרים",
     "loginRequired": "נדרש להתחבר למערכת",
     "noItemsError": "אין מוצרים זמינים להזמנה בעגלה",
-    "orderError": "שגיאה בהשלמת ההזמנה. נסה שוב."
+    "orderError": "שגיאה בהשלמת ההזמנה. נסה שוב.",
+    "fillRequiredFields": "אנא מלא את כל השדות הנדרשים ובחר חנות לאיסוף עצמי"
   },
   "orderSuccess": {
-    "title": "ההזמנה הושלמה בהצלחה!",
-    "orderNumber": "מספר הזמנה:",
+    "title": "!ההזמנה הושלמה בהצלחה",
+    "orderNumber": ":מספר הזמנה",
     "pickupFrom": "איסוף עצמי מ:",
-    "thankYou": "תודה על ההזמנה שלך! נשלח לך אישור הזמנה לאימייל שלך.",
+    "thankYou": "תודה על ההזמנה שלך! נשלח לך אישור הזמנה לאימייל שלך",
     "orderInfo": "📦 מידע על ההזמנה",
-    "status": "סטטוס:",
-    "orderDate": "תאריך הזמנה:",
+    "status": "סטטוס",
+    "orderDate": "תאריך הזמנה",
     "itemsInOrder": "מוצרים בהזמנה",
     "quantity": "כמות:",
     "continueShopping": "המשך בקניות",

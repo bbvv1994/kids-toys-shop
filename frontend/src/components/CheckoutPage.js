@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import {
   Container, Typography, Box, TextField, Button, 
   Radio, RadioGroup, FormControlLabel, FormControl, 
-  FormLabel, Divider, Paper, Grid, Alert, CircularProgress
+  FormLabel, FormHelperText, Divider, Paper, Grid, Alert, CircularProgress
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL, getImageUrl } from '../config';
 import { useTranslation } from 'react-i18next';
 
-export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
+export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearCart }) {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -27,6 +29,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
   const [userData, setUserData] = useState(null);
   const [pickupStore, setPickupStore] = useState('store1');
   const [isGuest, setIsGuest] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
   // Загрузка данных пользователя
   const loadUserData = async () => {
@@ -86,40 +89,93 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
     }
   };
 
-  // Загружаем данные пользователя при загрузке компонента
-  useEffect(() => {
-    loadUserData();
-  }, []);
+     // Загружаем данные пользователя при загрузке компонента
+   useEffect(() => {
+     loadUserData();
+   }, []);
 
-  const handleInputChange = (e) => {
-    let value = e.target.value;
-    
-    // Специальная обработка для поля телефона
-    if (e.target.name === 'phone') {
-      // Убираем все символы кроме цифр
-      value = value.replace(/\D/g, '');
-      
-      // Если номер начинается с 972, убираем его (чтобы избежать дублирования)
-      if (value.startsWith('972')) {
-        value = value.substring(3);
-      }
-      
-      // Если номер начинается с 0, убираем его
-      if (value.startsWith('0')) {
-        value = value.substring(1);
-      }
-      
-      // Ограничиваем длину номера (без кода страны)
-      if (value.length > 9) {
-        value = value.substring(0, 9);
-      }
-    }
-    
-    setFormData({
-      ...formData,
-      [e.target.name]: value
-    });
-  };
+   // Обновляем ошибки валидации при смене языка
+   useEffect(() => {
+     if (Object.keys(validationErrors).length > 0) {
+       // Пересчитываем ошибки валидации с новым языком
+       const errors = {};
+       if (!formData.firstName) {
+         errors.firstName = t('common.validation.required');
+       }
+       if (!formData.lastName) {
+         errors.lastName = t('common.validation.required');
+       }
+       if (!formData.email) {
+         errors.email = t('common.validation.required');
+       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+         errors.email = t('common.validation.email');
+       }
+       if (!formData.phone) {
+         errors.phone = t('common.validation.required');
+       } else if (formData.phone.length < 8) {
+         errors.phone = t('common.validation.phone');
+       }
+       if (!pickupStore) {
+         errors.pickupStore = t('common.validation.required');
+       }
+       
+       // Обновляем ошибки только если они есть
+       if (Object.keys(errors).length > 0) {
+         setValidationErrors(errors);
+       }
+     }
+   }, [i18n.language, formData, pickupStore, validationErrors]);
+
+   // Обновляем общее сообщение об ошибке при смене языка
+   useEffect(() => {
+     if (error === 'Пожалуйста, заполните все обязательные поля и выберите магазин для самовывоза' || 
+         error === 'אנא מלא את כל השדות הנדרשים ובחר חנות לאיסוף עצמי') {
+       setError(t('checkout.fillRequiredFields'));
+     } else if (error === 'В корзине нет доступных товаров для заказа' || 
+                error === 'אין מוצרים זמינים להזמנה בעגלה') {
+       setError(t('checkout.noItemsError'));
+     }
+   }, [i18n.language, error]);
+
+   
+
+     const handleInputChange = (e) => {
+     let value = e.target.value;
+     
+     // Специальная обработка для поля телефона
+     if (e.target.name === 'phone') {
+       // Убираем все символы кроме цифр
+       value = value.replace(/\D/g, '');
+       
+       // Если номер начинается с 972, убираем его (чтобы избежать дублирования)
+       if (value.startsWith('972')) {
+         value = value.substring(3);
+       }
+       
+       // Если номер начинается с 0, убираем его
+       if (value.startsWith('0')) {
+         value = value.substring(1);
+       }
+       
+       // Ограничиваем длину номера (без кода страны)
+       if (value.length > 9) {
+         value = value.substring(0, 9);
+       }
+     }
+     
+     setFormData({
+       ...formData,
+       [e.target.name]: value
+     });
+     
+     // Очищаем ошибку для этого поля при вводе
+     if (validationErrors[e.target.name]) {
+       setValidationErrors(prev => ({
+         ...prev,
+         [e.target.name]: ''
+       }));
+     }
+   };
 
   const calculateTotal = () => {
     if (!cart || !cart.items) return 0;
@@ -133,13 +189,40 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
     setLoading(true);
     setError('');
 
-    // Валидация
-    console.log('🔍 Checkout validation:', { formData, pickupStore, cart });
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !pickupStore) {
-      setError('Пожалуйста, заполните все обязательные поля и выберите магазин для самовывоза');
-      setLoading(false);
-      return;
-    }
+         // Валидация
+     console.log('🔍 Checkout validation:', { formData, pickupStore, cart });
+     
+     // Очищаем предыдущие ошибки
+     setValidationErrors({});
+     
+     // Проверяем каждое поле и показываем ошибки
+     const errors = {};
+     if (!formData.firstName) {
+       errors.firstName = t('common.validation.required');
+     }
+     if (!formData.lastName) {
+       errors.lastName = t('common.validation.required');
+     }
+     if (!formData.email) {
+       errors.email = t('common.validation.required');
+     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+       errors.email = t('common.validation.email');
+     }
+     if (!formData.phone) {
+       errors.phone = t('common.validation.required');
+     } else if (formData.phone.length < 8) {
+       errors.phone = t('common.validation.phone');
+     }
+     if (!pickupStore) {
+       errors.pickupStore = t('common.validation.required');
+     }
+     
+     if (Object.keys(errors).length > 0) {
+       setValidationErrors(errors);
+       setError(t('checkout.fillRequiredFields'));
+       setLoading(false);
+       return;
+     }
 
     try {
       if (isGuest) {
@@ -162,7 +245,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
         console.log('🔍 Final cartItems:', cartItems);
         
         if (cartItems.length === 0) {
-          setError('В корзине нет доступных товаров для заказа');
+          setError(t('checkout.noItemsError'));
           setLoading(false);
           return;
         }
@@ -299,6 +382,19 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
     }
   };
 
+  if (cartLoading) {
+    return (
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <CircularProgress sx={{ mb: 2 }} />
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            {t('checkout.loadingCart')}
+          </Typography>
+        </Box>
+      </Container>
+    );
+  }
+
   if (!cart || !cart.items || cart.items.length === 0) {
     return (
       <Container maxWidth="md" sx={{ mt: 4 }}>
@@ -322,7 +418,7 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
       )}
 
       {!loadingUserData && (
-        <form onSubmit={handleSubmit}>
+                 <form onSubmit={handleSubmit} noValidate>
           <Paper sx={{ p: { xs: 2, md: 3 }, background: 'white', mb: 3 }}>
             <Typography variant="h5" sx={{ mb: 3, color: '#333', fontWeight: 'bold', textAlign: 'center' }}>
               {t('checkout.orderInfo')}
@@ -336,77 +432,90 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
                 {t('checkout.autoFilled')}
               </Alert>
             )}
-            <Grid container spacing={2}>
+            <Grid container spacing={2} key={i18n.language}>
               <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={t('checkout.firstName')}
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  required
-                  variant="outlined"
-                  sx={{ mb: 2 }}
-                />
+                                                                  <TextField
+                   fullWidth
+                   label={t('checkout.firstName')}
+                   name="firstName"
+                                      value={formData.firstName}
+                   onChange={handleInputChange}
+                   variant="outlined"
+                   error={!!validationErrors.firstName}
+                   helperText={validationErrors.firstName}
+                    sx={{ mb: 2 }}
+                  />
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={t('checkout.lastName')}
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  required
-                  variant="outlined"
-                  sx={{ mb: 2 }}
-                />
+                                 <TextField
+                   fullWidth
+                   label={t('checkout.lastName')}
+                   name="lastName"
+                   value={formData.lastName}
+                   onChange={handleInputChange}
+                   variant="outlined"
+                   error={!!validationErrors.lastName}
+                   helperText={validationErrors.lastName}
+                   sx={{ mb: 2 }}
+                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={t('checkout.email')}
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  variant="outlined"
-                  sx={{ mb: 2 }}
-                />
+                                 <TextField
+                   fullWidth
+                   label={t('checkout.email')}
+                   name="email"
+                   type="email"
+                   value={formData.email}
+                   onChange={handleInputChange}
+                   variant="outlined"
+                   error={!!validationErrors.email}
+                   helperText={validationErrors.email}
+                   sx={{ mb: 2 }}
+                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={t('checkout.phone')}
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  onKeyPress={(e) => {
-                    const charCode = e.which ? e.which : e.keyCode;
-                    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-                      e.preventDefault();
-                    }
-                  }}
-                  required
-                  variant="outlined"
-                  InputProps={{
-                    startAdornment: <span style={{ color: '#000', marginRight: '8px' }}>+972</span>,
-                  }}
-                  sx={{ mb: 2 }}
-                />
+                                 <TextField
+                   fullWidth
+                   label={t('checkout.phone')}
+                   name="phone"
+                   value={formData.phone}
+                   onChange={handleInputChange}
+                   onKeyPress={(e) => {
+                     const charCode = e.which ? e.which : e.keyCode;
+                     if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                       e.preventDefault();
+                     }
+                   }}
+                   variant="outlined"
+                   error={!!validationErrors.phone}
+                   helperText={validationErrors.phone}
+                   InputProps={{
+                     startAdornment: <span style={{ color: '#000', marginRight: '8px' }}>+972</span>,
+                   }}
+                   sx={{ mb: 2 }}
+                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControl fullWidth required sx={{ mb: 2 }}>
-                  <FormLabel>{t('checkout.pickupStore')}</FormLabel>
-                  <RadioGroup
-                    row={false}
-                    value={pickupStore}
-                    onChange={e => setPickupStore(e.target.value)}
-                  >
-                    <FormControlLabel value="store1" control={<Radio />} label={t('checkout.store1')} />
-                    <FormControlLabel value="store2" control={<Radio />} label={t('checkout.store2')} />
-                  </RadioGroup>
-                </FormControl>
+                                 <FormControl fullWidth error={!!validationErrors.pickupStore} sx={{ mb: 2 }}>
+                   <FormLabel error={!!validationErrors.pickupStore}>{t('checkout.pickupStore')}</FormLabel>
+                   <RadioGroup
+                     row={false}
+                     value={pickupStore}
+                     onChange={e => {
+                       setPickupStore(e.target.value);
+                       setValidationErrors(prev => ({
+                         ...prev,
+                         pickupStore: ''
+                       }));
+                     }}
+                   >
+                     <FormControlLabel value="store1" control={<Radio />} label={t('checkout.store1')} />
+                     <FormControlLabel value="store2" control={<Radio />} label={t('checkout.store2')} />
+                   </RadioGroup>
+                   {validationErrors.pickupStore && (
+                     <FormHelperText error>{validationErrors.pickupStore}</FormHelperText>
+                   )}
+                 </FormControl>
               </Grid>
             </Grid>
           </Paper>
@@ -430,19 +539,30 @@ export default function CheckoutPage({ cart, onPlaceOrder, onClearCart }) {
             <Divider sx={{ my: 2 }} />
             <Box sx={{ mb: 2 }}>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                Товары: {cart.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0)} ₪
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 {t('checkout.pickupFrom')} {pickupStore === 'store1' ? t('checkout.store1') : t('checkout.store2')}
               </Typography>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 {t('checkout.paymentMethod')}
               </Typography>
             </Box>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="h6" color="primary" sx={{ textAlign: 'center' }}>
-              {t('checkout.totalAmount')} {calculateTotal()} ₪
-            </Typography>
+                         <Divider sx={{ my: 2 }} />
+                           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+                {t('checkout.totalAmount').includes('סה"כ') ? (
+                  // Иврит: цена и ":סה"כ" вместе по центру
+                  <>
+                    <Typography variant="h6" color="primary" sx={{ fontWeight: 600 }}>
+                      {calculateTotal()} ₪ {t('checkout.totalAmount')}
+                    </Typography>
+                  </>
+                ) : (
+                  // Русский язык: "Итого:" и цена по центру
+                  <>
+                    <Typography variant="h6" color="primary" sx={{ fontWeight: 600 }}>
+                      {t('checkout.totalAmount')} {calculateTotal()} ₪
+                    </Typography>
+                  </>
+                )}
+              </Box>
             {error && (
               <Alert severity="error" sx={{ mt: 2 }}>
                 {error}
