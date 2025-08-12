@@ -43,13 +43,30 @@ export default function ContactsPage() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Здесь будет логика отправки формы
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        setSubmitSuccess(true);
+        setFormData({ name: '', email: '', phone: '', message: '' });
+        setTimeout(() => setSubmitSuccess(false), 5000);
+      } else {
+        alert(result.error || t('contacts.contactForm.error'));
+      }
+    } catch (error) {
+      console.error('Ошибка отправки формы:', error);
+      alert(t('contacts.contactForm.errorTryAgain'));
+    } finally {
       setIsSubmitting(false);
-      setSubmitSuccess(true);
-      setFormData({ name: '', email: '', phone: '', message: '' });
-      setTimeout(() => setSubmitSuccess(false), 3000);
-    }, 1000);
+    }
   };
 
   const handleWhatsAppClick = () => {
@@ -58,7 +75,7 @@ export default function ContactsPage() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6, minHeight: '80vh' }}>
+    <Container maxWidth="lg" sx={{ py: 6, pt: 12, minHeight: '80vh' }}>
       {/* Заголовок */}
       <Box sx={{ textAlign: 'center', mb: 6 }}>
         <Typography 
@@ -87,68 +104,83 @@ export default function ContactsPage() {
         </Typography>
       </Box>
 
-      {/* Контактные данные */}
-      <Grid container spacing={4} sx={{ mb: 6 }}>
-        {/* Адрес */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-            <CardContent sx={{ textAlign: 'center', p: 3 }}>
-              <LocationOn sx={{ fontSize: 48, mb: 2, color: '#FFD93D' }} />
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                {t('contacts.address.title')}
-              </Typography>
-              <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
-                {t('contacts.address.location')}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+             {/* Контактные данные */}
+       <Grid container spacing={4} sx={{ mb: 6 }}>
+         {/* Адреса магазинов */}
+         <Grid item xs={12} md={6}>
+           <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+             <CardContent sx={{ textAlign: 'center', p: 3 }}>
+               <LocationOn sx={{ fontSize: 48, mb: 2, color: '#FFD93D' }} />
+               <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                 {t('contacts.address.title')}
+               </Typography>
+               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                 <Box>
+                   <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                     {t('contacts.address.store1.name')}
+                   </Typography>
+                   <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
+                     {t('contacts.address.store1.location')}
+                   </Typography>
+                 </Box>
+                 <Box>
+                   <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                     {t('contacts.address.store2.name')}
+                   </Typography>
+                   <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
+                     {t('contacts.address.store2.location')}
+                   </Typography>
+                 </Box>
+               </Box>
+             </CardContent>
+           </Card>
+         </Grid>
 
-        {/* Телефоны */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)', color: 'white' }}>
-            <CardContent sx={{ textAlign: 'center', p: 3 }}>
-              <Phone sx={{ fontSize: 48, mb: 2, color: '#FFD93D' }} />
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                {t('contacts.phones.title')}
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                  {t('contacts.phones.primary')}
-                </Typography>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                  {t('contacts.phones.secondary')}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+                 {/* Телефоны */}
+         <Grid item xs={12} md={3}>
+           <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)', color: 'white' }}>
+             <CardContent sx={{ textAlign: 'center', p: 3 }}>
+               <Phone sx={{ fontSize: 48, mb: 2, color: '#FFD93D' }} />
+               <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                 {t('contacts.phones.title')}
+               </Typography>
+               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                 <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                   {t('contacts.phones.primary')}
+                 </Typography>
+                 <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                   {t('contacts.phones.secondary')}
+                 </Typography>
+               </Box>
+             </CardContent>
+           </Card>
+         </Grid>
 
-        {/* WhatsApp */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)', color: 'white' }}>
-            <CardContent sx={{ textAlign: 'center', p: 3 }}>
-              <WhatsApp sx={{ fontSize: 48, mb: 2, color: '#FFD93D' }} />
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                {t('contacts.whatsapp.title')}
-              </Typography>
-              <Button
-                variant="contained"
-                onClick={handleWhatsAppClick}
-                sx={{
-                  background: '#25D366',
-                  color: 'white',
-                  fontWeight: 600,
-                  '&:hover': {
-                    background: '#128C7E'
-                  }
-                }}
-              >
-                {t('contacts.whatsapp.button')}
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
+         {/* WhatsApp */}
+         <Grid item xs={12} md={3}>
+           <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)', color: 'white' }}>
+             <CardContent sx={{ textAlign: 'center', p: 3 }}>
+               <WhatsApp sx={{ fontSize: 48, mb: 2, color: '#FFD93D' }} />
+               <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                 {t('contacts.whatsapp.title')}
+               </Typography>
+               <Button
+                 variant="contained"
+                 onClick={handleWhatsAppClick}
+                 sx={{
+                   background: '#25D366',
+                   color: 'white',
+                   fontWeight: 600,
+                   '&:hover': {
+                     background: '#128C7E'
+                   }
+                 }}
+               >
+                 {t('contacts.whatsapp.button')}
+               </Button>
+             </CardContent>
+           </Card>
+         </Grid>
       </Grid>
 
       {/* Часы работы */}

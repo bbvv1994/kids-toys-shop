@@ -4684,6 +4684,65 @@ app.post('/api/migrate', async (req, res) => {
   }
 });
 
+// POST /api/contact - обработка формы обратной связи
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, phone, message } = req.body;
+    
+    // Валидация
+    if (!name || !email || !message) {
+      return res.status(400).json({ 
+        error: 'Необходимо заполнить имя, email и сообщение' 
+      });
+    }
+    
+    // Проверка формата email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ 
+        error: 'Неверный формат email' 
+      });
+    }
+    
+    // Формируем сообщение для Telegram
+    const telegramMessage = `
+📧 <b>НОВОЕ СООБЩЕНИЕ С САЙТА</b>
+
+👤 <b>Имя:</b> ${name}
+📧 <b>Email:</b> ${email}
+📱 <b>Телефон:</b> ${phone || 'Не указан'}
+💬 <b>Сообщение:</b>
+
+${message}
+
+⏰ <b>Время:</b> ${new Date().toLocaleString('ru-RU')}
+🌐 <b>Источник:</b> Форма обратной связи
+    `;
+    
+    // Отправляем в Telegram
+    const telegramResult = await sendTelegramNotification(telegramMessage);
+    
+    if (telegramResult) {
+      console.log('✅ Сообщение с формы контактов отправлено в Telegram');
+      res.json({ 
+        success: true, 
+        message: 'Сообщение отправлено! Мы ответим вам в ближайшее время.' 
+      });
+    } else {
+      console.error('❌ Ошибка отправки в Telegram');
+      res.status(500).json({ 
+        error: 'Ошибка отправки сообщения. Попробуйте позже.' 
+      });
+    }
+    
+  } catch (error) {
+    console.error('❌ Ошибка обработки формы контактов:', error);
+    res.status(500).json({ 
+      error: 'Внутренняя ошибка сервера' 
+    });
+  }
+});
+
 app.listen(PORT, (err) => {
   if (err) {
     console.error('Server failed to start:', err);
