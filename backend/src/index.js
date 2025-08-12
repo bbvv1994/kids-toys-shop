@@ -4689,6 +4689,8 @@ app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, phone, message } = req.body;
     
+    console.log('📧 Получено сообщение с формы контактов:', { name, email, phone, message });
+    
     // Валидация
     if (!name || !email || !message) {
       return res.status(400).json({ 
@@ -4717,23 +4719,22 @@ ${message}
 
 ⏰ <b>Время:</b> ${new Date().toLocaleString('ru-RU')}
 🌐 <b>Источник:</b> Форма обратной связи
-    `;
+    `.trim();
     
-    // Отправляем в Telegram
-    const telegramResult = await sendTelegramNotification(telegramMessage);
-    
-    if (telegramResult) {
+    // Отправляем уведомление в Telegram
+    try {
+      await sendTelegramNotification(telegramMessage);
       console.log('✅ Сообщение с формы контактов отправлено в Telegram');
-      res.json({ 
-        success: true, 
-        message: 'Сообщение отправлено! Мы ответим вам в ближайшее время.' 
-      });
-    } else {
-      console.error('❌ Ошибка отправки в Telegram');
-      res.status(500).json({ 
-        error: 'Ошибка отправки сообщения. Попробуйте позже.' 
-      });
+    } catch (telegramError) {
+      console.error('❌ Ошибка отправки в Telegram:', telegramError);
+      // Не прерываем выполнение, если Telegram недоступен
     }
+    
+    console.log('✅ Сообщение с формы контактов обработано успешно');
+    res.json({ 
+      success: true, 
+      message: 'Сообщение отправлено! Мы ответим вам в ближайшее время.' 
+    });
     
   } catch (error) {
     console.error('❌ Ошибка обработки формы контактов:', error);
