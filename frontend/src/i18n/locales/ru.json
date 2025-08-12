@@ -700,5 +700,30 @@
     "ecoFriendly": "Экологически чистый",
     "madeIn": "Сделано в {{country}}",
     "importedBy": "Импортировано {{company}}"
+  },
+  "productPage": {
+    "category": "Категория",
+    "reviews": "Отзывы о товаре",
+    "noReviews": "Пока нет отзывов.",
+    "leaveReview": "Оставить отзыв",
+    "reviewText": "Ваш отзыв",
+    "submitReview": "Отправить отзыв",
+    "reviewSent": "Ваш отзыв отправлен на модерацию!",
+    "alreadyReviewed": "Вы уже оставили отзыв на этот товар.",
+    "onlyBuyersCanReview": "Оставлять отзывы могут только покупатели этого товара.",
+    "loginToReview": "Войдите в аккаунт, чтобы оставить отзыв.",
+    "questions": "Вопросы о товаре",
+    "noQuestions": "Пока нет вопросов о данном товаре. Будьте первым, кто задаст вопрос!",
+    "askQuestion": "Задать вопрос",
+    "questionText": "Ваш вопрос",
+    "submitQuestion": "Отправить вопрос",
+    "questionSent": "Ваш вопрос отправлен! Мы ответим на него в ближайшее время.",
+    "answer": "Ответ:",
+    "answeredOn": "Ответ дан:",
+    "quantity": ":Количество",
+    "onWarehouse": "На складе: {{quantity}}",
+    "user": "Пользователь",
+    "noCategory": "Без категории",
+    "noDescription": "Описание отсутствует"
   }
 } 

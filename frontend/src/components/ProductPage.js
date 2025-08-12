@@ -30,7 +30,7 @@ const ageIcons = {
 
 // Новый современный дизайн страницы товара
 export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuantity, onEditProduct, dbCategories, productId }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isAdmin = user?.role === 'admin';
   
   // Функция для перевода категорий
@@ -102,7 +102,38 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       'Кинетический песок': 'kinetic_sand',
       'Рисование': 'drawing',
       'Наборы для творчества': 'creativity_sets',
-      'Раскраски': 'coloring'
+      'Раскраски': 'coloring',
+      // Канцтовары
+      'Портфели для школы': 'school_bags',
+      'Портфели для детских садов': 'kindergarten_bags',
+      'Пеналы': 'pencil_cases',
+      'Ручки и карандаши': 'pens_pencils',
+      'Точилки': 'sharpeners',
+      'Фломастеры и маркеры': 'markers',
+      'Краски': 'paints',
+      'Кисточки и принадлежности': 'brushes_accessories',
+      'Брелки': 'keychains',
+      // Транспорт
+      'Детские самокаты': 'scooters',
+      'Велосипеды': 'bicycles',
+      'Ходунки': 'walkers',
+      'Беговелы': 'balance_bikes',
+      // Отдых на воде
+      'Бассейны': 'pools',
+      'Матрасы и плотики': 'mattresses_floats',
+      'Круги надувные': 'inflatable_circles',
+      'Нарукавники и жилеты': 'armbands_vests',
+      'Аксессуары для плавания': 'swimming_accessories',
+      'Ракетки': 'rackets',
+      'Пляжные мячи и игрушки для плавания': 'beach_balls',
+      'Насосы для матрасов': 'pumps',
+      // Настольные игры
+      'Настольные игры': 'board_games',
+      // Развивающие игры
+      'Развивающие игры': 'educational_games',
+      // Акции
+      'Скидки недели': 'weekly_discounts',
+      'Товары по акции': 'sale_items'
     };
     
     const parentKey = categoryMap[parentCategory];
@@ -366,7 +397,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   useEffect(() => {
           if (product && product.category) {
-        const categoryName = typeof product.category === 'string' ? product.category : (product.category?.name || 'Без категории');
+        const categoryName = typeof product.category === 'string' ? product.category : (product.category?.name || t('productPage.noCategory'));
         fetch(`${API_BASE_URL}/api/products?category=${encodeURIComponent(categoryName)}`)
         .then(res => res.json())
         .then(data => {
@@ -466,7 +497,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       const data = await res.json();
       
       if (res.ok) {
-        setReviewSuccess('Ваш отзыв отправлен на модерацию!');
+        setReviewSuccess(t('productPage.reviewSent'));
         setReviewText('');
         setReviewRating(5);
         // Обновляем список отзывов
@@ -512,7 +543,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       const data = await res.json();
       
       if (res.ok) {
-        setQuestionSuccess('Ваш вопрос отправлен! Мы ответим на него в ближайшее время.');
+        setQuestionSuccess(t('productPage.questionSent'));
         setQuestionText('');
         // Обновляем список вопросов
         setQuestions(prevQuestions => [...prevQuestions, data]);
@@ -538,7 +569,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       setCartAnimPlaying(false);
     }, 800); // Уменьшили время анимации
     
-    const categoryName = typeof product.category === 'string' ? product.category : (product.category?.name || 'Без категории');
+    const categoryName = typeof product.category === 'string' ? product.category : (product.category?.name || t('productPage.noCategory'));
     onAddToCart(product, categoryName, displayQuantity);
   };
 
@@ -1087,19 +1118,22 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1, mb: 2, width: 'auto', maxWidth: 'max-content' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '0.9rem', color: '#1976d2', padding: '2px 8px', borderRadius: '4px', fontWeight: 500, marginBottom: 2 }}>
                   <img src={getCategoryIcon(typeof product.category === 'object' ? product.category : { name: product.category })} alt="cat" style={{ width: 20, height: 20, marginRight: 6, verticalAlign: 'middle' }} />
-                  {typeof product.category === 'object' ? (product.category.label || product.category?.name) : product.category}
+                  {typeof product.category === 'object' ? translateCategory(product.category.label || product.category?.name) : translateCategory(product.category)}
                 </span>
               </Box>
             )}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 2 }}>
-              <Typography variant="body2"><b>{t('productCard.sku')}: {product.article || '—'}</b></Typography>
-              <Typography variant="body2"><b>{t('productCard.brand')}:</b> {product.brand || '—'}</Typography>
-              <Typography variant="body2"><b>{t('productCard.country')}:</b> {product.manufacturer || product.country || '—'}</Typography>
-              <Typography variant="body2" dir="rtl" style={{ textAlign: 'right' }}>
-                <b>{t('productCard.dimensions')}:</b> {product.height && product.length && product.width ? 
+              <Typography variant="body2"><b>{i18n.language === 'he' ? `${product.article || '—'}: ${t('productCard.sku')}` : `${t('productCard.sku')}: ${product.article || '—'}`}</b></Typography>
+              <Typography variant="body2"><b>{i18n.language === 'he' ? `${product.brand || '—'}: ${t('productCard.brand')}` : `${t('productCard.brand')}: ${product.brand || '—'}`}</b></Typography>
+              <Typography variant="body2"><b>{i18n.language === 'he' ? `${product.manufacturer || product.country || '—'}: ${t('productCard.country')}` : `${t('productCard.country')}: ${product.manufacturer || product.country || '—'}`}</b></Typography>
+              <Typography variant="body2"><b>{i18n.language === 'he' ? 
+                `${t('productCard.dimensions')}: ${product.height && product.length && product.width ? 
                   `${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
-                  '—'}
-              </Typography>
+                  '—'}` :
+                `${t('productCard.dimensions')}: ${product.height && product.length && product.width ? 
+                  `${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
+                  '—'}`
+              }</b></Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
               {isAdmin ? (
@@ -1114,7 +1148,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             {/* Выбор количества */}
             {product.quantity > 0 && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <Typography variant="body1" sx={{ fontWeight: 600 }}>Количество:</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <button
                     style={{
@@ -1174,6 +1207,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     disabled={!product.quantity || product.quantity <= 0}
                   >+</button>
                 </Box>
+                <Typography variant="body1" sx={{ fontWeight: 600 }}>{t('productPage.quantity')}</Typography>
               </Box>
             )}
             <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
@@ -1237,8 +1271,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   {product.quantity <= 0 
                     ? t('productCard.availability.outOfStock') 
                     : (inCart && !cartAnimPlaying)
-                      ? 'В корзине'
-                      : `В корзину (${displayQuantity} шт.)`}
+                      ? t('productCard.inCart')
+                      : `${t('productCard.addToCart')} (${displayQuantity} ${t('productCard.units.pcs')})`}
                 </Button>
               )}
               {isAdmin && (
@@ -1357,7 +1391,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             color: '#333',
             fontSize: '1.1rem'
           }}>
-            Описание
+            {t('productCard.description')}
           </Typography>
           <Typography variant="body1" sx={{ 
             lineHeight: 1.7, 
@@ -1365,7 +1399,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             fontSize: '1.05rem',
             textAlign: 'justify'
           }}>
-            {product.description && typeof product.description === 'string' ? product.description : 'Описание отсутствует'}
+            {product.description && typeof product.description === 'string' ? product.description : t('productPage.noDescription')}
           </Typography>
         </Box>
       </Box>
@@ -1390,9 +1424,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           gap: 1
         }}>
           <RateReviewIcon sx={{ color: '#4ECDC4', fontSize: 28 }} />
-          Отзывы о товаре
+          {t('productPage.reviews')}
         </Typography>
-        {reviews.length === 0 && <Typography>Пока нет отзывов.</Typography>}
+        {reviews.length === 0 && <Typography>{t('productPage.noReviews')}</Typography>}
         {reviews.map((review) => (
           <Box key={review.id} sx={{ 
             mb: 3, 
@@ -1409,7 +1443,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <Rating value={review.rating} readOnly size="small" sx={{ color: '#FFD600' }} />
               <Typography sx={{ ml: 2, fontWeight: 'bold', color: '#333' }}>
-                {review.user?.name || 'Пользователь'}
+                {review.user?.name || t('productPage.user')}
               </Typography>
               <Typography sx={{ ml: 2, color: '#888', fontSize: '0.9rem' }}>
                 {new Date(review.createdAt).toLocaleDateString()}
@@ -1429,11 +1463,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           <Box component="form" onSubmit={handleReviewSubmit} sx={{ mt: 3, p: 2, background: '#fffbe7', borderRadius: 2 }}>
             <Typography variant="h6" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
               <RateReviewIcon sx={{ color: '#4ECDC4', fontSize: 20 }} />
-              Оставить отзыв
+              {t('productPage.leaveReview')}
             </Typography>
             <Rating value={reviewRating} onChange={(_, v) => setReviewRating(v)} sx={{ mb: 1 }} />
             <TextField
-              label="Ваш отзыв"
+              label={t('productPage.reviewText')}
               value={reviewText}
               onChange={e => setReviewText(e.target.value)}
               fullWidth
@@ -1470,20 +1504,20 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 }
               }}
             >
-              Отправить
+              {reviewLoading ? t('reviews.form.submitting') : t('productPage.submitReview')}
             </Button>
             {reviewError && <Typography color="error" sx={{ mt: 1 }}>{reviewError}</Typography>}
             {reviewSuccess && <Typography color="success.main" sx={{ mt: 1 }}>{reviewSuccess}</Typography>}
           </Box>
         )}
         {user && user.token && alreadyReviewed && (
-          <Typography sx={{ mt: 2, color: '#888' }}>Вы уже оставили отзыв на этот товар.</Typography>
+          <Typography sx={{ mt: 2, color: '#888' }}>{t('productPage.alreadyReviewed')}</Typography>
         )}
         {user && user.token && !canReview && !alreadyReviewed && (
-          <Typography sx={{ mt: 2, color: '#888' }}>Оставлять отзывы могут только покупатели этого товара.</Typography>
+          <Typography sx={{ mt: 2, color: '#888' }}>{t('productPage.onlyBuyersCanReview')}</Typography>
         )}
         {!user && (
-          <Typography sx={{ mt: 2, color: '#888' }}>Войдите в аккаунт, чтобы оставить отзыв.</Typography>
+          <Typography sx={{ mt: 2, color: '#888' }}>{t('productPage.loginToReview')}</Typography>
         )}
       </Box>
 
@@ -1507,11 +1541,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           gap: 1
         }}>
           <HelpOutlineIcon sx={{ color: '#2196F3', fontSize: 28 }} />
-          Вопросы о товаре ({questions.length})
+          {t('productPage.questions')} ({questions.length})
         </Typography>
         {questions.length === 0 ? (
           <Typography sx={{ color: '#666', fontStyle: 'italic' }}>
-            Пока нет вопросов о данном товаре. Будьте первым, кто задаст вопрос!
+            {t('productPage.noQuestions')}
           </Typography>
         ) : (
           questions.map((question) => (
@@ -1529,7 +1563,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Typography sx={{ fontWeight: 'bold', color: '#333' }}>
-                  {question.user?.name || 'Пользователь'}
+                  {question.user?.name || t('productPage.user')}
                 </Typography>
                 <Typography sx={{ ml: 2, color: '#888', fontSize: '0.9rem' }}>
                   {new Date(question.createdAt).toLocaleDateString('ru-RU', {
@@ -1565,7 +1599,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     gap: 1
                   }}>
                     <ChatBubbleOutlineIcon sx={{ color: '#1976d2', fontSize: 20, mt: 0.2 }} />
-                    <strong>Ответ:</strong> {question.answer}
+                    <strong>{t('productPage.answer')}</strong> {question.answer}
                   </Typography>
                   {question.updatedAt && question.updatedAt !== question.createdAt && (
                     <Typography sx={{ 
@@ -1593,10 +1627,10 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           <Box component="form" onSubmit={handleQuestionSubmit} sx={{ mt: 3, p: 2, background: '#f3f8ff', borderRadius: 2 }}>
             <Typography variant="h6" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
               <HelpOutlineIcon sx={{ color: '#2196F3', fontSize: 20 }} />
-              Задать вопрос
+              {t('productPage.askQuestion')}
             </Typography>
             <TextField
-              label="Ваш вопрос"
+              label={t('productPage.questionText')}
               value={questionText}
               onChange={e => setQuestionText(e.target.value)}
               fullWidth
@@ -1633,14 +1667,14 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 }
               }}
             >
-              Отправить
+              {questionLoading ? t('reviews.form.submitting') : t('productPage.submitQuestion')}
             </Button>
             {questionError && <Typography color="error" sx={{ mt: 1 }}>{questionError}</Typography>}
             {questionSuccess && <Typography color="success.main" sx={{ mt: 1 }}>{questionSuccess}</Typography>}
           </Box>
         )}
         {!user && (
-          <Typography sx={{ mt: 2, color: '#888' }}>Войдите в аккаунт, чтобы задать вопрос.</Typography>
+          <Typography sx={{ mt: 2, color: '#888' }}>{t('productPage.loginToReview')}</Typography>
         )}
       </Box>
 

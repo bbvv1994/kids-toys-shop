@@ -661,5 +661,30 @@
     "ecoFriendly": "ידידותי לסביבה",
     "madeIn": "מיוצר ב{{country}}",
     "importedBy": "מיובא על ידי {{company}}"
+  },
+  "productPage": {
+    "category": "קטגוריה",
+    "reviews": "ביקורות על המוצר",
+    "noReviews": "עדיין אין ביקורות.",
+    "leaveReview": "כתוב ביקורת",
+    "reviewText": "הביקורת שלך",
+    "submitReview": "שלח ביקורת",
+    "reviewSent": "הביקורת שלך נשלחה למודרציה!",
+    "alreadyReviewed": "כבר כתבת ביקורת על מוצר זה.",
+    "onlyBuyersCanReview": "רק קונים יכולים לכתוב ביקורות על מוצר זה.",
+    "loginToReview": "התחבר כדי לכתוב ביקורת.",
+    "questions": "שאלות על המוצר",
+    "noQuestions": "עדיין אין שאלות על מוצר זה. היה הראשון לשאול שאלה!",
+    "askQuestion": "שאל שאלה",
+    "questionText": "השאלה שלך",
+    "submitQuestion": "שלח שאלה",
+    "questionSent": "השאלה שלך נשלחה! נענה עליה בקרוב.",
+    "answer": "תשובה:",
+    "answeredOn": "נענה ב:",
+    "quantity": ":כמות",
+    "onWarehouse": "במחסן: {{quantity}}",
+    "user": "משתמש",
+    "noCategory": "ללא קטגוריה",
+    "noDescription": "אין תיאור"
   }
 } 
