@@ -347,7 +347,17 @@ export default function ContactsPage() {
               mx: { xs: 'auto', sm: 'none' }
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, flexDirection: { xs: 'column', sm: 'row' }, textAlign: { xs: 'center', sm: 'left' } }}>
-                <Directions sx={{ fontSize: { xs: 28, md: 32 }, mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 }, color: '#FFD93D' }} />
+                <img 
+                  src="/lion-logo.png..png" 
+                  alt="Симба - Король игрушек" 
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    marginRight: '8px',
+                    marginBottom: '4px',
+                    filter: 'drop-shadow(0 2px 4px rgba(255, 217, 61, 0.3))'
+                  }}
+                />
                 <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '1rem', md: '1.25rem' } }}>
                   {t('contacts.address.store1.name')}
                 </Typography>
@@ -393,7 +403,17 @@ export default function ContactsPage() {
               mx: { xs: 'auto', sm: 'none' }
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, flexDirection: { xs: 'column', sm: 'row' }, textAlign: { xs: 'center', sm: 'left' } }}>
-                <Directions sx={{ fontSize: { xs: 28, md: 32 }, mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 }, color: '#FFD93D' }} />
+                <img 
+                  src="/lion-logo.png..png" 
+                  alt="Симба - Король игрушек" 
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    marginRight: '8px',
+                    marginBottom: '4px',
+                    filter: 'drop-shadow(0 2px 4px rgba(255, 217, 61, 0.3))'
+                  }}
+                />
                 <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '1rem', md: '1.25rem' } }}>
                   {t('contacts.address.store2.name')}
                 </Typography>

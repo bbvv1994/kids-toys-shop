@@ -42,11 +42,11 @@ const OpenStreetMapComponent = ({ stores, center, zoom = 8 }) => {
             key={index}
             position={store.coordinates}
             icon={new L.Icon({
-              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+              iconUrl: '/lion-logo.png..png',
               shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-              iconSize: [25, 41],
-              iconAnchor: [12, 41],
-              popupAnchor: [1, -34],
+              iconSize: [68, 68],
+              iconAnchor: [34, 68],
+              popupAnchor: [0, -68],
               shadowSize: [41, 41]
             })}
           >

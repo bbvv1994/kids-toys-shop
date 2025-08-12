@@ -9546,7 +9546,6 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
     surname: '',
     email: '',
     phone: '',
-    address: '',
   });
   const [profileData, setProfileData] = useState(null);
   const [profileSaved, setProfileSaved] = useState(false);
@@ -9814,7 +9813,6 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
           surname: data.user.surname || '',
           email: data.user.email || '',
           phone: data.user.phone || '',
-          address: data.user.address || '',
         });
       }
     } catch (error) {
@@ -10053,8 +10051,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
           name: profileForm.name,
           surname: profileForm.surname,
           email: profileForm.email,
-          phone: profileForm.phone,
-          address: profileForm.address
+          phone: profileForm.phone
         })
       });
       
@@ -10063,12 +10060,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         // Получаем обновленные данные пользователя
         const responseData = await response.json();
         // Обновляем данные пользователя в localStorage
-        const updatedUser = { 
+                const updatedUser = {
           ...user, 
           name: responseData.user.name,
           surname: responseData.user.surname,
           phone: responseData.user.phone,
-          address: responseData.user.address,
           googleId: responseData.user.googleId,
           facebookId: responseData.user.facebookId
         };
@@ -10361,16 +10357,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       </Box>
                     </Box>
 
-                    {/* Адрес */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <LocationOnIcon sx={{ color: '#4caf50', fontSize: 24 }} />
-                      <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.fields.address')}</Typography>
-                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500 }}>
-                          {profileData?.address || user?.address || t('profile.value.notSpecified')}
-                        </Typography>
-                      </Box>
-                    </Box>
+
 
                     {/* Дата регистрации */}
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -11559,17 +11546,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   fullWidth 
                   disabled={profileLoading}
                 />
-                <TextField 
-                  label={t('profile.fields.address')} 
-                  name="address" 
-                  value={profileForm.address} 
-                  onChange={handleProfileInput} 
-                  variant="outlined" 
-                  fullWidth 
-                  multiline
-                  rows={3}
-                  disabled={profileLoading}
-                />
+
                 <Button
                   type="submit"
                   variant="contained"
