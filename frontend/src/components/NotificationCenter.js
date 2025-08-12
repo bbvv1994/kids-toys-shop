@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -31,6 +32,7 @@ import {
 import ReviewModal from './ReviewModal';
 
 const NotificationCenter = ({ user }) => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -185,7 +187,12 @@ const NotificationCenter = ({ user }) => {
       <Tooltip title="Уведомления">
         <IconButton 
           color="inherit" 
-          onClick={() => setDrawerOpen(true)}
+          onClick={() => {
+            // Устанавливаем флаг для открытия вкладки уведомлений
+            localStorage.setItem('openNotificationsTab', 'true');
+            // Переходим на страницу профиля
+            window.location.href = '/profile';
+          }}
           sx={{ position: 'relative' }}
         >
           <Badge badgeContent={unreadCount} color="error" invisible={!unreadCount}>

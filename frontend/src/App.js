@@ -1565,6 +1565,7 @@ const theme = createTheme({
                         }, 100);
                       } else {
                         // Если не на странице профиля, переходим на профиль
+                        navigate('/profile');
                       }
                     }}
                     sx={{
