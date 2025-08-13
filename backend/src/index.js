@@ -95,6 +95,22 @@ function getStoreInfo(pickupStore) {
   return storeInfo[pickupStore] || { name: 'חנות לא נמצאה', address: 'כתובת לא צוינה' };
 }
 
+// Функция для безопасного получения полей переводов
+async function getTranslationFields() {
+  try {
+    const tableInfo = await prisma.$queryRaw`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'Product' 
+      AND column_name IN ('nameHe', 'descriptionHe')
+    `;
+    return tableInfo.map(col => col.column_name);
+  } catch (error) {
+    console.log('⚠️ Не удалось проверить поля переводов:', error.message);
+    return [];
+  }
+}
+
 // Функция для отправки email через Brevo
 async function sendEmail(to, subject, htmlContent) {
   try {
@@ -630,42 +646,52 @@ app.get('/api/products', async (req, res) => {
       whereClause.isHidden = false;
     }
     
+    // Проверяем доступность полей переводов
+    const translationFields = await getTranslationFields();
+    const hasTranslations = translationFields.length > 0;
+    
+    const selectFields = {
+      id: true,
+      name: true,
+      description: true,
+      price: true,
+      ageGroup: true,
+      createdAt: true,
+      updatedAt: true,
+      imageUrls: true,
+      quantity: true,
+      article: true,
+      brand: true,
+      country: true,
+      height: true,
+      length: true,
+      width: true,
+      subcategoryId: true,
+      isHidden: true,
+      gender: true,
+      categoryId: true,
+      categoryName: true,
+      reviews: {
+        where: { status: 'published' },
+        select: { rating: true }
+      },
+      category: {
+        select: { name: true }
+      },
+      subcategory: {
+        select: { name: true }
+      }
+    };
+    
+    // Добавляем поля переводов только если они существуют
+    if (hasTranslations) {
+      selectFields.nameHe = true;
+      selectFields.descriptionHe = true;
+    }
+    
     const products = await prisma.product.findMany({
       where: whereClause,
-      select: {
-        id: true,
-        name: true,
-        nameHe: true,
-        description: true,
-        descriptionHe: true,
-        price: true,
-        ageGroup: true,
-        createdAt: true,
-        updatedAt: true,
-        imageUrls: true,
-        quantity: true,
-        article: true,
-        brand: true,
-        country: true,
-        height: true,
-        length: true,
-        width: true,
-        subcategoryId: true,
-        isHidden: true,
-        gender: true,
-        categoryId: true,
-        categoryName: true,
-        reviews: {
-          where: { status: 'published' },
-          select: { rating: true }
-        },
-        category: {
-          select: { name: true }
-        },
-        subcategory: {
-          select: { name: true }
-        }
-      },
+      select: selectFields,
       orderBy: { createdAt: 'desc' }
     });
 
@@ -967,42 +993,52 @@ app.get('/api/products/:id', async (req, res) => {
       whereClause.isHidden = false;
     }
     
+    // Проверяем доступность полей переводов
+    const translationFields = await getTranslationFields();
+    const hasTranslations = translationFields.length > 0;
+    
+    const selectFields = {
+      id: true,
+      name: true,
+      description: true,
+      price: true,
+      ageGroup: true,
+      createdAt: true,
+      updatedAt: true,
+      imageUrls: true,
+      quantity: true,
+      article: true,
+      brand: true,
+      country: true,
+      height: true,
+      length: true,
+      width: true,
+      subcategoryId: true,
+      isHidden: true,
+      gender: true,
+      categoryId: true,
+      categoryName: true,
+      reviews: {
+        where: { status: 'published' },
+        select: { rating: true }
+      },
+      category: {
+        select: { id: true, name: true }
+      },
+      subcategory: {
+        select: { id: true, name: true }
+      }
+    };
+    
+    // Добавляем поля переводов только если они существуют
+    if (hasTranslations) {
+      selectFields.nameHe = true;
+      selectFields.descriptionHe = true;
+    }
+    
     const product = await prisma.product.findUnique({
       where: whereClause,
-      select: {
-        id: true,
-        name: true,
-        nameHe: true,
-        description: true,
-        descriptionHe: true,
-        price: true,
-        ageGroup: true,
-        createdAt: true,
-        updatedAt: true,
-        imageUrls: true,
-        quantity: true,
-        article: true,
-        brand: true,
-        country: true,
-        height: true,
-        length: true,
-        width: true,
-        subcategoryId: true,
-        isHidden: true,
-        gender: true,
-        categoryId: true,
-        categoryName: true,
-        reviews: {
-          where: { status: 'published' },
-          select: { rating: true }
-        },
-        category: {
-          select: { id: true, name: true }
-        },
-        subcategory: {
-          select: { id: true, name: true }
-        }
-      }
+      select: selectFields
     });
     
     console.log('API: GET product data:', {
@@ -2538,23 +2574,37 @@ app.delete('/api/profile/orders/:id', authMiddleware, async (req, res) => {
 
 // ВРЕМЕННАЯ МИГРАЦИЯ: переносим imageUrl в imageUrls
 async function migrateImageUrls() {
-  const products = await prisma.product.findMany();
-  for (const product of products) {
-    if (product.imageUrl && (!product.imageUrls || product.imageUrls.length === 0)) {
-      await prisma.product.update({
-        where: { id: product.id },
-        data: {
-          imageUrls: [product.imageUrl],
-          imageUrl: null
-        }
-      });
+  try {
+    // Проверяем, существуют ли поля переводов
+    const translationFields = await getTranslationFields();
+    
+    if (translationFields.length === 0) {
+      console.log('⚠️ Поля переводов еще не созданы. Пропускаем миграцию изображений.');
+      return;
     }
+    
+    const products = await prisma.product.findMany();
+    for (const product of products) {
+      if (product.imageUrl && (!product.imageUrls || product.imageUrls.length === 0)) {
+        await prisma.product.update({
+          where: { id: product.id },
+          data: {
+            imageUrls: [product.imageUrl],
+            imageUrl: null
+          }
+        });
+      }
+    }
+    console.log('✅ Миграция изображений завершена');
+  } catch (error) {
+    console.error('❌ Ошибка миграции изображений:', error.message);
   }
 }
 
-migrateImageUrls().then(() => {
-  
-});
+// Запускаем миграцию изображений только после проверки готовности базы
+setTimeout(() => {
+  migrateImageUrls();
+}, 5000); // Задержка 5 секунд для применения миграций
 
 // Эндпоинт для изменения только поля isHidden
 app.patch('/api/products/:id/hidden', authMiddleware, async (req, res) => {
@@ -2890,6 +2940,14 @@ app.put('/api/products/:id/translations', authMiddleware, async (req, res) => {
   try {
     const productId = parseInt(req.params.id);
     const { nameHe, descriptionHe } = req.body;
+    
+    // Проверяем доступность полей переводов
+    const translationFields = await getTranslationFields();
+    if (translationFields.length === 0) {
+      return res.status(400).json({ 
+        error: 'Поля переводов еще не созданы. Примените миграции базы данных.' 
+      });
+    }
     
     const updatedProduct = await TranslationService.updateProductTranslations(
       productId, 
@@ -4894,6 +4952,34 @@ app.listen(PORT, (err) => {
   if (err) {
     console.error('Server failed to start:', err);
   } else {
+    console.log(`🚀 Сервер запущен на порту ${PORT}`);
     
+    // Автоматически применяем миграции при запуске
+    setTimeout(async () => {
+      try {
+        console.log('🔄 Автоматическое применение миграций...');
+        const { execSync } = require('child_process');
+        
+        // Применяем миграции
+        execSync('npx prisma migrate deploy', { stdio: 'pipe' });
+        console.log('✅ Миграции применены');
+        
+        // Генерируем Prisma Client
+        execSync('npx prisma generate', { stdio: 'pipe' });
+        console.log('✅ Prisma Client обновлен');
+        
+        // Проверяем поля переводов
+        const translationFields = await getTranslationFields();
+        
+        if (translationFields.length > 0) {
+          console.log('✅ Поля переводов готовы к использованию');
+        } else {
+          console.log('⚠️ Поля переводов не найдены');
+        }
+        
+      } catch (error) {
+        console.error('❌ Ошибка автоматического применения миграций:', error.message);
+      }
+    }, 3000); // Задержка 3 секунды
   }
 });
