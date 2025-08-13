@@ -71,6 +71,7 @@ function EditProductModal(props) {
     ageGroup: false,
     gender: false
   });
+  
 
   // Блокировка прокрутки фона и установка z-index для Popover
   useEffect(() => {
@@ -599,6 +600,20 @@ function EditProductModal(props) {
       console.log('EditProductModal: Original product category:', product.category);
       console.log('EditProductModal: Original product subcategory:', product.subcategory);
       
+      // Определяем язык ввода на основе содержимого полей
+      const detectInputLanguage = (text) => {
+        if (!text) return 'ru';
+        // Простая эвристика для определения языка
+        const hebrewPattern = /[\u0590-\u05FF]/; // Диапазон символов иврита
+        return hebrewPattern.test(text) ? 'he' : 'ru';
+      };
+      
+      const nameLanguage = detectInputLanguage(formData.name);
+      const descriptionLanguage = detectInputLanguage(formData.description);
+      const inputLanguage = nameLanguage === 'he' || descriptionLanguage === 'he' ? 'he' : 'ru';
+      
+      console.log('EditProductModal: Detected input language:', inputLanguage);
+      
       const updatedProduct = {
         ...product,
         ...formData,
@@ -606,6 +621,7 @@ function EditProductModal(props) {
         removedExistingImages: removedExistingImages,
         currentExistingImages: existingImages, // Передаем текущее состояние существующих изображений
         mainImageIndex: mainImageIndex, // Передаем индекс главного изображения
+        inputLanguage: inputLanguage // Передаем язык ввода для автоматического перевода
       };
 
       console.log('EditProductModal: Updated product data:', updatedProduct);
@@ -766,7 +782,9 @@ function EditProductModal(props) {
       sx={{
         zIndex: 9999,
         '& .MuiDialog-paper': {
-          zIndex: 9999
+          zIndex: 9999,
+          marginTop: '35vh', // Опускаем модальное окно еще ниже
+          marginBottom: '5vh'
         },
         '& .MuiPopover-root': {
           zIndex: 10002
@@ -784,7 +802,7 @@ function EditProductModal(props) {
           boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
           minWidth: 600,
           maxWidth: 800,
-          maxHeight: '90vh',
+          maxHeight: '60vh',
           position: 'relative',
           overflow: 'visible'
         }
@@ -820,41 +838,41 @@ function EditProductModal(props) {
       </DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent
-          ref={dialogContentRef}
-          sx={{ 
-            p: 0,
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            height: '70vh',
-            '&::-webkit-scrollbar': {
-              width: '8px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: '#f1f1f1',
-              borderRadius: '4px',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: '#888',
-              borderRadius: '4px',
-              '&:hover': {
-                background: '#555',
+            ref={dialogContentRef}
+            sx={{ 
+              p: 0,
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              height: '50vh',
+              '&::-webkit-scrollbar': {
+                width: '8px',
               },
-            },
-            '& .MuiSelect-select': {
-              zIndex: 1
-            },
-            '& .MuiPopover-root': {
-              zIndex: 10002
-            },
-            '& .MuiMenu-root': {
-              zIndex: 10002
-            },
-            '& .MuiPaper-root': {
-              zIndex: 10002
-            }
-          }}
-          dividers
-        >
+              '&::-webkit-scrollbar-track': {
+                background: '#f1f1f1',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#888',
+                borderRadius: '4px',
+                '&:hover': {
+                  background: '#555',
+                },
+              },
+              '& .MuiSelect-select': {
+                zIndex: 1
+              },
+              '& .MuiPopover-root': {
+                zIndex: 10002
+              },
+              '& .MuiMenu-root': {
+                zIndex: 10002
+              },
+              '& .MuiPaper-root': {
+                zIndex: 10002
+              }
+            }}
+            dividers
+          >
           <Box sx={{ p: 0 }}>
             <Container maxWidth="md" sx={{ py: 0 }}>
               <Paper elevation={8} sx={{ 
@@ -875,6 +893,9 @@ function EditProductModal(props) {
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
                   Редактировать товар
                 </Typography>
+                
+                
+                
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <TextField 
                     label="Название" 
@@ -1444,6 +1465,8 @@ function EditProductModal(props) {
                     )}
                   </Box>
                 </Box>
+                
+                {/* Кнопки управления */}
                 <Box sx={{ display: 'flex', gap: 2, mt: 3, justifyContent: 'space-between', alignItems: 'center' }}>
                   <Box sx={{ display: 'flex', gap: 2 }}>
                     <Button 
@@ -1544,12 +1567,13 @@ function EditProductModal(props) {
                     {loading ? 'Сохранение...' : 'Сохранить изменения'}
                   </Button>
                 </Box>
+
               </Paper>
             </Container>
-          </Box>
-        </DialogContent>
-      </form>
-    </Dialog>
+                      </Box>
+          </DialogContent>
+        </form>
+      </Dialog>
   );
 }
 

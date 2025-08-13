@@ -4569,6 +4569,9 @@ function App() {
         formData.append('mainImageIndex', updatedProduct.mainImageIndex.toString());
       }
 
+      // Добавляем язык ввода для автоматического перевода
+      
+
       const userData = localStorage.getItem('user');
       const token = userData ? JSON.parse(userData).token : null;
 
@@ -5703,6 +5706,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
   const [loading, setLoading] = React.useState(true);
   const [cmsSubcategories, setCmsSubcategories] = React.useState([]);
   const [searchQuery, setSearchQuery] = React.useState('');
+  
   const [form, setForm] = React.useState({ 
     name: '', 
     description: '', 
@@ -5987,6 +5991,21 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         }
       });
       
+      // Определяем язык ввода на основе содержимого полей
+      const detectInputLanguage = (text) => {
+        if (!text) return 'ru';
+        // Простая эвристика для определения языка
+        const hebrewPattern = /[\u0590-\u05FF]/; // Диапазон символов иврита
+        return hebrewPattern.test(text) ? 'he' : 'ru';
+      };
+      
+      const nameLanguage = detectInputLanguage(form.name);
+      const descriptionLanguage = detectInputLanguage(form.description);
+      const inputLanguage = nameLanguage === 'he' || descriptionLanguage === 'he' ? 'he' : 'ru';
+      
+      // Добавляем язык ввода для автоматического перевода
+      formData.append('inputLanguage', inputLanguage);
+      
       // Добавляем изображения
       if (form.images) {
         form.images.forEach((image, index) => {
@@ -6202,10 +6221,15 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
   // Выбор отображения
   if (mode === 'add') {
     return (
-      <Box component="form" onSubmit={async (e) => { e.preventDefault(); await handleSave(); }} sx={{ width: '100%', maxWidth: 840, background: '#fff', p: 3, borderRadius: 3, boxShadow: 2, mb: 4, mt: 4, mx: 'auto' }}>
+      <Box sx={{ width: '100%', maxWidth: 840, background: '#fff', p: 3, borderRadius: 3, boxShadow: 2, mb: 4, mt: 4, mx: 'auto' }}>
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
           Добавить товар
         </Typography>
+        
+
+        
+        <Box component="form" onSubmit={async (e) => { e.preventDefault(); await handleSave(); }}>
+        
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField 
             label="Название" 
@@ -6776,6 +6800,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
           >
             Сохранить товар
           </Button>
+        </Box>
         </Box>
       </Box>
   );

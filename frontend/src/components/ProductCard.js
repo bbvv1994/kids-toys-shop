@@ -24,7 +24,7 @@ const ageIcons = {
 
 
 const ProductCard = React.memo(function ProductCard({ product, user, inWishlist, onWishlistToggle, onClick, isAdmin, onAddToCart, cart, onEditProduct, onChangeCartQuantity, viewMode }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
   const deviceType = useDeviceType();
   const isMobile = deviceType === 'mobile';
@@ -33,6 +33,24 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
   const cardRef = React.useRef();
   const navigate = useNavigate();
   const [imgError, setImgError] = React.useState(false);
+  
+  // Функция для получения переведенного названия товара
+  const getTranslatedName = () => {
+    const currentLanguage = i18n.language;
+    if (currentLanguage === 'he' && product.nameHe) {
+      return product.nameHe;
+    }
+    return product.name;
+  };
+  
+  // Функция для получения переведенного описания товара
+  const getTranslatedDescription = () => {
+    const currentLanguage = i18n.language;
+    if (currentLanguage === 'he' && product.descriptionHe) {
+      return product.descriptionHe;
+    }
+    return product.description;
+  };
   
   // Упрощенная логика анимации как в ProductPage
   const [wishlistAnimPlaying, setWishlistAnimPlaying] = React.useState(false);
@@ -214,7 +232,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             return (
               <img
                 src={imgSrc}
-                alt={typeof product.name === 'string' ? product.name : String(product.name || '')}
+                alt={getTranslatedName()}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -248,7 +266,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             minHeight: '4.5rem',
             maxHeight: '4.5rem'
           }}>
-            {typeof product.name === 'string' ? product.name : String(product.name || '')}
+            {getTranslatedName()}
           </h3>
           {/* Рейтинг */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, marginTop: 0 }}>
@@ -545,7 +563,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             return (
               <img
                 src={imgSrc}
-                alt={typeof product.name === 'string' ? product.name : String(product.name || '')}
+                alt={getTranslatedName()}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', borderRadius: 0, padding: 0, margin: 0, display: 'block', pointerEvents: 'none' }}
                 onError={() => setImgError(true)}
               />
@@ -629,7 +647,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             minHeight: '4.5rem',
             maxHeight: '4.5rem'
           }}>
-            {typeof product.name === 'string' ? product.name : String(product.name || '')}
+            {getTranslatedName()}
           </h3>
           {/* Рейтинг */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, marginTop: 0 }}>
@@ -1002,7 +1020,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           return (
             <img
               src={imgSrc}
-              alt={typeof product.name === 'string' ? product.name : String(product.name || '')}
+              alt={getTranslatedName()}
               style={{
                 width: '100%',
                 height: '100%',
@@ -1037,8 +1055,28 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           minHeight: isMobile ? '3rem' : '4.5rem',
           maxHeight: isMobile ? '3rem' : '4.5rem'
         }}>
-          {typeof product.name === 'string' ? product.name : String(product.name || '')}
+          {getTranslatedName()}
         </h3>
+        {/* Описание товара */}
+        {getTranslatedDescription() && (
+          <p style={{ 
+            margin: '4px 0 8px 0',
+            fontSize: isMobile ? '0.85rem' : '0.9rem', 
+            color: '#666',
+            lineHeight: 1.4,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            wordWrap: 'break-word',
+            wordBreak: 'break-word',
+            minHeight: '2.8rem',
+            maxHeight: '2.8rem'
+          }}>
+            {getTranslatedDescription()}
+          </p>
+        )}
         {/* Рейтинг */}
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, marginTop: 0 }}>
           <Rating

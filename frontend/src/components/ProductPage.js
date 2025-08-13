@@ -33,6 +33,24 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const { t, i18n } = useTranslation();
   const isAdmin = user?.role === 'admin';
   
+  // Функция для получения переведенного названия товара
+  const getTranslatedName = (product) => {
+    const currentLanguage = i18n.language;
+    if (currentLanguage === 'he' && product?.nameHe) {
+      return product.nameHe;
+    }
+    return product?.name;
+  };
+  
+  // Функция для получения переведенного описания товара
+  const getTranslatedDescription = (product) => {
+    const currentLanguage = i18n.language;
+    if (currentLanguage === 'he' && product?.descriptionHe) {
+      return product.descriptionHe;
+    }
+    return product?.description;
+  };
+  
   // Функция для перевода категорий
   const translateCategory = (categoryName) => {
     const categoryMap = {
@@ -417,7 +435,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     // Добавить текущий товар в начало
     filtered.unshift({
       id: product.id,
-      name: product.name,
+      name: getTranslatedName(product),
       image: product.imageUrls && product.imageUrls[0],
       price: product.price,
       // Добавьте другие нужные поля для ProductCard
@@ -802,7 +820,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             </Link>
           )}
           <Typography color="text.primary" sx={{ fontWeight: 600, fontSize: '14px' }}>
-            {product.name || 'Товар'}
+            {getTranslatedName(product) || 'Товар'}
           </Typography>
         </Breadcrumbs>
       </Box>
@@ -843,7 +861,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     return (
                       <img
                         src={imageSrc}
-                        alt={product.name}
+                        alt={getTranslatedName(product)}
                         style={{ width: '100%', maxHeight: 400, objectFit: 'contain', borderRadius: 12, cursor: 'pointer', background: '#f6f6f6' }}
                         onClick={() => setGalleryOpen(true)}
                         onTouchStart={handleTouchStart}
@@ -1004,7 +1022,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   wordBreak: 'break-word'
                 }}
               >
-                {typeof product.name === 'string' ? product.name : 'Название товара'}
+                {getTranslatedName(product) || 'Название товара'}
               </Typography>
             </Box>
             
@@ -1404,7 +1422,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             fontSize: '1.05rem',
             textAlign: 'justify'
           }}>
-            {product.description && typeof product.description === 'string' ? product.description : t('productPage.noDescription')}
+            {getTranslatedDescription(product) || t('productPage.noDescription')}
           </Typography>
         </Box>
       </Box>

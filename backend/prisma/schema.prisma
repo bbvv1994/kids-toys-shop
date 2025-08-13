@@ -11,6 +11,9 @@ model Product {
   id                        Int                        @id @default(autoincrement())
   name                      String
   description               String?
+  // Поля для переводов
+  nameHe                    String?                    // Название на иврите
+  descriptionHe             String?                    // Описание на иврите
   price                     Float
   ageGroup                  String?
   createdAt                 DateTime                   @default(now())

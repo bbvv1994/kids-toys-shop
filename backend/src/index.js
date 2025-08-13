@@ -17,6 +17,7 @@ const BatchImageProcessor = require('./batchImageProcessor');
 const ProductionUploadMiddleware = require('./productionUploadMiddleware');
 const CloudinaryUploadMiddleware = require('./cloudinaryUploadMiddleware');
 const FlexibleUploadMiddleware = require('./flexibleUploadMiddleware');
+const TranslationService = require('./services/translationService');
 
 // Создаем один экземпляр ImageMiddleware для использования во всех маршрутах
 const imageMiddleware = new ImageMiddleware();
@@ -528,7 +529,7 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
     return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
   }
   try {
-    const { name, description, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden } = req.body;
+    const { name, description, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, inputLanguage = 'ru' } = req.body;
     
     // Используем URL из Cloudinary или локальные пути
     const imageUrls = req.files ? req.files.map((file, index) => {
@@ -574,26 +575,32 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
       }
     }
 
+    // Автоматический перевод названия и описания
+    const productData = {
+      name,
+      description,
+      price: parseFloat(price),
+      categoryName: categoryName,
+      categoryId: category && !isNaN(category) ? parseInt(category) : null,
+      subcategoryId: subcategoryId,
+      ageGroup,
+      gender,
+      imageUrls,
+      quantity: quantity ? parseInt(quantity) : 0,
+      article: article || null,
+      brand: brand || null,
+      country: country || null,
+      length: length ? parseFloat(length) : null,
+      width: width ? parseFloat(width) : null,
+      height: height ? parseFloat(height) : null,
+      ...(isHidden !== undefined ? { isHidden: isHidden === 'true' || isHidden === true } : {})
+    };
+
+    // Автоматически переводим данные
+    const translatedProductData = await TranslationService.autoTranslateProductData(productData, inputLanguage);
+
     const product = await prisma.product.create({
-      data: {
-        name,
-        description,
-        price: parseFloat(price),
-        categoryName: categoryName,
-        categoryId: category && !isNaN(category) ? parseInt(category) : null,
-        subcategoryId: subcategoryId,
-        ageGroup,
-        gender,
-        imageUrls,
-        quantity: quantity ? parseInt(quantity) : 0,
-        article: article || null,
-        brand: brand || null,
-        country: country || null,
-        length: length ? parseFloat(length) : null,
-        width: width ? parseFloat(width) : null,
-        height: height ? parseFloat(height) : null,
-        ...(isHidden !== undefined ? { isHidden: isHidden === 'true' || isHidden === true } : {})
-      }
+      data: translatedProductData
     });
 
 
@@ -625,7 +632,29 @@ app.get('/api/products', async (req, res) => {
     
     const products = await prisma.product.findMany({
       where: whereClause,
-      include: {
+      select: {
+        id: true,
+        name: true,
+        nameHe: true,
+        description: true,
+        descriptionHe: true,
+        price: true,
+        ageGroup: true,
+        createdAt: true,
+        updatedAt: true,
+        imageUrls: true,
+        quantity: true,
+        article: true,
+        brand: true,
+        country: true,
+        height: true,
+        length: true,
+        width: true,
+        subcategoryId: true,
+        isHidden: true,
+        gender: true,
+        categoryId: true,
+        categoryName: true,
         reviews: {
           where: { status: 'published' },
           select: { rating: true }
@@ -940,7 +969,29 @@ app.get('/api/products/:id', async (req, res) => {
     
     const product = await prisma.product.findUnique({
       where: whereClause,
-      include: {
+      select: {
+        id: true,
+        name: true,
+        nameHe: true,
+        description: true,
+        descriptionHe: true,
+        price: true,
+        ageGroup: true,
+        createdAt: true,
+        updatedAt: true,
+        imageUrls: true,
+        quantity: true,
+        article: true,
+        brand: true,
+        country: true,
+        height: true,
+        length: true,
+        width: true,
+        subcategoryId: true,
+        isHidden: true,
+        gender: true,
+        categoryId: true,
+        categoryName: true,
         reviews: {
           where: { status: 'published' },
           select: { rating: true }
@@ -2536,7 +2587,7 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7),
     return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
   }
   try {
-    const { name, description, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, removedImages, currentExistingImages, mainImageIndex } = req.body;
+    const { name, description, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, removedImages, currentExistingImages, mainImageIndex, inputLanguage = 'ru' } = req.body;
     
     console.log('API: Received product update data:', {
       name, description, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden
@@ -2662,28 +2713,34 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7),
       }
     }
     
+    // Автоматический перевод названия и описания
+    const productData = {
+      name,
+      description,
+      price: parseFloat(price),
+      categoryName: categoryName,
+      categoryId: category && !isNaN(category) ? parseInt(category) : null,
+      subcategoryId: subcategoryId,
+      ageGroup,
+      gender,
+      imageUrls,
+      ...(quantity !== undefined ? { quantity: parseInt(quantity) } : {}),
+      ...(isHidden !== undefined ? { isHidden: isHidden === 'true' || isHidden === true } : {}),
+      // Дополнительные поля:
+      article: article || null,
+      brand: brand || null,
+      country: country || null,
+      length: length ? parseFloat(length) : null,
+      width: width ? parseFloat(width) : null,
+      height: height ? parseFloat(height) : null
+    };
+
+    // Автоматически переводим данные
+    const translatedProductData = await TranslationService.autoTranslateProductData(productData, inputLanguage);
+
     const updated = await prisma.product.update({
       where: { id: parseInt(req.params.id) },
-      data: {
-        name,
-        description,
-        price: parseFloat(price),
-        categoryName: categoryName,
-        categoryId: category && !isNaN(category) ? parseInt(category) : null,
-        subcategoryId: subcategoryId,
-        ageGroup,
-        gender,
-        imageUrls,
-        ...(quantity !== undefined ? { quantity: parseInt(quantity) } : {}),
-        ...(isHidden !== undefined ? { isHidden: isHidden === 'true' || isHidden === true } : {}),
-        // Дополнительные поля:
-        article: article || null,
-        brand: brand || null,
-        country: country || null,
-        length: length ? parseFloat(length) : null,
-        width: width ? parseFloat(width) : null,
-        height: height ? parseFloat(height) : null
-      },
+      data: translatedProductData,
       include: {
         category: {
           select: { id: true, name: true }
@@ -2759,6 +2816,95 @@ app.delete('/api/products/:id/images/:imageIndex', authMiddleware, async (req, r
   } catch (error) {
     console.error('Error deleting product image:', error);
     res.status(500).json({ error: 'Failed to delete product image' });
+  }
+});
+
+// === API для переводов товаров ===
+
+// Автоматический перевод товара
+app.post('/api/products/:id/translate', authMiddleware, async (req, res) => {
+  // Проверка роли admin
+  const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+  }
+  
+  try {
+    const productId = parseInt(req.params.id);
+    const translatedProduct = await TranslationService.autoTranslateProduct(productId);
+    
+    res.json({
+      success: true,
+      message: 'Товар успешно переведен',
+      product: translatedProduct
+    });
+  } catch (error) {
+    console.error('Error translating product:', error);
+    res.status(500).json({ error: 'Ошибка перевода товара' });
+  }
+});
+
+// Автоматический перевод всех товаров
+app.post('/api/products/translate-all', authMiddleware, async (req, res) => {
+  // Проверка роли admin
+  const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+  }
+  
+  try {
+    const translatedCount = await TranslationService.translateAllProducts();
+    
+    res.json({
+      success: true,
+      message: `Переведено ${translatedCount} товаров`,
+      translatedCount
+    });
+  } catch (error) {
+    console.error('Error translating all products:', error);
+    res.status(500).json({ error: 'Ошибка перевода товаров' });
+  }
+});
+
+// Получить товары с переводами для указанного языка
+app.get('/api/products/with-translations', async (req, res) => {
+  try {
+    const { language = 'ru' } = req.query;
+    const products = await TranslationService.getAllProductsWithTranslations(language);
+    
+    res.json(products);
+  } catch (error) {
+    console.error('Error getting products with translations:', error);
+    res.status(500).json({ error: 'Ошибка получения товаров с переводами' });
+  }
+});
+
+// Обновить переводы товара вручную
+app.put('/api/products/:id/translations', authMiddleware, async (req, res) => {
+  // Проверка роли admin
+  const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+  }
+  
+  try {
+    const productId = parseInt(req.params.id);
+    const { nameHe, descriptionHe } = req.body;
+    
+    const updatedProduct = await TranslationService.updateProductTranslations(
+      productId, 
+      nameHe, 
+      descriptionHe
+    );
+    
+    res.json({
+      success: true,
+      message: 'Переводы обновлены',
+      product: updatedProduct
+    });
+  } catch (error) {
+    console.error('Error updating product translations:', error);
+    res.status(500).json({ error: 'Ошибка обновления переводов' });
   }
 });
 
