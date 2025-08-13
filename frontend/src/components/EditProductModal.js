@@ -211,15 +211,33 @@ function EditProductModal(props) {
 
 
   const ageGroups = [
-    t('catalog.ageGroups.0-1_year'),
-    t('catalog.ageGroups.1-3_years'),
-    t('catalog.ageGroups.3-5_years'),
-    t('catalog.ageGroups.5-7_years'),
-    t('catalog.ageGroups.7-10_years'),
-    t('catalog.ageGroups.10-12_years'),
-    t('catalog.ageGroups.12-14_years'),
-    t('catalog.ageGroups.14-16_years')
+    '0-1 год',
+    '1-3 года',
+    '3-5 лет',
+    '5-7 лет',
+    '7-10 лет',
+    '10-12 лет',
+    '12-14 лет',
+    '14-16 лет'
   ];
+
+  // Функция для нормализации возрастных групп (иврит -> русский)
+  const normalizeAgeGroup = (ageGroup) => {
+    if (!ageGroup) return '';
+    
+    const ageGroupMap = {
+      '0-1 שנה': '0-1 год',
+      '1-3 שנים': '1-3 года',
+      '3-5 שנים': '3-5 лет',
+      '5-7 שנים': '5-7 лет',
+      '7-10 שנים': '7-10 лет',
+      '10-12 שנים': '10-12 лет',
+      '12-14 שנים': '12-14 лет',
+      '14-16 שנים': '14-16 лет'
+    };
+    
+    return ageGroupMap[ageGroup] || ageGroup;
+  };
 
   // Обработчики для управления Lenis в выпадающих списках
   const handleSelectOpen = (selectName) => {
@@ -695,7 +713,7 @@ function EditProductModal(props) {
         price: product.price || '',
         category: safeString(product.category) || '',
         subcategory: safeString(product.subcategory) || '',
-        ageGroup: safeString(product.ageGroup) || '',
+        ageGroup: normalizeAgeGroup(safeString(product.ageGroup)) || '',
         quantity: product.quantity || '',
         article: safeString(product.article) || '',
         brand: safeString(product.brand) || '',
@@ -996,12 +1014,12 @@ function EditProductModal(props) {
                     variant="outlined"
                     size="medium"
                   />
-                  <TextField 
-                    label={t('productCard.sku')} 
-                    name="article" 
-                    value={formData.article} 
-                    onChange={handleInputChange} 
-                    fullWidth 
+                                    <TextField 
+                    label="Артикул"
+                    name="article"
+                    value={formData.article}
+                    onChange={handleInputChange}
+                    fullWidth
                     variant="outlined"
                     size="medium"
                   />
@@ -1024,17 +1042,17 @@ function EditProductModal(props) {
                     size="medium"
                   />
                   <FormControl fullWidth>
-                    <InputLabel id="age-group-label">{t('catalog.ageGroup')}</InputLabel>
+                    <InputLabel id="age-group-label">Возрастная группа</InputLabel>
                     <Select 
                       labelId="age-group-label" 
-                                              label={t('catalog.ageGroup')} 
+                                              label="Возрастная группа" 
                       name="ageGroup" 
                       value={formData.ageGroup} 
                       onChange={handleInputChange} 
                       open={openSelects.ageGroup}
                       onOpen={() => handleSelectOpen('ageGroup')}
                       onClose={() => handleSelectClose('ageGroup')}
-                      renderValue={selected => selected || t('common.selectAgeGroup')}
+                      renderValue={selected => selected || 'Выберите возрастную группу'}
                       MenuProps={{
                         PaperProps: {
                           sx: { zIndex: 10002, maxHeight: 300 }

@@ -20,6 +20,12 @@ class FlexibleUploadMiddleware {
       }
 
       console.log(`🖼️ FlexibleUploadMiddleware: Processing ${req.files.length} uploaded files...`);
+      
+      // Логируем размеры файлов для отладки
+      req.files.forEach((file, index) => {
+        const fileSize = file.buffer ? file.buffer.length : (file.size || 0);
+        console.log(`🖼️ FlexibleUploadMiddleware: File ${index + 1}: ${file.originalname}, size: ${(fileSize / 1024 / 1024).toFixed(2)}MB`);
+      });
 
       // Проверяем размеры файлов
       const sizeErrors = this.imageHandler.checkFileSizes(req.files);

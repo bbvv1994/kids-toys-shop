@@ -164,29 +164,17 @@ const PORT = process.env.PORT || 5000;
 let storage;
 let upload;
 
-if (process.env.NODE_ENV === 'production') {
-  // В production используем память для загрузки файлов
-  upload = multer({ 
-    storage: multer.memoryStorage(),
-    limits: {
-      fileSize: 10 * 1024 * 1024 // 10MB limit
-    }
-  });
-} else {
-  // В development используем диск
-  storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-      cb(null, Date.now() + path.extname(file.originalname));
-    }
-  });
-  upload = multer({ storage: storage });
-  
-  if (!fs.existsSync('uploads')) {
-    fs.mkdirSync('uploads');
+// Всегда используем память для загрузки файлов, чтобы можно было обрабатывать их
+upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB limit
   }
+});
+
+// Создаем папку uploads если её нет
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads');
 }
 
 // CORS настройки
@@ -695,6 +683,13 @@ app.get('/api/products', async (req, res) => {
       select: selectFields,
       orderBy: { createdAt: 'desc' }
     });
+
+    console.log('🔧 API /products - First product sample:', products[0] ? {
+      id: products[0].id,
+      name: products[0].name,
+      hasNameHe: !!products[0].nameHe,
+      nameHe: products[0].nameHe
+    } : 'No products');
 
     // Добавляем расчет рейтинга и количества отзывов для каждого товара
     const productsWithRating = products.map(product => {

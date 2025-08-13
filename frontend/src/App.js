@@ -6106,11 +6106,11 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             <tr style={{ background: '#f5f5f5' }}>
               <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Картинка</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '200px' }}>Название</th>
-              <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>{t('common.price')}</th>
+              <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Цена</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '120px' }}>Категория</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '120px' }}>Подкатегория</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Кол-во</th>
-              <th style={{ padding: 8, border: '1px solid #eee', width: '100px' }}>{t('productCard.sku')}</th>
+              <th style={{ padding: 8, border: '1px solid #eee', width: '100px' }}>Артикул</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Статус</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '120px' }}>Действия</th>
             </tr>
@@ -6253,7 +6253,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             size="medium"
           />
           <TextField 
-            label={t('common.price')} 
+            label="Цена" 
             name="price" 
             value={form.price} 
             onChange={handleChange} 
@@ -6291,23 +6291,23 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
           </FormControl>
           {/* Добавлено: возрастная группа и пол */}
           <FormControl fullWidth>
-            <InputLabel id="age-group-label">{t('product.ageGroup')}</InputLabel>
+            <InputLabel id="age-group-label">Возрастная группа</InputLabel>
             <Select
               labelId="age-group-label"
-              label={t('product.ageGroup')}
+              label="Возрастная группа"
               name="ageGroup"
               value={form.ageGroup}
               onChange={handleChange}
             >
               <MenuItem value=""><em>Не выбрано</em></MenuItem>
-              <MenuItem value={t('catalog.ageGroups.0-1_year')}>{t('catalog.ageGroups.0-1_year')}</MenuItem>
-              <MenuItem value={t('catalog.ageGroups.1-3_years')}>{t('catalog.ageGroups.1-3_years')}</MenuItem>
-              <MenuItem value={t('catalog.ageGroups.3-5_years')}>{t('catalog.ageGroups.3-5_years')}</MenuItem>
-              <MenuItem value={t('catalog.ageGroups.5-7_years')}>{t('catalog.ageGroups.5-7_years')}</MenuItem>
-              <MenuItem value={t('catalog.ageGroups.7-10_years')}>{t('catalog.ageGroups.7-10_years')}</MenuItem>
-              <MenuItem value={t('catalog.ageGroups.10-12_years')}>{t('catalog.ageGroups.10-12_years')}</MenuItem>
-              <MenuItem value={t('catalog.ageGroups.12-14_years')}>{t('catalog.ageGroups.12-14_years')}</MenuItem>
-              <MenuItem value={t('catalog.ageGroups.14-16_years')}>{t('catalog.ageGroups.14-16_years')}</MenuItem>
+              <MenuItem value="0-1 год">0-1 год</MenuItem>
+              <MenuItem value="1-3 года">1-3 года</MenuItem>
+              <MenuItem value="3-5 лет">3-5 лет</MenuItem>
+              <MenuItem value="5-7 лет">5-7 лет</MenuItem>
+              <MenuItem value="7-10 лет">7-10 лет</MenuItem>
+              <MenuItem value="10-12 лет">10-12 лет</MenuItem>
+              <MenuItem value="12-14 лет">12-14 лет</MenuItem>
+              <MenuItem value="14-16 лет">14-16 лет</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth>
@@ -6337,7 +6337,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             size="medium"
           />
           <TextField 
-            label={t('productCard.sku')} 
+            label="Артикул" 
             name="article" 
             value={form.article} 
             onChange={handleChange} 

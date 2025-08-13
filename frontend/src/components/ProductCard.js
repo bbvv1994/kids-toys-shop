@@ -8,7 +8,7 @@ import { useDeviceType } from '../utils/deviceDetection';
 import Lottie from 'lottie-react';
 import wishlistHeartAnim from '../lottie/wishlist-heart.json';
 import addToCartAnim from '../lottie/cart checkout - fast.json';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, useI18next } from 'react-i18next';
 
 const ageIcons = {
   '0-1 год': '/age-icons/0-1.png',
@@ -34,24 +34,6 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
   const navigate = useNavigate();
   const [imgError, setImgError] = React.useState(false);
   
-  // Функция для получения переведенного названия товара
-  const getTranslatedName = () => {
-    const currentLanguage = i18n.language;
-    if (currentLanguage === 'he' && product.nameHe) {
-      return product.nameHe;
-    }
-    return product.name;
-  };
-  
-  // Функция для получения переведенного описания товара
-  const getTranslatedDescription = () => {
-    const currentLanguage = i18n.language;
-    if (currentLanguage === 'he' && product.descriptionHe) {
-      return product.descriptionHe;
-    }
-    return product.description;
-  };
-  
   // Упрощенная логика анимации как в ProductPage
   const [wishlistAnimPlaying, setWishlistAnimPlaying] = React.useState(false);
   const [wishlistAnimKey, setWishlistAnimKey] = React.useState(0);
@@ -59,6 +41,33 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
   const [cartAnimKey, setCartAnimKey] = React.useState(0);
 
   React.useEffect(() => { setImgError(false); }, [product?.id]);
+
+  // Функция для получения переведенного названия товара
+  const getTranslatedName = (product) => {
+    const currentLanguage = i18n.language;
+    console.log('🔧 getTranslatedName:', { 
+      currentLanguage, 
+      name: product?.name, 
+      nameHe: product?.nameHe,
+      hasNameHe: !!product?.nameHe 
+    });
+    
+    if (currentLanguage === 'he' && product?.nameHe) {
+      console.log('✅ Using Hebrew name:', product.nameHe);
+      return product.nameHe;
+    }
+    console.log('✅ Using original name:', product?.name);
+    return product?.name;
+  };
+  
+  // Функция для получения переведенного описания товара
+  const getTranslatedDescription = (product) => {
+    const currentLanguage = i18n.language;
+    if (currentLanguage === 'he' && product?.descriptionHe) {
+      return product.descriptionHe;
+    }
+    return product?.description;
+  };
 
   // Функция для перевода категорий
   const translateCategory = (categoryName) => {
@@ -232,7 +241,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             return (
               <img
                 src={imgSrc}
-                alt={getTranslatedName()}
+                alt={getTranslatedName(product)}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -266,7 +275,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             minHeight: '4.5rem',
             maxHeight: '4.5rem'
           }}>
-            {getTranslatedName()}
+            {getTranslatedName(product)}
           </h3>
           {/* Рейтинг */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, marginTop: 0 }}>
@@ -563,7 +572,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             return (
               <img
                 src={imgSrc}
-                alt={getTranslatedName()}
+                alt={getTranslatedName(product)}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', borderRadius: 0, padding: 0, margin: 0, display: 'block', pointerEvents: 'none' }}
                 onError={() => setImgError(true)}
               />
@@ -647,7 +656,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             minHeight: '4.5rem',
             maxHeight: '4.5rem'
           }}>
-            {getTranslatedName()}
+            {getTranslatedName(product)}
           </h3>
           {/* Рейтинг */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, marginTop: 0 }}>
@@ -1020,7 +1029,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           return (
             <img
               src={imgSrc}
-              alt={getTranslatedName()}
+              alt={getTranslatedName(product)}
               style={{
                 width: '100%',
                 height: '100%',
@@ -1055,28 +1064,8 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           minHeight: isMobile ? '3rem' : '4.5rem',
           maxHeight: isMobile ? '3rem' : '4.5rem'
         }}>
-          {getTranslatedName()}
+          {getTranslatedName(product)}
         </h3>
-        {/* Описание товара */}
-        {getTranslatedDescription() && (
-          <p style={{ 
-            margin: '4px 0 8px 0',
-            fontSize: isMobile ? '0.85rem' : '0.9rem', 
-            color: '#666',
-            lineHeight: 1.4,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            wordWrap: 'break-word',
-            wordBreak: 'break-word',
-            minHeight: '2.8rem',
-            maxHeight: '2.8rem'
-          }}>
-            {getTranslatedDescription()}
-          </p>
-        )}
         {/* Рейтинг */}
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, marginTop: 0 }}>
           <Rating

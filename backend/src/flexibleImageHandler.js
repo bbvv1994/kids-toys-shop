@@ -5,7 +5,7 @@ const cloudinary = require('cloudinary').v2;
 
 class FlexibleImageHandler {
   constructor() {
-    this.maxFileSize = 10 * 1024 * 1024; // 10MB
+    this.maxFileSize = 50 * 1024 * 1024; // 50MB
     this.supportedFormats = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
     
     // Определяем режим хранения
@@ -79,6 +79,12 @@ class FlexibleImageHandler {
     try {
       console.log(`🖼️ FlexibleImageHandler: Processing image: ${originalName}`);
       console.log(`🖼️ FlexibleImageHandler: Storage mode: ${this.storageMode}`);
+      console.log(`🖼️ FlexibleImageHandler: Buffer size: ${buffer.length} bytes`);
+      
+      // Проверяем, что buffer не пустой
+      if (!buffer || buffer.length === 0) {
+        throw new Error('Empty buffer provided');
+      }
       
       // Обрабатываем изображение с оптимизацией
       const processedBuffer = await sharp(buffer)
@@ -109,6 +115,7 @@ class FlexibleImageHandler {
 
     } catch (error) {
       console.error(`❌ Error processing ${originalName}:`, error.message);
+      console.error(`❌ Error details:`, error);
       return {
         success: false,
         error: error.message,
@@ -219,10 +226,25 @@ class FlexibleImageHandler {
     const results = [];
     
     for (const file of files) {
+      // Проверяем, что file и file.buffer существуют
+      if (!file || !file.buffer) {
+        console.error(`❌ FlexibleImageHandler: Invalid file object:`, file);
+        results.push({
+          success: false,
+          error: 'Invalid file object',
+          originalName: file?.originalname || 'unknown'
+        });
+        continue;
+      }
+      
+      console.log(`🖼️ FlexibleImageHandler: Processing file: ${file.originalname}, mimetype: ${file.mimetype}, size: ${file.buffer.length} bytes`);
+      
       if (this.isImageFile(file.originalname)) {
+        console.log(`🖼️ FlexibleImageHandler: File ${file.originalname} is recognized as image`);
         const result = await this.processImageFromBuffer(file.buffer, file.originalname);
         results.push(result);
       } else {
+        console.log(`🖼️ FlexibleImageHandler: File ${file.originalname} is NOT recognized as image, saving as-is`);
         // Для не-изображений сохраняем как есть
         if (this.storageMode === 'cloudinary') {
           const uploadResult = await this.saveToCloudinary(file.buffer, file.originalname, file.buffer.length, 0);
@@ -272,8 +294,11 @@ class FlexibleImageHandler {
     const errors = [];
     
     for (const file of files) {
-      if (file.size > this.maxFileSize) {
-        errors.push(`File ${file.originalname} is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is ${this.maxFileSize / 1024 / 1024}MB`);
+      // Используем buffer.length для размера файла в multer
+      const fileSize = file.buffer ? file.buffer.length : (file.size || 0);
+      
+      if (fileSize > this.maxFileSize) {
+        errors.push(`File ${file.originalname} is too large (${(fileSize / 1024 / 1024).toFixed(1)}MB). Maximum size is ${this.maxFileSize / 1024 / 1024}MB`);
       }
     }
 
