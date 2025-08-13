@@ -703,7 +703,8 @@
     "quantity": ":כמות",
     "user": "משתמש",
     "noCategory": "ללא קטגוריה",
-    "noDescription": "אין תיאור"
+    "noDescription": "אין תיאור",
+    "noPhoto": "אין תמונה"
   },
   "contacts": {
     "title": "צרו קשר איתנו — אנחנו תמיד זמינים!",

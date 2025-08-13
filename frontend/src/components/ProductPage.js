@@ -888,7 +888,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                               ">
                                 <img 
                                   src="/photography.jpg" 
-                                  alt="Нет фото" 
+                                  alt={t('productPage.noPhoto')} 
                                   style="
                                     width: 100%; 
                                     height: 100%; 
@@ -910,7 +910,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                                   z-index: 1;
                                   font-size: 14px;
                                 ">
-                                  Фото отсутствует
+                                  {t('productPage.noPhoto')}
                                 </div>
                               </div>
                             `;
@@ -938,7 +938,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   }}>
                     <img 
                       src="/photography.jpg" 
-                      alt="Нет фото" 
+                      alt={t('productPage.noPhoto')} 
                       style={{ 
                         width: '100%', 
                         height: '100%', 
@@ -962,7 +962,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                         zIndex: 1
                       }}
                     >
-                      Фото отсутствует
+                      {t('productPage.noPhoto')}
                     </Typography>
                   </div>
                 );
