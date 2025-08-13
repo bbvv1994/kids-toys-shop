@@ -7,10 +7,12 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { useTranslation } from 'react-i18next';
 
 const API_URL = `${API_BASE_URL}/api/auth`;
 
 function ForgotPasswordDialog({ open, onClose }) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [info, setInfo] = useState('');
   const [error, setError] = useState('');
@@ -70,8 +72,8 @@ function ForgotPasswordDialog({ open, onClose }) {
         body: JSON.stringify({ email })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Ошибка');
-      setInfo('Если email зарегистрирован, письмо отправлено');
+      if (!res.ok) throw new Error(data.error || t('auth.error'));
+      setInfo(t('auth.forgotPasswordSuccess'));
     } catch (e) {
       setError(e.message);
     }
@@ -79,7 +81,7 @@ function ForgotPasswordDialog({ open, onClose }) {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth disableScrollLock={false}>
-      <DialogTitle>Восстановление пароля</DialogTitle>
+      <DialogTitle>{t('auth.forgotPasswordTitle')}</DialogTitle>
       <DialogContent
         ref={dialogContentRef}
         onWheel={(e) => {
@@ -93,10 +95,10 @@ function ForgotPasswordDialog({ open, onClose }) {
             color="text.secondary" 
             sx={{ mb: 2, textAlign: 'center', lineHeight: 1.5 }}
           >
-            Введите email, привязанный к вашему аккаунту. Мы отправим инструкции для восстановления пароля на указанный адрес.
+            {t('auth.forgotPasswordDescription')}
           </Typography>
           <TextField
-            label="Email"
+            label={t('auth.email')}
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
@@ -129,7 +131,7 @@ function ForgotPasswordDialog({ open, onClose }) {
               },
             }}
           >
-            Восстановить
+            {t('auth.forgotPasswordButton')}
           </Button>
         </Box>
       </DialogContent>
@@ -155,7 +157,7 @@ function ForgotPasswordDialog({ open, onClose }) {
             },
           }}
         >
-          Закрыть
+          {t('auth.forgotPasswordClose')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -163,6 +165,7 @@ function ForgotPasswordDialog({ open, onClose }) {
 }
 
 export default function AuthModal({ open, onClose, onLogin, onRegister, loading }) {
+  const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -239,7 +242,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
       });
       const data = await res.json();
       
-      if (!res.ok) throw new Error(data.error || 'Ошибка');
+      if (!res.ok) throw new Error(data.error || t('auth.error'));
       if (isLogin) {
         // Сохраняем объект пользователя из ответа с токеном
         const userData = {
@@ -253,7 +256,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
         onClose();
       } else {
         // Показываем сообщение от сервера или стандартное
-        const message = data.message || 'Регистрация успешна! Пожалуйста, подтвердите email перед входом в систему.';
+        const message = data.message || t('auth.registerSuccess');
         setInfo(message);
         
         // Передаем данные пользователя для модального окна подтверждения
@@ -269,7 +272,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
       
       // Проверяем специальные ошибки
       if (e.message.includes('зарегистрирован через Google')) {
-        setError('Этот аккаунт зарегистрирован через Google. Пожалуйста, используйте кнопку "Войти через Google" для входа.');
+        setError(t('auth.googleAccountError'));
       } else {
         setError(e.message);
       }
@@ -293,7 +296,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
         sx={{ zIndex: 9999 }}
       >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        {isLogin ? 'Вход' : 'Регистрация'}
+        {isLogin ? t('auth.loginTitle') : t('auth.registerTitle')}
         <IconButton onClick={onClose}><CloseIcon /></IconButton>
       </DialogTitle>
       <DialogContent
@@ -306,7 +309,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
           {!isLogin && (
             <TextField
-              label="Имя"
+              label={t('auth.name')}
               value={name}
               onChange={e => setName(e.target.value)}
               fullWidth
@@ -316,7 +319,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
             />
           )}
           <TextField
-            label="Email"
+            label={t('auth.email')}
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
@@ -326,7 +329,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
             autoComplete="email"
           />
           <TextField
-            label="Пароль"
+            label={t('auth.password')}
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={e => setPassword(e.target.value)}
@@ -367,7 +370,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
                   setForgotOpen(true);
                 }}
               >
-                Забыли пароль?
+                {t('auth.forgotPassword')}
               </Link>
             </Box>
           )}
@@ -396,10 +399,10 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
             }}
             disabled={loading}
           >
-            {isLogin ? (loading ? 'Вход...' : 'Войти') : (loading ? 'Регистрация...' : 'Зарегистрироваться')}
+            {isLogin ? (loading ? t('auth.loginLoading') : t('auth.loginButton')) : (loading ? t('auth.registerLoading') : t('auth.registerButton'))}
           </Button>
         </Box>
-        <Divider sx={{ my: 2 }}>или</Divider>
+        <Divider sx={{ my: 2 }}>{t('auth.or')}</Divider>
         <Button
           variant="contained"
           fullWidth
@@ -423,7 +426,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
           onClick={() => handleOAuth('google')}
           disabled={loading}
         >
-          Войти через Google
+          {t('auth.loginWithGoogle')}
         </Button>
         <Button
           variant="contained"
@@ -447,7 +450,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
           onClick={() => handleOAuth('facebook')}
           disabled={loading}
         >
-          Войти через Facebook
+          {t('auth.loginWithFacebook')}
         </Button>
         <Box sx={{ mt: 2, textAlign: 'center' }}>
           <Button 
@@ -470,7 +473,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
               },
             }}
           >
-            {isLogin ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
+            {isLogin ? t('auth.noAccountRegister') : t('auth.haveAccountLogin')}
           </Button>
         </Box>
       </DialogContent>
