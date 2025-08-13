@@ -4934,27 +4934,44 @@ ${message}
 
 app.listen(PORT, (err) => {
   if (err) {
-    console.error('Server failed to start:', err);
+    if (err.code === 'EADDRINUSE') {
+      console.log(`⚠️ Порт ${PORT} уже занят, пробуем другой порт...`);
+      // Пробуем другой порт
+      app.listen(0, (err2) => {
+        if (err2) {
+          console.error('Server failed to start on any port:', err2);
+        } else {
+          console.log('🚀 Сервер запущен на случайном порту');
+          startSafeMigration();
+        }
+      });
+    } else {
+      console.error('Server failed to start:', err);
+    }
   } else {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
-    
-    // Автоматически применяем безопасную миграцию при запуске
-    setTimeout(async () => {
-      try {
-        console.log('🔄 Запуск безопасной миграции при старте сервера...');
-        
-        const migration = new SafeMigration();
-        const result = await migration.run();
-        
-        if (result.success) {
-          console.log('✅ Безопасная миграция завершена:', result.message);
-        } else {
-          console.log('⚠️ Миграция не удалась:', result.message);
-        }
-        
-      } catch (error) {
-        console.error('❌ Ошибка безопасной миграции:', error.message);
-      }
-    }, 5000); // Задержка 5 секунд для полной инициализации
+    startSafeMigration();
   }
 });
+
+// Функция для запуска безопасной миграции
+function startSafeMigration() {
+  // Автоматически применяем безопасную миграцию при запуске
+  setTimeout(async () => {
+    try {
+      console.log('🔄 Запуск безопасной миграции при старте сервера...');
+      
+      const migration = new SafeMigration();
+      const result = await migration.run();
+      
+      if (result.success) {
+        console.log('✅ Безопасная миграция завершена:', result.message);
+      } else {
+        console.log('⚠️ Миграция не удалась:', result.message);
+      }
+      
+    } catch (error) {
+      console.error('❌ Ошибка безопасной миграции:', error.message);
+    }
+  }, 5000); // Задержка 5 секунд для полной инициализации
+}
