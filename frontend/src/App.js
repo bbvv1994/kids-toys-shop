@@ -271,6 +271,9 @@ const theme = createTheme({
   const [submenuTimeout, setSubmenuTimeout] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [priceLimits, setPriceLimits] = useState([0, 10000]);
+  const [touchedCategory, setTouchedCategory] = useState(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [touchTimeout, setTouchTimeout] = useState(null);
   const cartIconRef = useRef(null);
   const drawerListRef = useRef(null); // ref для списка категорий внутри Drawer
 
@@ -303,6 +306,23 @@ const theme = createTheme({
   const [profileMenuAnchor, setProfileMenuAnchor] = React.useState(null);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   
+  // Определение сенсорного устройства
+  useEffect(() => {
+    const checkTouchDevice = () => {
+      const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      setIsTouchDevice(hasTouchScreen);
+    };
+    
+    checkTouchDevice();
+    window.addEventListener('resize', checkTouchDevice);
+    return () => {
+      window.removeEventListener('resize', checkTouchDevice);
+      if (touchTimeout) {
+        clearTimeout(touchTimeout);
+      }
+    };
+  }, [touchTimeout]);
+
   // Закрытие мобильного меню категорий при клике вне его
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -322,6 +342,36 @@ const theme = createTheme({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [mobileCategoriesOpen]);
+
+  // Закрытие сенсорного меню категорий при клике вне его
+  useEffect(() => {
+    const handleTouchOutside = (event) => {
+      if (touchedCategory && isTouchDevice) {
+        const menuElement = document.querySelector('.category-dropdown-submenu');
+        const categoryList = document.querySelector('[data-category-list]');
+        const arrowElements = document.querySelectorAll('[data-category-list] span');
+        
+        // Проверяем, был ли клик по стрелочке
+        const isArrowClick = Array.from(arrowElements).some(arrow => 
+          arrow.contains(event.target) || event.target === arrow
+        );
+        
+        if (!isArrowClick && menuElement && !menuElement.contains(event.target) && 
+            categoryList && !categoryList.contains(event.target)) {
+          setTouchedCategory(null);
+        }
+      }
+    };
+
+    if (isTouchDevice) {
+      document.addEventListener('touchstart', handleTouchOutside);
+      document.addEventListener('mousedown', handleTouchOutside);
+      return () => {
+        document.removeEventListener('touchstart', handleTouchOutside);
+        document.removeEventListener('mousedown', handleTouchOutside);
+      };
+    }
+  }, [touchedCategory, isTouchDevice]);
 
   // Сброс состояния открытых категорий при открытии мобильного меню
   useEffect(() => {
@@ -2104,17 +2154,64 @@ const theme = createTheme({
                 {t('catalog.categoriesButton')}
               </Box>
             )}
-            <List sx={{ pt: '8px', background: '#fff', height: '100%' }}>
+            <List sx={{ pt: '8px', background: '#fff', height: '100%' }} data-category-list>
               {rootCategories.map((cat, idx) => (
                 <ListItem
                   key={cat.label || cat.id}
-                  onMouseEnter={() => setActiveSub(cat.id)}
-                  onMouseLeave={() => setActiveSub(null)}
-                  onClick={() => {
-                    setInstantClose(true);
-                    navigate(`/category/${cat.id}`);
-                    if (!isHome) setMenuOpen(false); // Не закрывать меню на главной странице
-                    setTimeout(() => setInstantClose(false), 0);
+                  onMouseEnter={() => {
+                    if (!isTouchDevice) {
+                      setActiveSub(cat.id);
+                      setTouchedCategory(null);
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    if (!isTouchDevice) {
+                      setActiveSub(null);
+                    }
+                  }}
+                  onTouchStart={(e) => {
+                    if (isTouchDevice) {
+                      // Очищаем предыдущий таймаут
+                      if (touchTimeout) {
+                        clearTimeout(touchTimeout);
+                      }
+                      
+                      // Проверяем, было ли касание по стрелочке
+                      const isArrowTouch = e.target.textContent === '>' || 
+                                         e.target.closest('span')?.textContent === '>';
+                      
+                      if (isArrowTouch) {
+                        // Касание по стрелочке - показываем подкатегории
+                        const timeout = setTimeout(() => {
+                          setTouchedCategory(touchedCategory === cat.id ? null : cat.id);
+                          setActiveSub(null);
+                        }, 150);
+                        setTouchTimeout(timeout);
+                      } else {
+                        // Касание по категории - не делаем ничего, ждем onClick
+                        setTouchTimeout(null);
+                      }
+                    }
+                  }}
+                  onClick={(e) => {
+                    // Проверяем, был ли клик по стрелочке
+                    const isArrowClick = e.target.textContent === '>' || 
+                                       e.target.closest('span')?.textContent === '>';
+                    
+                    if (isTouchDevice && getSubcategories(cat).length > 0 && isArrowClick) {
+                      // На сенсорном устройстве клик по стрелочке - показываем подкатегории
+                      e.stopPropagation();
+                      setTouchedCategory(touchedCategory === cat.id ? null : cat.id);
+                      setActiveSub(null);
+                    } else {
+                      // Клик по категории (не по стрелочке) - переходим к категории
+                      setInstantClose(true);
+                      navigate(`/category/${cat.id}`);
+                      if (!isHome) setMenuOpen(false);
+                      setTouchedCategory(null);
+                      setActiveSub(null);
+                      setTimeout(() => setInstantClose(false), 0);
+                    }
                   }}
                   sx={{
                     display: 'flex',
@@ -2125,7 +2222,7 @@ const theme = createTheme({
                     mb: 0,
                     position: 'relative',
                     borderRadius: 2,
-                    background: activeSub === cat.id ? '#FFF3E0' : '#fff',
+                    background: (activeSub === cat.id || touchedCategory === cat.id) ? '#FFF3E0' : '#fff',
                     '&:hover': { backgroundColor: '#FFF3E0' },
                     cursor: 'pointer',
                   }}
@@ -2139,18 +2236,22 @@ const theme = createTheme({
               ))}
             </List>
             {/* Универсальная панель подкатегорий */}
-            {(activeSub || hoveredCategory) && (() => {
+            {(activeSub || hoveredCategory || touchedCategory) && (() => {
               // Определяем категорию и подкатегории
               let cat, subcats;
               
               if (activeSub) {
-                // Для основного меню (activeSub)
+                // Для основного меню (activeSub) - десктоп
                  cat = rootCategories.find(c => c.id === activeSub);
                  subcats = cat ? getSubcategories(cat) : [];
               } else if (hoveredCategory) {
                 // Для мобильного меню (hoveredCategory)
                 cat = safeCategories.find(c => c.label === hoveredCategory);
                 subcats = cat && Array.isArray(cat.sub) ? cat.sub : [];
+              } else if (touchedCategory) {
+                // Для сенсорного устройства (touchedCategory)
+                cat = rootCategories.find(c => c.id === touchedCategory);
+                subcats = cat ? getSubcategories(cat) : [];
               }
               
               if (!cat || !subcats.length) return null;
@@ -2173,7 +2274,7 @@ const theme = createTheme({
                       });
                       function raf(time) {
                         window.lenisCategorySubmenu?.raf(time);
-                        if (activeSub || hoveredCategory) requestAnimationFrame(raf);
+                        if (activeSub || hoveredCategory || touchedCategory) requestAnimationFrame(raf);
                       }
                       requestAnimationFrame(raf);
                     } else {
@@ -2200,12 +2301,16 @@ const theme = createTheme({
                     overflowY: 'auto',
                   }}
                   onMouseEnter={() => {
-                    if (activeSub) setActiveSub(activeSub);
-                    if (hoveredCategory) setHoveredCategory(hoveredCategory);
+                    if (!isTouchDevice) {
+                      if (activeSub) setActiveSub(activeSub);
+                      if (hoveredCategory) setHoveredCategory(hoveredCategory);
+                    }
                   }}
                   onMouseLeave={() => {
-                    if (activeSub) setActiveSub(null);
-                    if (hoveredCategory) setHoveredCategory(null);
+                    if (!isTouchDevice) {
+                      if (activeSub) setActiveSub(null);
+                      if (hoveredCategory) setHoveredCategory(null);
+                    }
                   }}
                   onWheel={e => e.stopPropagation()}
                 >
@@ -2216,7 +2321,7 @@ const theme = createTheme({
                         setInstantClose(true);
                         
                         if (activeSub) {
-                          // Для основного меню
+                          // Для основного меню (десктоп)
                            if (subcat && subcat.id) {
                              navigate(`/subcategory/${subcat.id}`);
                            } else {
@@ -2244,6 +2349,16 @@ const theme = createTheme({
                           navigate(`/subcategory/${i + 1}`);
                           setDrawerOpen(false);
                           setHoveredCategory(null);
+                        } else if (touchedCategory) {
+                          // Для сенсорного устройства
+                          if (subcat && subcat.id) {
+                            navigate(`/subcategory/${subcat.id}`);
+                          } else {
+                            // Fallback если нет id
+                            navigate(`/category/${cat.id}`);
+                          }
+                          setTouchedCategory(null);
+                          if (!isHome) setMenuOpen(false);
                         }
                         
                         setTimeout(() => setInstantClose(false), 0);
