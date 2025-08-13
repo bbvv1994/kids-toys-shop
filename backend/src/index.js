@@ -188,46 +188,31 @@ const corsOptions = {
       'http://localhost:3002',
       'http://192.168.31.156:3000',
       'http://192.168.31.156',
-      'https://*.vercel.app',
-      'https://*.netlify.app',
-      'https://*.onrender.com',
-      'https://vercel.app',
       'https://kids-toys-shop.vercel.app',
       'https://kids-toys-shop-git-main-bbvv1994.vercel.app',
-      'https://kids-toys-shop-bbvv1994.vercel.app',
-      // Добавляем все возможные Vercel домены
-      'https://*.vercel.app',
-      'https://vercel.app',
-      // Добавляем все возможные Render домены
-      'https://*.onrender.com',
-      'https://onrender.com'
+      'https://kids-toys-shop-bbvv1994.vercel.app'
     ];
     
     // Проверяем точное совпадение
     if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    
-    // Проверяем wildcard домены
-    const isAllowed = allowedOrigins.some(allowed => {
-      if (allowed.includes('*')) {
-        const pattern = allowed.replace('*', '.*');
-        return new RegExp(pattern).test(origin);
-      }
-      return false;
-    });
-    
-    if (isAllowed) {
+      console.log('✅ CORS allowed origin:', origin);
       return callback(null, true);
     }
     
     // В production разрешаем все Vercel и Render домены
     if (process.env.NODE_ENV === 'production' && 
         (origin.includes('vercel.app') || origin.includes('onrender.com'))) {
+      console.log('✅ CORS allowed production origin:', origin);
       return callback(null, true);
     }
     
-    console.log('CORS blocked origin:', origin);
+    // Разрешаем все Vercel домены (для разработки и продакшена)
+    if (origin.includes('vercel.app')) {
+      console.log('✅ CORS allowed Vercel origin:', origin);
+      return callback(null, true);
+    }
+    
+    console.log('❌ CORS blocked origin:', origin);
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
