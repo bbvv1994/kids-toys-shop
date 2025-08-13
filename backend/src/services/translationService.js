@@ -74,6 +74,21 @@ class TranslationService {
    */
   static async autoTranslateProduct(productId) {
     try {
+      // Проверяем, существуют ли поля переводов в базе данных
+      const tableInfo = await prisma.$queryRaw`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'Product' 
+        AND column_name IN ('nameHe', 'descriptionHe')
+      `;
+      
+      const hasTranslationFields = tableInfo.length > 0;
+      
+      if (!hasTranslationFields) {
+        console.log('⚠️ Поля переводов не существуют. Пропускаем автоматический перевод.');
+        return null;
+      }
+      
       const product = await prisma.product.findUnique({
         where: { id: productId },
         select: { name: true, description: true, nameHe: true, descriptionHe: true }
@@ -121,14 +136,29 @@ class TranslationService {
    */
   static async getProductName(productId, language = 'ru') {
     try {
+      // Проверяем, существуют ли поля переводов в базе данных
+      const tableInfo = await prisma.$queryRaw`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'Product' 
+        AND column_name IN ('nameHe', 'descriptionHe')
+      `;
+      
+      const hasTranslationFields = tableInfo.length > 0;
+      
+      const selectFields = { name: true };
+      if (hasTranslationFields) {
+        selectFields.nameHe = true;
+      }
+      
       const product = await prisma.product.findUnique({
         where: { id: productId },
-        select: { name: true, nameHe: true }
+        select: selectFields
       });
 
       if (!product) return null;
 
-      if (language === 'he' && product.nameHe) {
+      if (language === 'he' && hasTranslationFields && product.nameHe) {
         return product.nameHe;
       }
 
@@ -147,14 +177,29 @@ class TranslationService {
    */
   static async getProductDescription(productId, language = 'ru') {
     try {
+      // Проверяем, существуют ли поля переводов в базе данных
+      const tableInfo = await prisma.$queryRaw`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'Product' 
+        AND column_name IN ('nameHe', 'descriptionHe')
+      `;
+      
+      const hasTranslationFields = tableInfo.length > 0;
+      
+      const selectFields = { description: true };
+      if (hasTranslationFields) {
+        selectFields.descriptionHe = true;
+      }
+      
       const product = await prisma.product.findUnique({
         where: { id: productId },
-        select: { description: true, descriptionHe: true }
+        select: selectFields
       });
 
       if (!product) return null;
 
-      if (language === 'he' && product.descriptionHe) {
+      if (language === 'he' && hasTranslationFields && product.descriptionHe) {
         return product.descriptionHe;
       }
 
@@ -230,6 +275,21 @@ class TranslationService {
    */
   static async translateAllProducts() {
     try {
+      // Проверяем, существуют ли поля переводов в базе данных
+      const tableInfo = await prisma.$queryRaw`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'Product' 
+        AND column_name IN ('nameHe', 'descriptionHe')
+      `;
+      
+      const hasTranslationFields = tableInfo.length > 0;
+      
+      if (!hasTranslationFields) {
+        console.log('⚠️ Поля переводов не существуют. Пропускаем массовый перевод.');
+        return 0;
+      }
+      
       const productsWithoutTranslations = await prisma.product.findMany({
         where: {
           OR: [
@@ -245,8 +305,10 @@ class TranslationService {
 
       for (const product of productsWithoutTranslations) {
         try {
-          await this.autoTranslateProduct(product.id);
-          translatedCount++;
+          const result = await this.autoTranslateProduct(product.id);
+          if (result) {
+            translatedCount++;
+          }
           
           // Небольшая задержка чтобы не перегружать API
           await new Promise(resolve => setTimeout(resolve, 1000));
@@ -270,6 +332,21 @@ class TranslationService {
    */
   static async autoTranslateProductData(productData, inputLanguage = 'ru') {
     try {
+      // Проверяем, существуют ли поля переводов в базе данных
+      const tableInfo = await prisma.$queryRaw`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'Product' 
+        AND column_name IN ('nameHe', 'descriptionHe')
+      `;
+      
+      const hasTranslationFields = tableInfo.length > 0;
+      
+      if (!hasTranslationFields) {
+        console.log('⚠️ Поля переводов не существуют. Пропускаем автоматический перевод.');
+        return productData; // Возвращаем исходные данные без переводов
+      }
+      
       const { name, description } = productData;
       const result = { ...productData };
 
