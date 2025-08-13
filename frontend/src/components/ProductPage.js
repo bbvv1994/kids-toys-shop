@@ -1148,6 +1148,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             {/* Выбор количества */}
             {product.quantity > 0 && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                {i18n.language === 'ru' && (
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>{t('productPage.quantity')}:</Typography>
+                )}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <button
                     style={{
@@ -1207,7 +1210,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     disabled={!product.quantity || product.quantity <= 0}
                   >+</button>
                 </Box>
-                <Typography variant="body1" sx={{ fontWeight: 600 }}>{t('productPage.quantity')}</Typography>
+                {i18n.language === 'he' && (
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>{t('productPage.quantity')}</Typography>
+                )}
               </Box>
             )}
             <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>

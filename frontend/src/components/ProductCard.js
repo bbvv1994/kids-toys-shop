@@ -42,6 +42,25 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
 
   React.useEffect(() => { setImgError(false); }, [product?.id]);
 
+  // Функция для перевода категорий
+  const translateCategory = (categoryName) => {
+    const categoryMap = {
+      'Игрушки': 'toys',
+      'Конструкторы': 'constructors', 
+      'Пазлы': 'puzzles',
+      'Творчество': 'creativity',
+      'Канцтовары': 'stationery',
+      'Транспорт': 'transport',
+      'Отдых на воде': 'water_recreation',
+      'Настольные игры': 'board_games',
+      'Развивающие игры': 'educational_games',
+      'Акции': 'sales'
+    };
+    
+    const categoryKey = categoryMap[categoryName];
+    return categoryKey ? t(`categories.${categoryKey}`) : categoryName;
+  };
+
   const formatPrice = (price) => {
     return new Intl.NumberFormat('he-IL', {
       style: 'currency',
@@ -262,7 +281,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
               )}
               {isAdmin && (
                 <div style={{ fontSize: '0.9rem', color: '#666', marginLeft: 4 }}>
-                  {t('productCard.availability.onWarehouse', { quantity: product.quantity })}
+                  На складе: {product.quantity}
                 </div>
               )}
             </div>
@@ -640,7 +659,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                 </>
               )}
               {isAdmin && (
-                <Typography sx={{ fontSize: 15, color: '#666', fontWeight: 400, ml: 2 }}>{t('productCard.availability.onWarehouse', { quantity: product.quantity })}</Typography>
+                <Typography sx={{ fontSize: 15, color: '#666', fontWeight: 400, ml: 2 }}>На складе: {product.quantity}</Typography>
               )}
             </Box>
           </Box>
@@ -655,8 +674,8 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                       : { name: String(product.category) }
                   )} alt="cat" style={{ width: 20, height: 20, marginRight: 6, verticalAlign: 'middle' }} />
                   {typeof product.category === 'object' && product.category !== null
-                    ? (product.category.label || product.category.name || '')
-                    : (typeof product.category === 'string' ? product.category : String(product.category || ''))}
+                    ? translateCategory(product.category.name || product.category.label || '')
+                    : (typeof product.category === 'string' ? translateCategory(product.category) : translateCategory(String(product.category || '')))}
                 </span>
               )}
               {product.ageGroup && (
@@ -694,7 +713,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           <div>{t('productCard.brand')}: {product.brand || '-'}</div>
           <div>{t('productCard.country')}: {product.manufacturer || product.country || '-'}</div>
           <div dir="rtl" style={{ textAlign: 'right' }}>{product.height && product.length && product.width ? 
-            `${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
+            `${t('productCard.dimensions')}: ${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
             product.size || '-'}</div>
         </Box>
         <Box sx={{ position: 'absolute', right: 24, bottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
@@ -1051,7 +1070,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             )}
                           {isAdmin && (
                 <div style={{ fontSize: '0.9rem', color: '#666', marginLeft: 4 }}>
-                  {t('productCard.availability.onWarehouse', { quantity: product.quantity })}
+                  На складе: {product.quantity}
                 </div>
               )}
           </div>
@@ -1286,7 +1305,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
               <div>{t('productCard.brand')}: {product.brand || '-'}</div>
               <div>{t('productCard.country')}: {product.manufacturer || product.country || '-'}</div>
               <div dir="rtl" style={{ textAlign: 'right' }}>{product.height && product.length && product.width ? 
-                `${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
+                `${t('productCard.dimensions')}: ${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
                 product.size || '-'}</div>
             </div>
           </Box>

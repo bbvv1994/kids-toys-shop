@@ -524,7 +524,7 @@
     "sku": "Артикул",
     "brand": "Бренд",
     "country": "Страна",
-    "dimensions": "Габариты",
+    "dimensions": "Размер",
     "noPhoto": "Нет фото",
     "units": {
       "cm": "см",
@@ -579,7 +579,6 @@
       "preOrder": "Предзаказ",
       "available": "Доступно",
       "unavailable": "Недоступно",
-      "onWarehouse": "На складе: {{quantity}}",
       "expectedDelivery": "Ожидается: {{date}}"
     },
     "gender": {
@@ -702,7 +701,6 @@
     "preOrder": "Предзаказ",
     "available": "Доступно",
     "unavailable": "Недоступно",
-    "onWarehouse": "На складе: {{quantity}}",
     "expectedDelivery": "Ожидается: {{date}}"
   },
   "productDetails": {
@@ -740,8 +738,7 @@
     "questionSent": "Ваш вопрос отправлен! Мы ответим на него в ближайшее время.",
     "answer": "Ответ:",
     "answeredOn": "Ответ дан:",
-    "quantity": ":Количество",
-    "onWarehouse": "На складе: {{quantity}}",
+    "quantity": "Количество",
     "user": "Пользователь",
     "noCategory": "Без категории",
     "noDescription": "Описание отсутствует"

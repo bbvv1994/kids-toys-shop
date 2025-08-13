@@ -560,7 +560,6 @@
       "preOrder": "הזמנה מוקדמת",
       "available": "זמין",
       "unavailable": "לא זמין",
-      "onWarehouse": "במחסן: {{quantity}}",
       "expectedDelivery": "צפוי: {{date}}"
     },
     "gender": {
@@ -702,7 +701,6 @@
     "answer": "תשובה:",
     "answeredOn": "נענה ב:",
     "quantity": ":כמות",
-    "onWarehouse": "במחסן: {{quantity}}",
     "user": "משתמש",
     "noCategory": "ללא קטגוריה",
     "noDescription": "אין תיאור"
