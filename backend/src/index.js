@@ -18,6 +18,7 @@ const ProductionUploadMiddleware = require('./productionUploadMiddleware');
 const CloudinaryUploadMiddleware = require('./cloudinaryUploadMiddleware');
 const FlexibleUploadMiddleware = require('./flexibleUploadMiddleware');
 const TranslationService = require('./services/translationService');
+const SafeMigration = require('../safe-migration');
 
 // Создаем один экземпляр ImageMiddleware для использования во всех маршрутах
 const imageMiddleware = new ImageMiddleware();
@@ -4837,52 +4838,35 @@ app.get('/api/test-export', async (req, res) => {
   }
 });
 
-// POST /api/migrate - принудительное применение миграций
+// POST /api/migrate - безопасное применение миграций
 app.post('/api/migrate', async (req, res) => {
   try {
-    console.log('🔄 Применение миграций...');
+    console.log('🔄 Запуск безопасной миграции через API...');
     
-    // Проверяем текущее состояние
-    const currentMigrations = await prisma.$queryRaw`
-      SELECT * FROM _prisma_migrations 
-      ORDER BY finished_at DESC 
-      LIMIT 5;
-    `;
-    console.log('Текущие миграции:', currentMigrations);
+    const migration = new SafeMigration();
+    const result = await migration.run();
     
-    // Применяем миграции
-    const { execSync } = require('child_process');
-    execSync('npx prisma migrate deploy', { stdio: 'pipe' });
-    
-    // Генерируем Prisma Client
-    execSync('npx prisma generate', { stdio: 'pipe' });
-    
-    // Проверяем таблицу ProductQuestion
-    const tableExists = await prisma.$queryRaw`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'ProductQuestion'
-      );
-    `;
-    
-    if (tableExists[0]?.exists) {
-      console.log('✅ Таблица ProductQuestion существует');
-      const questionsCount = await prisma.productQuestion.count();
-      console.log(`📊 Вопросов в базе: ${questionsCount}`);
+    if (result.success) {
+      console.log('✅ Безопасная миграция завершена успешно');
+      res.json({ 
+        success: true, 
+        message: result.message,
+        details: 'Миграция выполнена с резервным копированием и проверками'
+      });
     } else {
-      console.log('❌ Таблица ProductQuestion не существует');
+      console.log('❌ Безопасная миграция не удалась');
+      res.status(500).json({ 
+        success: false,
+        error: result.error,
+        message: result.message,
+        details: 'Миграция не удалась, но данные защищены резервной копией'
+      });
     }
-    
-    res.json({ 
-      success: true, 
-      message: 'Миграции применены успешно',
-      tableExists: tableExists[0]?.exists || false
-    });
   } catch (error) {
-    console.error('❌ Ошибка применения миграций:', error);
+    console.error('❌ Критическая ошибка миграции:', error);
     res.status(500).json({ 
-      error: 'Ошибка применения миграций', 
+      success: false,
+      error: 'Критическая ошибка миграции', 
       details: error.message 
     });
   }
@@ -4954,32 +4938,23 @@ app.listen(PORT, (err) => {
   } else {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
     
-    // Автоматически применяем миграции при запуске
+    // Автоматически применяем безопасную миграцию при запуске
     setTimeout(async () => {
       try {
-        console.log('🔄 Автоматическое применение миграций...');
-        const { execSync } = require('child_process');
+        console.log('🔄 Запуск безопасной миграции при старте сервера...');
         
-        // Применяем миграции
-        execSync('npx prisma migrate deploy', { stdio: 'pipe' });
-        console.log('✅ Миграции применены');
+        const migration = new SafeMigration();
+        const result = await migration.run();
         
-        // Генерируем Prisma Client
-        execSync('npx prisma generate', { stdio: 'pipe' });
-        console.log('✅ Prisma Client обновлен');
-        
-        // Проверяем поля переводов
-        const translationFields = await getTranslationFields();
-        
-        if (translationFields.length > 0) {
-          console.log('✅ Поля переводов готовы к использованию');
+        if (result.success) {
+          console.log('✅ Безопасная миграция завершена:', result.message);
         } else {
-          console.log('⚠️ Поля переводов не найдены');
+          console.log('⚠️ Миграция не удалась:', result.message);
         }
         
       } catch (error) {
-        console.error('❌ Ошибка автоматического применения миграций:', error.message);
+        console.error('❌ Ошибка безопасной миграции:', error.message);
       }
-    }, 3000); // Задержка 3 секунды
+    }, 5000); // Задержка 5 секунд для полной инициализации
   }
 });
