@@ -10770,7 +10770,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 borderBottom: '2px solid #f0f0f0', 
                 pb: 2 
               }}>
-              {createHeader(t('profile.header.notifications'))}
+                {createHeader(t('profile.header.notifications'))}
                 {notifications.length > 0 && (
                   <Button 
                     variant="contained" 
