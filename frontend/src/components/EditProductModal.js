@@ -698,10 +698,12 @@ function EditProductModal(props) {
       }
   }, [formData.category]);
 
-  // Инициализируем форму данными товара (только если форма еще не инициализирована)
+  // Инициализируем форму данными товара при каждом открытии модального окна
   useEffect(() => {
-    if (product && open && (!formData.name || formData.name === '')) {
+    if (product && open) {
       console.log('EditProductModal: Initializing form with product data:', product);
+      console.log('EditProductModal: Product imageUrls:', product.imageUrls);
+      console.log('EditProductModal: Product images:', product.images);
       
       // Безопасная функция для извлечения строкового значения
       const safeString = (value) => {
@@ -733,9 +735,14 @@ function EditProductModal(props) {
       setFormData(initialFormData);
 
       // Загружаем существующие изображения
-      if (product.images && product.images.length > 0) {
+      if (product.imageUrls && product.imageUrls.length > 0) {
+        console.log('EditProductModal: Setting existing images:', product.imageUrls);
+        setExistingImages(product.imageUrls);
+      } else if (product.images && product.images.length > 0) {
+        console.log('EditProductModal: Setting existing images (fallback):', product.images);
         setExistingImages(product.images);
       } else {
+        console.log('EditProductModal: No existing images found');
         setExistingImages([]);
       }
 
@@ -795,18 +802,32 @@ function EditProductModal(props) {
     }
   }, [product, categories]);
 
+  // Отслеживаем изменения в existingImages для отладки
+  useEffect(() => {
+    console.log('EditProductModal: existingImages changed:', existingImages);
+  }, [existingImages]);
+
 
   return (
     <Dialog 
       ref={modalRef}
       open={open} 
       onClose={onClose} 
-      sx={{
+            sx={{
         zIndex: 9999,
         '& .MuiDialog-paper': {
           zIndex: 9999,
-          marginTop: '35vh', // Опускаем модальное окно еще ниже
-          marginBottom: '5vh'
+          marginTop: 'calc(5vh + 95px)',
+          marginBottom: '10vh',
+          maxHeight: '85vh',
+          height: '80vh',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          '& .MuiDialogContent-root': {
+            flex: 1,
+            overflow: 'auto'
+          }
         },
         '& .MuiPopover-root': {
           zIndex: 10002
@@ -824,9 +845,7 @@ function EditProductModal(props) {
           boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
           minWidth: 600,
           maxWidth: 800,
-          maxHeight: '60vh',
-          position: 'relative',
-          overflow: 'visible'
+          position: 'relative'
         }
       }}
 
@@ -862,10 +881,11 @@ function EditProductModal(props) {
         <DialogContent
             ref={dialogContentRef}
             sx={{ 
-              p: 0,
+              p: 3,
               overflowY: 'auto',
               overflowX: 'hidden',
-              height: '50vh',
+              flex: 1,
+              maxHeight: 'calc(80vh - 120px)', // Высота минус заголовок и отступы
               '&::-webkit-scrollbar': {
                 width: '8px',
               },
@@ -895,26 +915,9 @@ function EditProductModal(props) {
             }}
             dividers
           >
-          <Box sx={{ p: 0 }}>
-            <Container maxWidth="md" sx={{ py: 0 }}>
-              <Paper elevation={8} sx={{ 
-                p: 4, 
-                borderRadius: 3, 
-                background: 'linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%)', 
-                border: '1px solid rgba(255, 107, 107, 0.1)',
-                position: 'relative',
-                overflow: 'visible',
-                '& .MuiFormControl-root': {
-                  position: 'relative',
-                  zIndex: 1
-                }
-              }}>
-                {error && (
-                  <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
-                )}
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                  Редактировать товар
-                </Typography>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+            )}
                 
                 
                 
@@ -1609,10 +1612,6 @@ function EditProductModal(props) {
                     {loading ? 'Сохранение...' : 'Сохранить изменения'}
                   </Button>
                 </Box>
-
-              </Paper>
-            </Container>
-                      </Box>
           </DialogContent>
         </form>
       </Dialog>
