@@ -38,7 +38,9 @@ function EditProductModal(props) {
   console.log('props:', props);
   const [formData, setFormData] = useState({
     name: '',
+    nameHe: '',
     description: '',
+    descriptionHe: '',
     price: '',
     category: '',
     subcategory: '',
@@ -475,7 +477,9 @@ function EditProductModal(props) {
 
       setFormData({
         name: safeString(product.name) || '',
+        nameHe: safeString(product.nameHe) || '',
         description: safeString(product.description) || '',
+        descriptionHe: safeString(product.descriptionHe) || '',
         price: product.price || '',
         category: categoryId,
         subcategory: subcategoryId,
@@ -916,7 +920,7 @@ function EditProductModal(props) {
                 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <TextField 
-                    label="Название" 
+                    label="Название (русский)" 
                     name="name" 
                     value={formData.name} 
                     onChange={handleInputChange} 
@@ -926,9 +930,29 @@ function EditProductModal(props) {
                     size="medium"
                   />
                   <TextField 
-                    label="Описание" 
+                    label="Название (иврит)" 
+                    name="nameHe" 
+                    value={formData.nameHe} 
+                    onChange={handleInputChange} 
+                    fullWidth 
+                    variant="outlined"
+                    size="medium"
+                  />
+                  <TextField 
+                    label="Описание (русский)" 
                     name="description" 
                     value={formData.description} 
+                    onChange={handleInputChange} 
+                    fullWidth 
+                    multiline 
+                    minRows={2} 
+                    variant="outlined"
+                    size="medium"
+                  />
+                  <TextField 
+                    label="Описание (иврит)" 
+                    name="descriptionHe" 
+                    value={formData.descriptionHe} 
                     onChange={handleInputChange} 
                     fullWidth 
                     multiline 

@@ -8,12 +8,17 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { getTranslatedName } from '../utils/translationUtils';
 
 export default function OrderSuccessPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { orderNumber, orderData } = location.state || {};
+  
+  // Проверяем, является ли пользователь гостем
+  const userData = localStorage.getItem('user');
+  const isGuest = !userData;
 
   if (!orderNumber) {
     return (
@@ -137,10 +142,10 @@ export default function OrderSuccessPage() {
         </Typography>
         {orderData?.items?.map((item, index) => (
           <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexDirection: 'row' }}>
-            <Box sx={{ width: 48, height: 48, borderRadius: 2, border: '2px solid #f0f0f0', flexShrink: 0, backgroundImage: `url(${getImageUrl(item.product.imageUrls?.[0] || '/toys.png')})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', mr: 1 }} />
+            <Box sx={{ width: 48, height: 48, borderRadius: 2, border: '2px solid #f0f0f0', flexShrink: 0, backgroundImage: `url(${item.product.imageUrls?.[0] ? getImageUrl(item.product.imageUrls[0]) : '/photography.jpg'})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', mr: 1 }} />
             <Box sx={{ flexGrow: 1 }}>
               <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5, fontSize: 16 }}>
-                {item.product.name}
+                                    {getTranslatedName(item.product)}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {t('orderSuccess.quantity')} {item.quantity} × ₪{item.product.price}
@@ -210,31 +215,33 @@ export default function OrderSuccessPage() {
         >
           {t('orderSuccess.continueShopping')}
         </Button>
-        <Button 
-          variant="contained" 
-          fullWidth
-          size="large"
-          onClick={() => navigate('/profile')}
-          sx={{
-            background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
-            color: '#fff',
-            borderRadius: 2,
-            fontWeight: 600,
-            fontSize: 16,
-            py: 1.5,
-            boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
-            textTransform: 'none',
-            minWidth: 120,
-            mb: 2,
-            '&:hover': {
-              background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
-              boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
-              transform: 'translateY(-1px)'
-            },
-          }}
-        >
-          {t('orderSuccess.myOrders')}
-        </Button>
+        {!isGuest && (
+          <Button 
+            variant="contained" 
+            fullWidth
+            size="large"
+            onClick={() => navigate('/profile')}
+            sx={{
+              background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 16,
+              py: 1.5,
+              boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
+              textTransform: 'none',
+              minWidth: 120,
+              mb: 2,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
+                boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+            }}
+          >
+            {t('orderSuccess.myOrders')}
+          </Button>
+        )}
         <Button 
           variant="contained" 
           fullWidth

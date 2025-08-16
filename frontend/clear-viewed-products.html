@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Очистка просмотренных товаров</title>
+</head>
+<body>
+    <h1>Очистка просмотренных товаров</h1>
+    <button onclick="clearViewedProducts()">Очистить просмотренные товары</button>
+    <button onclick="showViewedProducts()">Показать текущие просмотренные товары</button>
+    <div id="output"></div>
+
+    <script>
+        function clearViewedProducts() {
+            localStorage.removeItem('viewedProducts');
+            document.getElementById('output').innerHTML = '<p style="color: green;">Просмотренные товары очищены!</p>';
+        }
+
+        function showViewedProducts() {
+            const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
+            let html = '<h3>Текущие просмотренные товары:</h3>';
+            
+            if (viewed.length === 0) {
+                html += '<p>Нет просмотренных товаров</p>';
+            } else {
+                html += '<ul>';
+                viewed.forEach((product, index) => {
+                    html += `<li>
+                        <strong>Товар ${index + 1}:</strong><br>
+                        ID: ${product.id}<br>
+                        name: ${product.name || 'НЕТ'}<br>
+                        nameHe: ${product.nameHe || 'НЕТ'}<br>
+                        description: ${product.description ? 'ЕСТЬ' : 'НЕТ'}<br>
+                        descriptionHe: ${product.descriptionHe ? 'ЕСТЬ' : 'НЕТ'}<br>
+                        <hr>
+                    </li>`;
+                });
+                html += '</ul>';
+            }
+            
+            document.getElementById('output').innerHTML = html;
+        }
+
+        // Показать текущие данные при загрузке
+        showViewedProducts();
+    </script>
+</body>
+</html>

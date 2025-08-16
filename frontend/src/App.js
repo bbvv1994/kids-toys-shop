@@ -8,6 +8,7 @@ import CustomerReviews from './components/CustomerReviews';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useDeviceType } from './utils/deviceDetection';
 import { getImageUrl, API_BASE_URL } from './config';
+import { getTranslatedName } from './utils/translationUtils';
 import { 
   DndContext,
   closestCenter,
@@ -110,7 +111,9 @@ import {
   Security,
   AccountCircle,
   NavigateNext,
-  Clear
+  Clear,
+  LocalShipping,
+  Category
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { jwtDecode } from 'jwt-decode';
@@ -162,6 +165,8 @@ import ReviewPage from './components/ReviewPage';
 import AdminCategories from './components/AdminCategories';
 import AdminQuestions from './components/AdminQuestions';
 import PublicQuestions from './components/PublicQuestions';
+import BulkImportProducts from './components/BulkImportProducts';
+import { searchInProductNames } from './utils/translationUtils';
 
 // Глобальный маппинг английских кодов на русские названия для фильтра по полу
 const genderMapping = {
@@ -4531,7 +4536,9 @@ function App() {
       
       const formData = new FormData();
       formData.append('name', updatedProduct.name);
+      formData.append('nameHe', updatedProduct.nameHe || '');
       formData.append('description', updatedProduct.description);
+      formData.append('descriptionHe', updatedProduct.descriptionHe || '');
       formData.append('price', updatedProduct.price);
       formData.append('category', updatedProduct.category);
   
@@ -5612,6 +5619,13 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
                   }} sx={{ cursor: 'pointer' }}>
                     <ListItemText primary="Список товаров" />
                   </ListItem>
+                  <ListItem selected={productsSubsection === 'import'} onClick={() => { 
+                    setSection('products'); 
+                    setProductsSubsection('import'); 
+                    setProductsMenuOpen(true);
+                  }} sx={{ cursor: 'pointer' }}>
+                    <ListItemText primary="Массовый импорт" />
+                  </ListItem>
               </List>
             </Box>
           )}
@@ -5672,14 +5686,20 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
       </Box>
       {/* Убираем фиксированную высоту и overflow у правой части */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, p: 0 }}>
-        {section === 'products' ? <CMSProducts 
+        {section === 'products' ? (
+          productsSubsection === 'import' ? (
+            <BulkImportProducts categories={dbCategories} />
+          ) : (
+            <CMSProducts 
           mode={productsSubsection} 
           editModalOpen={editModalOpen}
           setEditModalOpen={setEditModalOpen}
           editingProduct={editingProduct}
           setEditingProduct={setEditingProduct}
           dbCategories={dbCategories}
-        /> :
+            />
+          )
+        ) :
          section === 'categories' ? <CMSCategories loadCategoriesFromAPI={loadCategoriesFromAPI} /> :
          section === 'orders' ? <CMSOrders /> :
          section === 'users' ? <AdminUsers /> :
@@ -5709,7 +5729,9 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
   
   const [form, setForm] = React.useState({ 
     name: '', 
+    nameHe: '',
     description: '', 
+    descriptionHe: '',
     price: '', 
     category: '', 
     subcategory: '', 
@@ -5752,7 +5774,9 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
     } else {
       setForm({ 
         name: '', 
+        nameHe: '',
         description: '', 
+        descriptionHe: '',
         price: '', 
         category: '', 
         subcategory: '', 
@@ -6043,7 +6067,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         URL.revokeObjectURL(URL.createObjectURL(file));
       });
     }
-    setForm({ name: '', description: '', price: '', category: '', subcategory: '', quantity: '', article: '', brand: '', country: '', length: '', width: '', height: '', images: [], mainImageIndex: undefined });
+    setForm({ name: '', nameHe: '', description: '', descriptionHe: '', price: '', category: '', subcategory: '', quantity: '', article: '', brand: '', country: '', length: '', width: '', height: '', images: [], mainImageIndex: undefined });
   };
 
 
@@ -6073,7 +6097,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
     
     const query = searchQuery.toLowerCase();
     return (
-      product.name?.toLowerCase().includes(query) ||
+      searchInProductNames(product, searchQuery) ||
       product.article?.toLowerCase().includes(query) ||
       product.brand?.toLowerCase().includes(query) ||
       product.country?.toLowerCase().includes(query) ||
@@ -6232,7 +6256,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField 
-            label="Название" 
+            label="Название (русский)" 
             name="name" 
             value={form.name} 
             onChange={handleChange} 
@@ -6242,9 +6266,29 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             size="medium"
           />
           <TextField 
-            label="Описание" 
+            label="Название (иврит)" 
+            name="nameHe" 
+            value={form.nameHe} 
+            onChange={handleChange} 
+            fullWidth 
+            variant="outlined"
+            size="medium"
+          />
+          <TextField 
+            label="Описание (русский)" 
             name="description" 
             value={form.description} 
+            onChange={handleChange} 
+            fullWidth 
+            multiline 
+            minRows={2} 
+            variant="outlined"
+            size="medium"
+          />
+          <TextField 
+            label="Описание (иврит)" 
+            name="descriptionHe" 
+            value={form.descriptionHe} 
             onChange={handleChange} 
             fullWidth 
             multiline 
@@ -6311,7 +6355,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             </Select>
           </FormControl>
           <FormControl fullWidth>
-            <InputLabel id="gender-label">{t('product.gender')}</InputLabel>
+            <InputLabel id="gender-label">Пол</InputLabel>
             <Select
               labelId="gender-label"
               label="Пол"
@@ -6812,7 +6856,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         <Box sx={{ mb: 3, p: 2, background: '#fff', borderRadius: 2, boxShadow: 1 }}>
           <TextField
             fullWidth
-            placeholder={t('header.searchPlaceholder')}
+            placeholder="Поиск товаров..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             variant="outlined"
@@ -7427,20 +7471,7 @@ function CMSCategories({ loadCategoriesFromAPI }) {
       }}>
         {/* Красивая шапка */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-          <Box sx={{
-            width: 50,
-            height: 50,
-            borderRadius: 3,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-          }}>
-            <Typography sx={{ color: '#fff', fontSize: 24, fontWeight: 'bold' }}>
-              📂
-            </Typography>
-          </Box>
+          <Category color="primary" sx={{ fontSize: 40 }} />
           <Box>
             <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: '#3f51b5', mb: 1 }}>
               Управление категориями
@@ -8108,20 +8139,7 @@ function CMSOrders() {
       }}>
         {/* Красивая шапка */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-          <Box sx={{
-            width: 50,
-            height: 50,
-            borderRadius: 3,
-            background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(255, 107, 107, 0.3)'
-          }}>
-            <Typography sx={{ color: '#fff', fontSize: 24, fontWeight: 'bold' }}>
-              📦
-            </Typography>
-          </Box>
+          <LocalShipping color="primary" sx={{ fontSize: 40 }} />
           <Box>
             <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: '#3f51b5', mb: 1 }}>
               Управление заказами
@@ -10697,22 +10715,30 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
 
         // Функция для получения текста уведомления в зависимости от прогресса
         const getNotificationText = (notif) => {
-          if (notif.type !== 'review_request') return notif.message || notif.text;
+          if (notif.type !== 'review_request') {
+            // Для других типов уведомлений переводим сообщение, если оно начинается с 'reviews.'
+            const message = notif.message || notif.text;
+            return message.startsWith('reviews.') ? t(message) : message;
+          }
           
           const progress = getReviewProgress(notif);
-          if (!progress) return notif.message || notif.text;
+          if (!progress) {
+            // Если нет прогресса, переводим сообщение из backend
+            const message = notif.message || notif.text;
+            return message.startsWith('reviews.') ? t(message) : message;
+          }
           
           const { shopReview, productReviews, totalProducts } = progress;
           const completedProducts = productReviews ? productReviews.length : 0;
           
           if (!shopReview && completedProducts === 0) {
-            return "Пожалуйста, оставьте отзыв о вашей покупке";
+            return t('reviews.modal.title');
           } else if (!shopReview) {
-            return `Вы оценили ${completedProducts} из ${totalProducts} товаров. Не забудьте оставить отзыв о магазине!`;
+            return t('reviews.progress.shopReviewPending', { completedProducts, totalProducts });
           } else if (completedProducts < totalProducts) {
-            return `Вы оставили отзыв о магазине. Осталось оценить ${totalProducts - completedProducts} из ${totalProducts} товаров.`;
+            return t('reviews.progress.productsRemaining', { remaining: totalProducts - completedProducts, totalProducts });
           } else {
-            return "Спасибо! Вы оставили отзыв о магазине и всех товарах.";
+            return t('reviews.progress.completed');
           }
         };
 
@@ -10779,7 +10805,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 <Typography sx={{ textAlign: 'center', color: '#d32f2f', fontSize: 18, mt: 6 }}>{errorNotifications}</Typography>
               ) : notifications.length === 0 ? (
                 <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>
-                  Нет новых уведомлений
+                  {t('common.noNotifications')}
                 </Typography>
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -10817,7 +10843,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           color: isSubmitted || isCompleted ? '#999' : (notif.isRead ? '#888' : '#ff0844'), 
                           fontSize: { xs: 14, md: 16 } 
                         }}>
-                          {notif.title}
+                          {notif.title.startsWith('reviews.') ? t(notif.title) : notif.title}
                         </Typography>
                         <Typography sx={{ 
                           color: '#333', 
@@ -10858,7 +10884,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                               },
                             }}
                           >
-                            {notif.actionText}
+                            {notif.actionText.startsWith('reviews.') ? t(notif.actionText) : notif.actionText}
                           </Button>
                         )}
                         {isSubmitted && (
@@ -10868,7 +10894,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                             fontSize: { xs: 11, md: 12 }, 
                             fontWeight: 600 
                           }}>
-                            ✓ Отзыв отправлен
+                            {t('profile.notifications.reviewSubmitted')}
                           </Typography>
                         )}
                         {isCompleted && !isSubmitted && (
@@ -10878,7 +10904,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                             fontSize: { xs: 11, md: 12 }, 
                             fontWeight: 600 
                           }}>
-                            ✓ Выполнено
+                            {t('profile.notifications.completed')}
                           </Typography>
                         )}
                       </Box>
@@ -10890,7 +10916,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           color: '#ff1744',
                           minWidth: 'auto'
                         }} 
-                        title="Удалить уведомление"
+                        title={t('profile.notifications.deleteNotification')}
                       >
                         <Delete fontSize="small" />
                       </IconButton>
@@ -10957,11 +10983,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
 
         const getStatusText = (status) => {
           switch (status) {
-            case 'pending': return 'Ожидает подтверждения';
-            case 'confirmed': return 'Подтвержден';
-            case 'ready': return 'Готов к выдаче';
-            case 'pickedup': return 'Получен';
-            case 'cancelled': return 'Отменен';
+            case 'pending': return t('profile.orders.status.pending');
+            case 'confirmed': return t('profile.orders.status.confirmed');
+            case 'ready': return t('profile.orders.status.ready');
+            case 'pickedup': return t('profile.orders.status.pickedup');
+            case 'cancelled': return t('profile.orders.status.cancelled');
             default: return status;
           }
         };
@@ -11137,10 +11163,17 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                               }}
                             >
                               {(!item.product?.imageUrls || item.product.imageUrls.length === 0) && (
-                                <span style={{ 
-                                  color: '#bbb', 
-                                  fontSize: { xs: 20, md: 28 } 
-                                }}>🖼️</span>
+                                <img 
+                                  src="/photography.jpg" 
+                                  alt="Фото товара"
+                                  style={{ 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    objectFit: 'cover', 
+                                    borderRadius: '8px',
+                                    opacity: 0.5
+                                  }} 
+                                />
                               )}
                             </Box>
                             <Box sx={{ flex: 1 }}>
@@ -11149,13 +11182,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                                 color: '#333', 
                                 fontSize: { xs: 12, md: 14 } 
                               }}>
-                                {item.product?.name || 'Товар не найден'}
+                                {item.product ? getTranslatedName(item.product) : t('common.productNotFound')}
                               </Typography>
                               <Typography sx={{ 
                                 color: '#666', 
                                 fontSize: { xs: 10, md: 12 } 
                               }}>
-                                Количество: {item.quantity}
+                                {t('common.quantity')}: {item.quantity}
                               </Typography>
                             </Box>
                             <Typography sx={{ 
@@ -11250,7 +11283,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 </Box>
               ) : userReviews.length === 0 ? (
                 <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>
-                  У вас пока нет отзывов и вопросов
+                  {t('common.noReviews')}
                 </Typography>
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -11291,36 +11324,36 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                               width: { xs: 40, md: 50 },
                               height: { xs: 40, md: 50 },
                               borderRadius: 2,
-                              backgroundImage: `url(${getImageUrl(review.productImage)})`,
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center',
-                              backgroundColor: '#f0f0f0'
+                              backgroundColor: '#f0f0f0',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              overflow: 'hidden'
                             }}
-                            onError={(e) => {
-                              e.target.style.backgroundImage = 'url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjRjBGMEYwIi8+CjxwYXRoIGQ9Ik0yNSAyNUMzMi4xODM0IDI1IDM4IDMxLjgxNjYgMzggMzlDMzggNDYuMTgzNCAzMi4xODM0IDUzIDI1IDUzQzE3LjgxNjYgNTMgMTIgNDYuMTgzNCAxMiAzOUMxMiAzMS44MTY2IDE3LjgxNjYgMjUgMjUgMjVaIiBmaWxsPSIjQ0NDIi8+CjxwYXRoIGQ9Ik0yNSAzMUMyNy43NjE0IDMxIDMwIDMzLjIzODYgMzAgMzZDMzAgMzguNzYxNCAyNy43NjE0IDQxIDI1IDQxQzIyLjIzODYgNDEgMjAgMzguNzYxNCAyMCAzNkMyMCAzMy4yMzg2IDIyLjIzODYgMzEgMjUgMzFaIiBmaWxsPSIjOTk5Ii8+Cjwvc3ZnPgo=)';
-                            }}
-                          />
+                          >
+                            <img
+                              src={review.productImage && review.productImage.startsWith('/') ? review.productImage : (review.productImage ? getImageUrl(review.productImage) : '/photography.jpg')}
+                              alt="Фото товара"
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                borderRadius: '8px'
+                              }}
+                              onError={(e) => {
+                                e.target.src = '/photography.jpg';
+                              }}
+                            />
+                          </Box>
                           <Box>
-                            <Box sx={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              gap: { xs: 0.5, md: 1 }, 
+                            <Typography sx={{ 
+                              fontWeight: 600, 
+                              color: '#333', 
+                              fontSize: { xs: 14, md: 16 },
                               mb: 1 
                             }}>
-                              <Typography sx={{ 
-                                color: getReviewTypeColor(review.type), 
-                                fontSize: { xs: 16, md: 20 } 
-                              }}>
-                                {getReviewTypeIcon(review.type)}
-                              </Typography>
-                              <Typography sx={{ 
-                                fontWeight: 600, 
-                                color: '#333', 
-                                fontSize: { xs: 14, md: 16 } 
-                              }}>
-                                {review.productName}
-                              </Typography>
-                            </Box>
+                              {review.productName}
+                            </Typography>
                             <Typography sx={{ 
                               color: '#666', 
                               fontSize: { xs: 12, md: 14 } 
@@ -11408,7 +11441,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         return (
           <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             {localWishlist && localWishlist.length === 0 ? (
-              <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>У вас нет избранных товаров</Typography>
+                                          <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>{t('common.noWishlistItems')}</Typography>
             ) : (
               <Box sx={{
                 background: '#fff',
@@ -11501,7 +11534,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         return (
           <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             {localViewed && localViewed.length === 0 ? (
-              <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>Вы ещё не просматривали товары</Typography>
+                                          <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>{t('common.noViewedProducts')}</Typography>
             ) : (
               <Box sx={{
                 background: '#fff',

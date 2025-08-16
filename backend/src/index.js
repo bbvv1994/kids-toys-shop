@@ -601,11 +601,8 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
       ...(isHidden !== undefined ? { isHidden: isHidden === 'true' || isHidden === true } : {})
     };
 
-    // Автоматически переводим данные
-    const translatedProductData = await TranslationService.autoTranslateProductData(productData, inputLanguage);
-
     const product = await prisma.product.create({
-      data: translatedProductData
+      data: productData
     });
 
 
@@ -2477,6 +2474,7 @@ app.get('/api/profile/orders/:id', authMiddleware, async (req, res) => {
               select: { 
                 id: true, 
                 name: true, 
+                nameHe: true,
                 imageUrls: true 
               } 
             } 
@@ -2781,12 +2779,9 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7),
       height: height ? parseFloat(height) : null
     };
 
-    // Автоматически переводим данные
-    const translatedProductData = await TranslationService.autoTranslateProductData(productData, inputLanguage);
-
     const updated = await prisma.product.update({
       where: { id: parseInt(req.params.id) },
-      data: translatedProductData,
+      data: productData,
       include: {
         category: {
           select: { id: true, name: true }
@@ -3036,10 +3031,10 @@ app.put('/api/admin/orders/:id', authMiddleware, async (req, res) => {
           data: {
             userId: order.userId,
             type: 'review_request',
-            title: 'Оставьте отзыв о вашей покупке',
-            message: 'Пожалуйста, уделите пару минут вашего времени, оцените магазин и товары. Ваше мнение важно для нас, и других покупателей!',
+            title: 'reviews.notification.title',
+            message: 'reviews.notification.message',
             actionUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/review-order?orderId=${order.id}`,
-            actionText: 'Оставить отзыв'
+            actionText: 'reviews.notification.actionText'
           }
         });
         
@@ -4370,10 +4365,10 @@ app.post('/api/admin/notifications/test', authMiddleware, async (req, res) => {
       data: {
         userId: order.userId,
         type: 'review_request',
-        title: 'Оставьте отзыв о вашей покупке (тест)',
-        message: 'Пожалуйста, уделите пару минут вашего времени, оцените магазин и товары. Ваше мнение важно для нас, и других покупателей!',
+        title: 'reviews.notification.title',
+        message: 'reviews.notification.message',
         actionUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/review-order?orderId=${order.id}`,
-        actionText: 'Оставить отзыв'
+        actionText: 'reviews.notification.actionText'
       }
     });
     

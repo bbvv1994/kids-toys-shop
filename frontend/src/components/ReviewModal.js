@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { API_BASE_URL } from '../config';
+import { getTranslatedName } from '../utils/translationUtils';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Typography, Box, Button, TextField, Rating, Divider, CircularProgress, Alert
@@ -40,7 +41,7 @@ export default function ReviewModal({ open, onClose, orderId, user }) {
       // Инициализируем отзывы для товаров
       const initialReviews = orderData.items.map(item => ({
         productId: item.productId,
-        name: item.product.name,
+        name: getTranslatedName(item.product),
         rating: 0,
         text: ''
       }));

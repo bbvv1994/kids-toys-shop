@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { API_BASE_URL, getImageUrl } from '../config';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
 import { Box, Button, Typography, Container, Modal, Rating, TextField, Chip, IconButton, Breadcrumbs } from '@mui/material';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import Favorite from '@mui/icons-material/Favorite';
@@ -33,23 +34,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const { t, i18n } = useTranslation();
   const isAdmin = user?.role === 'admin';
   
-  // Функция для получения переведенного названия товара
-  const getTranslatedName = (product) => {
-    const currentLanguage = i18n.language;
-    if (currentLanguage === 'he' && product?.nameHe) {
-      return product.nameHe;
-    }
-    return product?.name;
-  };
-  
-  // Функция для получения переведенного описания товара
-  const getTranslatedDescription = (product) => {
-    const currentLanguage = i18n.language;
-    if (currentLanguage === 'he' && product?.descriptionHe) {
-      return product.descriptionHe;
-    }
-    return product?.description;
-  };
+
   
   // Функция для перевода категорий
   const translateCategory = (categoryName) => {
@@ -432,11 +417,14 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
     // Удалить дубликаты по id
     const filtered = viewed.filter(p => p.id !== product.id);
-    // Добавить текущий товар в начало
+    // Добавить текущий товар в начало с полными данными для перевода
     filtered.unshift({
       id: product.id,
-      name: getTranslatedName(product),
-      image: product.imageUrls && product.imageUrls[0],
+      name: product.name,
+      nameHe: product.nameHe,
+      description: product.description,
+      descriptionHe: product.descriptionHe,
+      imageUrls: product.imageUrls,
       price: product.price,
       // Добавьте другие нужные поля для ProductCard
       ...(['brand','category','subcategory','ageGroup','quantity'].reduce((acc, key) => { if (product[key]) acc[key] = product[key]; return acc; }, {}))

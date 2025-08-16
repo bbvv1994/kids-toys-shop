@@ -16,6 +16,7 @@ import {
   CircularProgress,
   Alert
 } from '@mui/material';
+import { getTranslatedName } from '../utils/translationUtils';
 
 const ORDER_STATUSES = [
   'pending',
@@ -133,7 +134,7 @@ export default function AdminOrders({ user }) {
                   <TableCell>
                     {order.items.map((item, index) => (
                       <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
-                        {item.product.name} × {item.quantity}
+                        {getTranslatedName(item.product)} × {item.quantity}
                       </Typography>
                     ))}
                   </TableCell>

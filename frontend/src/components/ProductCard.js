@@ -1123,9 +1123,8 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             </span>
           )}
         </div>
-        {/* Счетчик и кнопка — просто в потоке, без absolute */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, marginTop: 8, justifyContent: 'center', position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: viewMode === 'similar' ? 6 : 8, position: 'relative', flexWrap: 'wrap', justifyContent: 'center', rowGap: 6, maxWidth: '100%' }}>
+                 {/* Счетчик и кнопка в одной строке */}
+         <div style={{ display: 'flex', alignItems: 'center', gap: viewMode === 'similar' ? 6 : 8, marginTop: 8, justifyContent: 'center', position: 'relative', flexWrap: 'wrap', rowGap: 6, maxWidth: '100%' }}>
             {/* Надпись о наличии товара — только для списка */}
             {viewMode === 'list' && (
               <div style={{
@@ -1301,7 +1300,6 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                     : t('productCard.addToCart'))}
               </Button>
             )}
-          </div>
         </div>
 
         {/* Popover - часть карточки, плавно появляется */}

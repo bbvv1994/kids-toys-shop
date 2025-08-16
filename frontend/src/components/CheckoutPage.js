@@ -7,6 +7,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL, getImageUrl } from '../config';
 import { useTranslation } from 'react-i18next';
+import { getTranslatedName } from '../utils/translationUtils';
 
 export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearCart }) {
   const navigate = useNavigate();
@@ -236,7 +237,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
               productId: parseInt(item.product.id),
               quantity: item.quantity,
               price: item.product.price,
-              productName: item.product.name
+              productName: getTranslatedName(item.product)
             };
             console.log('🔍 Mapped item:', mappedItem);
                       return mappedItem;
@@ -324,7 +325,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
             productId: parseInt(item.product.id),
             quantity: item.quantity,
             price: item.product.price,
-            productName: item.product.name
+            productName: getTranslatedName(item.product)
           }));
 
         if (cartItems.length === 0) {
@@ -525,10 +526,10 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
             </Typography>
             {cart.items.map((item) => (
               <Box key={item.id} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ width: 60, height: 60, borderRadius: 3, border: '2px solid #f0f0f0', flexShrink: 0, backgroundImage: `url(${getImageUrl(item.product.imageUrls?.[0] || '/toys.png')})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+                <Box sx={{ width: 60, height: 60, borderRadius: 3, border: '2px solid #f0f0f0', flexShrink: 0, backgroundImage: `url(${item.product.imageUrls?.[0] ? getImageUrl(item.product.imageUrls[0]) : '/photography.jpg'})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
                 <Box sx={{ flexGrow: 1 }}>
                   <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
-                    {item.product.name} x {item.quantity}
+                    {getTranslatedName(item.product)} x {item.quantity}
                   </Typography>
                   <Typography variant="body1" color="text.secondary">
                     {item.product.price} ₪ x {item.quantity} = {item.product.price * item.quantity} ₪

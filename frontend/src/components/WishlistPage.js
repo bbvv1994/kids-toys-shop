@@ -3,10 +3,13 @@ import { API_BASE_URL } from '../config';
 import { Box, Typography, Button, CircularProgress, Grid, Card, CardMedia, CardContent, IconButton } from '@mui/material';
 import { Favorite, FavoriteBorder } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
+import { useTranslation } from 'react-i18next';
 
 export default function WishlistPage({ user, wishlist, onWishlistToggle }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     setLoading(false);
@@ -22,9 +25,9 @@ export default function WishlistPage({ user, wishlist, onWishlistToggle }) {
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>Избранное</Typography>
+      <Typography variant="h4" sx={{ mb: 3 }}>{t('common.favorites')}</Typography>
       {wishlist.length === 0 ? (
-        <Typography>У вас нет избранных товаров.</Typography>
+        <Typography>{t('common.noWishlistItems')}</Typography>
       ) : (
         <Grid container spacing={3}>
           {wishlist.map(item => (
@@ -33,16 +36,16 @@ export default function WishlistPage({ user, wishlist, onWishlistToggle }) {
                 <CardMedia
                   component="img"
                   height="200"
-                  image={item.product.imageUrls && item.product.imageUrls.length > 0 ? `${API_BASE_URL}${item.product.imageUrls[0]}` : '/toys.png'}
-                  alt={item.product.name}
+                  image={item.product.imageUrls && item.product.imageUrls.length > 0 ? `${API_BASE_URL}${item.product.imageUrls[0]}` : '/photography.jpg'}
+                  alt={getTranslatedName(item.product)}
                   sx={{ objectFit: 'cover' }}
                 />
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography gutterBottom variant="h6" component="h2">
-                    {item.product.name}
+                    {getTranslatedName(item.product)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    {item.product.description}
+                    {getTranslatedDescription(item.product)}
                   </Typography>
                   <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
                     ₪{item.product.price}
@@ -53,7 +56,7 @@ export default function WishlistPage({ user, wishlist, onWishlistToggle }) {
                       onClick={() => navigate(`/product/${item.productId}`)}
                       size="small"
                     >
-                      Подробнее
+                      {t('common.details')}
                     </Button>
                     <IconButton
                       onClick={() => handleRemove(item.productId)}

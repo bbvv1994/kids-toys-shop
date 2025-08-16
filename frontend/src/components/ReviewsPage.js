@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
 import { useTranslation } from 'react-i18next';
+import { getTranslatedName } from '../utils/translationUtils';
 import {
   Box,
   Typography,
@@ -76,7 +77,7 @@ const ReviewPage = () => {
         // Инициализируем отзывы для каждого товара
         const initialProductReviews = order.items.map(item => ({
           productId: item.productId,
-          productName: item.product.name,
+          productName: getTranslatedName(item.product),
           productImage: item.product.imageUrls?.[0] || '',
           rating: 0,
           comment: ''
@@ -215,7 +216,7 @@ const ReviewPage = () => {
           i === index ? { ...r, submitted: true } : r
         ));
         
-        setSuccess('Отзыв о товаре успешно отправлен!');
+        setSuccess(t('reviews.form.successfullySent'));
         setTimeout(() => setSuccess(''), 3000);
       } else {
         const errorData = await response.json();

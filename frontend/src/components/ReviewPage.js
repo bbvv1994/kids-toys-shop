@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../config';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { API_BASE_URL, getImageUrl } from '../config';
+import { getTranslatedName } from '../utils/translationUtils';
 import {
   Box,
   Typography,
@@ -7,24 +9,25 @@ import {
   Button,
   Rating,
   Paper,
-  Grid,
   Card,
   CardContent,
-  CardMedia,
   Chip,
   Alert,
   CircularProgress,
   Stepper,
   Step,
-  StepLabel,
-  Divider
+  StepLabel
 } from '@mui/material';
 import { Star, Send, ArrowBack, Store, ShoppingBag } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const ReviewPage = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Отладочная информация о текущем языке
+  console.log('ReviewPage - Current language:', i18n.language);
   const [currentStep, setCurrentStep] = useState(0);
   const [shopReview, setShopReview] = useState({ rating: 0, text: '' });
   const [productReviews, setProductReviews] = useState([]);
@@ -33,21 +36,7 @@ const ReviewPage = () => {
   const [error, setError] = useState('');
   const [orderData, setOrderData] = useState(null);
 
-  useEffect(() => {
-    // Получаем данные заказа из URL параметров или localStorage
-    const orderId = new URLSearchParams(location.search).get('orderId');
-    console.log('URL search params:', location.search);
-    console.log('Extracted orderId:', orderId);
-    
-    if (orderId) {
-      loadOrderData(orderId);
-    } else {
-      console.log('No orderId found in URL');
-      setError('ID заказа не найден в URL');
-    }
-  }, [location]);
-
-  const loadOrderData = async (orderId) => {
+  const loadOrderData = useCallback(async (orderId) => {
     try {
       console.log('Loading order data for orderId:', orderId);
       
@@ -72,13 +61,15 @@ const ReviewPage = () => {
         setOrderData(order);
         
         // Инициализируем отзывы для каждого товара
-        const initialProductReviews = order.items.map(item => ({
-          productId: item.productId,
-          productName: item.product.name,
-          productImage: item.product.imageUrls?.[0] || '',
-          rating: 0,
-          comment: ''
-        }));
+        const initialProductReviews = order.items.map(item => {
+          return {
+            productId: item.productId,
+            product: item.product, // Сохраняем полный объект товара
+            productImage: item.product.imageUrls?.[0] || '/photography.jpg',
+            rating: 0,
+            comment: ''
+          };
+        });
         setProductReviews(initialProductReviews);
         
         // Проверяем прогресс заполнения отзывов
@@ -105,13 +96,33 @@ const ReviewPage = () => {
       } else {
         const errorText = await response.text();
         console.error('Error response:', errorText);
-        setError(`Ошибка загрузки данных заказа: ${response.status}`);
+        setError(t('reviews.form.loadOrderErrorWithStatus', { status: response.status }));
       }
     } catch (err) {
       console.error('Error loading order data:', err);
-      setError('Ошибка загрузки данных заказа');
+      setError(t('reviews.form.loadOrderError'));
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    // Получаем данные заказа из URL параметров или localStorage
+    const orderId = new URLSearchParams(location.search).get('orderId');
+    console.log('URL search params:', location.search);
+    console.log('Extracted orderId:', orderId);
+    
+    if (orderId) {
+      loadOrderData(orderId);
+    } else {
+      console.log('No orderId found in URL');
+      setError(t('reviews.form.orderIdNotFound'));
+    }
+  }, [location, loadOrderData, t]);
+
+
+
+
+
+
 
   const handleShopReviewChange = (field, value) => {
     setShopReview(prev => ({ ...prev, [field]: value }));
@@ -131,7 +142,7 @@ const ReviewPage = () => {
     if (reviewProgress) {
       const progress = JSON.parse(reviewProgress);
       if (progress.shopReview) {
-        setError('Отзыв о магазине уже был отправлен');
+        setError(t('reviews.form.shopReviewAlreadySubmitted'));
         return;
       }
     }
@@ -142,7 +153,7 @@ const ReviewPage = () => {
     }
 
     if (!shopReview.text.trim()) {
-      setError('Пожалуйста, напишите отзыв о магазине');
+              setError(t('reviews.form.pleaseWriteShopReview'));
       return;
     }
 
@@ -193,7 +204,7 @@ const ReviewPage = () => {
         setError('');
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Ошибка при отправке отзыва о магазине');
+        setError(errorData.error || t('reviews.form.submitError'));
       }
     } catch (err) {
       setError('Произошла ошибка сети или сервера');
@@ -207,7 +218,7 @@ const ReviewPage = () => {
     
     // Проверяем, не был ли уже отправлен отзыв о товаре
     if (review.submitted) {
-      setError('Отзыв о товаре уже был отправлен');
+              setError(t('reviews.form.alreadySubmitted'));
       return;
     }
     
@@ -217,7 +228,7 @@ const ReviewPage = () => {
     }
 
     if (!review.comment.trim()) {
-      setError('Пожалуйста, напишите отзыв о товаре');
+              setError(t('reviews.form.pleaseWriteReview'));
       return;
     }
 
@@ -289,7 +300,7 @@ const ReviewPage = () => {
         }
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Ошибка при отправке отзыва о товаре');
+        setError(errorData.error || t('reviews.form.submitError'));
       }
     } catch (err) {
       setError('Произошла ошибка сети или сервера');
@@ -298,7 +309,7 @@ const ReviewPage = () => {
     }
   };
 
-  const steps = ['Отзыв о магазине', 'Отзывы о товарах'];
+      const steps = [t('reviews.form.shopReviewStep'), t('reviews.form.productReviewsStep')];
 
   if (!orderData) {
     return (
@@ -306,7 +317,7 @@ const ReviewPage = () => {
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: '#3f51b5' }}>
-              Отзывы о заказе
+              {t('reviews.modal.title')}
             </Typography>
             <Button
               variant="contained"
@@ -331,7 +342,7 @@ const ReviewPage = () => {
                 },
               }}
             >
-              Назад
+              {t('reviews.form.back')}
             </Button>
           </Box>
 
@@ -343,10 +354,10 @@ const ReviewPage = () => {
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <CircularProgress size={60} sx={{ mb: 2 }} />
               <Typography variant="h6" sx={{ mb: 2 }}>
-                Загрузка данных заказа...
+                {t('reviews.form.loadingOrderData')}
               </Typography>
               <Typography variant="body2" color="textSecondary">
-                Пожалуйста, подождите
+                {t('reviews.form.pleaseWait')}
               </Typography>
             </Box>
           )}
@@ -354,10 +365,10 @@ const ReviewPage = () => {
           {error && (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <Typography variant="h6" sx={{ mb: 2, color: '#666' }}>
-                Не удалось загрузить данные заказа
+                {t('reviews.form.failedToLoadOrder')}
               </Typography>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-                Возможно, ссылка устарела или заказ не найден
+                {t('reviews.form.linkExpiredOrOrderNotFound')}
               </Typography>
               <Button
                 variant="contained"
@@ -382,7 +393,7 @@ const ReviewPage = () => {
                   },
                 }}
               >
-                Вернуться в личный кабинет
+                {t('reviews.form.returnToProfile')}
               </Button>
             </Box>
           )}
@@ -396,9 +407,9 @@ const ReviewPage = () => {
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
         {/* Заголовок */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: '#3f51b5' }}>
-            Отзывы о заказе #{orderData.id}
-          </Typography>
+                      <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: '#3f51b5' }}>
+              {t('reviews.modal.title')} #{orderData.id}
+            </Typography>
           <Button
             variant="contained"
             startIcon={<ArrowBack />}
@@ -422,7 +433,7 @@ const ReviewPage = () => {
               },
             }}
           >
-            Назад
+            {t('reviews.form.back')}
           </Button>
         </Box>
 
@@ -443,7 +454,7 @@ const ReviewPage = () => {
 
         {success && (
           <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
-            Все отзывы успешно отправлены! Спасибо за ваше мнение!
+            {t('reviews.form.allReviewsSuccessfullySent')}
           </Alert>
         )}
 
@@ -452,11 +463,11 @@ const ReviewPage = () => {
           <Box>
             <Typography variant="h5" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
               <Store color="primary" />
-              Отзыв о магазине
+              {t('reviews.form.shopReviewStep')}
             </Typography>
 
             <Box sx={{ mb: 3, textAlign: 'center' }}>
-              <Typography component="legend" sx={{ mb: 1 }}>Ваша оценка магазина:</Typography>
+              <Typography component="legend" sx={{ mb: 1 }}>{t('reviews.form.shopRatingLabel')}</Typography>
               <Rating
                 name="shop-rating"
                 value={shopReview.rating}
@@ -469,14 +480,14 @@ const ReviewPage = () => {
             </Box>
 
             <TextField
-              label="Ваш отзыв о магазине"
+              label={t('reviews.form.shopReviewLabel')}
               multiline
               rows={4}
               fullWidth
               value={shopReview.text}
               onChange={(e) => handleShopReviewChange('text', e.target.value)}
               variant="outlined"
-              placeholder="Поделитесь своим мнением о магазине, обслуживании, доставке..."
+              placeholder={t('reviews.form.shopReviewPlaceholder')}
               sx={{ mb: 3 }}
             />
 
@@ -509,7 +520,7 @@ const ReviewPage = () => {
                 }
               }}
             >
-              {loading ? 'Отправка...' : 'Отправить отзыв о магазине'}
+              {loading ? t('reviews.form.submitting') : t('reviews.form.submitShopReview')}
             </Button>
             
             {/* Показываем сообщение, если отзыв уже отправлен */}
@@ -519,9 +530,9 @@ const ReviewPage = () => {
                 const progress = JSON.parse(reviewProgress);
                 if (progress.shopReview) {
                   return (
-                    <Alert severity="success" sx={{ mt: 2, borderRadius: 2 }}>
-                      Отзыв о магазине уже отправлен!
-                    </Alert>
+                                          <Alert severity="success" sx={{ mt: 2, borderRadius: 2 }}>
+                        {t('reviews.form.shopReviewSubmitted')}
+                      </Alert>
                   );
                 }
               }
@@ -535,37 +546,34 @@ const ReviewPage = () => {
           <Box>
             <Typography variant="h5" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
               <ShoppingBag color="primary" />
-              Отзывы о товарах
+              {t('reviews.form.productReviewsStep')}
             </Typography>
 
             <Typography variant="body1" sx={{ mb: 3, color: '#666' }}>
-              Пожалуйста, оставьте отзыв о каждом товаре из вашего заказа:
+              {t('reviews.page.leaveReviewForEach')}
             </Typography>
 
             {productReviews.map((review, index) => (
               <Card key={index} sx={{ mb: 3, boxShadow: 1, borderRadius: 2 }}>
                 <CardContent>
                   <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                    <CardMedia
-                      component="img"
-                      sx={{ width: 80, height: 80, objectFit: 'contain', borderRadius: 1 }}
-                      image={review.productImage ? 
-                        (review.productImage.startsWith('http') ? 
-                          review.productImage : 
-                          `${API_BASE_URL}${review.productImage}`) :
-                        'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjRjBGMEYwIi8+CjxwYXRoIGQ9Ik0yNSAyNUMzMi4xODM0IDI1IDM4IDMxLjgyMzYgMzggMzlDMzggNDYuMTc2NCAzMi4xODM0IDUzIDI1IDUzQzE3LjgxNjYgNTMgMTIgNDYuMTc2NCAxMiAzOUMxMiAzMS44MjM2IDE3LjgxNjYgMjUgMjUgMjVaIiBmaWxsPSIjQ0NDIi8+CjxwYXRoIGQ9Ik0yNSAzMUMyNy43NjE0IDMxIDMwIDMzLjIzODYgMzAgMzZDMzAgMzguNzYxNCAyNy43NjE0IDQxIDI1IDQxQzIyLjIzODYgNDEgMjAgMzguNzYxNCAyMCAzNkMyMCAzMy4yMzg2IDIyLjIzODYgMzEgMjUgMzFaIiBmaWxsPSIjOTk5Ii8+Cjwvc3ZnPgo='
-                      }
-                      alt={review.productName}
-                      onError={(e) => {
-                        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjRjBGMEYwIi8+CjxwYXRoIGQ9Ik0yNSAyNUMzMi4xODM0IDI1IDM4IDMxLjgyMzYgMzggMzlDMzggNDYuMTc2NCAzMi4xODM0IDUzIDI1IDUzQzE3LjgxNjYgNTMgMTIgNDYuMTc2NCAxMiAzOUMxMiAzMS44MjM2IDE3LjgxNjYgMjUgMjUgMjVaIiBmaWxsPSIjQ0NDIi8+CjxwYXRoIGQ9Ik0yNSAzMUMyNy43NjE0IDMxIDMwIDMzLjIzODYgMzAgMzZDMzAgMzguNzYxNCAyNy43NjE0IDQxIDI1IDQxQzIyLjIzODYgNDEgMjAgMzguNzYxNCAyMCAzNkMyMCAzMy4yMzg2IDIyLjIzODYgMzEgMjUgMzFaIiBmaWxsPSIjOTk5Ii8+Cjwvc3ZnPgo=';
-                      }}
-                    />
+                    <Box sx={{ 
+                      width: 80, 
+                      height: 80, 
+                      borderRadius: 1,
+                      border: '2px solid #f0f0f0',
+                      flexShrink: 0,
+                      backgroundImage: `url(${review.productImage.startsWith('/') ? review.productImage : getImageUrl(review.productImage)})`,
+                      backgroundSize: '100% 100%',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat'
+                    }} />
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-                        {review.productName}
+                        {review.product ? getTranslatedName(review.product) : 'Товар'}
                       </Typography>
                       {review.submitted && (
-                        <Chip label="Отзыв отправлен" color="success" size="small" />
+                        <Chip label={t('reviews.modal.productReviewSent')} color="success" size="small" />
                       )}
                     </Box>
                   </Box>
@@ -573,7 +581,7 @@ const ReviewPage = () => {
                   {!review.submitted ? (
                     <>
                       <Box sx={{ mb: 2, textAlign: 'center' }}>
-                        <Typography component="legend" sx={{ mb: 1 }}>Ваша оценка:</Typography>
+                        <Typography component="legend" sx={{ mb: 1 }}>{t('reviews.form.yourRating')}:</Typography>
                         <Rating
                           name={`product-rating-${index}`}
                           value={review.rating}
@@ -586,14 +594,14 @@ const ReviewPage = () => {
                       </Box>
 
                       <TextField
-                        label="Ваш отзыв о товаре"
+                        label={t('reviews.form.productComment')}
                         multiline
                         rows={3}
                         fullWidth
                         value={review.comment}
                         onChange={(e) => handleProductReviewChange(index, 'comment', e.target.value)}
                         variant="outlined"
-                        placeholder="Напишите, что вам понравилось или не понравилось в товаре..."
+                        placeholder={t('reviews.form.productPlaceholder')}
                         sx={{ mb: 2 }}
                       />
 
@@ -626,12 +634,12 @@ const ReviewPage = () => {
                           }
                         }}
                       >
-                        {loading ? 'Отправка...' : 'Отправить отзыв'}
+                        {loading ? t('reviews.form.submitting') : t('reviews.form.submit')}
                       </Button>
                     </>
                   ) : (
                     <Alert severity="success" sx={{ borderRadius: 2 }}>
-                      Отзыв успешно отправлен!
+                      {t('reviews.form.success')}
                     </Alert>
                   )}
                 </CardContent>
@@ -641,7 +649,7 @@ const ReviewPage = () => {
             {productReviews.every(review => review.submitted) && (
               <Box sx={{ textAlign: 'center', mt: 3 }}>
                 <Typography variant="h6" color="success.main" sx={{ mb: 2 }}>
-                  Все отзывы отправлены! 🎉
+                  {t('reviews.form.allReviewsSubmitted')}
                 </Typography>
                 <Button
                   variant="contained"
@@ -666,7 +674,7 @@ const ReviewPage = () => {
                     },
                   }}
                 >
-                  Вернуться в личный кабинет
+                  {t('reviews.form.returnToProfile')}
                 </Button>
               </Box>
             )}

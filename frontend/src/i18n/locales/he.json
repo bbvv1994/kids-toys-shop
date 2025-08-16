@@ -33,7 +33,14 @@
       "phone": "אנא הזן מספר טלפון תקין",
       "minLength": "על השדה להכיל לפחות {{min}} תווים",
       "maxLength": "על השדה להכיל לכל היותר {{max}} תווים"
-    }
+    },
+    "productNotFound": "המוצר לא נמצא",
+    "noViewedProducts": "עדיין לא צפית במוצרים",
+    "noWishlistItems": "אין לך מוצרים מועדפים",
+    "favorites": "מועדפים",
+    "details": "פרטים",
+    "noReviews": "עדיין אין לך ביקורות ושאלות",
+    "noNotifications": "אין הודעות חדשות"
   },
   "profile": {
     "menu": {
@@ -73,10 +80,20 @@
       "empty": "עדיין אין לך הזמנות",
       "orderN": "הזמנה #{{id}}",
       "removeFromList": "הסר הזמנה מהרשימה",
-      "total": "סך הכל:"
+      "total": "סך הכל:",
+      "status": {
+        "pending": "ממתין לאישור",
+        "confirmed": "אושר",
+        "ready": "מוכן לאיסוף",
+        "pickedup": "נאסף",
+        "cancelled": "בוטל"
+      }
     },
     "notifications": {
-      "deleteAll": "מחק הכל"
+      "deleteAll": "מחק הכל",
+      "reviewSubmitted": "✓ ביקורת נשלחה",
+      "completed": "✓ הושלם",
+      "deleteNotification": "מחק הודעה"
     },
     "auth": {
       "changePassword": "שינוי סיסמה",
@@ -608,7 +625,37 @@
       "submit": "שלח ביקורת",
       "submitting": "שולח...",
       "productInfo": "מידע על המוצר",
-      "productReviewLabel": "ביקורת על המוצר"
+      "productReviewLabel": "ביקורת על המוצר",
+      "yourRating": "הדירוג שלך",
+      "productComment": "הביקורת שלך על המוצר",
+      "productPlaceholder": "כתוב מה אהבת או לא אהבת במוצר...",
+      "submit": "שלח ביקורת",
+      "submitting": "שולח...",
+      "success": "הביקורת נשלחה בהצלחה!",
+      "allReviewsSubmitted": "כל הביקורות נשלחו! 🎉",
+      "alreadySubmitted": "הביקורת על המוצר כבר נשלחה",
+      "pleaseWriteReview": "אנא כתוב ביקורת על המוצר",
+      "successfullySent": "הביקורת על המוצר נשלחה בהצלחה!",
+      "orderIdNotFound": "מזהה ההזמנה לא נמצא ב-URL",
+      "loadOrderError": "שגיאה בטעינת נתוני ההזמנה",
+      "loadOrderErrorWithStatus": "שגיאה בטעינת נתוני ההזמנה: {{status}}",
+      "shopReviewAlreadySubmitted": "הביקורת על החנות כבר נשלחה",
+      "pleaseWriteShopReview": "אנא כתוב ביקורת על החנות",
+      "shopReviewSubmitted": "הביקורת על החנות כבר נשלחה!",
+      "shopReviewStep": "ביקורת על החנות",
+      "productReviewsStep": "ביקורות על מוצרים",
+      "shopReviewLabel": "הביקורת שלך על החנות",
+      "submitShopReview": "שלח ביקורת על החנות",
+      "shopRatingLabel": "הדירוג שלך לחנות:",
+      "shopReviewPlaceholder": "שתף את דעתך על החנות, השירות, המשלוח...",
+      "back": "חזור",
+      "loadingOrderData": "טוען נתוני הזמנה...",
+      "pleaseWait": "אנא המתן",
+      "failedToLoadOrder": "לא ניתן לטעון נתוני הזמנה",
+      "linkExpiredOrOrderNotFound": "ייתכן שהקישור פג תוקף או שההזמנה לא נמצאה",
+      "returnToProfile": "חזור לפרופיל",
+      "allReviewsSuccessfullySent": "כל הביקורות נשלחו בהצלחה! תודה על דעתך!",
+      "yourRating": "הדירוג שלך"
     },
     "modal": {
       "title": "כתוב ביקורת על הקנייה",
@@ -625,7 +672,8 @@
     "page": {
       "title": "ביקורות על החנות",
       "noReviews": "עדיין אין ביקורות.",
-      "user": "משתמש"
+      "user": "משתמש",
+      "leaveReviewForEach": "אנא כתוב ביקורת על כל מוצר מההזמנה שלך:"
     },
     "customerReviews": {
       "title": "ביקורות על החנות שלנו",
@@ -663,6 +711,16 @@
       "testing": "בודק API...",
       "shopReviews": "ביקורות על החנות ({{count}})",
       "productReviews": "ביקורות על המוצר ({{count}})"
+    },
+    "progress": {
+      "shopReviewPending": "דירגת {{completedProducts}} מתוך {{totalProducts}} מוצרים. אל תשכח לכתוב ביקורת על החנות!",
+      "productsRemaining": "כתבת ביקורת על החנות. נותר לדרג {{remaining}} מתוך {{totalProducts}} מוצרים.",
+      "completed": "תודה! כתבת ביקורת על החנות וכל המוצרים."
+    },
+    "notification": {
+      "title": "כתוב ביקורת על הקנייה שלך",
+      "message": "אנא הקדש כמה דקות מזמנך, דרג את החנות והמוצרים. דעתך חשובה לנו ולקונים אחרים!",
+      "actionText": "כתוב ביקורת"
     }
   },
   "productDetails": {

@@ -21,6 +21,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { getImageUrl } from '../config';
 import { useTranslation } from 'react-i18next';
+import { getTranslatedName } from '../utils/translationUtils';
 
 // Иконки для возрастных групп
 const ageIcons = {
@@ -179,7 +180,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                 borderRadius: { xs: 1.5, md: 2 },
                 border: '2px solid #f0f0f0',
                 flexShrink: 0,
-                backgroundImage: `url(${getImageUrl(item.product.imageUrls?.[0] || '/toys.png')})`,
+                backgroundImage: `url(${item.product.imageUrls?.[0] ? getImageUrl(item.product.imageUrls[0]) : '/photography.jpg'})`,
                 backgroundSize: '100% 100%',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat'
@@ -205,7 +206,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                        fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' }
                      }}
                    >
-                     {typeof item.product.name === 'string' ? item.product.name : String(item.product.name || '')}
+                     {getTranslatedName(item.product)}
                    </Typography>
                    
                    {!isSmallMobile && (

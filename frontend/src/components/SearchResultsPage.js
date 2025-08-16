@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Box, Typography } from '@mui/material';
 import ProductCard from './ProductCard';
+import { searchInProductNames } from '../utils/translationUtils';
 
 export default function SearchResultsPage({ products, cart, onChangeCartQuantity }) {
   const location = useLocation();
@@ -9,8 +10,9 @@ export default function SearchResultsPage({ products, cart, onChangeCartQuantity
   const query = params.get('q') || '';
   const filteredProducts = products.filter(product =>
     query && (
-      product.name.toLowerCase().includes(query.toLowerCase()) ||
+      searchInProductNames(product, query) ||
       product.description?.toLowerCase().includes(query.toLowerCase()) ||
+      product.descriptionHe?.toLowerCase().includes(query.toLowerCase()) ||
       (typeof product.category === 'string' ? product.category.toLowerCase().includes(query.toLowerCase()) : 
        product.category?.name?.toLowerCase().includes(query.toLowerCase()) || false)
     )

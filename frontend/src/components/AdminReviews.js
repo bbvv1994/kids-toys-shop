@@ -15,6 +15,7 @@ import {
   Grid
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
+import { getTranslatedName } from '../utils/translationUtils';
 
 const STATUS_LABELS = {
   pending: 'На модерации',
@@ -161,7 +162,7 @@ export default function AdminReviews() {
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                     <Box>
                       <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-                        {review.product.name}
+                        {getTranslatedName(review.product)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         Отзыв от: {review.user.name}
