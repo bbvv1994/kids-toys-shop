@@ -5771,6 +5771,41 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
   const [loading, setLoading] = React.useState(true);
   const [cmsSubcategories, setCmsSubcategories] = React.useState([]);
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedProducts, setSelectedProducts] = React.useState([]);
+  const [selectAll, setSelectAll] = React.useState(false);
+  
+  // Функция для получения названия категории
+  const getCategoryName = (categoryValue) => {
+    if (!categoryValue) return '';
+    
+    // Если это объект с полем name (из include)
+    if (typeof categoryValue === 'object' && categoryValue.name) {
+      return categoryValue.name;
+    }
+    
+    // Если это ID, ищем по ID
+    if (!isNaN(categoryValue)) {
+      const category = categories.find(c => c.id === parseInt(categoryValue));
+      return category ? category.name : categoryValue;
+    }
+    
+    // Если это уже название, возвращаем как есть
+    return categoryValue;
+  };
+  
+  // Фильтрация товаров по поисковому запросу
+  const filteredProducts = products.filter(product => {
+    if (!searchQuery) return true;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      searchInProductNames(product, searchQuery) ||
+      product.article?.toLowerCase().includes(query) ||
+      product.brand?.toLowerCase().includes(query) ||
+      product.country?.toLowerCase().includes(query) ||
+      getCategoryName(product.category)?.toLowerCase().includes(query)
+    );
+  });
   
   const [form, setForm] = React.useState({ 
     name: '', 
@@ -6153,40 +6188,140 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
     setForm({ name: '', nameHe: '', description: '', descriptionHe: '', price: '', category: '', subcategory: '', quantity: '', article: '', brand: '', country: '', length: '', width: '', height: '', images: [], mainImageIndex: undefined });
   };
 
-
-
-  // Функция для получения названия категории
-  const getCategoryName = (categoryValue) => {
-    if (!categoryValue) return '';
-    
-    // Если это объект с полем name (из include)
-    if (typeof categoryValue === 'object' && categoryValue.name) {
-      return categoryValue.name;
-    }
-    
-    // Если это ID, ищем по ID
-    if (!isNaN(categoryValue)) {
-      const category = categories.find(c => c.id === parseInt(categoryValue));
-      return category ? category.name : categoryValue;
-    }
-    
-    // Если это уже название, возвращаем как есть
-    return categoryValue;
+  // Функции для мультивыбора
+  const handleSelectProduct = (productId) => {
+    setSelectedProducts(prev => {
+      if (prev.includes(productId)) {
+        return prev.filter(id => id !== productId);
+      } else {
+        return [...prev, productId];
+      }
+    });
   };
 
-  // Фильтрация товаров по поисковому запросу
-  const filteredProducts = products.filter(product => {
-    if (!searchQuery) return true;
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedProducts([]);
+      setSelectAll(false);
+    } else {
+      setSelectedProducts(filteredProducts.map(p => p.id));
+      setSelectAll(true);
+    }
+  };
+
+  // Обновляем состояние selectAll при изменении выбранных товаров
+  React.useEffect(() => {
+    if (filteredProducts.length > 0) {
+      const allSelected = filteredProducts.every(p => selectedProducts.includes(p.id));
+      const someSelected = filteredProducts.some(p => selectedProducts.includes(p.id));
+      
+      if (allSelected) {
+        setSelectAll(true);
+      } else if (someSelected) {
+        setSelectAll(false);
+      } else {
+        setSelectAll(false);
+      }
+    } else {
+      setSelectAll(false);
+    }
+  }, [selectedProducts, filteredProducts]);
+
+  const handleBulkDelete = async () => {
+    if (selectedProducts.length === 0) return;
     
-    const query = searchQuery.toLowerCase();
-    return (
-      searchInProductNames(product, searchQuery) ||
-      product.article?.toLowerCase().includes(query) ||
-      product.brand?.toLowerCase().includes(query) ||
-      product.country?.toLowerCase().includes(query) ||
-      getCategoryName(product.category)?.toLowerCase().includes(query)
-    );
-  });
+    if (!window.confirm(`Вы уверены, что хотите удалить ${selectedProducts.length} товаров? Это действие нельзя отменить.`)) {
+      return;
+    }
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !user.token) {
+      alert('Ошибка авторизации. Пожалуйста, войдите в систему.');
+      return;
+    }
+
+    try {
+      const deletePromises = selectedProducts.map(productId =>
+        fetch(`${API_BASE_URL}/api/products/${productId}`, {
+          method: 'DELETE',
+          headers: { 
+            'Authorization': `Bearer ${user.token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+      );
+
+      const results = await Promise.allSettled(deletePromises);
+      const successful = results.filter(result => result.status === 'fulfilled' && result.value.ok).length;
+      const failed = results.length - successful;
+
+      if (failed > 0) {
+        alert(`Удалено ${successful} товаров. Не удалось удалить ${failed} товаров.`);
+      } else {
+        alert(`Успешно удалено ${successful} товаров.`);
+      }
+
+      setSelectedProducts([]);
+      setSelectAll(false);
+      fetchProducts();
+    } catch (error) {
+      console.error('Ошибка массового удаления:', error);
+      alert('Ошибка при массовом удалении товаров.');
+    }
+  };
+
+  const handleBulkToggleHidden = async (hide) => {
+    if (selectedProducts.length === 0) return;
+    
+    const action = hide ? 'скрыть' : 'показать';
+    if (!window.confirm(`Вы уверены, что хотите ${action} ${selectedProducts.length} товаров?`)) {
+      return;
+    }
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !user.token) {
+      alert('Ошибка авторизации. Пожалуйста, войдите в систему.');
+      return;
+    }
+
+    try {
+      const togglePromises = selectedProducts.map(productId =>
+        fetch(`${API_BASE_URL}/api/products/${productId}/hidden`, {
+          method: 'PATCH',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`
+          },
+          body: JSON.stringify({ isHidden: hide })
+        })
+      );
+
+      const results = await Promise.allSettled(togglePromises);
+      const successful = results.filter(result => result.status === 'fulfilled' && result.value.ok).length;
+      const failed = results.length - successful;
+
+      if (failed > 0) {
+        alert(`${action.charAt(0).toUpperCase() + action.slice(1)} ${successful} товаров. Не удалось ${action} ${failed} товаров.`);
+      } else {
+        alert(`Успешно ${action} ${successful} товаров.`);
+      }
+
+      setSelectedProducts([]);
+      setSelectAll(false);
+      fetchProducts();
+    } catch (error) {
+      console.error(`Ошибка массового ${action} товаров:`, error);
+      alert(`Ошибка при массовом ${action} товаров.`);
+    }
+  };
+
+
+
+  // Очищаем выбранные товары при изменении поискового запроса
+  React.useEffect(() => {
+    setSelectedProducts([]);
+    setSelectAll(false);
+  }, [searchQuery]);
 
   if (loading) {
     return (
@@ -6211,6 +6346,21 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
           <thead>
             <tr style={{ background: '#f5f5f5' }}>
+              <th style={{ padding: 8, border: '1px solid #eee', width: '50px', textAlign: 'center' }} title="Выбрать все">
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                  <Checkbox
+                    checked={selectAll}
+                    onChange={handleSelectAll}
+                    size="small"
+                    sx={{ padding: 0 }}
+                  />
+                  {selectedProducts.length > 0 && selectedProducts.length < filteredProducts.length && (
+                    <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>
+                      {selectedProducts.length}
+                    </Typography>
+                  )}
+                </Box>
+              </th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Картинка</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '200px' }}>Название</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Цена</th>
@@ -6225,6 +6375,14 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
           <tbody>
             {filteredProducts.map(p => (
               <tr key={p.id}>
+                <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center' }}>
+                  <Checkbox
+                    checked={selectedProducts.includes(p.id)}
+                    onChange={() => handleSelectProduct(p.id)}
+                    size="small"
+                    sx={{ padding: 0 }}
+                  />
+                </td>
                 <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center' }}>
                   {p.imageUrls && p.imageUrls.length > 0 && !imageErrors[p.id] ? (
                     <Box
@@ -6979,6 +7137,119 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             </Typography>
           )}
         </Box>
+
+        {/* Панель массовых действий */}
+        {selectedProducts.length > 0 && (
+          <Box sx={{ mb: 2, p: 2, background: '#e3f2fd', borderRadius: 2, border: '1px solid #1976d2' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+              <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+                Выбрано товаров: {selectedProducts.length}
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={() => handleBulkToggleHidden(false)}
+                startIcon={<Visibility />}
+                sx={{
+                  background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                  color: '#fff',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  px: 2,
+                  py: 1,
+                  height: 36,
+                  boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                  textTransform: 'none',
+                  minWidth: 120,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                    transform: 'translateY(-1px)'
+                  },
+                }}
+              >
+                Показать все
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleBulkToggleHidden(true)}
+                startIcon={<VisibilityOff />}
+                sx={{
+                  background: 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)',
+                  color: '#fff',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  px: 2,
+                  py: 1,
+                  height: 36,
+                  boxShadow: '0 2px 8px rgba(255, 152, 0, 0.3)',
+                  textTransform: 'none',
+                  minWidth: 120,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #ffb74d 0%, #ff9800 100%)',
+                    boxShadow: '0 4px 12px rgba(255, 152, 0, 0.4)',
+                    transform: 'translateY(-1px)'
+                  },
+                }}
+              >
+                Скрыть все
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleBulkDelete}
+                startIcon={<Delete />}
+                sx={{
+                  background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
+                  color: '#fff',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  px: 2,
+                  py: 1,
+                  height: 36,
+                  boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
+                  textTransform: 'none',
+                  minWidth: 120,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #ef5350 0%, #f44336 100%)',
+                    boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                    transform: 'translateY(-1px)'
+                  },
+                }}
+              >
+                Удалить все
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  setSelectedProducts([]);
+                  setSelectAll(false);
+                }}
+                sx={{
+                  background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                  color: '#fff',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  px: 2,
+                  py: 1,
+                  height: 36,
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  textTransform: 'none',
+                  minWidth: 120,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+                  }
+                }}
+              >
+                Отменить выбор
+              </Button>
+            </Box>
+          </Box>
+        )}
         
         <ProductList />
       </Box>

@@ -305,8 +305,14 @@ export default function ContactsPage() {
                  <Typography variant="body1" sx={{ mb: 1, fontSize: { xs: '0.9rem', md: '1rem' } }}>
                    {t('contacts.workingHours.weekdays')}
                  </Typography>
+                 <Typography variant="body1" sx={{ mb: 1, fontSize: { xs: '0.9rem', md: '1rem' } }}>
+                   {t('contacts.workingHours.friday')}
+                 </Typography>
+                 <Typography variant="body1" sx={{ mb: 1, fontSize: { xs: '0.9rem', md: '1rem' } }}>
+                   {t('contacts.workingHours.saturday')}
+                 </Typography>
                  <Typography variant="body1" sx={{ fontSize: { xs: '0.9rem', md: '1rem' } }}>
-                   {t('contacts.workingHours.weekend')}
+                   {t('contacts.workingHours.sunday')}
                  </Typography>
                </Box>
              </CardContent>
