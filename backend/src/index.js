@@ -69,6 +69,7 @@ async function sendTelegramNotification(message) {
     console.log('🔑 TELEGRAM_BOT_TOKEN exists:', !!process.env.TELEGRAM_BOT_TOKEN);
     console.log('💬 TELEGRAM_CHAT_ID exists:', !!process.env.TELEGRAM_CHAT_ID);
     console.log('👥 TELEGRAM_CHAT_IDS exists:', !!process.env.TELEGRAM_CHAT_IDS);
+    console.log('📝 Message to send:', message.substring(0, 100) + '...');
     
     if (!telegramBot) {
       console.log('❌ Telegram bot not configured, skipping notification');
@@ -796,6 +797,7 @@ app.post('/api/products/:id/questions', authMiddleware, async (req, res) => {
 ❓ <b>Вопрос:</b> ${question.trim()}
 📅 <b>Дата:</b> ${new Date().toLocaleString('ru-RU')}
       `.trim();
+      console.log('🚀 About to send Telegram notification for product question');
       await sendTelegramNotification(telegramMessage);
     } catch (telegramError) {
       console.error('Error sending Telegram notification:', telegramError);
@@ -3058,16 +3060,22 @@ app.put('/api/admin/orders/:id', authMiddleware, async (req, res) => {
     if (status === 'pickedup') {
       
       try {
-        const notification = await prisma.notification.create({
-          data: {
-            userId: order.userId,
-            type: 'review_request',
-            title: 'reviews.notification.title',
-            message: 'reviews.notification.message',
-            actionUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/review-order?orderId=${order.id}`,
-            actionText: 'reviews.notification.actionText'
-          }
-        });
+        // Создаем уведомление только если есть userId (не гостевой заказ)
+        if (order.userId) {
+          const notification = await prisma.notification.create({
+            data: {
+              userId: order.userId,
+              type: 'review_request',
+              title: 'reviews.notification.title',
+              message: 'reviews.notification.message',
+              actionUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/review-order?orderId=${order.id}`,
+              actionText: 'reviews.notification.actionText'
+            }
+          });
+          console.log('✅ Уведомление о отзыве создано для заказа:', order.id);
+        } else {
+          console.log('ℹ️ Пропускаем создание уведомления для гостевого заказа:', order.id);
+        }
         
       } catch (error) {
         console.error('Ошибка создания уведомления:', error);
