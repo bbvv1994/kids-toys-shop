@@ -158,7 +158,7 @@ prisma.$connect()
     process.exit(1);
   });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Настройка multer для production и development
 let storage;
@@ -3725,66 +3725,9 @@ app.delete('/api/profile/notifications', authMiddleware, async (req, res) => {
   }
 });
 
-// === Подписка на уведомления о наличии товара ===
-app.post('/api/products/:id/notify-availability', async (req, res) => {
-  try {
-    const productId = parseInt(req.params.id);
-    const { email, productId: bodyProductId } = req.body;
-    
-    if (isNaN(productId)) {
-      return res.status(400).json({ error: 'Некорректный id товара' });
-    }
-    
-    if (!email || !email.trim()) {
-      return res.status(400).json({ error: 'Email обязателен' });
-    }
-    
-    // Проверяем, что товар существует
-    const product = await prisma.product.findUnique({
-      where: { id: productId }
-    });
-    
-    if (!product) {
-      return res.status(404).json({ error: 'Товар не найден' });
-    }
-    
-    // Проверяем, что товар действительно отсутствует
-    if (product.quantity > 0) {
-      return res.status(400).json({ error: 'Товар уже в наличии' });
-    }
-    
-    // Сохраняем подписку на уведомления
-    await prisma.availabilityNotification.upsert({
-      where: {
-        email_productId: {
-          email: email.toLowerCase().trim(),
-          productId: productId
-        }
-      },
-      update: {
-        createdAt: new Date()
-      },
-      create: {
-        email: email.toLowerCase().trim(),
-        productId: productId,
-        createdAt: new Date()
-      }
-    });
-    
-    res.json({ message: 'Подписка на уведомления успешно оформлена' });
-  } catch (error) {
-    console.error('Error subscribing to availability notifications:', error);
-    res.status(500).json({ error: 'Ошибка подписки на уведомления' });
-  }
-});
 
-app.listen(PORT, (err) => {
-  if (err) {
-    console.error('Server failed to start:', err);
-  } else {
-    
-  }
-});
+
+
 
 process.on('SIGINT', async () => {
 
@@ -4913,20 +4856,8 @@ ${message}
 
 app.listen(PORT, (err) => {
   if (err) {
-    if (err.code === 'EADDRINUSE') {
-      console.log(`⚠️ Порт ${PORT} уже занят, пробуем другой порт...`);
-      // Пробуем другой порт
-      app.listen(0, (err2) => {
-        if (err2) {
-          console.error('Server failed to start on any port:', err2);
-        } else {
-          console.log('🚀 Сервер запущен на случайном порту');
-          startSafeMigration();
-        }
-      });
-    } else {
-      console.error('Server failed to start:', err);
-    }
+    console.error('Server failed to start:', err);
+    process.exit(1);
   } else {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
     startSafeMigration();

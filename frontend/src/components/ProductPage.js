@@ -188,11 +188,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [wishlist, setWishlist] = useState([]);
   const [similarProducts, setSimilarProducts] = useState([]);
   const [quantity, setQuantity] = useState(1);
-  const [notificationEmail, setNotificationEmail] = useState('');
-  const [notificationSubscribed, setNotificationSubscribed] = useState(false);
-  const [notificationLoading, setNotificationLoading] = useState(false);
-  const [notificationError, setNotificationError] = useState('');
-  const [notificationSuccess, setNotificationSuccess] = useState('');
+
   const [cartAnimPlaying, setCartAnimPlaying] = useState(false);
   const [cartAnimKey, setCartAnimKey] = useState(0);
   const [wishlistAnimPlaying, setWishlistAnimPlaying] = useState(false);
@@ -661,45 +657,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     }
   };
 
-  // Функция для подписки на уведомления о наличии
-  const handleNotificationSubscribe = async (e) => {
-    e.preventDefault();
-    if (!notificationEmail.trim()) {
-      setNotificationError('Введите email');
-      return;
-    }
-    
-    setNotificationLoading(true);
-    setNotificationError('');
-    setNotificationSuccess('');
-    
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/products/${id}/notify-availability`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(user?.token && { 'Authorization': `Bearer ${user.token}` })
-        },
-        body: JSON.stringify({ 
-          email: notificationEmail,
-          productId: parseInt(id)
-        })
-      });
-      
-      const data = await res.json();
-      if (res.ok) {
-        setNotificationSuccess('Вы подписались на уведомления!');
-        setNotificationSubscribed(true);
-        setNotificationEmail('');
-      } else {
-        setNotificationError(data.error || 'Ошибка подписки');
-      }
-    } catch (e) {
-      setNotificationError('Ошибка подписки на уведомления');
-    }
-    
-    setNotificationLoading(false);
-  };
+
 
   if (loading) {
     return <Container sx={{ py: 4, textAlign: 'center' }}><Typography variant="h4">Загрузка...</Typography></Container>;
@@ -1317,76 +1275,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               )}
             </Box>
             
-            {/* Уведомления о наличии */}
-            {product.quantity <= 0 && !notificationSubscribed && (
-              <Box sx={{ mt: 3, p: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: 3, color: 'white' }}>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                  🔔 Уведомить о поступлении
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 2, opacity: 0.9 }}>
-                  Оставьте свой email, и мы сообщим вам, когда товар появится в наличии
-                </Typography>
-                <Box component="form" onSubmit={handleNotificationSubscribe} sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <TextField
-                    type="email"
-                    placeholder="Ваш email"
-                    value={notificationEmail}
-                    onChange={(e) => setNotificationEmail(e.target.value)}
-                    sx={{
-                      flex: 1,
-                      minWidth: 250,
-                      '& .MuiOutlinedInput-root': {
-                        backgroundColor: 'rgba(255,255,255,0.9)',
-                        borderRadius: 2,
-                        '&:hover': {
-                          backgroundColor: 'rgba(255,255,255,1)'
-                        }
-                      }
-                    }}
-                    disabled={notificationLoading}
-                  />
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={notificationLoading || !notificationEmail.trim()}
-                    sx={{
-                      background: 'linear-gradient(90deg, #FFD93D 0%, #FF6B6B 100%)',
-                      color: 'white',
-                      borderRadius: 2,
-                      fontWeight: 600,
-                      px: 3,
-                      '&:hover': {
-                        background: 'linear-gradient(90deg, #FF6B6B 0%, #FFD93D 100%)',
-                        transform: 'scale(1.02)'
-                      }
-                    }}
-                  >
-                    {notificationLoading ? 'Подписка...' : 'Подписаться'}
-                  </Button>
-                </Box>
-                {notificationError && (
-                  <Typography sx={{ mt: 1, color: '#ffebee', fontSize: '0.875rem' }}>
-                    {notificationError}
-                  </Typography>
-                )}
-                {notificationSuccess && (
-                  <Typography sx={{ mt: 1, color: '#c8e6c9', fontSize: '0.875rem' }}>
-                    {notificationSuccess}
-                  </Typography>
-                )}
-              </Box>
-            )}
-            
-            {product.quantity <= 0 && notificationSubscribed && (
-              <Box sx={{ mt: 3, p: 3, background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)', borderRadius: 3, color: 'white' }}>
-                <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-                  ✅ Вы подписаны на уведомления
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  Мы сообщим вам, когда товар появится в наличии
-                </Typography>
-              </Box>
-            )}
+
           </Box>
         </Box>
         
