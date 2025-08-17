@@ -8,7 +8,8 @@ import CustomerReviews from './components/CustomerReviews';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useDeviceType } from './utils/deviceDetection';
 import { getImageUrl, API_BASE_URL } from './config';
-import { getTranslatedName } from './utils/translationUtils';
+import { getTranslatedName, forceLanguageUpdate, checkTranslationsAvailable } from './utils/translationUtils';
+import TranslationDebugger from './components/TranslationDebugger';
 import { 
   DndContext,
   closestCenter,
@@ -4085,6 +4086,39 @@ function App() {
   useEffect(() => {
     document.documentElement.lang = i18n.language;
   }, [i18n.language]);
+
+  // Принудительная инициализация переводов для production
+  useEffect(() => {
+    const initializeTranslations = async () => {
+      try {
+        // Проверяем доступность переводов
+        const translationsAvailable = checkTranslationsAvailable();
+        
+        if (!translationsAvailable) {
+          console.warn('⚠️ Translations not available, forcing initialization...');
+          // Принудительно устанавливаем язык
+          forceLanguageUpdate('ru');
+        }
+        
+        // Проверяем текущий язык
+        const currentLang = i18n.language || localStorage.getItem('i18nextLng') || 'ru';
+        if (!currentLang.match(/^(ru|he)$/)) {
+          console.warn('⚠️ Invalid language detected, forcing to Russian');
+          forceLanguageUpdate('ru');
+        }
+        
+        console.log('✅ App translations initialized. Current language:', i18n.language);
+      } catch (error) {
+        console.error('❌ Error initializing app translations:', error);
+        // Fallback на русский
+        forceLanguageUpdate('ru');
+      }
+    };
+    
+    // Запускаем инициализацию с небольшой задержкой для надежности
+    const timer = setTimeout(initializeTranslations, 100);
+    return () => clearTimeout(timer);
+  }, [i18n.language]);
   
   // Делаем setUser доступным глобально для ConfirmEmailPage
   useEffect(() => {
@@ -4093,6 +4127,17 @@ function App() {
       delete window.setUser;
     };
   }, []);
+
+  // Отладчик переводов для production
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') {
+      console.log('🔍 Translation Debugger Active');
+      console.log('Current language:', i18n.language);
+      console.log('Available languages:', i18n.languages);
+      console.log('Has resources:', i18n.hasResourceBundle(i18n.language, 'translation'));
+      console.log('LocalStorage language:', localStorage.getItem('i18nextLng'));
+    }
+  }, [i18n.language]);
 
   const [editingProduct, setEditingProduct] = useState(null);
   const [miniCartOpen, setMiniCartOpen] = useState(false);
@@ -10770,7 +10815,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 borderBottom: '2px solid #f0f0f0', 
                 pb: 2 
               }}>
-                {createHeader(t('profile.header.notifications'))}
+              {createHeader(t('profile.header.notifications'))}
                 {notifications.length > 0 && (
                   <Button 
                     variant="contained" 
@@ -11339,21 +11384,21 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                                 height: '100%',
                                 objectFit: 'cover',
                                 borderRadius: '8px'
-                              }}
-                              onError={(e) => {
+                            }}
+                            onError={(e) => {
                                 e.target.src = '/photography.jpg';
-                              }}
-                            />
+                            }}
+                          />
                           </Box>
                           <Box>
-                            <Typography sx={{ 
-                              fontWeight: 600, 
-                              color: '#333', 
+                              <Typography sx={{ 
+                                fontWeight: 600, 
+                                color: '#333', 
                               fontSize: { xs: 14, md: 16 },
                               mb: 1 
-                            }}>
-                              {review.productName}
-                            </Typography>
+                              }}>
+                                {review.productName}
+                              </Typography>
                             <Typography sx={{ 
                               color: '#666', 
                               fontSize: { xs: 12, md: 14 } 

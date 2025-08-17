@@ -15,22 +15,63 @@ const resources = {
   }
 };
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources,
-    fallbackLng: 'ru',
-    debug: process.env.NODE_ENV === 'development',
+// Функция для принудительной инициализации i18n
+const initializeI18n = async () => {
+  try {
+    await i18n
+      .use(LanguageDetector)
+      .use(initReactI18next)
+      .init({
+        resources,
+        fallbackLng: 'ru',
+        debug: process.env.NODE_ENV === 'development',
+        
+        interpolation: {
+          escapeValue: false, // React уже экранирует значения
+        },
+        
+        detection: {
+          order: ['localStorage', 'navigator', 'htmlTag'],
+          caches: ['localStorage'],
+          // Принудительно устанавливаем язык если не определен
+          lookupLocalStorage: 'i18nextLng',
+          lookupSessionStorage: 'i18nextLng',
+        },
+        
+        // Дополнительные настройки для production
+        react: {
+          useSuspense: false, // Отключаем Suspense для лучшей совместимости
+        },
+        
+        // Обработка ошибок
+        saveMissing: process.env.NODE_ENV === 'development',
+        missingKeyHandler: (lng, ns, key, fallbackValue) => {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`Missing translation key: ${key} for language: ${lng}`);
+          }
+        },
+      });
     
-    interpolation: {
-      escapeValue: false, // React уже экранирует значения
-    },
+    // Принудительно устанавливаем язык если он не определен
+    if (!i18n.language || !i18n.language.match(/^(ru|he)$/)) {
+      i18n.changeLanguage('ru');
+    }
     
-    detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
-      caches: ['localStorage'],
-    },
-  });
+    console.log('✅ i18n initialized successfully. Current language:', i18n.language);
+  } catch (error) {
+    console.error('❌ Error initializing i18n:', error);
+    // Fallback инициализация
+    i18n.init({
+      resources,
+      fallbackLng: 'ru',
+      lng: 'ru',
+      debug: false,
+      interpolation: { escapeValue: false },
+    });
+  }
+};
+
+// Инициализируем i18n
+initializeI18n();
 
 export default i18n; 

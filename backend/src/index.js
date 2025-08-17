@@ -519,7 +519,15 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
     return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
   }
   try {
-    const { name, description, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, inputLanguage = 'ru' } = req.body;
+    console.log('📦 Создание нового товара...');
+    console.log('📥 Полученные данные:', JSON.stringify(req.body, null, 2));
+    console.log('🔍 Проверка полей переводов:');
+    console.log('  - nameHe:', req.body.nameHe);
+    console.log('  - descriptionHe:', req.body.descriptionHe);
+    console.log('  - name:', req.body.name);
+    console.log('  - description:', req.body.description);
+    
+    const { name, description, nameHe, descriptionHe, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, inputLanguage = 'ru' } = req.body;
     
     // Используем URL из Cloudinary или локальные пути
     const imageUrls = req.files ? req.files.map((file, index) => {
@@ -565,10 +573,12 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
       }
     }
 
-    // Автоматический перевод названия и описания
+    // Создаем данные товара с поддержкой ручных переводов
     const productData = {
       name,
       description,
+      nameHe: nameHe || null,
+      descriptionHe: descriptionHe || null,
       price: parseFloat(price),
       categoryName: categoryName,
       categoryId: category && !isNaN(category) ? parseInt(category) : null,
@@ -2616,7 +2626,15 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7),
     return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
   }
   try {
-    const { name, description, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, removedImages, currentExistingImages, mainImageIndex, inputLanguage = 'ru' } = req.body;
+    console.log('📝 Обновление товара ID:', req.params.id);
+    console.log('📥 Полученные данные:', JSON.stringify(req.body, null, 2));
+    console.log('🔍 Проверка полей переводов:');
+    console.log('  - nameHe:', req.body.nameHe);
+    console.log('  - descriptionHe:', req.body.descriptionHe);
+    console.log('  - name:', req.body.name);
+    console.log('  - description:', req.body.description);
+    
+    const { name, description, nameHe, descriptionHe, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, removedImages, currentExistingImages, mainImageIndex, inputLanguage = 'ru' } = req.body;
     
     console.log('API: Received product update data:', {
       name, description, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden
@@ -2742,10 +2760,12 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7),
       }
     }
     
-    // Автоматический перевод названия и описания
+    // Создаем данные товара с поддержкой ручных переводов
     const productData = {
       name,
       description,
+      nameHe: nameHe || null,
+      descriptionHe: descriptionHe || null,
       price: parseFloat(price),
       categoryName: categoryName,
       categoryId: category && !isNaN(category) ? parseInt(category) : null,
@@ -4950,3 +4970,117 @@ function startSafeMigration() {
     }
   }, 5000); // Задержка 5 секунд для полной инициализации
 }
+
+// Diagnostic endpoint для проверки структуры базы данных
+app.get('/api/debug/database-structure', async (req, res) => {
+  try {
+    console.log('🔍 Проверка структуры базы данных...');
+    
+    // Проверяем существование таблицы Product
+    const tableExists = await prisma.$queryRaw`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'Product'
+      );
+    `;
+    
+    // Проверяем существование полей переводов
+    const columnsExist = await prisma.$queryRaw`
+      SELECT column_name, data_type, is_nullable
+      FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+      AND table_name = 'Product'
+      AND column_name IN ('nameHe', 'descriptionHe', 'name', 'description')
+      ORDER BY column_name;
+    `;
+    
+    // Проверяем количество продуктов с переводами
+    const productsWithTranslations = await prisma.product.findMany({
+      where: {
+        OR: [
+          { nameHe: { not: null } },
+          { descriptionHe: { not: null } }
+        ]
+      },
+      select: {
+        id: true,
+        name: true,
+        nameHe: true,
+        description: true,
+        descriptionHe: true
+      },
+      take: 5
+    });
+    
+    // Общее количество продуктов
+    const totalProducts = await prisma.product.count();
+    
+    res.json({
+      success: true,
+      tableExists: tableExists[0]?.exists || false,
+      translationColumns: columnsExist,
+      productsWithTranslations: {
+        count: productsWithTranslations.length,
+        samples: productsWithTranslations
+      },
+      totalProducts,
+      environment: process.env.NODE_ENV,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Ошибка при проверке структуры БД:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+// Diagnostic endpoint для тестирования создания продукта с переводами
+app.post('/api/debug/test-translations', async (req, res) => {
+  try {
+    console.log('🧪 Тестирование создания продукта с переводами...');
+    console.log('📥 Полученные данные:', JSON.stringify(req.body, null, 2));
+    
+    const { name, description, nameHe, descriptionHe, price = 100 } = req.body;
+    
+    // Создаем тестовый продукт
+    const testProduct = await prisma.product.create({
+      data: {
+        name: name || 'Test Product',
+        description: description || 'Test Description',
+        nameHe: nameHe || null,
+        descriptionHe: descriptionHe || null,
+        price: parseFloat(price),
+        quantity: 1,
+        categoryName: 'Test Category'
+      }
+    });
+    
+    console.log('✅ Тестовый продукт создан:', testProduct);
+    
+    // Получаем созданный продукт для проверки
+    const createdProduct = await prisma.product.findUnique({
+      where: { id: testProduct.id }
+    });
+    
+    res.json({
+      success: true,
+      createdProduct,
+      receivedData: req.body,
+      environment: process.env.NODE_ENV,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Ошибка при тестировании переводов:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
