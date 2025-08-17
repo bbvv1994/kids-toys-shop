@@ -1,7 +1,7 @@
 // Универсальная конфигурация для автоматического определения среды
 const config = {
   development: {
-    API_BASE_URL: 'http://localhost:5000',
+    API_BASE_URL: 'http://localhost:5001',
     FRONTEND_URL: 'http://localhost:3000'
   },
   production: {

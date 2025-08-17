@@ -34,6 +34,8 @@ function EditProductModal(props) {
   console.log('=== EditProductModal RENDER ===');
   console.log('open:', open);
   console.log('product:', product);
+  console.log('product.nameHe:', product?.nameHe);
+  console.log('product.descriptionHe:', product?.descriptionHe);
   console.log('categories length:', categories.length);
   console.log('props:', props);
   const [formData, setFormData] = useState({
@@ -514,6 +516,8 @@ function EditProductModal(props) {
   const handleInputChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
     
+    console.log('EditProductModal: handleInputChange - name:', name, 'value:', value);
+    
     if (name === 'isHidden') {
       setFormData(prev => ({ ...prev, isHidden: checked }));
       return;
@@ -647,6 +651,10 @@ function EditProductModal(props) {
       };
 
       console.log('EditProductModal: Updated product data:', updatedProduct);
+      console.log('EditProductModal: formData.nameHe:', formData.nameHe);
+      console.log('EditProductModal: formData.descriptionHe:', formData.descriptionHe);
+      console.log('EditProductModal: updatedProduct.nameHe:', updatedProduct.nameHe);
+      console.log('EditProductModal: updatedProduct.descriptionHe:', updatedProduct.descriptionHe);
       await onSave(updatedProduct);
     } catch (err) {
       setError('Ошибка сохранения товара');
@@ -715,7 +723,9 @@ function EditProductModal(props) {
 
       const initialFormData = {
         name: safeString(product.name) || '',
+        nameHe: safeString(product.nameHe) || '',
         description: safeString(product.description) || '',
+        descriptionHe: safeString(product.descriptionHe) || '',
         price: product.price || '',
         category: safeString(product.category) || '',
         subcategory: safeString(product.subcategory) || '',
@@ -731,8 +741,10 @@ function EditProductModal(props) {
         isHidden: product.isHidden || false
       };
       
-      console.log('EditProductModal: Setting initial form data:', initialFormData);
-      setFormData(initialFormData);
+        console.log('EditProductModal: Setting initial form data:', initialFormData);
+  console.log('EditProductModal: nameHe value:', initialFormData.nameHe);
+  console.log('EditProductModal: descriptionHe value:', initialFormData.descriptionHe);
+  setFormData(initialFormData);
 
       // Загружаем существующие изображения
       if (product.imageUrls && product.imageUrls.length > 0) {
