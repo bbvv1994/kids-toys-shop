@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест переводов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Тест переводов - Kids Toys Shop</h1>
+    
+    <div class="container">
+        <h2>1. Проверка структуры базы данных</h2>
+        <button onclick="checkDatabaseStructure()">Проверить структуру БД</button>
+        <div id="dbResult" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h2>2. Тест создания продукта с переводами</h2>
+        <div class="form-group">
+            <label>Название (русский):</label>
+            <input type="text" id="nameRu" value="Тестовый продукт">
+        </div>
+        <div class="form-group">
+            <label>Описание (русский):</label>
+            <textarea id="descriptionRu">Описание тестового продукта на русском языке</textarea>
+        </div>
+        <div class="form-group">
+            <label>Название (иврит):</label>
+            <input type="text" id="nameHe" value="מוצר בדיקה">
+        </div>
+        <div class="form-group">
+            <label>Описание (иврит):</label>
+            <textarea id="descriptionHe">תיאור מוצר הבדיקה בעברית</textarea>
+        </div>
+        <div class="form-group">
+            <label>Цена:</label>
+            <input type="number" id="price" value="100">
+        </div>
+        <button onclick="testCreateProduct()">Создать тестовый продукт</button>
+        <div id="createResult" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h2>3. Проверка API endpoints</h2>
+        <button onclick="checkHealth()">Health Check</button>
+        <button onclick="checkProducts()">Получить продукты</button>
+        <div id="apiResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://kids-toys-backend.onrender.com';
+        
+        async function makeRequest(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                const data = await response.json();
+                return { success: response.ok, data, status: response.status };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        function displayResult(elementId, result, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.className = `result ${type}`;
+            element.textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function checkDatabaseStructure() {
+            const result = await makeRequest(`${API_BASE_URL}/api/debug/database-structure`);
+            displayResult('dbResult', result, result.success ? 'success' : 'error');
+        }
+
+        async function testCreateProduct() {
+            const productData = {
+                name: document.getElementById('nameRu').value,
+                description: document.getElementById('descriptionRu').value,
+                nameHe: document.getElementById('nameHe').value,
+                descriptionHe: document.getElementById('descriptionHe').value,
+                price: document.getElementById('price').value
+            };
+
+            const result = await makeRequest(`${API_BASE_URL}/api/debug/test-translations`, {
+                method: 'POST',
+                body: JSON.stringify(productData)
+            });
+            
+            displayResult('createResult', result, result.success ? 'success' : 'error');
+        }
+
+        async function checkHealth() {
+            const result = await makeRequest(`${API_BASE_URL}/api/health`);
+            displayResult('apiResult', result, result.success ? 'success' : 'error');
+        }
+
+        async function checkProducts() {
+            const result = await makeRequest(`${API_BASE_URL}/api/products?limit=3`);
+            displayResult('apiResult', result, result.success ? 'success' : 'error');
+        }
+
+        // Автоматически проверяем структуру БД при загрузке
+        window.onload = function() {
+            checkDatabaseStructure();
+        };
+    </script>
+</body>
+</html>

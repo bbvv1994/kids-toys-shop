@@ -627,14 +627,12 @@ app.get('/api/products', async (req, res) => {
       whereClause.isHidden = false;
     }
     
-    // Проверяем доступность полей переводов
-    const translationFields = await getTranslationFields();
-    const hasTranslations = translationFields.length > 0;
-    
     const selectFields = {
       id: true,
       name: true,
       description: true,
+      nameHe: true,
+      descriptionHe: true,
       price: true,
       ageGroup: true,
       createdAt: true,
@@ -663,12 +661,6 @@ app.get('/api/products', async (req, res) => {
         select: { name: true }
       }
     };
-    
-    // Добавляем поля переводов только если они существуют
-    if (hasTranslations) {
-      selectFields.nameHe = true;
-      selectFields.descriptionHe = true;
-    }
     
     const products = await prisma.product.findMany({
       where: whereClause,
@@ -981,14 +973,12 @@ app.get('/api/products/:id', async (req, res) => {
       whereClause.isHidden = false;
     }
     
-    // Проверяем доступность полей переводов
-    const translationFields = await getTranslationFields();
-    const hasTranslations = translationFields.length > 0;
-    
     const selectFields = {
       id: true,
       name: true,
       description: true,
+      nameHe: true,
+      descriptionHe: true,
       price: true,
       ageGroup: true,
       createdAt: true,
@@ -1017,12 +1007,6 @@ app.get('/api/products/:id', async (req, res) => {
         select: { id: true, name: true }
       }
     };
-    
-    // Добавляем поля переводов только если они существуют
-    if (hasTranslations) {
-      selectFields.nameHe = true;
-      selectFields.descriptionHe = true;
-    }
     
     const product = await prisma.product.findUnique({
       where: whereClause,
