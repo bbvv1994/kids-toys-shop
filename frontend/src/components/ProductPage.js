@@ -1091,9 +1091,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               <Typography variant="body2"><b>{i18n.language === 'he' ? `${product.brand || '—'}: ${t('productCard.brand')}` : `${t('productCard.brand')}: ${product.brand || '—'}`}</b></Typography>
               <Typography variant="body2"><b>{i18n.language === 'he' ? `${product.manufacturer || product.country || '—'}: ${t('productCard.country')}` : `${t('productCard.country')}: ${product.manufacturer || product.country || '—'}`}</b></Typography>
               <Typography variant="body2"><b>{i18n.language === 'he' ? 
-                `${t('productCard.dimensions')}: ${product.height && product.length && product.width ? 
+                `${product.height && product.length && product.width ? 
                   `${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
-                  '—'}` :
+                  '—'}: ${t('productCard.dimensions')}` :
                 `${t('productCard.dimensions')}: ${product.height && product.length && product.width ? 
                   `${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
                   '—'}`
