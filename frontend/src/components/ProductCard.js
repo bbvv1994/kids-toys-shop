@@ -736,12 +736,12 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           minWidth: 120, 
           wordBreak: 'break-word' 
         }}>
-          <div>{t('productCard.sku')}: {product.article || '-'}</div>
-          <div>{t('productCard.brand')}: {product.brand || '-'}</div>
-          <div>{t('productCard.country')}: {product.manufacturer || product.country || '-'}</div>
+          <div>{i18n.language === 'he' ? `${product.article || '—'}: ${t('productCard.sku')}` : `${t('productCard.sku')}: ${product.article || '-'}`}</div>
+          <div>{i18n.language === 'he' ? `${product.brand || '—'}: ${t('productCard.brand')}` : `${t('productCard.brand')}: ${product.brand || '-'}`}</div>
+          <div>{i18n.language === 'he' ? `${product.manufacturer || product.country || '—'}: ${t('productCard.country')}` : `${t('productCard.country')}: ${product.manufacturer || product.country || '-'}`}</div>
           <div dir="rtl" style={{ textAlign: 'right' }}>{product.height && product.length && product.width ? 
             `${t('productCard.dimensions')}: ${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
-            product.size || '-'}</div>
+            `${t('productCard.dimensions')}: ${product.size || '—'}`}</div>
         </Box>
         <Box sx={{ position: 'absolute', right: 24, bottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
           {/* Счетчик и кнопка — просто в потоке, без absolute */}
@@ -1326,12 +1326,12 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
               color: '#444',
               textAlign: 'left'
             }}>
-              <div>{t('productCard.sku')}: {product.article || '-'}</div>
-              <div>{t('productCard.brand')}: {product.brand || '-'}</div>
-              <div>{t('productCard.country')}: {product.manufacturer || product.country || '-'}</div>
+              <div>{i18n.language === 'he' ? `${product.article || '—'}: ${t('productCard.sku')}` : `${t('productCard.sku')}: ${product.article || '-'}`}</div>
+              <div>{i18n.language === 'he' ? `${product.brand || '—'}: ${t('productCard.brand')}` : `${t('productCard.brand')}: ${product.brand || '-'}`}</div>
+              <div>{i18n.language === 'he' ? `${product.manufacturer || product.country || '—'}: ${t('productCard.country')}` : `${t('productCard.country')}: ${product.manufacturer || product.country || '-'}`}</div>
               <div dir="rtl" style={{ textAlign: 'right' }}>{product.height && product.length && product.width ? 
                 `${t('productCard.dimensions')}: ${product.length}×${product.width}×${product.height} ${t('productCard.units.cm')}` : 
-                product.size || '-'}</div>
+                `${t('productCard.dimensions')}: ${product.size || '—'}`}</div>
             </div>
           </Box>
         )}
