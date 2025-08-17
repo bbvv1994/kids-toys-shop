@@ -5931,7 +5931,26 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
 
       if (response.ok) {
         // Очищаем форму
-        setForm({ name: '', description: '', price: '', category: '', subcategory: '', quantity: '', article: '', brand: '', country: '', length: '', width: '', height: '', images: [], mainImageIndex: undefined });
+        setForm({ 
+          name: '', 
+          nameHe: '',
+          description: '', 
+          descriptionHe: '',
+          price: '', 
+          category: '', 
+          subcategory: '', 
+          quantity: '', 
+          article: '', 
+          brand: '', 
+          country: '', 
+          length: '', 
+          width: '', 
+          height: '', 
+          ageGroup: '',
+          gender: '',
+          images: [], 
+          mainImageIndex: undefined 
+        });
         // Перезагружаем товары с сервера
         fetchProducts();
     } else {
@@ -6094,7 +6113,26 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
 
       if (response.ok) {
         // Очищаем форму
-        setForm({ name: '', description: '', price: '', category: '', subcategory: '', quantity: '', article: '', brand: '', country: '', length: '', width: '', height: '', images: [], mainImageIndex: undefined });
+        setForm({ 
+          name: '', 
+          nameHe: '',
+          description: '', 
+          descriptionHe: '',
+          price: '', 
+          category: '', 
+          subcategory: '', 
+          quantity: '', 
+          article: '', 
+          brand: '', 
+          country: '', 
+          length: '', 
+          width: '', 
+          height: '', 
+          ageGroup: '',
+          gender: '',
+          images: [], 
+          mainImageIndex: undefined 
+        });
         // Перезагружаем товары с сервера
         fetchProducts();
       } else {
