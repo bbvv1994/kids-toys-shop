@@ -64,20 +64,35 @@ if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
 // Функция для отправки уведомления в Telegram
 async function sendTelegramNotification(message) {
   try {
+    console.log('🔍 Telegram notification function called');
+    console.log('📱 Telegram bot exists:', !!telegramBot);
+    console.log('🔑 TELEGRAM_BOT_TOKEN exists:', !!process.env.TELEGRAM_BOT_TOKEN);
+    console.log('💬 TELEGRAM_CHAT_ID exists:', !!process.env.TELEGRAM_CHAT_ID);
+    console.log('👥 TELEGRAM_CHAT_IDS exists:', !!process.env.TELEGRAM_CHAT_IDS);
+    
     if (!telegramBot) {
-      console.log('Telegram bot not configured, skipping notification');
+      console.log('❌ Telegram bot not configured, skipping notification');
       return true;
     }
     
     // Получаем список Chat ID из переменной окружения
-    const chatIds = process.env.TELEGRAM_CHAT_IDS 
-      ? process.env.TELEGRAM_CHAT_IDS.split(',').map(id => id.trim())
-      : process.env.TELEGRAM_CHAT_ID 
-        ? [process.env.TELEGRAM_CHAT_ID]
-        : [];
+    let chatIds = [];
+    
+    if (process.env.TELEGRAM_CHAT_IDS) {
+      console.log('📋 Using TELEGRAM_CHAT_IDS:', process.env.TELEGRAM_CHAT_IDS);
+      chatIds = process.env.TELEGRAM_CHAT_IDS.split(',').map(id => id.trim());
+    } else if (process.env.TELEGRAM_CHAT_ID) {
+      console.log('📋 Using TELEGRAM_CHAT_ID:', process.env.TELEGRAM_CHAT_ID);
+      chatIds = [process.env.TELEGRAM_CHAT_ID];
+    }
+    
+    console.log('🎯 Chat IDs to send to:', chatIds);
     
     if (chatIds.length === 0) {
-      console.log('No Telegram chat IDs configured, skipping notification');
+      console.log('❌ No Telegram chat IDs configured, skipping notification');
+      console.log('💡 Available environment variables:');
+      console.log('   - TELEGRAM_CHAT_ID:', process.env.TELEGRAM_CHAT_ID);
+      console.log('   - TELEGRAM_CHAT_IDS:', process.env.TELEGRAM_CHAT_IDS);
       return true;
     }
     
@@ -85,11 +100,11 @@ async function sendTelegramNotification(message) {
     const sendPromises = chatIds.map(chatId => 
       telegramBot.sendMessage(chatId, message, { parse_mode: 'HTML' })
         .then(() => {
-          console.log(`Telegram notification sent successfully to chat ID: ${chatId}`);
+          console.log(`✅ Telegram notification sent successfully to chat ID: ${chatId}`);
           return true;
         })
         .catch(error => {
-          console.error(`Error sending Telegram notification to chat ID ${chatId}:`, error);
+          console.error(`❌ Error sending Telegram notification to chat ID ${chatId}:`, error.message);
           return false;
         })
     );
@@ -97,10 +112,10 @@ async function sendTelegramNotification(message) {
     const results = await Promise.allSettled(sendPromises);
     const successCount = results.filter(result => result.status === 'fulfilled' && result.value).length;
     
-    console.log(`Telegram notifications sent: ${successCount}/${chatIds.length} successful`);
+    console.log(`📊 Telegram notifications summary: ${successCount}/${chatIds.length} successful`);
     return successCount > 0;
   } catch (error) {
-    console.error('Error sending Telegram notifications:', error);
+    console.error('💥 Error in sendTelegramNotification function:', error);
     return false;
   }
 }
