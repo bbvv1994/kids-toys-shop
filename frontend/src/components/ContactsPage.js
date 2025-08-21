@@ -76,9 +76,15 @@ export default function ContactsPage() {
     window.open(`https://wa.me/972533774509?text=${message}`, '_blank');
   };
 
-  const handleWazeClick = (location) => {
-    const encodedLocation = encodeURIComponent(location);
-    window.open(`https://waze.com/ul?q=${encodedLocation}&navigate=yes`, '_blank');
+  const handleWazeClick = (location, coordinates = null) => {
+    if (coordinates) {
+      // Используем точные координаты для более точной навигации
+      window.open(`https://waze.com/ul?ll=${coordinates.lat},${coordinates.lng}&navigate=yes`, '_blank');
+    } else {
+      // Fallback на текстовый адрес
+      const encodedLocation = encodeURIComponent(location);
+      window.open(`https://waze.com/ul?q=${encodedLocation}&navigate=yes`, '_blank');
+    }
   };
 
   // Данные о магазинах для карты
@@ -87,17 +93,17 @@ export default function ContactsPage() {
       name: t('contacts.address.store1.name'),
       address: t('contacts.address.store1.location'),
       phone: t('contacts.phones.primary'),
-      coordinates: { lat: 32.8333, lng: 35.0667 } // Kiryat Yam - Robert Sold 8
+      coordinates: { lat: 32.835482, lng: 35.063737 } // Kiryat Yam - Robert Sold 8
     },
     {
       name: t('contacts.address.store2.name'),
       address: t('contacts.address.store2.location'),
       phone: t('contacts.phones.secondary'),
-      coordinates: { lat: 32.8333, lng: 35.0833 } // Kiryat Motzkin - Weizmann 6
+      coordinates: { lat: 32.833308, lng: 35.074906 } // Kiryat Motzkin - Weizmann 6
     }
   ];
 
-  const mapCenter = { lat: 32.8333, lng: 35.0750 }; // Центр между магазинами в Хайфском заливе
+  const mapCenter = { lat: 32.8344, lng: 35.0693 }; // Центр между магазинами в Хайфском заливе
 
   return (
     <Container maxWidth="lg" sx={{ 
@@ -372,7 +378,7 @@ export default function ContactsPage() {
               <Box sx={{ display: 'flex', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
                 <Button
                   variant="contained"
-                  onClick={() => handleWazeClick(t('contacts.address.store1.location'))}
+                  onClick={() => handleWazeClick(t('contacts.address.store1.location'), stores[0].coordinates)}
                   sx={{
                     background: 'linear-gradient(135deg, #87CEEB 0%, #5F9EA0 100%)',
                     color: '#fff',
@@ -428,7 +434,7 @@ export default function ContactsPage() {
               <Box sx={{ display: 'flex', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
                 <Button
                   variant="contained"
-                  onClick={() => handleWazeClick(t('contacts.address.store2.location'))}
+                  onClick={() => handleWazeClick(t('contacts.address.store2.location'), stores[1].coordinates)}
                   sx={{
                     background: 'linear-gradient(135deg, #87CEEB 0%, #5F9EA0 100%)',
                     color: '#fff',
