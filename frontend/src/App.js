@@ -1639,7 +1639,7 @@ const theme = createTheme({
                 </Box>
               )}
               {/* Уведомления */}
-              {user && (
+              {user && user.role !== 'admin' && (
                 <Box sx={{ display: 'flex', alignItems: 'center', height: 56, mr: 1, position: 'relative' }}>
                   <Button
                     color="inherit"
@@ -12819,6 +12819,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   <ListItemIcon><PersonIcon /></ListItemIcon>
                   <ListItemText primary={t('profile.menu.myProfile')} />
                 </ListItem>
+                {user?.role !== 'admin' && (
                 <ListItem 
                   button 
                   selected={selectedSection === 'notifications'} 
@@ -12847,6 +12848,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   <ListItemIcon><NotificationsIcon /></ListItemIcon>
                   <ListItemText primary={t('profile.menu.notifications')} />
                 </ListItem>
+                )}
                 <ListItem 
                   button 
                   selected={selectedSection === 'orders'} 
