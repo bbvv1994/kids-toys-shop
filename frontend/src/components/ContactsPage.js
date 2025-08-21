@@ -101,7 +101,7 @@ export default function ContactsPage() {
   return (
     <Container maxWidth="lg" sx={{ 
       py: { xs: 1, md: 6 }, 
-      pt: { xs: 4, md: 12 }, 
+      pt: { xs: 4, md: 5.75 }, 
       minHeight: '80vh' 
     }}>
       {/* Заголовок */}
@@ -308,11 +308,8 @@ export default function ContactsPage() {
                  <Typography variant="body1" sx={{ mb: 1, fontSize: { xs: '0.9rem', md: '1rem' } }}>
                    {t('contacts.workingHours.friday')}
                  </Typography>
-                 <Typography variant="body1" sx={{ mb: 1, fontSize: { xs: '0.9rem', md: '1rem' } }}>
-                   {t('contacts.workingHours.saturday')}
-                 </Typography>
                  <Typography variant="body1" sx={{ fontSize: { xs: '0.9rem', md: '1rem' } }}>
-                   {t('contacts.workingHours.sunday')}
+                   {t('contacts.workingHours.saturday')}
                  </Typography>
                </Box>
              </CardContent>

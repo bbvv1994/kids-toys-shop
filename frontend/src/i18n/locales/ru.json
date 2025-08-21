@@ -263,6 +263,15 @@
       "showLess": "Скрыть"
     }
   },
+  "searchResults": {
+    "title": "Результаты поиска",
+    "forQuery": "По запросу",
+    "noResults": "По запросу \"{{query}}\" ничего не найдено",
+    "enterQuery": "Введите поисковый запрос"
+  },
+  "filters": {
+    "title": "Фильтры"
+  },
   "breadcrumbs": {
     "home": "Главная",
     "catalog": "Каталог",
@@ -828,10 +837,10 @@
     },
     "workingHours": {
       "title": "Часы работы",
-      "weekdays": "Пн–Чт: 10:00 – 20:00",
-      "friday": "Пт: 9:00 – 15:00",
-      "saturday": "Сб: выходной",
-      "sunday": "Вс: 10:00 – 20:00"
+      "weekdays": "Вс-Чт: 10:00 - 20:00",
+      "friday": "Пт: 10:00 - 15:00",
+      "saturday": "Сб: Выходной",
+      "sunday": ""
     },
     "contactForm": {
       "title": "Форма обратной связи",

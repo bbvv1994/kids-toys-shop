@@ -1,10 +1,12 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Box, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import ProductCard from './ProductCard';
 import { searchInProductNames } from '../utils/translationUtils';
 
 export default function SearchResultsPage({ products, cart, onChangeCartQuantity }) {
+  const { t } = useTranslation();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
@@ -18,8 +20,8 @@ export default function SearchResultsPage({ products, cart, onChangeCartQuantity
     )
   );
   return (
-    <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
-             <Box sx={{ mb: 4, pt: { xs: 2, md: 4 } }}>
+    <Container maxWidth={false} sx={{ py: { xs: 2, md: 0.25 }, px: { xs: 2, md: 4 }, pl: { md: '270px' } }}>
+             <Box sx={{ mb: 4, pt: { xs: 0, md: 0 } }}>
                  <Typography variant="h2" sx={{ 
            textAlign: 'center', 
            mb: 4,
@@ -34,10 +36,10 @@ export default function SearchResultsPage({ products, cart, onChangeCartQuantity
            WebkitTextFillColor: 'transparent',
            backgroundClip: 'text'
          }}>
-           Результаты поиска
+           {t('searchResults.title')}
          </Typography>
         <Typography sx={{ textAlign: 'center', mb: 2, color: '#666' }}>
-          По запросу: <b>{query}</b>
+          <b>{query}</b> {t('searchResults.forQuery')}
         </Typography>
                  <Box sx={{ 
            display: 'grid', 
@@ -61,7 +63,7 @@ export default function SearchResultsPage({ products, cart, onChangeCartQuantity
             ))
           ) : (
             <Typography sx={{ gridColumn: '1/-1', textAlign: 'center', color: '#888', fontSize: 20 }}>
-              {query ? `По запросу "${query}" ничего не найдено` : 'Введите поисковый запрос'}
+              {query ? t('searchResults.noResults', { query }) : t('searchResults.enterQuery')}
             </Typography>
           )}
         </Box>

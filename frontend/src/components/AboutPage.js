@@ -46,7 +46,7 @@ export default function AboutPage() {
   return (
     <Container maxWidth="lg" sx={{ 
       py: { xs: 0, md: 0 }, 
-      pt: { xs: 0, md: 1 }, 
+      mt: { xs: 0, md: -14.25 }, 
       minHeight: '80vh' 
     }}>
       {/* Логотип */}

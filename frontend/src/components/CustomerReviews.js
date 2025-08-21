@@ -65,7 +65,7 @@ const CustomerReviews = () => {
   };
 
   return (
-    <Box sx={{ p: 2, width: '100%', mx: 'auto', mt: 10, display: 'flex', justifyContent: 'center' }}>
+    <Box sx={{ p: 2, width: '100%', mx: 'auto', mt: 3.75, display: 'flex', justifyContent: 'center' }}>
       <Box sx={{ width: '100%', maxWidth: '1200px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {/* Заголовок */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4, justifyContent: 'center' }}>

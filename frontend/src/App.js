@@ -265,7 +265,7 @@ const theme = createTheme({
 });
 
   // Компонент навигации
-  function Navigation({ cartCount, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups, mobileFiltersOpen, setMobileFiltersOpen, priceRange, setPriceRange }) {
+  function Navigation({ cartCount, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups, mobileFiltersOpen, setMobileFiltersOpen, priceRange, setPriceRange, filtersMenuOpen, setFiltersMenuOpen, desktopSearchBarRef }) {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
   const deviceType = useDeviceType();
@@ -293,6 +293,8 @@ const theme = createTheme({
   const [interimTranscript, setInterimTranscript] = useState("");
   const recognitionRef = useRef(null);
   const isHome = location.pathname === '/';
+  const isCatalog = location.pathname === '/catalog';
+  const shouldShowDesktopSearch = isHome || isCatalog;
   const drawerPaperRef = useRef(null); // ref для Drawer-пейпера
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [submenuAnchorEl, setSubmenuAnchorEl] = useState(null);
@@ -309,7 +311,6 @@ const theme = createTheme({
   const subcategoriesMenuRef = useRef(null);
   const lenisSubcategoriesMenuRef = useRef(null);
   const [instantClose, setInstantClose] = React.useState(false);
-  const [filtersMenuOpen, setFiltersMenuOpen] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = React.useState(false);
   const [profileMenuAnchor, setProfileMenuAnchor] = React.useState(null);
@@ -388,6 +389,30 @@ const theme = createTheme({
       setOpenCatIdx(null);
     }
   }, [mobileCategoriesOpen]);
+
+  // Закрытие десктопных фильтров при клике вне их области
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filtersMenuOpen) {
+        const filtersPanel = filtersPanelRef?.current;
+        const searchBar = desktopSearchBarRef?.current;
+        
+        // Проверяем, был ли клик по кнопке фильтров в поисковой строке
+        const filterButton = event.target.closest('[data-filter-button]');
+        
+        if (filtersPanel && !filtersPanel.contains(event.target) && 
+            searchBar && !searchBar.contains(event.target) && 
+            !filterButton) {
+          setFiltersMenuOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [filtersMenuOpen]);
 
   // Функции для управления контекстным меню профиля
   const handleProfileMenuOpen = (event) => {
@@ -1566,51 +1591,8 @@ const theme = createTheme({
                 ))}
               </Box>
             )}
-            {/* Поисковая строка */}
-            {isDesktop && (
-              <form id="appbar-search-form" onSubmit={handleSearch} style={{ 
-                flex: 1, 
-                maxWidth: 260, 
-                minWidth: 200,
-                margin: '0 24px', 
-                display: 'flex', 
-                alignItems: 'center',
-                flexShrink: 1
-              }}>
-                <TextField
-                  size="small"
-                  placeholder={t('header.searchPlaceholder')}
-                  value={isListening && interimTranscript ? interimTranscript : searchValue}
-                  onChange={e => setSearchValue(e.target.value)}
-                  InputProps={{
-                    ...(i18n.language === 'he' ? {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <IconButton type="submit" size="small">
-                            <SearchIcon />
-                          </IconButton>
-                          <IconButton onClick={handleMicClick} size="small" color={isListening ? 'primary' : 'default'} title="Голосовой ввод">
-                            <MicIcon />
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    } : {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={handleMicClick} size="small" color={isListening ? 'primary' : 'default'} title="Голосовой ввод">
-                            <MicIcon />
-                          </IconButton>
-                          <IconButton type="submit" size="small">
-                            <SearchIcon />
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    })
-                  }}
-                  sx={{ background: 'white', borderRadius: 2, minWidth: 140, maxWidth: 260, flex: 1 }}
-                />
-              </form>
-            )}
+            
+            
             {/* Корзина и профиль - Desktop */}
             <Box sx={{ marginLeft: 'auto', display: { xs: 'none', lg: 'flex' }, alignItems: 'center', gap: 3, flexShrink: 0 }}>
               {/* Кнопка CMS для админа */}
@@ -2016,50 +1998,16 @@ const theme = createTheme({
               {t('catalog.categoriesButton')}
             </button>
           </Box>
-          {/* Кнопка Фильтры */}
-          <Box sx={{ position: 'fixed', top: '144px', left: 0, zIndex: 1402, width: 250 }}>
-            <button
-              onClick={() => {
-                setFiltersMenuOpen(o => {
-                  if (!o) {
-                    if (!isHome) setMenuOpen(false); // Не закрывать меню на главной странице
-                  }
-                  return !o;
-                });
-              }}
-              style={{
-                width: 250,
-                height: 44,
-                background: filtersMenuOpen ? '#fff' : '#1976d2',
-                color: filtersMenuOpen ? '#1976d2' : '#fff',
-                fontWeight: 'bold',
-                fontSize: 20,
-                border: 'none',
-                borderRadius: 0,
-                boxShadow: filtersMenuOpen ? '0 4px 16px rgba(25,118,210,0.15)' : '0 2px 8px rgba(0,0,0,0.08)',
-                cursor: 'pointer',
-                outline: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 12,
-                transition: 'background 0.2s, color 0.2s, box-shadow 0.2s, border-radius 0.2s',
-                margin: 0,
-                padding: 0,
-              }}
-            >
-              <FilterAltRounded sx={{ fontSize: 28, mr: 1 }} />
-              {t('catalog.filtersButton')}
-            </button>
-          </Box>
           {/* Выпадающее меню фильтров */}
           {filtersMenuOpen && (
             <Paper
               ref={filtersPanelRef}
               sx={{
                 position: 'fixed',
-                top: 184,
-                left: 0,
+                top: desktopSearchBarRef?.current ? 
+                  desktopSearchBarRef.current.getBoundingClientRect().bottom + 5 : 184,
+                left: desktopSearchBarRef?.current ? 
+                  desktopSearchBarRef.current.getBoundingClientRect().right - 250 : 0,
                 width: 250,
                 zIndex: 2000,
                 m: 0,
@@ -2072,6 +2020,19 @@ const theme = createTheme({
               }}
               onWheel={e => { e.stopPropagation(); /* wheel-событие не блокируется, скролл работает */ }}
             >
+              {/* Заголовок Фильтры */}
+              <Box sx={{ 
+                background: '#FFB300', 
+                color: '#fff', 
+                fontWeight: 'bold', 
+                fontSize: 18, 
+                textAlign: 'center', 
+                py: 1,
+                mb: 2,
+                borderRadius: 1
+              }}>
+                {t('filters.title')}
+              </Box>
               {/* Фильтры */}
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {/* Цена */}
@@ -3406,10 +3367,10 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
 
   return (
     <Box sx={{ position: 'relative' }}>
-      <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 },
+      <Container maxWidth={false} sx={{ py: { xs: 2, md: 0.25 }, px: { xs: 2, md: 4 },
         pl: { md: '270px' }
       }}>
-        <Box sx={{ mb: 4, pt: { xs: 0, md: 10 } }}>
+        <Box sx={{ mb: 4, pt: { xs: 0, md: 0 } }}>
           <Typography variant="h2" sx={{ 
             textAlign: 'center', 
             mb: 4,
@@ -4174,6 +4135,8 @@ function App() {
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedAgeGroups, setSelectedAgeGroups] = useState([]);
   const [priceRange, setPriceRange] = useState([0, 10000]);
+  const [filtersMenuOpen, setFiltersMenuOpen] = useState(false);
+  const desktopSearchBarRef = useRef(null);
   
   // Состояние для формы отзывов
   const [reviewFormOpen, setReviewFormOpen] = useState(false);
@@ -5223,6 +5186,9 @@ function App() {
           emailConfirmData={emailConfirmData}
           priceRange={priceRange}
           setPriceRange={setPriceRange}
+          filtersMenuOpen={filtersMenuOpen}
+          setFiltersMenuOpen={setFiltersMenuOpen}
+          desktopSearchBarRef={desktopSearchBarRef}
         />
         </Router>
       </Box>
@@ -5239,14 +5205,20 @@ function AppContent({
   handleRemoveFromCart, handleAddToCart, handleEditProduct, 
   handleSaveProduct, handleDeleteProduct, handleWishlistToggle, handleClearCart, wishlist, products, dbCategories, 
   authOpen, handleLogin, handleRegister,
-  editModalOpen, setEditModalOpen, editingProduct, setEditingProduct, loadCategoriesFromAPI, selectedGenders, onGendersChange, selectedBrands, selectedAgeGroups, setSelectedBrands, setSelectedAgeGroups, handleUserUpdate, handleOpenReviewForm, reviewFormOpen, setReviewFormOpen, reviewFormData, emailConfirmModalOpen, setEmailConfirmModalOpen, emailConfirmData, priceRange, setPriceRange
+  editModalOpen, setEditModalOpen, editingProduct, setEditingProduct, loadCategoriesFromAPI, selectedGenders, onGendersChange, selectedBrands, selectedAgeGroups, setSelectedBrands, setSelectedAgeGroups, handleUserUpdate, handleOpenReviewForm, reviewFormOpen, setReviewFormOpen, reviewFormData, emailConfirmModalOpen, setEmailConfirmModalOpen, emailConfirmData, priceRange, setPriceRange, filtersMenuOpen, setFiltersMenuOpen, desktopSearchBarRef
 }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const theme = useTheme();
   const isNarrow = useMediaQuery(theme.breakpoints.down('lg')); // < 1200px
+  const isDesktop = useMediaQuery(theme.breakpoints.up('lg')); // >= 1200px
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
+  
+  // Проверка для отображения десктопной поисковой строки
+  const isHome = location.pathname === '/';
+  const isCatalog = location.pathname === '/catalog';
+  const shouldShowDesktopSearch = isHome || isCatalog;
   
   // Состояния для мобильного поиска и фильтров
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -5446,6 +5418,9 @@ function AppContent({
           setMobileFiltersOpen={setMobileFiltersOpen}
           priceRange={priceRange}
           setPriceRange={setPriceRange}
+          filtersMenuOpen={filtersMenuOpen}
+          setFiltersMenuOpen={setFiltersMenuOpen}
+          desktopSearchBarRef={desktopSearchBarRef}
         />
         
         {/* Мобильный поиск и фильтры под AppBar */}
@@ -5504,6 +5479,73 @@ function AppContent({
                      </IconButton>
           </Box>
         )}
+
+                         {/* Десктопная поисковая строка под AppBar */}
+        {isDesktop && shouldShowDesktopSearch && (
+          <Box 
+            ref={desktopSearchBarRef}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              p: 1,
+              width: '100%',
+              mt: '15px',
+              mb: '15px',
+              px: 2,
+              position: 'relative',
+              zIndex: 1
+            }}
+          >
+                  {/* Поисковое поле с отступом слева 255px */}
+                  <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} style={{
+                    flex: 1,
+                    marginLeft: '255px',
+                    maxWidth: 'calc(100% - 255px)'
+                  }}>
+               <TextField
+                 size="small"
+                 placeholder={t('header.searchPlaceholder')}
+                 value={isListening && interimTranscript ? interimTranscript : searchQuery}
+                 onChange={(e) => setSearchQuery(e.target.value)}
+                 InputProps={{
+                   endAdornment: (
+                     <InputAdornment position="end">
+                       <IconButton onClick={handleMicClick} size="small" color={isListening ? 'primary' : 'default'} title="Голосовой ввод">
+                         <MicIcon />
+                       </IconButton>
+                       <IconButton type="submit" size="small">
+                         <SearchIcon />
+                       </IconButton>
+                     </InputAdornment>
+                   )
+                 }}
+                 sx={{ background: 'white', borderRadius: 2, width: '100%' }}
+               />
+             </form>
+
+             {/* Кнопка фильтров для десктопа */}
+             <IconButton
+               data-filter-button
+               onClick={() => setFiltersMenuOpen(!filtersMenuOpen)}
+               sx={{
+                 color: '#FF9800',
+                 backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.1)' : 'white',
+                 border: '1px solid #FF9800',
+                 borderRadius: 2,
+                 width: 48,
+                 height: 40,
+                 '&:hover': {
+                   backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.15)' : 'rgba(255, 152, 0, 0.04)',
+                 },
+               }}
+             >
+               <FilterList />
+             </IconButton>
+           </Box>
+         )}
+
+
         <Routes>
           <Route path="/" element={<HomePage products={products} onAddToCart={handleAddToCart} cart={cart} user={user} onWishlistToggle={handleWishlistToggle} onChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} wishlist={wishlist} />} />
           <Route path="/product/:id" element={<ProductPage onAddToCart={handleAddToCart} cart={cart} user={user} onChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} setAuthOpen={setAuthOpen} dbCategories={dbCategories} />} />

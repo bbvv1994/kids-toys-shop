@@ -244,6 +244,15 @@
       "unisex": "אוניברסלי"
     }
   },
+  "searchResults": {
+    "title": "תוצאות חיפוש",
+    "forQuery": ":לחיפוש",
+    "noResults": "לא נמצא כלום לחיפוש \"{{query}}\"",
+    "enterQuery": "הזן שאילתת חיפוש"
+  },
+  "filters": {
+    "title": "מסננים"
+  },
   "breadcrumbs": {
     "home": "דף הבית",
     "catalog": "קטלוג",
@@ -790,10 +799,10 @@
     },
     "workingHours": {
       "title": "שעות פעילות",
-      "weekdays": "א'-ה': 10:00 – 20:00",
-      "friday": "ו': 9:00 – 15:00",
+      "weekdays": "א'-ה': 10:00 - 20:00",
+      "friday": "ו': 10:00 - 15:00",
       "saturday": "ש': יום מנוחה",
-      "sunday": "א': 10:00 – 20:00"
+      "sunday": ""
     },
     "contactForm": {
       "title": "טופס יצירת קשר",
