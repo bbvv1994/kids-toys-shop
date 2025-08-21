@@ -22,6 +22,7 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import OpenStreetMapComponent from './OpenStreetMap';
+import { API_ENDPOINTS } from '../config/api';
 
 export default function ContactsPage() {
   const { t } = useTranslation();
@@ -46,7 +47,7 @@ export default function ContactsPage() {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
+      const response = await fetch(API_ENDPOINTS.CONTACT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
