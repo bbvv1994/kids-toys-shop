@@ -848,12 +848,12 @@ const theme = createTheme({
   // Lenis для Drawer
   
   useEffect(() => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
+    if (!isSpeechRecognitionSupported()) return;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognitionRef.current = new SpeechRecognition();
     recognitionRef.current.continuous = false;
     recognitionRef.current.interimResults = true;
-    recognitionRef.current.lang = 'ru-RU';
+    recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
     recognitionRef.current.onresult = (event) => {
       let finalTranscript = '';
       let interim = '';
@@ -2272,12 +2272,12 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   
   // Инициализация распознавания речи
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    if (isSpeechRecognitionSupported()) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'ru-RU';
+      recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
       
       recognitionRef.current.onresult = (event) => {
         let finalTranscript = '';
@@ -7707,12 +7707,12 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
 
   // Инициализация распознавания речи
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    if (isSpeechRecognitionSupported()) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'ru-RU';
+      recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
       
       recognitionRef.current.onresult = (event) => {
         let finalTranscript = '';
@@ -8088,12 +8088,12 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
 
   // Инициализация распознавания речи
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    if (isSpeechRecognitionSupported()) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'ru-RU';
+      recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
       
       recognitionRef.current.onresult = (event) => {
         let finalTranscript = '';

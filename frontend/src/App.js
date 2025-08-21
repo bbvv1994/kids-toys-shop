@@ -11,6 +11,7 @@ import { useDeviceType } from './utils/deviceDetection';
 import { getImageUrl, API_BASE_URL } from './config';
 import { getTranslatedName, forceLanguageUpdate, checkTranslationsAvailable } from './utils/translationUtils';
 import TranslationDebugger from './components/TranslationDebugger';
+import { getSpeechRecognitionLanguage, getSpeechRecognitionErrorMessage, isSpeechRecognitionSupported } from './utils/speechRecognitionUtils';
 import { 
   DndContext,
   closestCenter,
@@ -1078,44 +1079,84 @@ const theme = createTheme({
   // Lenis для Drawer
   
   useEffect(() => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
+    if (!isSpeechRecognitionSupported()) {
+      console.log('Navigation: Speech recognition not supported');
+      return;
+    }
+    
+    // Очищаем предыдущий объект распознавания
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (error) {
+        console.log('Navigation: Error stopping previous recognition:', error);
+      }
+      recognitionRef.current = null;
+    }
+    
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognitionRef.current = new SpeechRecognition();
-    recognitionRef.current.continuous = false;
-    recognitionRef.current.interimResults = true;
-    recognitionRef.current.lang = 'ru-RU';
-    recognitionRef.current.onresult = (event) => {
-      let finalTranscript = '';
-      let interim = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript;
-        } else {
-          interim += transcript;
+    try {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
+      
+      recognitionRef.current.onresult = (event) => {
+        let finalTranscript = '';
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interim += transcript;
+          }
         }
-      }
-      if (finalTranscript) {
-        setSearchValue(finalTranscript);
-        setInterimTranscript("");
-        setIsListening(false);
-        setTimeout(() => {
-          document.getElementById('appbar-search-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-        }, 100);
-      } else {
-        setInterimTranscript(interim);
-      }
-    };
-    recognitionRef.current.onerror = () => { setIsListening(false); setInterimTranscript(""); };
-    recognitionRef.current.onend = () => { setIsListening(false); setInterimTranscript(""); };
-  }, []);
+        if (finalTranscript) {
+          setSearchValue(finalTranscript);
+          setInterimTranscript("");
+          setIsListening(false);
+          setTimeout(() => {
+            document.getElementById('appbar-search-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+          }, 100);
+        } else {
+          setInterimTranscript(interim);
+        }
+      };
+      recognitionRef.current.onerror = (event) => { 
+        console.error('Navigation: Speech recognition error:', event.error);
+        setIsListening(false); 
+        setInterimTranscript(""); 
+      };
+      recognitionRef.current.onend = () => { 
+        console.log('Navigation: Speech recognition ended');
+        setIsListening(false); 
+        setInterimTranscript(""); 
+      };
+      
+      console.log('Navigation: Speech recognition initialized with language:', getSpeechRecognitionLanguage(i18n.language));
+    } catch (error) {
+      console.error('Navigation: Error initializing speech recognition:', error);
+    }
+  }, [i18n.language]);
 
   const handleMicClick = () => {
+    console.log('Navigation: handleMicClick called, isListening:', isListening);
+    
     if (recognitionRef.current) {
-      setIsListening(true);
-      recognitionRef.current.start();
+      try {
+        // Убеждаемся, что язык установлен правильно перед запуском
+        recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
+        console.log('Navigation: Setting speech recognition language to:', recognitionRef.current.lang);
+        setIsListening(true);
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error('Navigation: Error in handleMicClick:', error);
+        setIsListening(false);
+      }
     } else {
-      alert('Голосовой ввод не поддерживается в вашем браузере');
+      console.log('Navigation: No recognition object available');
+      alert(getSpeechRecognitionErrorMessage(i18n.language));
     }
   };
 
@@ -3222,12 +3263,12 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   
   // Инициализация распознавания речи
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    if (isSpeechRecognitionSupported()) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'ru-RU';
+      recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
       
       recognitionRef.current.onresult = (event) => {
         let finalTranscript = '';
@@ -3262,12 +3303,15 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
         setInterimTranscript('');
       };
     }
-  }, []);
+  }, [i18n.language]);
 
   // Функция для начала голосового ввода
   const startListening = () => {
     if (recognitionRef.current) {
       try {
+        // Убеждаемся, что язык установлен правильно перед запуском
+        recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
+        console.log('CatalogPage: Setting speech recognition language to:', recognitionRef.current.lang);
         recognitionRef.current.start();
         setIsListening(true);
       } catch (error) {
@@ -3275,7 +3319,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
         setIsListening(false);
       }
     } else {
-      alert('Голосовой ввод не поддерживается в вашем браузере');
+      alert(getSpeechRecognitionErrorMessage(i18n.language));
     }
   };
 
@@ -5199,7 +5243,7 @@ function AppContent({
 }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
   const isNarrow = useMediaQuery(theme.breakpoints.down('lg')); // < 1200px
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
@@ -5223,18 +5267,35 @@ function AppContent({
     }
   };
 
-  // Функции для голосового поиска
-  const handleMicClick = () => {
-    if (!recognitionRef.current) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SpeechRecognition) {
+  // Инициализация голосового поиска
+  React.useEffect(() => {
+    if (!isSpeechRecognitionSupported()) {
+      console.log('Speech recognition not supported');
+      return;
+    }
+    
+    // Очищаем предыдущий объект распознавания
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (error) {
+        console.log('Error stopping previous recognition:', error);
+      }
+      recognitionRef.current = null;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      try {
+        // Создаем новый объект распознавания
         recognitionRef.current = new SpeechRecognition();
         recognitionRef.current.continuous = true;
         recognitionRef.current.interimResults = true;
-        recognitionRef.current.lang = 'ru-RU';
+        recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
 
         recognitionRef.current.onstart = () => {
           setIsListening(true);
+          console.log('Speech recognition started with language:', recognitionRef.current.lang);
         };
 
         recognitionRef.current.onresult = (event) => {
@@ -5267,13 +5328,39 @@ function AppContent({
         recognitionRef.current.onend = () => {
           setIsListening(false);
         };
+        
+        console.log('Speech recognition initialized with language:', getSpeechRecognitionLanguage(i18n.language));
+      } catch (error) {
+        console.error('Error initializing speech recognition:', error);
       }
     }
+  }, [i18n.language]); // Переинициализируем только при смене языка
 
-    if (isListening) {
-      recognitionRef.current.stop();
-    } else {
-      recognitionRef.current.start();
+  // Функции для голосового поиска
+  const handleMicClick = () => {
+    console.log('handleMicClick called, isListening:', isListening);
+    
+    if (!recognitionRef.current) {
+      console.log('No recognition object available');
+      alert(getSpeechRecognitionErrorMessage(i18n.language));
+      return;
+    }
+
+    try {
+      // Убеждаемся, что язык установлен правильно перед запуском
+      recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
+      console.log('Setting speech recognition language to:', recognitionRef.current.lang);
+
+      if (isListening) {
+        console.log('Stopping speech recognition');
+        recognitionRef.current.stop();
+      } else {
+        console.log('Starting speech recognition');
+        recognitionRef.current.start();
+      }
+    } catch (error) {
+      console.error('Error in handleMicClick:', error);
+      setIsListening(false);
     }
   };
 
@@ -9006,7 +9093,7 @@ function CMSOrders() {
 }
 // Страница категории (показывает подкатегории)
 function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, user, wishlist, onWishlistToggle, onEditProduct }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [category, setCategory] = useState(null);
@@ -9055,12 +9142,12 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
 
   // Инициализация распознавания речи
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    if (isSpeechRecognitionSupported()) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'ru-RU';
+      recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
       
       recognitionRef.current.onresult = (event) => {
         let finalTranscript = '';
@@ -9095,11 +9182,14 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
         setInterimTranscript('');
       };
     }
-  }, []);
+  }, [i18n.language]);
 
   const startListening = () => {
     if (recognitionRef.current) {
       try {
+        // Убеждаемся, что язык установлен правильно перед запуском
+        recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
+        console.log('CategoryPage: Setting speech recognition language to:', recognitionRef.current.lang);
         recognitionRef.current.start();
         setIsListening(true);
       } catch (error) {
@@ -9107,7 +9197,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
         setIsListening(false);
       }
     } else {
-      alert('Голосовой ввод не поддерживается в вашем браузере');
+      alert(getSpeechRecognitionErrorMessage(i18n.language));
     }
   };
 
@@ -9567,7 +9657,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
 }
 // Страница подкатегории (показывает товары)
 function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, user, wishlist, onWishlistToggle, onEditProduct, selectedGenders }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [subcategory, setSubcategory] = useState(null);
@@ -9623,12 +9713,12 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
 
   // Инициализация распознавания речи
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    if (isSpeechRecognitionSupported()) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'ru-RU';
+      recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
       
       recognitionRef.current.onresult = (event) => {
         let finalTranscript = '';
@@ -9663,11 +9753,14 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
         setInterimTranscript('');
       };
     }
-  }, []);
+  }, [i18n.language]);
 
   const startListening = () => {
     if (recognitionRef.current) {
       try {
+        // Убеждаемся, что язык установлен правильно перед запуском
+        recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
+        console.log('SubcategoryPage: Setting speech recognition language to:', recognitionRef.current.lang);
         recognitionRef.current.start();
         setIsListening(true);
       } catch (error) {
@@ -9675,7 +9768,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
         setIsListening(false);
       }
     } else {
-      alert('Голосовой ввод не поддерживается в вашем браузере');
+      alert(getSpeechRecognitionErrorMessage(i18n.language));
     }
   };
 
