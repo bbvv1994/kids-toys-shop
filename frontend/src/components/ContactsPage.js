@@ -560,17 +560,23 @@ export default function ContactsPage() {
             <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.6, mb: 3 }}>
               {t('contacts.info.description')}
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <Email sx={{ color: '#4ECDC4' }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, justifyContent: 'flex-end' }}>
               <Typography variant="body1">
                 {t('contacts.info.email')}
               </Typography>
+              <Email sx={{ color: '#4ECDC4' }} />
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Phone sx={{ color: '#4ECDC4' }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, justifyContent: 'flex-end' }}>
               <Typography variant="body1">
                 {t('contacts.info.phone')}
               </Typography>
+              <Phone sx={{ color: '#4ECDC4' }} />
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'flex-end' }}>
+              <Typography variant="body1">
+                {t('contacts.info.phone2')}
+              </Typography>
+              <Phone sx={{ color: '#4ECDC4' }} />
             </Box>
           </Box>
         </Grid>

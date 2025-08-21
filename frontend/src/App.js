@@ -74,6 +74,7 @@ import {
   Snackbar,
   Breadcrumbs,
   Chip,
+  Link,
 } from '@mui/material';
 import { 
   Home, 
@@ -116,7 +117,11 @@ import {
   NavigateNext,
   Clear,
   LocalShipping,
-  Category
+  Category,
+  Instagram,
+  WhatsApp,
+  Phone,
+  Email
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { jwtDecode } from 'jwt-decode';
@@ -153,7 +158,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AdminUsers from './components/AdminUsers';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams, useNavigate, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link as RouterLink, useLocation, useParams, useNavigate, Navigate } from 'react-router-dom';
 import ProductPage from './components/ProductPage';
 import CartPage from './components/CartPage';
 import CheckoutPage from './components/CheckoutPage';
@@ -169,6 +174,8 @@ import AdminCategories from './components/AdminCategories';
 import AdminQuestions from './components/AdminQuestions';
 import PublicQuestions from './components/PublicQuestions';
 import BulkImportProducts from './components/BulkImportProducts';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
 import { searchInProductNames } from './utils/translationUtils';
 
 // Глобальный маппинг английских кодов на русские названия для фильтра по полу
@@ -316,6 +323,16 @@ const theme = createTheme({
   const [profileMenuAnchor, setProfileMenuAnchor] = React.useState(null);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   
+  // Автоматическая прокрутка наверх при изменении маршрута
+  useEffect(() => {
+    // Плавная прокрутка наверх при переходе на новую страницу
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }, [location.pathname]);
+
   // Определение сенсорного устройства
   useEffect(() => {
     const checkTouchDevice = () => {
@@ -1091,6 +1108,9 @@ const theme = createTheme({
   // Дополнительная проверка безопасности
   const safeCategories = Array.isArray(navCategories) ? navCategories : [];
 
+  // Определяем, нужно ли скрыть кнопку меню категорий для определенных страниц (только для десктопа)
+  const shouldHideCategories = (location.pathname === '/privacy' || location.pathname === '/terms' || location.pathname === '/attribution') && isDesktop;
+  
   const navItems = [
     { text: t('navigation.home'), path: '/', icon: <Home /> },
     { text: t('navigation.catalog'), path: '/catalog', icon: <FormatListBulleted /> },
@@ -1565,7 +1585,7 @@ const theme = createTheme({
                 {navItems.map((item) => (
                   <Button
                     key={item.text}
-                    component={Link}
+                    component={RouterLink}
                     to={item.path}
                     color="inherit"
                     startIcon={item.icon}
@@ -1600,7 +1620,10 @@ const theme = createTheme({
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', mt: 2.5 }}>
                   <IconButton
                     color="inherit"
-                    onClick={() => navigate('/cms')}
+                    onClick={() => {
+                      navigate('/cms');
+                      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                    }}
                     sx={{ 
                       minWidth: 0, 
                       p: 0, 
@@ -1620,7 +1643,7 @@ const theme = createTheme({
                 <Box sx={{ display: 'flex', alignItems: 'center', height: 56, mr: 1, position: 'relative' }}>
                   <Button
                     color="inherit"
-                    component={Link}
+                    component={RouterLink}
                     to="/profile"
                     onClick={(e) => {
                       e.preventDefault();
@@ -1705,7 +1728,7 @@ const theme = createTheme({
                 {user ? (
                   <Button
                     color="inherit"
-                    component={Link}
+                    component={RouterLink}
                     to="/profile"
                     onClick={() => {
                       // Мгновенно закрываем меню при переходе на профиль
@@ -1778,7 +1801,10 @@ const theme = createTheme({
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: 80, justifyContent: 'center', mt: 2.125 }}>
                 <IconButton
                   color="inherit"
-                  onClick={() => navigate('/cart')}
+                  onClick={() => {
+                    navigate('/cart');
+                    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                  }}
                   ref={cartIconRef}
                 >
                   <Badge
@@ -1844,7 +1870,10 @@ const theme = createTheme({
                 {/* Корзина для мобильных */}
                 <IconButton
                   color="inherit"
-                  onClick={() => navigate('/cart')}
+                  onClick={() => {
+                    navigate('/cart');
+                    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                  }}
                   ref={cartIconRef}
                   sx={{ 
                     color: 'white',
@@ -1961,6 +1990,7 @@ const theme = createTheme({
          location.pathname !== '/cart' && 
          location.pathname !== '/checkout' && 
          location.pathname !== '/order-success' && 
+         !shouldHideCategories && 
          user?.role !== 'admin' && isDesktop && (
           <>
           <Box sx={{ 
@@ -2128,7 +2158,7 @@ const theme = createTheme({
           </>
         )}
         {/* Меню категорий с position: fixed */}
-        {isDesktop && !instantClose && (
+        {isDesktop && !instantClose && !shouldHideCategories && (
           <Paper
             ref={menuRef}
             className="category-dropdown-menu"
@@ -2437,9 +2467,12 @@ const theme = createTheme({
             {navItems.map((item) => (
               <ListItem
                 key={item.text}
-                component={Link}
+                component={RouterLink}
                 to={item.path}
-                onClick={() => setMobileOpen(false)}
+                onClick={() => {
+                  setMobileOpen(false);
+                  window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                }}
                 sx={{
                   backgroundColor: location.pathname === item.path ? '#FFF3E0' : 'transparent',
                   borderRadius: 2,
@@ -2503,9 +2536,12 @@ const theme = createTheme({
               {navItems.map((item) => (
                 <ListItem
                   key={item.text}
-                  component={Link}
+                  component={RouterLink}
                   to={item.path}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                  }}
                   sx={{
                     backgroundColor: location.pathname === item.path ? '#FFF3E0' : 'transparent',
                     borderRadius: 2,
@@ -5569,6 +5605,8 @@ function AppContent({
           <Route path="/confirm-email" element={<ConfirmEmailPage />} />
           <Route path="/oauth-success" element={<OAuthSuccessPage />} />
           <Route path="/questions" element={<PublicQuestions />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
 
           {/* Catch-all route for unmatched paths */}
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -5683,22 +5721,241 @@ function AppContent({
       {/* Футер */}
       <Box component="footer" sx={{
         width: '100%',
-        py: 2,
-        textAlign: 'center',
-        background: 'rgba(255,255,255,0.85)',
-        color: '#4FC3F7',
-        fontWeight: 'bold',
-        fontSize: { xs: '1rem', md: '1.15rem' },
-        letterSpacing: 1,
-        borderTop: '2px solid #4FC3F7',
+        background: 'linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%)',
+        color: '#fff',
         mt: 6,
         position: 'relative',
-        flexShrink: 0
+        flexShrink: 0,
+        boxShadow: '0 -4px 20px rgba(0,0,0,0.1)'
       }}>
-        {new Date().getFullYear()} © כל הזכויות שמורות – סימבה מלך הצעצועים
-        <a href="/attribution" style={{ color: '#888', fontSize: '0.9em', marginLeft: 16 }}>Фото: авторы и источники</a>
-        <a href="/sitemap" style={{ color: '#888', fontSize: '0.9em', marginLeft: 16 }}>Карта сайта</a>
-        <span style={{ color: '#888', fontSize: '0.9em', marginLeft: 16 }}>Контакты: info@example.com</span>
+        <Container maxWidth="lg" sx={{ py: 6 }}>
+          <Grid container spacing={4}>
+            {/* Информация о компании */}
+            <Grid item xs={12} md={4}>
+              <Typography variant="h5" sx={{ 
+                fontWeight: 700, 
+                mb: 2, 
+                color: '#fff',
+                textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+              }}>
+                {t('footer.title')}
+              </Typography>
+              <Typography variant="body2" sx={{ 
+                color: '#e3f2fd', 
+                lineHeight: 1.6, 
+                mb: 3,
+                opacity: 0.9
+              }}>
+                {t('footer.description')}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <IconButton 
+                  component="a"
+                  href="https://www.facebook.com/simbakingoftoys"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ 
+                    color: '#fff', 
+                    bgcolor: 'rgba(255,255,255,0.1)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
+                  }}
+                >
+                  <Facebook />
+                </IconButton>
+                <IconButton 
+                  component="a"
+                  href="https://www.instagram.com/simbaking_oftoys?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ 
+                    color: '#fff', 
+                    bgcolor: 'rgba(255,255,255,0.1)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
+                  }}
+                >
+                  <Instagram />
+                </IconButton>
+                <IconButton 
+                  component="a"
+                  href="https://wa.me/972533774509?text=שלום! יש לי שאלה על הצעצועים שלכם."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ 
+                    color: '#fff', 
+                    bgcolor: 'rgba(255,255,255,0.1)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
+                  }}
+                >
+                  <WhatsApp />
+                </IconButton>
+              </Box>
+            </Grid>
+
+            {/* Быстрые ссылки */}
+            <Grid item xs={12} sm={6} md={2}>
+              <Typography variant="h6" sx={{ 
+                fontWeight: 600, 
+                mb: 3, 
+                color: '#fff',
+                textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+              }}>
+                {t('footer.quickLinks')}
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <RouterLink to="/" style={{ 
+                  color: '#fff', 
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  '&:hover': { textDecoration: 'underline' }
+                }}>
+                  {t('breadcrumbs.home')}
+                </RouterLink>
+                <RouterLink to="/catalog" style={{ 
+                  color: '#fff', 
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  '&:hover': { textDecoration: 'underline' }
+                }}>
+                  {t('navigation.catalog')}
+                </RouterLink>
+                <RouterLink to="/about" style={{ 
+                  color: '#fff', 
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  '&:hover': { textDecoration: 'underline' }
+                }}>
+                  {t('footer.about')}
+                </RouterLink>
+                <RouterLink to="/contacts" style={{ 
+                  color: '#fff', 
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  '&:hover': { textDecoration: 'underline' }
+                }}>
+                  {t('footer.contacts')}
+                </RouterLink>
+                <RouterLink to="/reviews" style={{ 
+                  color: '#fff', 
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  '&:hover': { textDecoration: 'underline' }
+                }}>
+                  {t('footer.reviews')}
+                </RouterLink>
+              </Box>
+            </Grid>
+
+            {/* Часы работы */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Typography variant="h6" sx={{ 
+                fontWeight: 600, 
+                mb: 3, 
+                color: '#fff',
+                textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+              }}>
+                {t('footer.workingHours')}
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.9 }}>
+                  {t('footer.weekdays')}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.9 }}>
+                  {t('footer.friday')}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.9 }}>
+                  {t('footer.saturday')}
+                </Typography>
+              </Box>
+            </Grid>
+
+            {/* Контактная информация */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Typography variant="h6" sx={{ 
+                fontWeight: 600, 
+                mb: 3, 
+                color: '#fff',
+                textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+              }}>
+                {t('footer.contactInfo')}
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Phone sx={{ color: '#e3f2fd', fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.9 }}>
+                    +972 53-377-4509
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Phone sx={{ color: '#e3f2fd', fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.9 }}>
+                    +972 77-700-5171
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Email sx={{ color: '#e3f2fd', fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.9 }}>
+                    info@kids-toys-shop.com
+                  </Typography>
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+
+
+        </Container>
+
+        {/* Нижняя часть футера */}
+        <Box sx={{ 
+          bgcolor: 'rgba(0,0,0,0.2)', 
+          py: 2,
+          borderTop: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          <Container maxWidth="lg">
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              flexDirection: { xs: 'column', md: 'row' },
+              gap: 2
+            }}>
+              <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.8 }}>
+                © {new Date().getFullYear()} {t('footer.copyright')} - {t('footer.title')}
+              </Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                gap: 3,
+                flexWrap: 'wrap',
+                justifyContent: 'center'
+              }}>
+                <RouterLink to="/privacy" style={{ 
+                  color: '#fff', 
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  opacity: 0.8
+                }}>
+                  {t('footer.privacyPolicy')}
+                </RouterLink>
+                <RouterLink to="/terms" style={{ 
+                  color: '#fff', 
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  opacity: 0.8
+                }}>
+                  {t('footer.termsOfService')}
+                </RouterLink>
+
+                <RouterLink to="/attribution" style={{ 
+                  color: '#fff', 
+                  textDecoration: 'none',
+                  fontSize: '0.9rem',
+                  opacity: 0.8
+                }}>
+                  {t('footer.attribution')}
+                </RouterLink>
+              </Box>
+            </Box>
+          </Container>
+        </Box>
       </Box>
          </>
    );
@@ -9513,7 +9770,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
               }
             }}
           >
-            <Link 
+            <RouterLink 
               to="/" 
               style={{ 
                 textDecoration: 'none', 
@@ -9530,8 +9787,8 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
             >
               <Home sx={{ fontSize: 18 }} />
               {t('breadcrumbs.home')}
-            </Link>
-            <Link 
+            </RouterLink>
+            <RouterLink 
               to="/catalog"
               style={{ 
                 textDecoration: 'none', 
@@ -9544,7 +9801,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
               onMouseLeave={(e) => e.target.style.color = '#666'}
             >
               {t('breadcrumbs.catalog')}
-            </Link>
+            </RouterLink>
             <Typography color="text.primary" sx={{ fontWeight: 600, fontSize: '14px' }}>
               {category?.name ? translateCategory(category.name) : t('breadcrumbs.category')}
             </Typography>
@@ -9998,7 +10255,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
               }
             }}
           >
-            <Link 
+            <RouterLink 
               to="/" 
               style={{ 
                 textDecoration: 'none', 
@@ -10015,8 +10272,8 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
             >
               <Home sx={{ fontSize: 18 }} />
               {t('breadcrumbs.home')}
-            </Link>
-            <Link 
+            </RouterLink>
+            <RouterLink 
               to="/catalog"
               style={{ 
                 textDecoration: 'none', 
@@ -10029,9 +10286,9 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
               onMouseLeave={(e) => e.target.style.color = '#666'}
             >
               {t('breadcrumbs.catalog')}
-            </Link>
+            </RouterLink>
             {category && (
-              <Link 
+              <RouterLink 
                 to={`/category/${category.id}`}
                 style={{ 
                   textDecoration: 'none', 
@@ -10044,7 +10301,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
                 onMouseLeave={(e) => e.target.style.color = '#666'}
               >
                 {translateCategory(category.name)}
-              </Link>
+              </RouterLink>
             )}
             <Typography color="text.primary" sx={{ fontWeight: 600, fontSize: '14px' }}>
               {subcategory?.name ? (category ? translateSubcategory(category.name, subcategory.name) : subcategory.name) : t('breadcrumbs.subcategory')}
@@ -10841,7 +11098,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
     switch (selectedSection) {
       case 'myprofile':
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
@@ -11231,7 +11488,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         };
 
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
@@ -11475,7 +11732,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         };
 
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
@@ -11734,7 +11991,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         };
 
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
@@ -11921,7 +12178,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         );
       case 'wishlist':
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             {localWishlist && localWishlist.length === 0 ? (
                                           <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>{t('common.noWishlistItems')}</Typography>
             ) : (
@@ -12014,7 +12271,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         );
       case 'viewed':
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             {localViewed && localViewed.length === 0 ? (
                                           <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>{t('common.noViewedProducts')}</Typography>
             ) : (
@@ -12106,7 +12363,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         );
       case 'profile':
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 2, pt: 1, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 2, pt: 1, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
@@ -12213,7 +12470,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
 
       case 'auth':
         return (
-          <Box sx={{ mt: 0, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
