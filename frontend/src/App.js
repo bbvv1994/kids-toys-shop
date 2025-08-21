@@ -1,3 +1,4 @@
+﻿
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -270,6 +271,7 @@ const theme = createTheme({
   // Viewport-based breakpoints
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg')); // >= 1200px
   const isNarrow = useMediaQuery(theme.breakpoints.down('lg')); // < 1200px
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm')); // < 600px
   const location = useLocation();
   const navigate = useNavigate();
@@ -1426,37 +1428,40 @@ const theme = createTheme({
             justifyContent: 'space-between',
             flexWrap: 'nowrap',
             gap: { xs: 0.25, sm: 0.5, md: 1 },
-            px: { xs: 0.5, sm: 1, md: 2 }
+            px: { xs: 0.5, sm: 1, md: 2 },
+            position: 'relative'
           }}>
-            {/* Логотип */}
-            <Box sx={{ display: 'flex', alignItems: 'center', mr: { xs: 0.5, sm: 1, md: 2 } }}>
-              <img src="/lion-logo.png..png" alt="Логотип магазина" style={{ width: isDesktop ? 96 : (isNarrow ? 68 : 56), height: isDesktop ? 96 : (isNarrow ? 68 : 56) }} />
+            {/* Левая секция: Логотип и кнопка меню */}
+            <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mr: { xs: 0.5, sm: 1, md: 2 } }}>
+                <img src="/lion-logo.png..png" alt="Логотип магазина" style={{ width: isDesktop ? 96 : (isNarrow ? 68 : 56), height: isDesktop ? 96 : (isNarrow ? 68 : 56) }} />
+              </Box>
+              {/* Кнопка меню при узком вьюпорте (и на мобильных) - справа от логотипа */}
+              {(isNarrow || isMobile) && (
+                <IconButton
+                  color="inherit"
+                  onClick={() => setMobileMenuOpen(true)}
+                  sx={{ 
+                    color: 'white',
+                    mr: { xs: 0.25, sm: 0.5, md: 1, lg: 2 },
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                    },
+                  }}
+                >
+                  <MenuIcon />
+                </IconButton>
+              )}
             </Box>
-            {/* Кнопка меню при узком вьюпорте (и на мобильных) */}
-            {isNarrow && (
-              <IconButton
-                color="inherit"
-                onClick={() => setMobileMenuOpen(true)}
-                sx={{ 
-                  color: 'white',
-                  mr: { xs: 0.25, sm: 0.5, md: 1, lg: 2 },
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                  },
-                }}
-              >
-                <MenuIcon />
-              </IconButton>
-            )}
-            
-            {/* Кнопка категорий в центре для мобильных */}
-            {isNarrow && (
+
+            {/* Центральная секция: Кнопка категорий для мобильных и средних экранов */}
+            {(isMobile || isNarrow) && (
               <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                flex: 1,
-                mx: { xs: 0.25, sm: 0.5, md: 1, lg: 2 }
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 2
               }}>
                 <IconButton
                   color="inherit"
@@ -1480,6 +1485,7 @@ const theme = createTheme({
                 </IconButton>
               </Box>
             )}
+            
             {/* Кнопки навигации: все пункты */}
             {isDesktop && (
               <Box sx={{ 
@@ -1790,7 +1796,7 @@ const theme = createTheme({
             
 
             {/* Корзина и язык для мобильных - справа */}
-            {isNarrow && (
+            {(isNarrow || isMobile) && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, ml: 'auto' }}>
                 {/* Кнопка профиля для мобильных */}
                 <IconButton
@@ -2393,24 +2399,9 @@ const theme = createTheme({
           </Paper>
         )}
 
-        {/* Переношу бургер-меню под AppBar */}
-        {isNarrow && location.pathname !== '/profile' && 
-         location.pathname !== '/checkout' && 
-         location.pathname !== '/order-success' && (
-        <Box sx={{ display: { xs: 'block', md: 'none' }, p: 1 }}>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={() => setMobileOpen(true)}
-            sx={{ mr: 2 }}
-          >
-            <CategoryIcon sx={{ fontSize: 28, color: 'inherit', mr: 1 }} />
-          </IconButton>
-        </Box>
-        )}
+
         {/* Мобильный Drawer с категориями */}
-        {isNarrow && location.pathname !== '/profile' && 
+        {(isNarrow || isMobile) && location.pathname !== '/profile' && 
          location.pathname !== '/checkout' && 
          location.pathname !== '/order-success' && (
       <Drawer
@@ -2485,6 +2476,11 @@ const theme = createTheme({
               background: 'linear-gradient(180deg, #FFF8E1 0%, #FFFFFF 100%)',
               top: '60px',
               height: 'calc(100vh - 60px)',
+              overflow: 'auto',
+              '&::-webkit-scrollbar': { display: 'none' },
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              overflowX: 'hidden'
             },
           }}
         >
@@ -2545,6 +2541,11 @@ const theme = createTheme({
               background: 'linear-gradient(180deg, #FFF8E1 0%, #FFFFFF 100%)',
               top: '60px',
               height: 'calc(100vh - 60px)',
+              overflow: 'auto',
+              '&::-webkit-scrollbar': { display: 'none' },
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              overflowX: 'hidden'
             },
           }}
         >
@@ -2714,103 +2715,88 @@ const theme = createTheme({
           </Box>
         </Drawer>
         
-        {/* Мобильное меню категорий - выпадающее под кнопкой */}
-        {mobileCategoriesOpen && (
-          <Box
-            sx={{
-              position: 'fixed',
+        {/* Мобильное меню категорий */}
+        <Drawer
+          anchor="top"
+          open={mobileCategoriesOpen}
+          onClose={() => setMobileCategoriesOpen(false)}
+          sx={{
+            '& .MuiDrawer-paper': {
+              background: 'linear-gradient(180deg, #FFF8E1 0%, #FFFFFF 100%)',
               top: 'var(--appbar-height)',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 1400,
-              width: '280px',
-              maxHeight: '70vh',
-              mt: '-4px',
-            }}
-          >
-          <Slide
-            in={mobileCategoriesOpen}
-            direction="down"
-            timeout={300}
-          >
-                      <Paper
-              elevation={8}
-              sx={{
-                background: 'linear-gradient(180deg, #FFF8E1 0%, #FFFFFF 100%)',
-                borderRadius: 2,
-                mt: 1,
-                maxHeight: '70vh',
-                overflow: 'auto',
-                '&::-webkit-scrollbar': { display: 'none' },
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none'
-              }}
-            >
-            <Box sx={{ p: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#FFB300' }}>
-                  {t('catalog.categoriesButton')}
-                </Typography>
-                <IconButton 
-                  size="small"
-                  onClick={() => setMobileCategoriesOpen(false)}
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-              
-              {/* Список категорий с раскрывающимися подкатегориями */}
-              <List sx={{ py: 0 }}>
-                {navCategories && navCategories.map((category) => {
-                  // Функции перевода для мобильного меню
-                  const translateCategory = (categoryName) => {
-                    const categoryMap = {
-                      'Игрушки': t('categories.toys'),
-                      'Конструкторы': t('categories.constructors'),
-                      'Пазлы': t('categories.puzzles'),
-                      'Творчество': t('categories.creativity'),
-                      'Канцтовары': t('categories.stationery'),
-                      'Транспорт': t('categories.transport'),
-                      'Отдых на воде': t('categories.water_recreation'),
-                      'Настольные игры': t('categories.board_games'),
-                      'Развивающие игры': t('categories.educational_games'),
-                      'Акции': t('categories.sales')
-                    };
-                    return categoryMap[categoryName] || categoryName;
+              height: 'calc(100vh - var(--appbar-height))',
+              overflow: 'auto',
+              '&::-webkit-scrollbar': { display: 'none' },
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
+            },
+          }}
+        >
+          <Box sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#FFB300' }}>
+                {t('catalog.categoriesButton')}
+              </Typography>
+              <IconButton 
+                size="small"
+                onClick={() => setMobileCategoriesOpen(false)}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            
+            {/* Список категорий с раскрывающимися подкатегориями */}
+            <List sx={{ py: 0 }}>
+              {navCategories && navCategories.map((category) => {
+                // Функции перевода для мобильного меню
+                const translateCategory = (categoryName) => {
+                  const categoryMap = {
+                    'Игрушки': t('categories.toys'),
+                    'Конструкторы': t('categories.constructors'),
+                    'Пазлы': t('categories.puzzles'),
+                    'Творчество': t('categories.creativity'),
+                    'Канцтовары': t('categories.stationery'),
+                    'Транспорт': t('categories.transport'),
+                    'Отдых на воде': t('categories.water_recreation'),
+                    'Настольные игры': t('categories.board_games'),
+                    'Развивающие игры': t('categories.educational_games'),
+                    'Акции': t('categories.sales')
                   };
+                  return categoryMap[categoryName] || categoryName;
+                };
 
-                  const translateSubcategory = (categoryName, subcategoryName) => {
-                    const subcategoryMap = {
-                      'Игрушки': {
-                        'Игрушки для самых маленьких': t('categories.subcategories.toys.for_babies'),
-                        'Куклы': t('categories.subcategories.toys.dolls'),
-                        'Оружие игрушечное': t('categories.subcategories.toys.toy_weapons'),
-                        'Треки, паркинги и жд': t('categories.subcategories.toys.tracks_parking_railway'),
-                        'Мягкие игрушки': t('categories.subcategories.toys.soft_toys'),
-                        'Игрушки - антистресс и сквиши': t('categories.subcategories.toys.antistress_squishy'),
-                        'Активные игры': t('categories.subcategories.toys.active_games'),
-                        'Тематические игровые наборы': t('categories.subcategories.toys.thematic_sets'),
-                        'Декоративная косметика и украшения': t('categories.subcategories.toys.decorative_cosmetics'),
-                        'Машинки и другой транспорт': t('categories.subcategories.toys.cars_transport'),
-                        'Роботы и трансформеры': t('categories.subcategories.toys.robots_transformers'),
-                        'Игровые фигурки': t('categories.subcategories.toys.game_figures'),
-                        'Игрушки для песочницы': t('categories.subcategories.toys.sandbox_toys'),
-                        'Шарики': t('categories.subcategories.toys.balls'),
-                        'Игрушки на радиоуправлении': t('categories.subcategories.toys.radio_controlled')
-                      },
-                      'Конструкторы': {
-                        'Lego для мальчиков': t('categories.subcategories.constructors.lego_boys'),
-                        'Lego для девочек': t('categories.subcategories.constructors.lego_girls'),
-                        'Металлические конструкторы': t('categories.subcategories.constructors.metal_constructors'),
-                        'Lego крупные блоки': t('categories.subcategories.constructors.lego_large_blocks')
-                      },
-                      'Пазлы': {
-                        'Пазлы для взрослых': t('categories.subcategories.puzzles.for_adults'),
-                        'Пазлы для детей': t('categories.subcategories.puzzles.for_children'),
-                        'Магнитные пазлы': t('categories.subcategories.puzzles.magnetic'),
-                        'Пазлы напольные': t('categories.subcategories.puzzles.floor'),
-                        'Пазлы для малышей': t('categories.subcategories.puzzles.for_babies')
-                      },
+                const translateSubcategory = (categoryName, subcategoryName) => {
+                  const subcategoryMap = {
+                    'Игрушки': {
+                      'Игрушки для самых маленьких': t('categories.subcategories.toys.for_babies'),
+                      'Куклы': t('categories.subcategories.toys.dolls'),
+                      'Оружие игрушечное': t('categories.subcategories.toys.toy_weapons'),
+                      'Треки, паркинги и жд': t('categories.subcategories.toys.tracks_parking_railway'),
+                      'Мягкие игрушки': t('categories.subcategories.toys.soft_toys'),
+                      'Игрушки - антистресс и сквиши': t('categories.subcategories.toys.antistress_squishy'),
+                      'Активные игры': t('categories.subcategories.toys.active_games'),
+                      'Тематические игровые наборы': t('categories.subcategories.toys.thematic_sets'),
+                      'Декоративная косметика и украшения': t('categories.subcategories.toys.decorative_cosmetics'),
+                      'Машинки и другой транспорт': t('categories.subcategories.toys.cars_transport'),
+                      'Роботы и трансформеры': t('categories.subcategories.toys.robots_transformers'),
+                      'Игровые фигурки': t('categories.subcategories.toys.game_figures'),
+                      'Игрушки для песочницы': t('categories.subcategories.toys.sandbox_toys'),
+                      'Шарики': t('categories.subcategories.toys.balls'),
+                      'Игрушки на радиоуправлении': t('categories.subcategories.toys.radio_controlled')
+                    },
+                    'Конструкторы': {
+                      'Lego для мальчиков': t('categories.subcategories.constructors.lego_boys'),
+                      'Lego для девочек': t('categories.subcategories.constructors.lego_girls'),
+                      'Металлические конструкторы': t('categories.subcategories.constructors.metal_constructors'),
+                      'Lego крупные блоки': t('categories.subcategories.constructors.lego_large_blocks')
+                    },
+                    'Пазлы': {
+                      'Пазлы для взрослых': t('categories.subcategories.puzzles.for_adults'),
+                      'Пазлы для детей': t('categories.subcategories.puzzles.for_children'),
+                      'Магнитные пазлы': t('categories.subcategories.puzzles.magnetic'),
+                      'Пазлы напольные': t('categories.subcategories.puzzles.floor'),
+                      'Пазлы для малышей': t('categories.subcategories.puzzles.for_babies')
+                    },
                       'Творчество': {
                         'Наборы для лепки': t('categories.subcategories.creativity.modeling_sets'),
                         'Наклейки': t('categories.subcategories.creativity.stickers'),
@@ -2969,10 +2955,7 @@ const theme = createTheme({
                 })}
               </List>
             </Box>
-          </Paper>
-          </Slide>
-          </Box>
-        )}
+          </Drawer>
       </Box>
     </>
   );
@@ -3046,10 +3029,10 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   
   // Автоматически переключаем на grid view на мобильных устройствах
   useEffect(() => {
-   if (isNarrow && viewMode === 'list') {
+   if ((isNarrow || isMobile) && viewMode === 'list') {
       setViewMode('grid');
     }
- }, [isNarrow, viewMode]);
+ }, [isNarrow, isMobile, viewMode]);
   
   // Определяем валюту по товарам (если есть поле currency, иначе ILS)
   const currency = products && products.length > 0
@@ -3604,7 +3587,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                       cart={cart}
                       onChangeCartQuantity={handleChangeCartQuantity}
                       onEditProduct={onEditProduct}
-                     viewMode={isNarrow && window.innerWidth > window.innerHeight ? "carousel" : "grid"}
+                     viewMode={(isNarrow || isMobile) && window.innerWidth > window.innerHeight ? "carousel" : "grid"}
                       isAdmin={user?.role === 'admin'}
                     />
                   </Box>
@@ -5218,7 +5201,8 @@ function AppContent({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const theme = useTheme();
-  const isNarrow = useMediaQuery(theme.breakpoints.down('lg'));
+  const isNarrow = useMediaQuery(theme.breakpoints.down('lg')); // < 1200px
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
   
   // Состояния для мобильного поиска и фильтров
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -5340,7 +5324,12 @@ function AppContent({
   
   return (
     <>
-      <div className="App" style={{ flex: '1 0 auto', display: 'flex', flexDirection: 'column' }}>
+      <div className="App" style={{ 
+        flex: '1 0 auto', 
+        display: 'flex', 
+        flexDirection: 'column',
+        paddingTop: isNarrow ? '64px' : '96px' // Добавляем отступ сверху для учета фиксированного AppBar
+      }}>
         <Navigation 
           cart={cart}
           cartCount={cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0}
@@ -5380,7 +5369,11 @@ function AppContent({
             gap: 1, 
             p: 1, 
             width: '100%',
-            mt: '5px'
+            mt: '15px',
+            mb: '15px',
+            px: 2,
+            position: 'relative',
+            zIndex: 1
           }}>
             {/* Поисковое поле */}
             <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} style={{ flex: 1 }}>
