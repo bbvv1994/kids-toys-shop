@@ -394,7 +394,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
       maxWidth: { xs: '100%', md: 1400 },
       width: { xs: '95%', md: '90%' },
       mx: 'auto', 
-      mt: { xs: 2, md: 16 }, 
+      mt: { xs: 2, md: 2 }, 
       p: { xs: 1, md: 2 },
       pt: { xs: 2, md: 6 },
       pb: { xs: 1, md: 2 },

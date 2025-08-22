@@ -1995,15 +1995,18 @@ const theme = createTheme({
          user?.role !== 'admin' && isDesktop && (
           <>
           <Box sx={{ 
-            position: 'fixed',
-            top: '100px',
+            position: 'absolute',
+            top: '4px',
             left: 0,
-            zIndex: 1402,
+            zIndex: 1400,
             width: 250,
           }}>
             <button
               ref={categoryBtnRef}
-              onClick={handleCategoryBtnClick}
+              onClick={() => {
+                console.log('Category button clicked!');
+                handleCategoryBtnClick();
+              }}
               style={{
                 width: 250,
                 height: 44,
@@ -2158,17 +2161,18 @@ const theme = createTheme({
           )}
           </>
         )}
-        {/* Меню категорий с position: fixed */}
+        {/* Меню категорий с position: absolute */}
         {isDesktop && !instantClose && !shouldHideCategories && (
+        <Box sx={{ position: 'relative' }}>
           <Paper
             ref={menuRef}
             className="category-dropdown-menu"
             sx={{
-              position: 'fixed',
-              top: isHome ? 100 : 144,
+              position: 'absolute',
+              top: isHome ? 4 : 48,
               left: 0,
               width: 250,
-              zIndex: 2000,
+              zIndex: 1400,
               m: 0,
               p: 0,
               borderRadius: 0,
@@ -2280,6 +2284,7 @@ const theme = createTheme({
                 </ListItem>
               ))}
             </List>
+            </Paper>
             {/* Универсальная панель подкатегорий */}
             {(activeSub || hoveredCategory || touchedCategory) && (() => {
               // Определяем категорию и подкатегории
@@ -2330,13 +2335,13 @@ const theme = createTheme({
                     }
                   }}
                   sx={{
-                    position: 'fixed',
-                    top: 100,
+                    position: 'absolute',
+                    top: 4,
                     left: 250,
                     width: 250,
                     height: 'calc(100vh - 100px - 67px + 4px)',
                     background: '#fff',
-                    zIndex: 2100,
+                    zIndex: 1400,
                     boxShadow: '0 8px 16px -8px rgba(0,0,0,0.08)',
                     borderLeft: 'none',
                     borderRadius: 0,
@@ -2429,8 +2434,9 @@ const theme = createTheme({
                 </Box>
               );
             })()}
-          </Paper>
+          </Box>
         )}
+      
 
 
         {/* Мобильный Drawer с категориями */}

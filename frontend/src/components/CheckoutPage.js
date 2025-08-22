@@ -407,7 +407,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
   }
 
   return (
-    <Container maxWidth="sm" sx={{ mt: { xs: 4, md: 16 }, mb: 4 }}>
+    <Container maxWidth={false} sx={{ mt: { xs: 4, md: 8 }, mb: 4, maxWidth: '1100px !important' }}>
 
       {loadingUserData && (
         <Box sx={{ textAlign: 'center', py: 4 }}>

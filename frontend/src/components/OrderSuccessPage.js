@@ -70,7 +70,7 @@ export default function OrderSuccessPage() {
   const total = orderData?.total || 0;
 
   return (
-    <Container maxWidth="sm" sx={{ mt: { xs: 4, md: 12 }, mb: 4 }}>
+    <Container maxWidth={false} sx={{ mt: { xs: 4, md: 1 }, mb: 4, maxWidth: '1100px !important' }}>
       <Box sx={{ textAlign: 'center', mb: 4, pt: 2 }}>
         <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
         <Typography variant="h5" color="success.main" gutterBottom>
@@ -190,82 +190,91 @@ export default function OrderSuccessPage() {
         </Grid>
       </Paper>
       <Box sx={{ textAlign: 'center', mt: 3 }}>
-        <Button 
-          variant="contained" 
-          fullWidth
-          size="large"
-          onClick={() => navigate('/catalog')}
-          sx={{
-            background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
-            color: '#fff',
-            borderRadius: 2,
-            fontWeight: 600,
-            fontSize: 16,
-            py: 1.5,
-            boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
-            textTransform: 'none',
-            minWidth: 120,
-            mb: 2,
-            '&:hover': {
-              background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
-              boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
-              transform: 'translateY(-1px)'
-            },
-          }}
-        >
-          {t('orderSuccess.continueShopping')}
-        </Button>
-        {!isGuest && (
-          <Button 
-            variant="contained" 
-            fullWidth
-            size="large"
-            onClick={() => navigate('/profile')}
-            sx={{
-              background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
-              color: '#fff',
-              borderRadius: 2,
-              fontWeight: 600,
-              fontSize: 16,
-              py: 1.5,
-              boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
-              textTransform: 'none',
-              minWidth: 120,
-              mb: 2,
-              '&:hover': {
-                background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
-                boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
-                transform: 'translateY(-1px)'
-              },
-            }}
-          >
-            {t('orderSuccess.myOrders')}
-          </Button>
-        )}
-        <Button 
-          variant="contained" 
-          fullWidth
-          size="large"
-          onClick={() => navigate('/')}
-          sx={{
-            background: 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)',
-            color: '#fff',
-            borderRadius: 2,
-            fontWeight: 600,
-            fontSize: 16,
-            py: 1.5,
-            boxShadow: '0 2px 8px rgba(255, 152, 0, 0.3)',
-            textTransform: 'none',
-            minWidth: 120,
-            '&:hover': {
-              background: 'linear-gradient(135deg, #ffb74d 0%, #ff9800 100%)',
-              boxShadow: '0 4px 12px rgba(255, 152, 0, 0.4)',
-              transform: 'translateY(-1px)'
-            },
-          }}
-        >
-          {t('orderSuccess.goHome')}
-        </Button>
+        <Grid container spacing={2} justifyContent="center">
+          <Grid item xs={12} md={4}>
+            <Button 
+              variant="contained" 
+              fullWidth
+              size="large"
+              onClick={() => navigate('/catalog')}
+              sx={{
+                background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                color: '#fff',
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: 16,
+                py: 1.5,
+                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                textTransform: 'none',
+                minWidth: 120,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                  boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+              }}
+            >
+              {t('orderSuccess.continueShopping')}
+            </Button>
+          </Grid>
+          {!isGuest && (
+            <Grid item xs={12} md={4}>
+              <Button 
+                variant="contained" 
+                fullWidth
+                size="large"
+                onClick={() => {
+                  localStorage.setItem('activeProfileTab', 'orders');
+                  navigate('/profile');
+                }}
+                sx={{
+                  background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+                  color: '#fff',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  fontSize: 16,
+                  py: 1.5,
+                  boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
+                  textTransform: 'none',
+                  minWidth: 120,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
+                    boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                    transform: 'translateY(-1px)'
+                  },
+                }}
+              >
+                {t('orderSuccess.myOrders')}
+              </Button>
+            </Grid>
+          )}
+          <Grid item xs={12} md={4}>
+            <Button 
+              variant="contained" 
+              fullWidth
+              size="large"
+              onClick={() => navigate('/')}
+              sx={{
+                background: 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)',
+                color: '#fff',
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: 16,
+                py: 1.5,
+                boxShadow: '0 2px 8px rgba(255, 152, 0, 0.3)',
+                textTransform: 'none',
+                minWidth: 120,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #ffb74d 0%, #ff9800 100%)',
+                  boxShadow: '0 4px 12px rgba(255, 152, 0, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+              }}
+            >
+              {t('orderSuccess.goHome')}
+            </Button>
+          </Grid>
+        </Grid>
       </Box>
     </Container>
   );
