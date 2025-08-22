@@ -7541,6 +7541,48 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
           )}
         </Box>
 
+        {/* Статистика товаров */}
+        <Box sx={{ mb: 4, p: 3, bgcolor: '#f8f9fa', borderRadius: 3, border: '1px solid #e9ecef' }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: '#495057' }}>
+            Статистика товаров
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            <Box sx={{ textAlign: 'center', minWidth: 120 }}>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#667eea' }}>
+                {products.length}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Всего товаров
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center', minWidth: 120 }}>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#28a745' }}>
+                {products.filter(product => product.quantity > 0).length}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                В наличии
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center', minWidth: 120 }}>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#ffc107' }}>
+                {products.filter(product => product.quantity === 0).length}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Нет в наличии
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center', minWidth: 120 }}>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#dc3545' }}>
+                {products.filter(product => product.hidden).length}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Скрытые
+              </Typography>
+            </Box>
+
+          </Box>
+        </Box>
+
         {/* Панель массовых действий */}
         {selectedProducts.length > 0 && (
           <Box sx={{ mb: 2, p: 2, background: '#e3f2fd', borderRadius: 2, border: '1px solid #1976d2' }}>
