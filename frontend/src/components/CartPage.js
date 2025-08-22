@@ -362,7 +362,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                   order: { xs: 2, sm: 2 }
                 }}
               >
-                {(item.product.price * item.quantity).toFixed(2)} ₪
+                ₪{(item.product.price * item.quantity).toFixed(2)}
               </Typography>
               
               {/* Кнопка удаления */}
@@ -569,7 +569,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                    // Иврит: цена слева, "מוצרים: ({{count}})" справа
                    <>
                      <Typography sx={{ fontSize: { xs: '0.9rem', md: '1rem' } }}>
-                       {total.toFixed(2)} ₪
+                       ₪{total.toFixed(2)}
                      </Typography>
                      <Typography sx={{ fontSize: { xs: '0.9rem', md: '1rem' } }}>
                        {t('cart.itemsCount', { count: itemCount })}
@@ -582,7 +582,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                        {t('cart.itemsCount', { count: itemCount })}
                      </Typography>
                      <Typography sx={{ fontSize: { xs: '0.9rem', md: '1rem' } }}>
-                       {total.toFixed(2)} ₪
+                       ₪{total.toFixed(2)}
                      </Typography>
                    </>
                  )}
@@ -593,7 +593,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                     {t('cart.discount', { percent: discount })}
                   </Typography>
                   <Typography sx={{ color: '#4CAF50', fontWeight: 700, fontSize: { xs: '0.9rem', md: '1rem' } }}>
-                    -{Math.round(total * discount / 100)} ₪
+                    -₪{Math.round(total * discount / 100)}
                   </Typography>
                 </Box>
               )}
@@ -619,7 +619,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                          fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' }
                        }}
                      >
-                       {finalTotal.toFixed(2)} ₪
+                       ₪{finalTotal.toFixed(2)}
                      </Typography>
                    </>
                                    ) : (
@@ -633,7 +633,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                            fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' }
                          }}
                        >
-                         {finalTotal.toFixed(2)} ₪
+                         ₪{finalTotal.toFixed(2)}
                        </Typography>
                        <Typography 
                          variant={isMobile ? "body1" : "h6"} 

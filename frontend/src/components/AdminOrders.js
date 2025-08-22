@@ -140,7 +140,7 @@ export default function AdminOrders({ user }) {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-                      {order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)}₪
+                      ₪{order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
                     </Typography>
                   </TableCell>
                   <TableCell>

@@ -665,7 +665,7 @@ const BulkImportProducts = ({ categories = [] }) => {
                                 <TableCell>{product.name}</TableCell>
                                 <TableCell>{product.article || '-'}</TableCell>
                                 <TableCell>{product.quantity}</TableCell>
-                                <TableCell>{product.price} ₪</TableCell>
+                                <TableCell>₪{product.price}</TableCell>
                               </TableRow>
                             ))}
                           </TableBody>

@@ -532,7 +532,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
                     {getTranslatedName(item.product)} x {item.quantity}
                   </Typography>
                   <Typography variant="body1" color="text.secondary">
-                    {item.product.price} ₪ x {item.quantity} = {item.product.price * item.quantity} ₪
+                    ₪{item.product.price} x {item.quantity} = ₪{item.product.price * item.quantity}
                   </Typography>
                 </Box>
               </Box>
@@ -552,14 +552,14 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
                   // Иврит: цена и ":סה"כ" вместе по центру
                   <>
                     <Typography variant="h6" color="primary" sx={{ fontWeight: 600 }}>
-                      {calculateTotal()} ₪ {t('checkout.totalAmount')}
+                      ₪{calculateTotal()} {t('checkout.totalAmount')}
                     </Typography>
                   </>
                 ) : (
                   // Русский язык: "Итого:" и цена по центру
                   <>
                     <Typography variant="h6" color="primary" sx={{ fontWeight: 600 }}>
-                      {t('checkout.totalAmount')} {calculateTotal()} ₪
+                      {t('checkout.totalAmount')} ₪{calculateTotal()}
                     </Typography>
                   </>
                 )}

@@ -204,7 +204,7 @@ function CategoryDetails({ category }) {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3, mt: -5 }}>
       <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: '#2c3e50' }}>
         {category.label}
       </Typography>

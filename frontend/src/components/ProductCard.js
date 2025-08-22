@@ -89,10 +89,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('he-IL', {
-      style: 'currency',
-      currency: 'ILS'
-    }).format(price);
+    return `₪${price}`;
   };
 
   const handleWishlistClick = React.useCallback(e => {
@@ -672,9 +669,9 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
               <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 14 }}>{product.reviewCount || 0}</Typography>
             </Box>
           </div>
-          {/* Цена и доп. инфа */}
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 1 }}>
-            <Typography sx={{ color: '#1976d2', fontWeight: 700, fontSize: 18 }}>{formatPrice(product.price)}</Typography>
+                     {/* Цена и доп. инфа */}
+           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 1 }}>
+             <Typography sx={{ color: '#000000', fontWeight: 700, fontSize: 18 }}>{formatPrice(product.price)}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {!isAdmin && (
                 <>

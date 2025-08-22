@@ -349,7 +349,7 @@
     "yourOrder": "ההזמנה שלך",
     "itemsCount": "מוצרים: ({{count}})",
     "discount": "הנחה {{percent}}%:",
-    "discountMessage": "הנחה {{percent}}%! חיסכון {{saved}} ₪",
+    "discountMessage": "הנחה {{percent}}%! חיסכון ₪{{saved}}",
     "toPay": ":לתשלום",
     "removeFromCart": "הסר מהעגלה"
   },
@@ -875,7 +875,7 @@
       "title": "למה לקוחות בוחרים בנו שוב ושוב",
       "prices": {
         "title": "מחירים ללא תחרות",
-        "description": "אצלנו תמצאו צעצועים מעולים במחיר מקסימלי של עד 250 ₪ בלבד!"
+        "description": "אצלנו תמצאו צעצועים מעולים במחיר מקסימלי של עד ₪250 בלבד!"
       },
       "safety": {
         "title": "בטיחות מעל הכול",

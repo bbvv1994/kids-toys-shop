@@ -1966,10 +1966,10 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
 🏬 <b>Самовывоз из:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
 💳 <b>Оплата:</b> ${paymentMethod === 'card' ? 'Карта' : 'Наличными или картой'}
 
-📦 <b>Товары:</b>
-${order.items.map(item => `• ${item.product.name} x${item.quantity} - ${item.price * item.quantity} ₪`).join('\n')}
+  📦 <b>Товары:</b>
+${order.items.map(item => `• ${item.product.name} x${item.quantity} - ₪${item.price * item.quantity}`).join('\n')}
 
-💰 <b>Итого:</b> ${totalAmount} ₪
+💰 <b>Итого:</b> ₪${totalAmount}
 📅 <b>Дата:</b> ${new Date().toLocaleString('ru-RU')}
         `.trim();
         await sendTelegramNotification(telegramMessage);
@@ -2029,14 +2029,14 @@ ${order.items.map(item => `• ${item.product.name} x${item.quantity} - ${item.p
                       <div style="font-size: 12px; color: #666;">Количество: ${item.quantity} шт.</div>
                     </div>
                     <div style="font-weight: bold; color: #e65100; font-size: 16px;">
-                      ${item.price * item.quantity} ₪
+                      ₪${item.price * item.quantity}
                     </div>
                   </div>
                 `).join('')}
               </div>
               <div style="text-align: right; padding-top: 15px; border-top: 2px solid #ffcc02;">
                 <div style="font-size: 20px; font-weight: bold; color: #e65100;">
-                  Итого: ${total} ₪
+                  Итого: ₪${total}
                 </div>
               </div>
             </div>
@@ -2233,14 +2233,14 @@ ${order.items.map(item => `• ${item.product.name} x${item.quantity} - ${item.p
                       <div style="font-size: 12px; color: #666;">Количество: ${item.quantity} шт.</div>
                     </div>
                     <div style="font-weight: bold; color: #e65100; font-size: 16px;">
-                      ${item.product.price * item.quantity} ₪
+                      ₪${item.product.price * item.quantity}
                     </div>
                   </div>
                 `).join('')}
               </div>
               <div style="text-align: right; padding-top: 15px; border-top: 2px solid #ffcc02;">
                 <div style="font-size: 20px; font-weight: bold; color: #e65100;">
-                  Итого: ${totalAmount} ₪
+                  Итого: ₪${totalAmount}
                 </div>
               </div>
             </div>
@@ -2363,9 +2363,9 @@ app.post('/api/guest/checkout', async (req, res) => {
 💳 <b>Оплата:</b> ${paymentMethod === 'card' ? 'Карта' : 'Наличными или картой'}
 
 📦 <b>Товары:</b>
-${cartItems.map(item => `• ${item.productName} x${item.quantity} - ${item.price * item.quantity} ₪`).join('\n')}
+${cartItems.map(item => `• ${item.productName} x${item.quantity} - ₪${item.price * item.quantity}`).join('\n')}
 
-💰 <b>Итого:</b> ${totalAmount} ₪
+💰 <b>Итого:</b> ₪${totalAmount}
 📅 <b>Дата:</b> ${new Date().toLocaleString('ru-RU')}
       `.trim();
       await sendTelegramNotification(telegramMessage);
@@ -2422,14 +2422,14 @@ ${cartItems.map(item => `• ${item.productName} x${item.quantity} - ${item.pric
                       <div style="font-size: 12px; color: #666;">Количество: ${item.quantity} шт.</div>
                     </div>
                     <div style="font-weight: bold; color: #e65100; font-size: 16px;">
-                      ${item.price * item.quantity} ₪
+                      ₪${item.price * item.quantity}
                     </div>
                   </div>
                 `).join('')}
               </div>
               <div style="text-align: right; padding-top: 15px; border-top: 2px solid #ffcc02;">
                 <div style="font-size: 20px; font-weight: bold; color: #e65100;">
-                  Итого: ${totalAmount} ₪
+                  Итого: ₪${totalAmount}
                 </div>
               </div>
             </div>

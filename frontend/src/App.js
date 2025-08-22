@@ -6797,7 +6797,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
                   )}
                 </td>
                 <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center', verticalAlign: 'middle', wordWrap: 'break-word', wordBreak: 'break-word', maxWidth: '200px' }}>{p.name}</td>
-                <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center', verticalAlign: 'middle' }}>{p.price} ₪</td>
+                <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center', verticalAlign: 'middle' }}>₪{p.price}</td>
                 <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center', verticalAlign: 'middle' }}>{getCategoryName(p.category)}</td>
                 <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center', verticalAlign: 'middle' }}>{p.subcategory?.name || p.subcategory || ''}</td>
                 <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center', verticalAlign: 'middle' }}>{p.quantity}</td>
@@ -8847,7 +8847,7 @@ function CMSOrders() {
 
   // Форматирование цены
   const formatPrice = (price) => {
-    return `${price} ₪`;
+    return `₪${price}`;
   };
 
   if (loading) {
@@ -9751,10 +9751,11 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
-      <Box sx={{ mb: 4, pt: { xs: 0, md: 10 } }}>
+      <Box sx={{ mb: 4, pt: { xs: 0, md: 3.75 } }}>
                 {/* Хлебные крошки */}
         <Box sx={{ 
           mb: 3, 
+          mt: -3.625,
           ml: { xs: 0, md: '280px' }, // Отступ слева для десктопа
           pl: { xs: 2, md: 0 }, // Отступ слева для мобильных
           pt: { xs: 1, md: 0 } // Отступ сверху для мобильных
@@ -10236,10 +10237,11 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
-      <Box sx={{ mb: 4, pt: { xs: 0, md: 10 } }}>
+      <Box sx={{ mb: 4, pt: { xs: 0, md: 3.75 } }}>
         {/* Хлебные крошки */}
         <Box sx={{ 
           mb: 3, 
+          mt: -3.625,
           ml: { xs: 0, md: '280px' }, // Отступ слева для десктопа
           pl: { xs: 2, md: 0 }, // Отступ слева для мобильных
           pt: { xs: 1, md: 0 } // Отступ сверху для мобильных
@@ -11867,7 +11869,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
 
 
         const formatPrice = (price) => {
-          return `${price} ₪`;
+          return `₪${price}`;
         };
 
         const getStatusColor = (status) => {

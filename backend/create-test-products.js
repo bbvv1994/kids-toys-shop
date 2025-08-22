@@ -78,7 +78,7 @@ async function createTestProducts() {
       const created = await prisma.product.create({
         data: product
       });
-      console.log(`✅ Создан товар: ${created.name} (${created.price} ₪)`);
+      console.log(`✅ Создан товар: ${created.name} (₪${created.price})`);
     }
 
     console.log('\n🎉 Все тестовые товары созданы!');

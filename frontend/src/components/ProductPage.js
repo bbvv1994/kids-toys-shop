@@ -210,10 +210,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const displayQuantity = inCart ? cartQuantity : quantity;
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('he-IL', {
-      style: 'currency',
-      currency: 'ILS'
-    }).format(price);
+    return `₪${price}`;
   };
 
   useEffect(() => {
@@ -667,9 +664,15 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4, pt: 10 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 4 }, pt: { xs: 0, md: 7.5 } }}>
       {/* Хлебные крошки */}
-      <Box sx={{ mb: 3, mt: 2 }}>
+      <Box sx={{ 
+        mb: 3, 
+        mt: -3.625,
+        ml: { xs: 0, md: '280px' }, // Отступ слева для десктопа
+        pl: { xs: 2, md: 0 }, // Отступ слева для мобильных
+        pt: { xs: 1, md: 0 } // Отступ сверху для мобильных
+      }}>
         <Breadcrumbs 
           separator={<NavigateNextIcon fontSize="small" />}
           aria-label="breadcrumb"
@@ -779,7 +782,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         borderRadius: 3,
         p: { xs: 2, md: 4 },
         boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-        position: 'relative'
+        position: 'relative',
+        mt: -1.875
       }}>
         {/* Галерея и инфо-бокс в одной строке */}
         <Box sx={{
@@ -1108,7 +1112,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 product.quantity > 0 ? <Chip label={t('productCard.availability.inStock')} color="success" size="small" /> : <Chip label={t('productCard.availability.outOfStock')} color="default" size="small" />
               )}
             </Box>
-            <Typography sx={{ color: '#1976d2', fontWeight: 700, fontSize: 24 }}>{formatPrice(product.price)}</Typography>
+            <Typography sx={{ color: '#000000', fontWeight: 700, fontSize: 24 }}>{formatPrice(product.price)}</Typography>
             {/* Выбор количества */}
             {product.quantity > 0 && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
