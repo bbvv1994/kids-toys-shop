@@ -9046,8 +9046,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               p: { xs: 2, md: 4 },
-              maxWidth: 1100,
-              minWidth: 1100,
+              width: 1100,
               minHeight: 320,
               margin: '0 auto',
               mt: 0,
@@ -9061,7 +9060,8 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 alignItems: 'center', 
                 mb: 4,
                 borderBottom: '2px solid #f0f0f0',
-                pb: 2
+                pb: 2,
+                width: '100%'
               }}>
                 {createHeader('Мой профиль')}
                 
@@ -9120,7 +9120,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               </Box>
 
               {/* Основная информация */}
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, width: '100%' }}>
                 {/* Левая колонка - личная информация */}
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 3 }}>
@@ -10597,7 +10597,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             sx={{
               width: 260,
               flexShrink: 0,
-              [`& .MuiDrawer-paper`]: { width: 260, boxSizing: 'border-box', borderRight: '1px solid #eee', background: '#fafbfc', top: 'var(--appbar-height)', height: 'calc(100vh - var(--appbar-height) - 64px)' },
+              [`& .MuiDrawer-paper`]: { width: 260, boxSizing: 'border-box', borderRight: '1px solid #eee', background: '#fafbfc', position: 'fixed', top: 0, height: '100vh' },
               display: { xs: 'none', md: 'block' },
             }}
             open

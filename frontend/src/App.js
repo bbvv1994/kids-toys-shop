@@ -157,6 +157,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import AdminUsers from './components/AdminUsers';
 import { BrowserRouter as Router, Routes, Route, Link as RouterLink, useLocation, useParams, useNavigate, Navigate } from 'react-router-dom';
 import ProductPage from './components/ProductPage';
@@ -11098,16 +11099,23 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
     switch (selectedSection) {
       case 'myprofile':
         return (
-          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 2, pt: 1, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               p: { xs: 2, md: 4 },
               maxWidth: { xs: '100%', md: 1100 },
+              minWidth: { xs: 'auto', md: 1100 },
               minHeight: 320,
               margin: '0 auto',
               mt: 0,
+              position: 'relative',
+              left: { xs: 0, md: '-80px' },
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
             }}>
               {/* Заголовок и кнопки в одной строке */}
               <Box sx={{ 
@@ -11118,7 +11126,8 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 gap: { xs: 2, md: 0 },
                 mb: 4,
                 borderBottom: '2px solid #f0f0f0',
-                pb: 2
+                pb: 2,
+                width: '100%'
               }}>
                 {createHeader(t('profile.header.myProfile'))}
                 
@@ -11178,69 +11187,158 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
 
               {/* Основная информация */}
               <Box sx={{ 
-                display: 'grid', 
-                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
-                gap: { xs: 2, md: 4 } 
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                gap: { xs: 4, md: 6 },
+                width: '100%',
+                maxWidth: { xs: '100%', md: 1000 }
               }}>
                 {/* Левая колонка - личная информация */}
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 3 }}>
+                <Box sx={{ 
+                  width: '100%',
+                  p: { xs: 2, md: 3 },
+                  borderRadius: 3,
+                  backgroundColor: '#fafafa',
+                  border: '1px solid #e0e0e0'
+                }}>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 600, 
+                    color: '#333', 
+                    mb: 3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}>
+                    <PersonIcon sx={{ color: '#4caf50', fontSize: 24 }} />
                     {t('profile.sections.personalInfo')}
                   </Typography>
                   
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                     {/* Имя */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <PersonIcon sx={{ color: '#4caf50', fontSize: 24 }} />
-                      <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.fields.firstName')}</Typography>
-                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500 }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: '#fff',
+                      border: '1px solid #e8e8e8',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        transform: 'translateY(-1px)'
+                      }
+                    }}>
+                      <PersonIcon sx={{ color: '#4caf50', fontSize: 20 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('profile.fields.firstName')}
+                        </Typography>
+                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500, mt: 0.5 }}>
                           {profileData?.name || user?.name || t('profile.value.notSpecified')}
                         </Typography>
                       </Box>
                     </Box>
 
                     {/* Фамилия */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Box sx={{ width: 24 }}></Box>
-                      <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.fields.lastName')}</Typography>
-                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500 }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: '#fff',
+                      border: '1px solid #e8e8e8',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        transform: 'translateY(-1px)'
+                      }
+                    }}>
+                      <PersonIcon sx={{ color: '#4caf50', fontSize: 20 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('profile.fields.lastName')}
+                        </Typography>
+                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500, mt: 0.5 }}>
                           {profileData?.surname || user?.surname || t('profile.value.notSpecifiedF')}
                         </Typography>
                       </Box>
                     </Box>
 
                     {/* Email */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <EmailIcon sx={{ color: '#4caf50', fontSize: 24 }} />
-                      <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>Email</Typography>
-                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500 }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: '#fff',
+                      border: '1px solid #e8e8e8',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        transform: 'translateY(-1px)'
+                      }
+                    }}>
+                      <EmailIcon sx={{ color: '#4caf50', fontSize: 20 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          Email
+                        </Typography>
+                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500, mt: 0.5 }}>
                           {profileData?.email || user?.email}
                         </Typography>
                       </Box>
                     </Box>
 
                     {/* Телефон */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <PhoneIcon sx={{ color: '#4caf50', fontSize: 24 }} />
-                      <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.fields.phone')}</Typography>
-                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500 }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: '#fff',
+                      border: '1px solid #e8e8e8',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        transform: 'translateY(-1px)'
+                      }
+                    }}>
+                      <PhoneIcon sx={{ color: '#4caf50', fontSize: 20 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('profile.fields.phone')}
+                        </Typography>
+                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500, mt: 0.5 }}>
                           {profileData?.phone || user?.phone || t('profile.value.notSpecified')}
                         </Typography>
                       </Box>
                     </Box>
 
-
-
                     {/* Дата регистрации */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <CalendarTodayIcon sx={{ color: '#4caf50', fontSize: 24 }} />
-                      <Box>
-                        <Typography sx={{ color: '#666', fontSize: 14 }}>{t('profile.fields.registeredAt')}</Typography>
-                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500 }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 2,
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: '#fff',
+                      border: '1px solid #e8e8e8',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        transform: 'translateY(-1px)'
+                      }
+                    }}>
+                      <CalendarTodayIcon sx={{ color: '#4caf50', fontSize: 20 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('profile.fields.registeredAt')}
+                        </Typography>
+                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500, mt: 0.5 }}>
                           {profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString('ru-RU') : user?.createdAt ? new Date(user.createdAt).toLocaleDateString('ru-RU') : t('profile.value.notSpecifiedF')}
                         </Typography>
                       </Box>
@@ -11249,30 +11347,61 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 </Box>
 
                 {/* Правая колонка - статистика */}
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 3 }}>
+                <Box sx={{ 
+                  width: '100%',
+                  p: { xs: 2, md: 3 },
+                  borderRadius: 3,
+                  backgroundColor: '#fafafa',
+                  border: '1px solid #e0e0e0'
+                }}>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 600, 
+                    color: '#333', 
+                    mb: 3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}>
+                    <BarChartIcon sx={{ color: '#4caf50', fontSize: 24 }} />
                     {t('profile.sections.stats')}
                   </Typography>
                   
                   <Box sx={{ 
                     display: 'grid', 
-                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: '1fr' }, 
-                    gap: { xs: 2, md: 3 } 
+                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, 
+                    gap: 3 
                   }}>
                     {/* Товары в корзине */}
                     <Box sx={{ 
                       display: 'flex', 
                       alignItems: 'center', 
                       gap: 2,
-                      p: { xs: 1.5, md: 2 },
-                      borderRadius: 2,
-                      backgroundColor: '#f8f9fa',
-                      border: '1px solid #e9ecef'
+                      p: 3,
+                      borderRadius: 3,
+                      backgroundColor: '#fff',
+                      border: '1px solid #e8e8e8',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        boxShadow: '0 4px 12px rgba(76, 175, 80, 0.15)',
+                        transform: 'translateY(-2px)',
+                        borderColor: '#4caf50'
+                      }
                     }}>
-                      <ShoppingCartIcon sx={{ color: '#4caf50', fontSize: { xs: 20, md: 24 } }} />
+                      <Box sx={{ 
+                        p: 1.5, 
+                        borderRadius: 2, 
+                        backgroundColor: '#e8f5e8',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <ShoppingCartIcon sx={{ color: '#4caf50', fontSize: 24 }} />
+                      </Box>
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: { xs: 12, md: 14 } }}>{t('profile.stats.cartItems')}</Typography>
-                        <Typography sx={{ color: '#333', fontSize: { xs: 16, md: 18 }, fontWeight: 600 }}>
+                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('profile.stats.cartItems')}
+                        </Typography>
+                        <Typography sx={{ color: '#333', fontSize: 24, fontWeight: 700, mt: 0.5 }}>
                           {cart?.length || 0}
                         </Typography>
                       </Box>
@@ -11283,15 +11412,32 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       display: 'flex', 
                       alignItems: 'center', 
                       gap: 2,
-                      p: { xs: 1.5, md: 2 },
-                      borderRadius: 2,
-                      backgroundColor: '#f8f9fa',
-                      border: '1px solid #e9ecef'
+                      p: 3,
+                      borderRadius: 3,
+                      backgroundColor: '#fff',
+                      border: '1px solid #e8e8e8',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        boxShadow: '0 4px 12px rgba(76, 175, 80, 0.15)',
+                        transform: 'translateY(-2px)',
+                        borderColor: '#4caf50'
+                      }
                     }}>
-                      <FavoriteIcon sx={{ color: '#4caf50', fontSize: { xs: 20, md: 24 } }} />
+                      <Box sx={{ 
+                        p: 1.5, 
+                        borderRadius: 2, 
+                        backgroundColor: '#e8f5e8',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <FavoriteIcon sx={{ color: '#4caf50', fontSize: 24 }} />
+                      </Box>
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: { xs: 12, md: 14 } }}>{t('profile.stats.wishlistItems')}</Typography>
-                        <Typography sx={{ color: '#333', fontSize: { xs: 16, md: 18 }, fontWeight: 600 }}>
+                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('profile.stats.wishlistItems')}
+                        </Typography>
+                        <Typography sx={{ color: '#333', fontSize: 24, fontWeight: 700, mt: 0.5 }}>
                           {localWishlist?.length || 0}
                         </Typography>
                       </Box>
@@ -11302,15 +11448,32 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       display: 'flex', 
                       alignItems: 'center', 
                       gap: 2,
-                      p: { xs: 1.5, md: 2 },
-                      borderRadius: 2,
-                      backgroundColor: '#f8f9fa',
-                      border: '1px solid #e9ecef'
+                      p: 3,
+                      borderRadius: 3,
+                      backgroundColor: '#fff',
+                      border: '1px solid #e8e8e8',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        boxShadow: '0 4px 12px rgba(76, 175, 80, 0.15)',
+                        transform: 'translateY(-2px)',
+                        borderColor: '#4caf50'
+                      }
                     }}>
-                      <VisibilityIcon sx={{ color: '#4caf50', fontSize: { xs: 20, md: 24 } }} />
+                      <Box sx={{ 
+                        p: 1.5, 
+                        borderRadius: 2, 
+                        backgroundColor: '#e8f5e8',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <VisibilityIcon sx={{ color: '#4caf50', fontSize: 24 }} />
+                      </Box>
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: { xs: 12, md: 14 } }}>{t('profile.stats.viewedItems')}</Typography>
-                        <Typography sx={{ color: '#333', fontSize: { xs: 16, md: 18 }, fontWeight: 600 }}>
+                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('profile.stats.viewedItems')}
+                        </Typography>
+                        <Typography sx={{ color: '#333', fontSize: 24, fontWeight: 700, mt: 0.5 }}>
                           {localViewed?.length || 0}
                         </Typography>
                       </Box>
@@ -11488,16 +11651,23 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         };
 
         return (
-          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 2, pt: 1, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               p: { xs: 2, md: 4 },
               maxWidth: { xs: '100%', md: 1100 },
+              minWidth: { xs: 'auto', md: 1100 },
               minHeight: 320,
               margin: '0 auto',
               mt: 0,
+              position: 'relative',
+              left: { xs: 0, md: '-80px' },
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
             }}>
               <Box sx={{ 
                 display: 'flex', 
@@ -11507,7 +11677,8 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 gap: { xs: 2, md: 0 },
                 mb: 4, 
                 borderBottom: '2px solid #f0f0f0', 
-                pb: 2 
+                pb: 2,
+                width: '100%'
               }}>
               {createHeader(t('profile.header.notifications'))}
                 {notifications.length > 0 && (
@@ -11547,7 +11718,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   {t('common.noNotifications')}
                 </Typography>
               ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 3,
+                  width: '100%',
+                  maxWidth: { xs: '100%', md: 1000 }
+                }}>
                   {notifications.map((notif) => {
                     const isSubmitted = isReviewSubmitted(notif);
                     const isCompleted = isNotificationCompleted(notif);
@@ -11569,6 +11746,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         transition: 'all 0.2s',
                         position: 'relative',
                         opacity: isSubmitted || isCompleted ? 0.6 : 1,
+                        width: '100%',
                         '&:hover': {
                           boxShadow: isSubmitted || isCompleted ? 'none' : '0 4px 16px rgba(255,8,68,0.12)',
                           backgroundColor: isSubmitted || isCompleted ? '#f5f5f5' : '#fff0f0',
@@ -11576,11 +11754,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       }}
                     >
                       {getNotificationIcon(notif.type)}
-                      <Box sx={{ flex: 1 }}>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Typography sx={{ 
                           fontWeight: 600, 
                           color: isSubmitted || isCompleted ? '#999' : (notif.isRead ? '#888' : '#ff0844'), 
-                          fontSize: { xs: 14, md: 16 } 
+                          fontSize: { xs: 14, md: 16 },
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word'
                         }}>
                           {notif.title.startsWith('reviews.') ? t(notif.title) : notif.title}
                         </Typography>
@@ -11588,7 +11768,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           color: '#333', 
                           fontSize: { xs: 13, md: 15 }, 
                           mt: 1, 
-                          mb: 1 
+                          mb: 1,
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word',
+                          lineHeight: 1.4
                         }}>
                           {getNotificationText(notif)}
                         </Typography>
@@ -11732,27 +11915,35 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         };
 
         return (
-          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 2, pt: 1, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               p: { xs: 2, md: 4 },
               maxWidth: { xs: '100%', md: 1100 },
+              minWidth: { xs: 'auto', md: 1100 },
               minHeight: 320,
               margin: '0 auto',
               mt: 0,
+              position: 'relative',
+              left: { xs: 0, md: '-80px' },
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
             }}>
               {/* Заголовок с серой линией */}
               <Box sx={{ 
                 display: 'flex', 
-                justifyContent: { xs: 'flex-start', md: 'space-between' }, 
+                justifyContent: { xs: 'flex-start', md: 'flex-start' }, 
                 alignItems: { xs: 'flex-start', md: 'center' }, 
                 flexDirection: { xs: 'column', md: 'row' },
                 gap: { xs: 2, md: 0 },
                 mb: 4,
                 borderBottom: '2px solid #f0f0f0',
-                pb: 2
+                pb: 2,
+                width: '100%'
               }}>
               {createHeader(t('profile.header.orders'))}
               </Box>
@@ -11766,7 +11957,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   {t('profile.orders.empty')}
                 </Typography>
               ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 3,
+                  width: '100%',
+                  maxWidth: { xs: '100%', md: 1000 }
+                }}>
                   {orders.map((order) => (
                     <Box
                       key={order.id}
@@ -11778,6 +11975,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         transition: 'all 0.3s ease',
                         position: 'relative',
                         overflow: 'hidden',
+                        width: '100%',
                         '&::before': {
                           content: '""',
                           position: 'absolute',
@@ -11991,27 +12189,35 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         };
 
         return (
-          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 2, pt: 1, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               p: { xs: 2, md: 4 },
               maxWidth: { xs: '100%', md: 1100 },
+              minWidth: { xs: 'auto', md: 1100 },
               minHeight: 320,
               margin: '0 auto',
               mt: 0,
+              position: 'relative',
+              left: { xs: 0, md: '-80px' },
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
             }}>
               {/* Заголовок с серой линией */}
               <Box sx={{ 
                 display: 'flex', 
-                justifyContent: { xs: 'flex-start', md: 'space-between' }, 
+                justifyContent: { xs: 'flex-start', md: 'flex-start' }, 
                 alignItems: { xs: 'flex-start', md: 'center' }, 
                 flexDirection: { xs: 'column', md: 'row' },
                 gap: { xs: 2, md: 0 },
                 mb: 4,
                 borderBottom: '2px solid #f0f0f0',
-                pb: 2
+                pb: 2,
+                width: '100%'
               }}>
               {createHeader(t('profile.header.reviews'))}
               </Box>
@@ -12025,7 +12231,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   {t('common.noReviews')}
                 </Typography>
               ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 3,
+                  width: '100%',
+                  maxWidth: { xs: '100%', md: 1000 }
+                }}>
                   {userReviews.map((review) => (
                     <Box
                       key={review.id}
@@ -12035,6 +12247,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         p: { xs: 2, md: 3 },
                         backgroundColor: '#fafafa',
                         transition: 'all 0.2s ease',
+                        width: '100%',
                         '&:hover': {
                           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                           transform: 'translateY(-2px)'
@@ -12084,12 +12297,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                             }}
                           />
                           </Box>
-                          <Box>
+                          <Box sx={{ minWidth: 0, flex: 1 }}>
                               <Typography sx={{ 
                                 fontWeight: 600, 
                                 color: '#333', 
                               fontSize: { xs: 14, md: 16 },
-                              mb: 1 
+                              mb: 1,
+                              wordBreak: 'break-word',
+                              overflowWrap: 'break-word'
                               }}>
                                 {review.productName}
                               </Typography>
@@ -12137,7 +12352,9 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         <Typography sx={{ 
                           color: '#666', 
                           fontSize: { xs: 13, md: 14 }, 
-                          lineHeight: 1.6 
+                          lineHeight: 1.6,
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word'
                         }}>
                           {review.comment || review.text || 'Комментарий отсутствует'}
                         </Typography>
@@ -12163,7 +12380,9 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           <Typography sx={{ 
                             color: '#333', 
                             fontSize: { xs: 13, md: 14 }, 
-                            lineHeight: 1.6 
+                            lineHeight: 1.6,
+                            wordBreak: 'break-word',
+                            overflowWrap: 'break-word'
                           }}>
                             {review.answer}
                           </Typography>
@@ -12178,7 +12397,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         );
       case 'wishlist':
         return (
-          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 2, pt: 1, px: { xs: 0, md: 0 } }}>
             {localWishlist && localWishlist.length === 0 ? (
                                           <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>{t('common.noWishlistItems')}</Typography>
             ) : (
@@ -12193,7 +12412,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 margin: '0 auto',
                 mt: 0,
                 position: 'relative',
-                left: { xs: 0, md: '-110px' },
+                left: { xs: 0, md: '-80px' },
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
               }}>
                 {/* Заголовок и кнопка в одной строке */}
                 <Box sx={{ 
@@ -12204,7 +12427,8 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   gap: { xs: 2, md: 0 },
                   mb: 4,
                   borderBottom: '2px solid #f0f0f0',
-                  pb: 2
+                  pb: 2,
+                  width: '100%'
                 }}>
               {createHeader(t('profile.header.wishlist'))}
                   
@@ -12271,7 +12495,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         );
       case 'viewed':
         return (
-          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 2, pt: 1, px: { xs: 0, md: 0 } }}>
             {localViewed && localViewed.length === 0 ? (
                                           <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>{t('common.noViewedProducts')}</Typography>
             ) : (
@@ -12286,7 +12510,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 margin: '0 auto',
                 mt: 0,
                 position: 'relative',
-                left: { xs: 0, md: '-110px' },
+                left: { xs: 0, md: '-80px' },
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
               }}>
                 {/* Заголовок и кнопка в одной строке */}
                 <Box sx={{ 
@@ -12297,7 +12525,8 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   gap: { xs: 2, md: 0 },
                   mb: 4,
                   borderBottom: '2px solid #f0f0f0',
-                  pb: 2
+                  pb: 2,
+                  width: '100%'
                 }}>
               {createHeader(t('profile.header.viewed'))}
                   
@@ -12375,7 +12604,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               margin: '0 auto',
               mt: 0,
               position: 'relative',
-              left: { xs: 0, md: '-110px' },
+              left: { xs: 0, md: '-80px' },
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -12470,25 +12699,35 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
 
       case 'auth':
         return (
-          <Box sx={{ mt: -10, minHeight: 400, py: 1, pt: 0.5, px: { xs: 0, md: 0 } }}>
+          <Box sx={{ mt: -10, minHeight: 400, py: 2, pt: 1, px: { xs: 0, md: 0 } }}>
             <Box sx={{
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               p: { xs: 2, md: 4 },
               maxWidth: { xs: '100%', md: 1100 },
+              minWidth: { xs: 'auto', md: 1100 },
               minHeight: 320,
               margin: '0 auto',
               mt: 0,
+              position: 'relative',
+              left: { xs: 0, md: '-80px' },
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
             }}>
               {/* Заголовок с серой линией */}
               <Box sx={{ 
                 display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
+                justifyContent: { xs: 'flex-start', md: 'flex-start' }, 
+                alignItems: { xs: 'flex-start', md: 'center' }, 
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: { xs: 2, md: 0 },
                 mb: 4,
                 borderBottom: '2px solid #f0f0f0',
-                pb: 2
+                pb: 2,
+                width: '100%'
               }}>
               {createHeader(t('profile.header.authSettings'))}
               </Box>
@@ -12776,20 +13015,26 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
         justifyContent: 'flex-start',
         pt: { xs: 'var(--appbar-height)', md: 'var(--appbar-height)' },
         pb: { xs: '64px', md: '64px' }, // отступ снизу ровно над футером
+        ml: { xs: 0, md: '2px' }, // сдвигаем вправо для десктопа (было 0px, теперь +2px)
       }}>
         <Box sx={{ display: 'flex', flex: 1, minHeight: 0 }}>
           {/* Боковое меню */}
-          <Drawer
-            variant="permanent"
+          <Box
             sx={{
               width: 260,
               flexShrink: 0,
-              [`& .MuiDrawer-paper`]: { width: 260, boxSizing: 'border-box', borderRight: '1px solid #eee', background: '#fafbfc', top: 'var(--appbar-height)', height: 'calc(100vh - var(--appbar-height) - 64px)' },
+              borderRight: '1px solid #eee',
+              background: '#fafbfc',
               display: { xs: 'none', md: 'block' },
+              position: 'sticky',
+              top: 'var(--appbar-height)',
+              height: 'fit-content',
+              mt: -11.5, // сдвигаем на 92px вверх (92px = 11.5 * 8px)
+              alignSelf: 'flex-start',
+              ml: { xs: 0, md: '2px' }, // дополнительный сдвиг вправо (было 0px, теперь +2px)
             }}
-            open
           >
-            <Box sx={{ overflow: 'auto', mt: 2 }}>
+            <Box sx={{ overflow: 'auto', pt: 2 }}>
               <List>
                 <ListItem 
                   button 
@@ -12799,6 +13044,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     backgroundColor: '#f5f5f5',
                     color: 'primary.main',
                     borderRadius: 2,
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: 'primary.main' },
                     '&:hover': {
                       backgroundColor: '#f0f0f0',
@@ -12808,6 +13054,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   } : {
                     borderRadius: 2,
                     color: 'inherit',
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                     '&:hover': {
                       backgroundColor: '#f5f5f5',
@@ -12819,7 +13066,6 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   <ListItemIcon><PersonIcon /></ListItemIcon>
                   <ListItemText primary={t('profile.menu.myProfile')} />
                 </ListItem>
-                {user?.role !== 'admin' && (
                 <ListItem 
                   button 
                   selected={selectedSection === 'notifications'} 
@@ -12828,6 +13074,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     backgroundColor: '#f5f5f5',
                     color: 'primary.main',
                     borderRadius: 2,
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: 'primary.main' },
                     '&:hover': {
                       backgroundColor: '#f0f0f0',
@@ -12837,6 +13084,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   } : {
                     borderRadius: 2,
                     color: 'inherit',
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                     '&:hover': {
                       backgroundColor: '#f5f5f5',
@@ -12848,7 +13096,6 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   <ListItemIcon><NotificationsIcon /></ListItemIcon>
                   <ListItemText primary={t('profile.menu.notifications')} />
                 </ListItem>
-                )}
                 <ListItem 
                   button 
                   selected={selectedSection === 'orders'} 
@@ -12857,6 +13104,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     backgroundColor: '#f5f5f5',
                     color: 'primary.main',
                     borderRadius: 2,
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: 'primary.main' },
                     '&:hover': {
                       backgroundColor: '#f0f0f0',
@@ -12866,6 +13114,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   } : {
                     borderRadius: 2,
                     color: 'inherit',
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                     '&:hover': {
                       backgroundColor: '#f5f5f5',
@@ -12885,6 +13134,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     backgroundColor: '#f5f5f5',
                     color: 'primary.main',
                     borderRadius: 2,
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: 'primary.main' },
                     '&:hover': {
                       backgroundColor: '#f0f0f0',
@@ -12894,6 +13144,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   } : {
                     borderRadius: 2,
                     color: 'inherit',
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                     '&:hover': {
                       backgroundColor: '#f5f5f5',
@@ -12913,6 +13164,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     backgroundColor: '#f5f5f5',
                     color: 'primary.main',
                     borderRadius: 2,
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: 'primary.main' },
                     '&:hover': {
                       backgroundColor: '#f0f0f0',
@@ -12922,6 +13174,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   } : {
                     borderRadius: 2,
                     color: 'inherit',
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                     '&:hover': {
                       backgroundColor: '#f5f5f5',
@@ -12941,6 +13194,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     backgroundColor: '#f5f5f5',
                     color: 'primary.main',
                     borderRadius: 2,
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: 'primary.main' },
                     '&:hover': {
                       backgroundColor: '#f0f0f0',
@@ -12950,6 +13204,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   } : {
                     borderRadius: 2,
                     color: 'inherit',
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                     '&:hover': {
                       backgroundColor: '#f5f5f5',
@@ -12969,6 +13224,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     backgroundColor: '#f5f5f5',
                     color: 'primary.main',
                     borderRadius: 2,
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: 'primary.main' },
                     '&:hover': {
                       backgroundColor: '#f0f0f0',
@@ -12978,6 +13234,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   } : {
                     borderRadius: 2,
                     color: 'inherit',
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                     '&:hover': {
                       backgroundColor: '#f5f5f5',
@@ -12997,6 +13254,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     backgroundColor: '#f5f5f5',
                     color: 'primary.main',
                     borderRadius: 2,
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: 'primary.main' },
                     '&:hover': {
                       backgroundColor: '#f0f0f0',
@@ -13006,6 +13264,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   } : {
                     borderRadius: 2,
                     color: 'inherit',
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                     '&:hover': {
                       backgroundColor: '#f5f5f5',
@@ -13023,6 +13282,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   sx={{
                     borderRadius: 2,
                     color: '#f44336',
+                    cursor: 'pointer',
                     '& .MuiListItemIcon-root': { color: '#f44336' },
                     '&:hover': {
                       backgroundColor: '#ffebee',
@@ -13036,9 +13296,9 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 </ListItem>
               </List>
             </Box>
-          </Drawer>
+          </Box>
           {/* Контент */}
-          <Box sx={{ flex: 1, p: { xs: 2, md: 4 }, minHeight: 0 }}>
+          <Box sx={{ flex: 1, p: { xs: 2, md: 4 }, minHeight: 0, ml: { xs: 0, md: '130px' } }}>
             {renderSection()}
           </Box>
         </Box>
