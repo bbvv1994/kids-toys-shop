@@ -6031,7 +6031,7 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
   );
 
     return (
-      <Box sx={{ display: 'flex', minHeight: '100vh', background: '#f7f7f7', pt: 'var(--appbar-height)', boxSizing: 'border-box' }}>
+      <Box sx={{ display: 'flex', minHeight: '100vh', background: '#f7f7f7', pt: 'calc(var(--appbar-height) - 92px)', boxSizing: 'border-box' }}>
       <Box sx={{ width: 220, background: '#fff', borderRight: '1px solid #eee', p: 0 }}>
         <Typography variant="h6" sx={{ p: 2, fontWeight: 'bold', color: '#1976d2' }}>CMS</Typography>
         <List>
