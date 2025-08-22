@@ -1521,7 +1521,7 @@ const theme = createTheme({
             {/* Левая секция: Логотип и кнопка меню */}
             <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mr: { xs: 0.5, sm: 1, md: 2 } }}>
-                <img src="/lion-logo.png..png" alt="Логотип магазина" style={{ width: isDesktop ? 96 : (isNarrow ? 68 : 56), height: isDesktop ? 96 : (isNarrow ? 68 : 56) }} />
+                <img src="/lion-logo.png..png" alt="Логотип магазина" style={{ width: isDesktop ? 57 : (isNarrow ? 45 : 40), height: isDesktop ? 57 : (isNarrow ? 45 : 40) }} />
               </Box>
               {/* Кнопка меню при узком вьюпорте (и на мобильных) - справа от логотипа */}
               {(isNarrow || isMobile) && (
@@ -5738,7 +5738,7 @@ function AppContent({
         <Container maxWidth="lg" sx={{ py: 6 }}>
           <Grid container spacing={4}>
             {/* Информация о компании */}
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={i18n.language === 'he' ? 4 : 3} sx={{ ml: { md: -5 } }}>
               <Typography variant="h5" sx={{ 
                 fontWeight: 700, 
                 mb: 2, 
@@ -5876,7 +5876,7 @@ function AppContent({
             </Grid>
 
             {/* Контактная информация */}
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={i18n.language === 'he' ? 3 : 4}>
               <Typography variant="h6" sx={{ 
                 fontWeight: 600, 
                 mb: 3, 
@@ -5906,6 +5906,8 @@ function AppContent({
                 </Box>
               </Box>
             </Grid>
+
+
           </Grid>
 
 
@@ -5925,9 +5927,24 @@ function AppContent({
               flexDirection: { xs: 'column', md: 'row' },
               gap: 2
             }}>
-              <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.8 }}>
-                © {new Date().getFullYear()} {t('footer.copyright')} - {t('footer.title')}
-              </Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 2
+              }}>
+                <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.8 }}>
+                  © {new Date().getFullYear()} {t('footer.copyright')} - {t('footer.title')}
+                </Typography>
+                <img 
+                  src="/lion-logo.png..png" 
+                  alt="Kids Toys Shop Logo" 
+                  style={{ 
+                    width: '60px', 
+                    height: '60px',
+                    opacity: 0.9
+                  }} 
+                />
+              </Box>
               <Box sx={{ 
                 display: 'flex', 
                 gap: 3,

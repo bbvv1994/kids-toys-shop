@@ -46,17 +46,23 @@ export default function AboutPage() {
   return (
     <Container maxWidth="lg" sx={{ 
       py: { xs: 0, md: 0 }, 
-      mt: { xs: 0, md: -14.25 }, 
+      mt: { xs: 0, md: -1 }, 
       minHeight: '80vh' 
     }}>
       {/* Логотип */}
-      <Box sx={{ textAlign: 'center', mb: { xs: 0, md: 1 } }}>
+      <Box sx={{ 
+        textAlign: 'center', 
+        mb: { xs: 0, md: 1 },
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
         <img 
           src="/lion-logo.png..png" 
           alt="Симба - Король игрушек" 
           style={{
             width: 'auto',
-            height: '50px',
+            height: '29px',
             maxWidth: '100%',
             filter: 'drop-shadow(0 4px 8px rgba(255, 102, 0, 0.3))',
             marginBottom: '10px'
