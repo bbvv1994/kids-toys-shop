@@ -7,6 +7,7 @@ import AdminShopReviews from './components/AdminShopReviews';
 import AdminProductReviews from './components/AdminProductReviews';
 import CustomerReviews from './components/CustomerReviews';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import CustomSelect from './components/CustomSelect';
 import { useDeviceType } from './utils/deviceDetection';
 import { getImageUrl, API_BASE_URL } from './config';
 import { getTranslatedName, forceLanguageUpdate, checkTranslationsAvailable } from './utils/translationUtils';
@@ -134,7 +135,7 @@ import Paper from '@mui/material/Paper';
 import Slide from '@mui/material/Slide';
 import Grow from '@mui/material/Grow';
 import Collapse from '@mui/material/Collapse';
-import CustomSelect from './components/CustomSelect';
+import Pagination from '@mui/material/Pagination';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import ProductCarousel from './components/ProductCarousel';
 import ScrollToTopButton from './components/ScrollToTopButton';
@@ -4996,6 +4997,44 @@ function App() {
     };
   }, []);
 
+  // Функция для обновления всех состояний товаров
+  const refreshAllProducts = async () => {
+    try {
+      // Загружаем товары для основного каталога
+      const response = await fetch(`${API_BASE_URL}/api/products`);
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data);
+      }
+      
+      // Если пользователь авторизован и является админом, обновляем CMS товары
+      if (user?.token && user?.role === 'admin') {
+        const cmsResponse = await fetch(`${API_BASE_URL}/api/products?admin=true`, {
+          headers: { 'Authorization': `Bearer ${user.token}` }
+        });
+        if (cmsResponse.ok) {
+          const cmsData = await cmsResponse.json();
+          // Обновляем CMS товары, если они загружены
+          if (window.cmsProductsSetter) {
+            window.cmsProductsSetter(cmsData);
+          }
+        }
+      }
+
+
+    } catch (error) {
+      console.error('Error refreshing all products:', error);
+    }
+  };
+
+  // Делаем функцию доступной глобально
+  React.useEffect(() => {
+    window.refreshAllProducts = refreshAllProducts;
+    return () => {
+      delete window.refreshAllProducts;
+    };
+  }, []);
+
   // Загрузка данных из API
   useEffect(() => {
     // Загрузка товаров (без аутентификации)
@@ -6176,6 +6215,8 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedProducts, setSelectedProducts] = React.useState([]);
   const [selectAll, setSelectAll] = React.useState(false);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [productsPerPage] = React.useState(20);
   
   // Функция для получения названия категории
   const getCategoryName = (categoryValue) => {
@@ -6209,6 +6250,32 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
       getCategoryName(product.category)?.toLowerCase().includes(query)
     );
   });
+
+  // Пагинация
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  // Сброс страницы при изменении поискового запроса
+  React.useEffect(() => {
+    setCurrentPage(1);
+    setSelectedProducts([]); // Также сбрасываем выбранные товары
+    setSelectAll(false);
+  }, [searchQuery]);
+
+  // Сброс выбранных товаров при смене страницы
+  React.useEffect(() => {
+    setSelectedProducts([]);
+    setSelectAll(false);
+  }, [currentPage]);
+
+
+
+  // Обработчики пагинации
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
   
   const [form, setForm] = React.useState({ 
     name: '', 
@@ -6229,6 +6296,32 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
     ageGroup: '',
     gender: ''
   });
+
+
+
+
+
+  // Делаем функцию fetchProducts доступной глобально для обновления из основного приложения
+  React.useEffect(() => {
+    window.cmsProductsSetter = setProducts;
+    return () => {
+      delete window.cmsProductsSetter;
+    };
+  }, []);
+
+  // Массив возрастных групп (как в EditProductModal)
+  const ageGroups = [
+    '0-1 год',
+    '1-3 года',
+    '3-5 лет',
+    '5-7 лет',
+    '7-10 лет',
+    '10-12 лет',
+    '12-14 лет',
+    '14-16 лет'
+  ];
+
+
 
   React.useEffect(() => {
     fetchProducts();
@@ -6288,6 +6381,8 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
       }
     };
   }, [form.images]);
+
+
 
   const handleOpenEdit = (product) => {
     // Добавляем callback функции к продукту
@@ -6408,6 +6503,8 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
       });
       if (response.ok) {
         const data = await response.json();
+        console.log('Fetched products:', data.length, 'products');
+        console.log('Sample product:', data[0]);
         setProducts(data);
       }
     } catch (error) {
@@ -6463,6 +6560,10 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
       if (response.ok) {
         // Убираем alert - товар удаляется без уведомления
         fetchProducts();
+        // Обновляем все состояния товаров в приложении
+        if (window.refreshAllProducts) {
+          window.refreshAllProducts();
+        }
       } else {
         let errorMessage = 'Неизвестная ошибка';
         try {
@@ -6484,18 +6585,31 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
 
   const handleToggleHidden = async (product) => {
     try {
+      console.log('Toggling hidden for product:', product.id, 'Current isHidden:', product.isHidden);
+      const newHiddenValue = !product.isHidden;
+      console.log('New hidden value:', newHiddenValue);
+      
       const response = await fetch(`${API_BASE_URL}/api/products/${product.id}/hidden`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}`
         },
-        body: JSON.stringify({ isHidden: !product.isHidden })
+        body: JSON.stringify({ isHidden: newHiddenValue })
       });
+      
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
+        console.log('Successfully toggled hidden status');
         fetchProducts();
+        // Обновляем все состояния товаров в приложении
+        if (window.refreshAllProducts) {
+          window.refreshAllProducts();
+        }
       } else {
         const errorData = await response.json();
+        console.error('Error response:', errorData);
         alert(`Ошибка при изменении видимости товара: ${errorData.error || 'Неизвестная ошибка'}`);
       }
     } catch (error) {
@@ -6573,6 +6687,10 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         });
         // Перезагружаем товары с сервера
         fetchProducts();
+        // Обновляем все состояния товаров в приложении
+        if (window.refreshAllProducts) {
+          window.refreshAllProducts();
+        }
       } else {
         console.error('Ошибка сохранения товара');
       }
@@ -6607,16 +6725,16 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
       setSelectedProducts([]);
       setSelectAll(false);
     } else {
-      setSelectedProducts(filteredProducts.map(p => p.id));
+      setSelectedProducts(currentProducts.map(p => p.id));
       setSelectAll(true);
     }
   };
 
   // Обновляем состояние selectAll при изменении выбранных товаров
   React.useEffect(() => {
-    if (filteredProducts.length > 0) {
-      const allSelected = filteredProducts.every(p => selectedProducts.includes(p.id));
-      const someSelected = filteredProducts.some(p => selectedProducts.includes(p.id));
+    if (currentProducts.length > 0) {
+      const allSelected = currentProducts.every(p => selectedProducts.includes(p.id));
+      const someSelected = currentProducts.some(p => selectedProducts.includes(p.id));
       
       if (allSelected) {
         setSelectAll(true);
@@ -6628,7 +6746,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
     } else {
       setSelectAll(false);
     }
-  }, [selectedProducts, filteredProducts]);
+  }, [selectedProducts, currentProducts]);
 
   const handleBulkDelete = async () => {
     if (selectedProducts.length === 0) return;
@@ -6667,6 +6785,10 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
       setSelectedProducts([]);
       setSelectAll(false);
       fetchProducts();
+      // Обновляем все состояния товаров в приложении
+      if (window.refreshAllProducts) {
+        window.refreshAllProducts();
+      }
     } catch (error) {
       console.error('Ошибка массового удаления:', error);
       alert('Ошибка при массовом удалении товаров.');
@@ -6712,6 +6834,10 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
       setSelectedProducts([]);
       setSelectAll(false);
       fetchProducts();
+      // Обновляем все состояния товаров в приложении
+      if (window.refreshAllProducts) {
+        window.refreshAllProducts();
+      }
     } catch (error) {
       console.error(`Ошибка массового ${action} товаров:`, error);
       alert(`Ошибка при массовом ${action} товаров.`);
@@ -6776,7 +6902,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map(p => (
+            {currentProducts.map(p => (
               <tr key={p.id}>
                 <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center' }}>
                   <Checkbox
@@ -6819,7 +6945,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
                     />
                   )}
                 </td>
-                <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center', verticalAlign: 'middle', wordWrap: 'break-word', wordBreak: 'break-word', maxWidth: '200px' }}>{p.name}</td>
+                <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center', verticalAlign: 'middle', wordWrap: 'break-word', wordBreak: 'break-word', maxWidth: '200px' }}>{p.nameHe || p.name}</td>
                 <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center', verticalAlign: 'middle' }}>₪{p.price}</td>
                 <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center', verticalAlign: 'middle' }}>{getCategoryName(p.category)}</td>
                 <td style={{ padding: 8, border: '1px solid #eee', textAlign: 'center', verticalAlign: 'middle' }}>{p.subcategory?.name || p.subcategory || ''}</td>
@@ -6883,6 +7009,41 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             ))}
           </tbody>
         </table>
+        
+        {/* Пагинация */}
+        {totalPages > 1 && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+              size="large"
+              showFirstButton
+              showLastButton
+              sx={{
+                '& .MuiPaginationItem-root': {
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                },
+                '& .Mui-selected': {
+                  backgroundColor: '#1976d2',
+                  color: '#fff',
+                  '&:hover': {
+                    backgroundColor: '#1565c0',
+                  },
+                },
+              }}
+            />
+          </Box>
+        )}
+        
+        {/* Информация о страницах */}
+        <Box sx={{ textAlign: 'center', mt: 2, mb: 2, color: 'text.secondary' }}>
+          <Typography variant="body2">
+            Показано {indexOfFirstProduct + 1}-{Math.min(indexOfLastProduct, filteredProducts.length)} из {filteredProducts.length} товаров
+          </Typography>
+        </Box>
       </Box>
     );
   };
@@ -6951,68 +7112,53 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             variant="outlined"
             size="medium"
           />
-          <FormControl fullWidth>
-            <InputLabel id="category-label">Категория</InputLabel>
-            <Select 
-              labelId="category-label" 
-              label="Категория" 
-              name="category" 
-              value={form.category} 
-              onChange={handleCategoryChange} 
-              renderValue={selected => selected ? (categories.find(c => c.id === parseInt(selected))?.name || selected) : 'Выберите категорию'}
-            >
-              {categories.filter(c => !c.parentId).map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth disabled={!form.category}>
-            <InputLabel id="subcategory-label">Подкатегория</InputLabel>
-            <Select 
-              labelId="subcategory-label" 
-              label="Подкатегория" 
-              name="subcategory" 
-              value={form.subcategory} 
-              onChange={handleChange} 
-              renderValue={selected => selected ? (cmsSubcategories.find(sub => sub.id === selected)?.name || selected) : 'Выберите подкатегорию'}
-            >
-              {cmsSubcategories.map(sub => <MenuItem key={sub.id} value={sub.id}>{sub.name}</MenuItem>)}
-            </Select>
-          </FormControl>
+          <CustomSelect
+            label="Категория"
+            value={form.category || ''}
+            onChange={(value) => handleCategoryChange({ target: { name: 'category', value } })}
+            options={[
+              ...categories.filter(c => !c.parentId).map(c => ({ value: c.id, label: c.name }))
+            ]}
+            width="100%"
+            sx={{ width: '100%' }}
+          />
+          <CustomSelect
+            label="Подкатегория"
+            value={form.subcategory || ''}
+            onChange={(value) => handleChange({ target: { name: 'subcategory', value } })}
+            options={[
+              ...cmsSubcategories.map(sub => ({ value: sub.id, label: sub.name }))
+            ]}
+            width="100%"
+            sx={{ 
+              width: '100%',
+              opacity: !form.category ? 0.38 : 1
+            }}
+            disabled={!form.category}
+          />
           {/* Добавлено: возрастная группа и пол */}
-          <FormControl fullWidth>
-            <InputLabel id="age-group-label">Возрастная группа</InputLabel>
-            <Select
-              labelId="age-group-label"
-              label="Возрастная группа"
-              name="ageGroup"
-              value={form.ageGroup}
-              onChange={handleChange}
-            >
-              <MenuItem value=""><em>Не выбрано</em></MenuItem>
-              <MenuItem value="0-1 год">0-1 год</MenuItem>
-              <MenuItem value="1-3 года">1-3 года</MenuItem>
-              <MenuItem value="3-5 лет">3-5 лет</MenuItem>
-              <MenuItem value="5-7 лет">5-7 лет</MenuItem>
-              <MenuItem value="7-10 лет">7-10 лет</MenuItem>
-              <MenuItem value="10-12 лет">10-12 лет</MenuItem>
-              <MenuItem value="12-14 лет">12-14 лет</MenuItem>
-              <MenuItem value="14-16 лет">14-16 лет</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel id="gender-label">Пол</InputLabel>
-            <Select
-              labelId="gender-label"
-              label="Пол"
-              name="gender"
-              value={form.gender}
-              onChange={handleChange}
-            >
-              <MenuItem value=""><em>Не выбрано</em></MenuItem>
-                                      <MenuItem value="Для мальчиков">Для мальчиков</MenuItem>
-                        <MenuItem value="Для девочек">Для девочек</MenuItem>
-              <MenuItem value="Универсальный">Универсальный</MenuItem>
-            </Select>
-          </FormControl>
+          <CustomSelect
+            label="Возрастная группа"
+            value={form.ageGroup || ''}
+            onChange={(value) => handleChange({ target: { name: 'ageGroup', value } })}
+            options={[
+              ...ageGroups.map(age => ({ value: age, label: age }))
+            ]}
+            width="100%"
+            sx={{ width: '100%' }}
+          />
+          <CustomSelect
+            label="Пол"
+            value={form.gender || ''}
+            onChange={(value) => handleChange({ target: { name: 'gender', value } })}
+            options={[
+              { value: 'Для мальчиков', label: 'Для мальчиков' },
+              { value: 'Для девочек', label: 'Для девочек' },
+              { value: 'Универсальный', label: 'Универсальный' }
+            ]}
+            width="100%"
+            sx={{ width: '100%' }}
+          />
           <TextField 
             label="Количество" 
             name="quantity" 
@@ -7544,7 +7690,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         {/* Статистика товаров */}
         <Box sx={{ mb: 4, p: 3, bgcolor: '#f8f9fa', borderRadius: 3, border: '1px solid #e9ecef' }}>
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: '#495057' }}>
-            Статистика товаров
+            Статистика товаров (Всего: {products.length})
           </Typography>
           <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             <Box sx={{ textAlign: 'center', minWidth: 120 }}>
@@ -7573,7 +7719,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             </Box>
             <Box sx={{ textAlign: 'center', minWidth: 120 }}>
               <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#dc3545' }}>
-                {products.filter(product => product.hidden).length}
+                {products.filter(product => product.isHidden).length}
               </Typography>
               <Typography variant="body2" color="textSecondary">
                 Скрытые
@@ -9470,36 +9616,39 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
   const recognitionRef = useRef(null);
   const [categoryProducts, setCategoryProducts] = useState([]);
 
+  // Функция для загрузки товаров категории
+  const fetchCategoryData = async () => {
+    setLoading(true);
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const headers = user.token ? { 'Authorization': `Bearer ${user.token}` } : {};
+      const [categoryRes, subcategoriesRes, productsRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/categories/${id}`, { headers }),
+        fetch(`${API_BASE_URL}/api/categories?parentId=${id}`, { headers }),
+        fetch(`${API_BASE_URL}/api/products?categoryId=${id}`, { headers })
+      ]);
+      if (categoryRes.ok) {
+        const categoryData = await categoryRes.json();
+        setCategory(categoryData);
+      }
+      if (subcategoriesRes.ok) {
+        const subcategoriesData = await subcategoriesRes.json();
+        setSubcategories(subcategoriesData);
+      }
+      if (productsRes.ok) {
+        const productsData = await productsRes.json();
+        setCategoryProducts(productsData);
+      }
+    } catch (error) {
+      console.error('Error fetching category data:', error);
+    }
+    setLoading(false);
+  };
+
+
+
   // Загрузка категории и подкатегорий
   useEffect(() => {
-    const fetchCategoryData = async () => {
-      setLoading(true);
-      try {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const headers = user.token ? { 'Authorization': `Bearer ${user.token}` } : {};
-        const [categoryRes, subcategoriesRes, productsRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/categories/${id}`, { headers }),
-          fetch(`${API_BASE_URL}/api/categories?parentId=${id}`, { headers }),
-          fetch(`${API_BASE_URL}/api/products?categoryId=${id}`, { headers })
-        ]);
-        if (categoryRes.ok) {
-          const categoryData = await categoryRes.json();
-          setCategory(categoryData);
-        }
-        if (subcategoriesRes.ok) {
-          const subcategoriesData = await subcategoriesRes.json();
-          setSubcategories(subcategoriesData);
-        }
-        if (productsRes.ok) {
-          const productsData = await productsRes.json();
-          setCategoryProducts(productsData);
-        }
-      } catch (error) {
-        console.error('Error fetching category data:', error);
-      }
-      setLoading(false);
-    };
-
     if (id) {
       fetchCategoryData();
     }
@@ -10061,7 +10210,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
             }
           }
         }
-        
+          
         if (productsRes.ok) {
           const productsData = await productsRes.json();
           setSubcategoryProducts(productsData);
@@ -10076,6 +10225,8 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
       fetchSubcategoryData();
     }
   }, [id]);
+
+
 
   // Инициализация распознавания речи
   useEffect(() => {

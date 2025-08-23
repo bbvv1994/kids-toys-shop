@@ -155,6 +155,29 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     if (typeof category === 'object' && category?.name) return category.name;
     return null;
   };
+
+  // Вспомогательная функция для получения ID категории
+  const getCategoryId = (category) => {
+    if (typeof category === 'string') return category;
+    if (typeof category === 'object' && category?.id) return category.id;
+    if (typeof category === 'object' && category?.name) return category.name;
+    return null;
+  };
+
+  // Вспомогательная функция для получения имени подкатегории
+  const getSubcategoryName = (subcategory) => {
+    if (typeof subcategory === 'string') return subcategory;
+    if (typeof subcategory === 'object' && subcategory?.name) return subcategory.name;
+    return null;
+  };
+
+  // Вспомогательная функция для получения ID подкатегории
+  const getSubcategoryId = (subcategory) => {
+    if (typeof subcategory === 'string') return subcategory;
+    if (typeof subcategory === 'object' && subcategory?.id) return subcategory.id;
+    if (typeof subcategory === 'object' && subcategory?.name) return subcategory.name;
+    return null;
+  };
   const handleChangeCartQuantity = onChangeCartQuantity; // Переименовываем для совместимости
   const { id } = useParams();
   const navigate = useNavigate();
@@ -175,8 +198,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [loading, setLoading] = useState(true);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
+
   const [reviews, setReviews] = useState([]);
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
@@ -200,6 +222,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [questionError, setQuestionError] = useState('');
   const [questionSuccess, setQuestionSuccess] = useState('');
   const [questionLoading, setQuestionLoading] = useState(false);
+  
+  // Состояния для экранной лупы (только для десктопа)
+  const [isZoomEnabled, setIsZoomEnabled] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 }); // Начинаем с центра
 
   // Безопасно ищем товар в корзине только если product загружен
   const cartItem = product ? cart?.items?.find(item => item.product.id === product.id) : null;
@@ -584,37 +611,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     }
   };
 
-  // Функции для свайпа в галерее
-  const handleTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
 
-  const handleTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
 
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
 
-    if (isLeftSwipe) {
-      // Свайп влево - следующее изображение
-      const realImages = getRealImages();
-      if (realImages.length > 1) {
-        setGalleryIndex((galleryIndex + 1) % realImages.length);
-      }
-    } else if (isRightSwipe) {
-      // Свайп вправо - предыдущее изображение
-      const realImages = getRealImages();
-      if (realImages.length > 1) {
-        setGalleryIndex((galleryIndex - 1 + realImages.length) % realImages.length);
-      }
-    }
-  };
 
   // Функция для получения реальных изображений
   const getRealImages = () => {
@@ -654,6 +653,42 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     }
   };
 
+  // Функции для экранной лупы (только для десктопа)
+  const handleMouseMove = (e) => {
+    if (!isZoomEnabled) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Вычисляем процентные координаты для правильного позиционирования
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
+    
+    setMousePosition({ x: xPercent, y: yPercent });
+  };
+
+  const toggleZoom = () => {
+    if (window.innerWidth >= 768) { // Только для десктопа
+      setIsZoomEnabled(!isZoomEnabled);
+      if (!isZoomEnabled) {
+        setZoomLevel(2); // Увеличение в 2 раза для начала
+      } else {
+        setZoomLevel(1);
+        setMousePosition({ x: 50, y: 50 }); // Центрируем при отключении
+      }
+    }
+  };
+
+  const handleWheel = (e) => {
+    if (!isZoomEnabled || window.innerWidth < 768) return;
+    
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.2 : 0.2;
+    const newZoom = Math.max(1, Math.min(4, zoomLevel + delta));
+    setZoomLevel(newZoom);
+  };
+
 
 
   if (loading) {
@@ -671,12 +706,16 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         mt: -3.625,
         ml: { xs: 0, md: '280px' }, // Отступ слева для десктопа
         pl: { xs: 2, md: 0 }, // Отступ слева для мобильных
-        pt: { xs: 1, md: 0 } // Отступ сверху для мобильных
+        pt: { xs: 1, md: 0 }, // Отступ сверху для мобильных
+        position: 'relative',
+        zIndex: 10
       }}>
         <Breadcrumbs 
           separator={<NavigateNextIcon fontSize="small" />}
           aria-label="breadcrumb"
           sx={{
+            position: 'relative',
+            zIndex: 15,
             '& .MuiBreadcrumbs-separator': {
               color: '#4ECDC4'
             },
@@ -704,9 +743,27 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             <HomeIcon sx={{ fontSize: 18 }} />
             {t('breadcrumbs.home')}
           </Link>
-          {product.category && typeof product.category === 'string' && (
+          
+          {/* Каталог */}
+          <Link 
+            to="/catalog"
+            style={{ 
+              textDecoration: 'none', 
+              color: '#666',
+              transition: 'color 0.2s',
+              fontSize: '14px',
+              fontWeight: 500
+            }}
+            onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
+            onMouseLeave={(e) => e.target.style.color = '#666'}
+          >
+            {t('breadcrumbs.catalog')}
+          </Link>
+          
+          {/* Категория */}
+          {product.category && getCategoryId(product.category) && (
             <Link 
-              to={`/category/${product.categoryId || product.category}`}
+              to={`/category/${getCategoryId(product.category)}`}
               style={{ 
                 textDecoration: 'none', 
                 color: '#666',
@@ -717,12 +774,14 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
               onMouseLeave={(e) => e.target.style.color = '#666'}
             >
-              {translateCategory(product.category)}
+              {translateCategory(getCategoryName(product.category))}
             </Link>
           )}
-          {product.category && typeof product.category === 'object' && product.category?.name && (
+          
+          {/* Подкатегория */}
+          {product.subcategory && getSubcategoryId(product.subcategory) && getCategoryName(product.category) && (
             <Link 
-              to={`/category/${product.category.id || product.categoryId || product.category?.name}`}
+              to={`/subcategory/${getSubcategoryId(product.subcategory)}`}
               style={{ 
                 textDecoration: 'none', 
                 color: '#666',
@@ -733,41 +792,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
               onMouseLeave={(e) => e.target.style.color = '#666'}
             >
-              {translateCategory(product.category?.name)}
+              {translateSubcategory(getCategoryName(product.category), getSubcategoryName(product.subcategory))}
             </Link>
           )}
-          {product.subcategory && typeof product.subcategory === 'string' && (
-            <Link 
-              to={`/subcategory/${product.subcategoryId || product.subcategory}`}
-              style={{ 
-                textDecoration: 'none', 
-                color: '#666',
-                transition: 'color 0.2s',
-                fontSize: '14px',
-                fontWeight: 500
-              }}
-              onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
-              onMouseLeave={(e) => e.target.style.color = '#666'}
-            >
-              {translateSubcategory(getCategoryName(product.category), product.subcategory)}
-            </Link>
-          )}
-          {product.subcategory && typeof product.subcategory === 'object' && product.subcategory.name && (
-            <Link 
-              to={`/subcategory/${product.subcategory.id || product.subcategoryId || product.subcategory.name}`}
-              style={{ 
-                textDecoration: 'none', 
-                color: '#666',
-                transition: 'color 0.2s',
-                fontSize: '14px',
-                fontWeight: 500
-              }}
-              onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
-              onMouseLeave={(e) => e.target.style.color = '#666'}
-            >
-              {translateSubcategory(getCategoryName(product.category), product.subcategory.name)}
-            </Link>
-          )}
+          
+          {/* Название товара */}
           <Typography color="text.primary" sx={{ fontWeight: 600, fontSize: '14px' }}>
             {getTranslatedName(product) || 'Товар'}
           </Typography>
@@ -809,64 +838,29 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     const imageSrc = getImageUrl(realImages[galleryIndex]);
                     
                     return (
-                      <img
-                        src={imageSrc}
-                        alt={getTranslatedName(product)}
-                        style={{ width: '100%', maxHeight: 400, objectFit: 'contain', borderRadius: 12, cursor: 'pointer', background: '#f6f6f6' }}
-                        onClick={() => setGalleryOpen(true)}
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        onKeyDown={handleGalleryKeyDown}
-                        tabIndex={0}
-                        onError={(e) => {
-                          // Показываем заглушку вместо скрытия изображения
-                          const container = e.target.parentElement;
-                          if (container) {
-                            container.innerHTML = `
-                              <div style="
-                                width: 100%; 
-                                height: 100%; 
-                                display: flex; 
-                                align-items: center; 
-                                justify-content: center; 
-                                background: #f6f6f6; 
-                                border-radius: 12px;
-                                flex-direction: column;
-                                gap: 8px;
-                                position: relative;
-                              ">
-                                <img 
-                                  src="/photography.jpg" 
-                                  alt={t('productPage.noPhoto')} 
-                                  style="
-                                    width: 100%; 
-                                    height: 100%; 
-                                    object-fit: cover; 
-                                    border-radius: 12px; 
-                                    opacity: 0.7;
-                                  "
-                                />
-                                <div style="
-                                  color: #666; 
-                                  text-align: center;
-                                  position: absolute;
-                                  bottom: 16px;
-                                  left: 50%;
-                                  transform: translateX(-50%);
-                                  background: rgba(255,255,255,0.9);
-                                  padding: 4px 12px;
-                                  border-radius: 4px;
-                                  z-index: 1;
-                                  font-size: 14px;
-                                ">
-                                  {t('productPage.noPhoto')}
-                                </div>
-                              </div>
-                            `;
-                          }
-                        }}
-                      />
+                      <Box sx={{ 
+                        width: '100%', 
+                        height: 400, 
+                        maxWidth: 550,
+                        background: '#f6f6f6',
+                        overflow: 'hidden',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => setGalleryOpen(true)}
+                      onKeyDown={handleGalleryKeyDown}
+                      tabIndex={0}
+                      >
+                        {/* Основное изображение товара - используем тот же принцип, что и в корзине */}
+                        <Box sx={{
+                          width: '100%',
+                          height: '100%',
+                          backgroundImage: `url(${imageSrc})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                          borderRadius: 2
+                        }} />
+                      </Box>
                     );
                   }
                 }
@@ -884,7 +878,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     borderRadius: 12,
                     flexDirection: 'column',
                     gap: 2,
-                    position: 'relative'
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}>
                     <img 
                       src="/photography.jpg" 
@@ -894,7 +889,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                         height: '100%', 
                         objectFit: 'cover', 
                         borderRadius: 12, 
-                        opacity: 0.7 
+                        opacity: 0.7
                       }} 
                     />
                     <Typography 
@@ -917,6 +912,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   </div>
                 );
               })()}
+              
+
+              
               {/* Миниатюры */}
               {(() => {
                 const hasImages = product.imageUrls && (
@@ -930,21 +928,33 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     return (
                       <Box sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
                         {realImages.map((url, idx) => (
-                          <img
+                          <Box
                             key={idx}
-                            src={getImageUrl(url)}
-                            alt={`Миниатюра ${idx+1}`}
-                            style={{ 
-                              width: 56, 
-                              height: 56, 
-                              objectFit: 'cover', 
-                              borderRadius: 6, 
-                              border: galleryIndex === idx ? '2px solid #4ECDC4' : '2px solid #eee', 
-                              cursor: 'pointer', 
-                              boxShadow: galleryIndex === idx ? '0 2px 8px #4ECDC455' : 'none' 
+                            sx={{
+                              width: 56,
+                              height: 56,
+                              background: '#f6f6f6',
+                              borderRadius: 6,
+                              border: galleryIndex === idx ? '2px solid #4ECDC4' : '2px solid #eee',
+                              cursor: 'pointer',
+                              boxShadow: galleryIndex === idx ? '0 2px 8px #4ECDC455' : 'none',
+                              overflow: 'hidden',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
                             }}
                             onClick={() => setGalleryIndex(idx)}
-                          />
+                          >
+                            {/* Миниатюра изображения - используем тот же принцип, что и в корзине */}
+                            <Box sx={{
+                              width: '100%',
+                              height: '100%',
+                              backgroundImage: `url(${getImageUrl(url)})`,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                              backgroundRepeat: 'no-repeat'
+                            }} />
+                          </Box>
                         ))}
                       </Box>
                     );
@@ -1588,82 +1598,133 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         onClose={() => setGalleryOpen(false)}
         onKeyDown={handleGalleryKeyDown}
         tabIndex={0}
+        sx={{
+          zIndex: 99999,
+          '& .MuiBackdrop-root': {
+            backgroundColor: { xs: '#000000', sm: 'rgba(0, 0, 0, 0.5)' }
+          }
+        }}
       >
         <Box 
           sx={{ 
-            position: 'absolute', 
-            top: '50%', 
-            left: '50%', 
-            transform: 'translate(-50%, -50%)', 
-            bgcolor: 'background.paper', 
-            boxShadow: 24, 
-            p: 2, 
-            borderRadius: 2, 
+            position: 'fixed', 
+            top: { xs: 0, sm: '50%' }, 
+            left: { xs: 0, sm: '50%' }, 
+            transform: { xs: 'none', sm: 'translate(-50%, -50%)' }, 
+            bgcolor: { xs: '#000000', sm: 'background.paper' }, 
+            boxShadow: { xs: 'none', sm: '0 20px 60px rgba(0, 0, 0, 0.3)' }, 
+            p: { xs: 0, sm: 2, md: 3 }, 
+            borderRadius: 0, 
             outline: 'none', 
-            maxWidth: 700, 
-            width: '95%', 
-            textAlign: 'center' 
+            maxWidth: { xs: '100%', sm: 600, md: 800 }, 
+            width: { xs: '100%', sm: '95%', md: '95%' }, 
+            textAlign: 'center',
+            maxHeight: { xs: '100vh', sm: '95vh', md: '95vh' },
+            overflow: 'hidden',
+            zIndex: 99999,
+            border: 'none'
           }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
+
+          onClick={(e) => {
+            // Закрываем галерею при клике по пустому месту на мобильных
+            if (e.target === e.currentTarget) {
+              setGalleryOpen(false);
+            }
+          }}
         >
-          <Typography variant="h6" sx={{ mb: 2 }}>Фотографии товара</Typography>
+
           {(() => {
             const realImages = getRealImages();
             
             if (realImages.length > 0 && galleryIndex < realImages.length && galleryIndex >= 0) {
               return (
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  mb: 2,
+                  minHeight: { xs: 150, sm: 200, md: 200 },
+                  flexWrap: 'wrap',
+                  gap: { xs: 1, sm: 2, md: 2 }
+                }}>
                   <Button 
                     onClick={() => setGalleryIndex((galleryIndex - 1 + realImages.length) % realImages.length)} 
                     disabled={realImages.length < 2}
-                    TouchRippleProps={{
-                      style: {
-                        transform: 'scale(0.5)'
-                      }
-                    }}
                     sx={{
-                      background: 'transparent',
-                      color: realImages.length < 2 ? '#ccc' : '#ff6600',
+                      display: { xs: 'none', sm: 'flex' },
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      color: realImages.length < 2 ? '#ccc' : '#333',
                       borderRadius: '50%',
                       fontWeight: 600,
-                      fontSize: 36,
-                      minWidth: 80,
-                      height: 80,
+                      fontSize: { xs: 24, sm: 28, md: 32 },
+                      minWidth: { xs: 40, sm: 50, md: 60 },
+                      height: { xs: 40, sm: 50, md: 60 },
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      border: '2px solid rgba(0, 0, 0, 0.1)',
                       '&:hover': {
-                        background: 'transparent',
-                        color: realImages.length < 2 ? '#ccc' : '#e55a00'
-                      }
+                        background: 'rgba(255, 255, 255, 1)',
+                        color: realImages.length < 2 ? '#ccc' : '#000',
+                        boxShadow: '0 6px 20px rgba(0, 0, 0, 0.2)',
+                        transform: 'scale(1.05)'
+                      },
+                      transition: 'all 0.2s ease'
                     }}
                   >
                     ‹
                   </Button>
-                  <img
-                    src={getImageUrl(realImages[galleryIndex])}
-                    alt={`Фото ${galleryIndex+1}`}
-                    style={{ width: 500, height: 500, objectFit: 'contain', borderRadius: 8, margin: '0 16px', background: '#f6f6f6' }}
-                  />
+                  <Box 
+                    sx={{ 
+                      width: { xs: '100vw', sm: 400, md: 500 }, 
+                      height: { xs: '100vh', sm: 400, md: 500 }, 
+                      margin: { xs: 0, sm: '0 12px', md: '0 16px' },
+                      background: 'transparent',
+                      overflow: 'hidden',
+                      position: { xs: 'fixed', sm: 'static' },
+                      top: { xs: 0, sm: 'auto' },
+                      left: { xs: 'auto' },
+                      right: { xs: 0, sm: 'auto' },
+                      cursor: isZoomEnabled ? 'zoom-out' : 'zoom-in'
+                    }}
+                    onClick={toggleZoom}
+                    onDoubleClick={() => setGalleryOpen(false)}
+                    onMouseMove={handleMouseMove}
+                    onWheel={handleWheel}
+                  >
+                    {/* Изображение в модальном окне с экранной лупой для десктопа */}
+                    <Box sx={{
+                      width: '100%',
+                      height: '100%',
+                      backgroundImage: `url(${getImageUrl(realImages[galleryIndex])})`,
+                      backgroundSize: isZoomEnabled ? `${100 * zoomLevel}%` : 'contain',
+                      backgroundPosition: isZoomEnabled 
+                        ? `${mousePosition.x}% ${mousePosition.y}%`
+                        : 'center',
+                      backgroundRepeat: 'no-repeat',
+                      transition: isZoomEnabled ? 'none' : 'background-size 0.3s ease, background-position 0.3s ease',
+                      overflow: 'hidden' // Важно для корректного отображения увеличенного изображения
+                    }} />
+                  </Box>
                   <Button 
                     onClick={() => setGalleryIndex((galleryIndex + 1) % realImages.length)} 
                     disabled={realImages.length < 2}
-                    TouchRippleProps={{
-                      style: {
-                        transform: 'scale(0.5)'
-                      }
-                    }}
                     sx={{
-                      background: 'transparent',
-                      color: realImages.length < 2 ? '#ccc' : '#ff6600',
+                      display: { xs: 'none', sm: 'flex' },
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      color: realImages.length < 2 ? '#ccc' : '#333',
                       borderRadius: '50%',
                       fontWeight: 600,
-                      fontSize: 36,
-                      minWidth: 80,
-                      height: 80,
+                      fontSize: { xs: 24, sm: 28, md: 32 },
+                      minWidth: { xs: 40, sm: 50, md: 60 },
+                      height: { xs: 40, sm: 50, md: 60 },
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      border: '2px solid rgba(0, 0, 0, 0.1)',
                       '&:hover': {
-                        background: 'transparent',
-                        color: realImages.length < 2 ? '#ccc' : '#e55a00'
-                      }
+                        background: 'rgba(255, 255, 255, 1)',
+                        color: realImages.length < 2 ? '#ccc' : '#000',
+                        boxShadow: '0 6px 20px rgba(0, 0, 0, 0.2)',
+                        transform: 'scale(1.05)'
+                      },
+                      transition: 'all 0.2s ease'
                     }}
                   >
                     ›
@@ -1682,19 +1743,26 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             const realImages = getRealImages();
             if (realImages.length > 1) {
               return (
-                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', mb: 2, flexWrap: 'wrap' }}>
+                <Box sx={{ 
+                  display: { xs: 'none', sm: 'flex' }, 
+                  gap: 1, 
+                  justifyContent: 'center', 
+                  mb: 2, 
+                  flexWrap: 'wrap' 
+                }}>
                   {realImages.map((url, idx) => (
-                                          <img
-                        key={idx}
-                        src={getImageUrl(url)}
-                        alt={`Миниатюра ${idx+1}`}
-                      style={{ 
-                        width: 48, 
-                        height: 48, 
-                        objectFit: 'cover', 
-                        borderRadius: 4, 
-                        border: galleryIndex === idx ? '2px solid #4ECDC4' : '2px solid #eee', 
-                        cursor: 'pointer' 
+                    <Box
+                      key={idx}
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        backgroundImage: `url(${getImageUrl(url)})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                        borderRadius: 1,
+                        border: galleryIndex === idx ? '2px solid #4ECDC4' : '2px solid #eee',
+                        cursor: 'pointer'
                       }}
                       onClick={() => setGalleryIndex(idx)}
                     />
@@ -1704,30 +1772,71 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             }
             return null;
           })()}
-          <Button 
-            onClick={() => setGalleryOpen(false)} 
-            sx={{ 
-              mt: 2,
-              background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
-              color: '#fff',
-              borderRadius: 2,
-              fontWeight: 600,
-              fontSize: 15,
-              px: 3,
-              py: 1.5,
-              height: 44,
-              boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
-              textTransform: 'none',
-              minWidth: 120,
-              '&:hover': {
-                background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
-                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
-                transform: 'translateY(-1px)'
-              },
-            }}
-          >
-            Закрыть
-          </Button>
+          {/* Кнопка закрытия для планшетов и десктопа */}
+          <Box sx={{ 
+            display: { xs: 'none', sm: 'block' }
+          }}>
+            <Button 
+              onClick={() => setGalleryOpen(false)} 
+              sx={{ 
+                mt: 2,
+                background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                color: '#fff',
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: 15,
+                px: 3,
+                py: 1.5,
+                height: 44,
+                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                textTransform: 'none',
+                minWidth: 120,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                  boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+              }}
+            >
+              Закрыть
+            </Button>
+          </Box>
+          
+
+          
+          {/* Кнопка закрытия для мобильных (временная, пока не заработает двойной тап) */}
+          <Box sx={{ 
+            display: { xs: 'block', sm: 'none' },
+            position: 'fixed',
+            bottom: 20,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 100000
+          }}>
+            <Button 
+              onClick={() => setGalleryOpen(false)} 
+              sx={{ 
+                background: 'rgba(255, 255, 255, 0.9)',
+                color: '#333',
+                borderRadius: 25,
+                fontWeight: 600,
+                fontSize: 16,
+                px: 4,
+                py: 2,
+                height: 50,
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                textTransform: 'none',
+                minWidth: 140,
+                border: '2px solid rgba(0, 0, 0, 0.1)',
+                '&:hover': {
+                  background: 'rgba(255, 255, 255, 1)',
+                  boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)',
+                },
+              }}
+            >
+              Закрыть
+            </Button>
+          </Box>
         </Box>
       </Modal>
       {/* Блок похожих товаров */}

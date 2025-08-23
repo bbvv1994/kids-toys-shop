@@ -88,17 +88,17 @@ function EditProductModal(props) {
       // Устанавливаем глобальные стили для Popover компонентов
       const style = document.createElement('style');
       style.id = 'modal-popover-styles';
-      style.textContent = `
-        .MuiPopover-root {
-          z-index: 10002 !important;
-        }
-        .MuiPaper-root {
-          z-index: 10002 !important;
-        }
-        .MuiMenu-root {
-          z-index: 10002 !important;
-        }
-      `;
+             style.textContent = `
+         .MuiPopover-root {
+           z-index: 99999 !important;
+         }
+         .MuiPaper-root {
+           z-index: 99999 !important;
+         }
+         .MuiMenu-root {
+           z-index: 99999 !important;
+         }
+       `;
       document.head.appendChild(style);
     } else {
       // Восстанавливаем прокрутку
@@ -826,13 +826,13 @@ function EditProductModal(props) {
       open={open} 
       onClose={onClose} 
             sx={{
-        zIndex: 9999,
+        zIndex: 99999,
         '& .MuiDialog-paper': {
-          zIndex: 9999,
-          marginTop: 'calc(5vh + 95px)',
-          marginBottom: '10vh',
-          maxHeight: '85vh',
-          height: '80vh',
+          zIndex: 99999,
+          marginTop: 'calc(5vh + 15px)',
+          marginBottom: '0',
+          maxHeight: '95vh',
+          height: '90vh',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -842,24 +842,24 @@ function EditProductModal(props) {
           }
         },
         '& .MuiPopover-root': {
-          zIndex: 10002
+          zIndex: 99999
         },
         '& .MuiMenu-root': {
-          zIndex: 10002
+          zIndex: 99999
         },
         '& .MuiPaper-root': {
-          zIndex: 10002
+          zIndex: 99999
         }
       }}
-      PaperProps={{
-        sx: {
-          borderRadius: 3,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-          minWidth: 600,
-          maxWidth: 800,
-          position: 'relative'
-        }
-      }}
+             PaperProps={{
+         sx: {
+           borderRadius: 3,
+           boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+           minWidth: 700,
+           maxWidth: 900,
+           position: 'relative'
+         }
+       }}
 
     >
       <DialogTitle sx={{
@@ -897,7 +897,7 @@ function EditProductModal(props) {
               overflowY: 'auto',
               overflowX: 'hidden',
               flex: 1,
-              maxHeight: 'calc(80vh - 120px)', // Высота минус заголовок и отступы
+              maxHeight: 'calc(90vh - 120px)', // Высота минус заголовок и отступы
               '&::-webkit-scrollbar': {
                 width: '8px',
               },
@@ -915,15 +915,15 @@ function EditProductModal(props) {
               '& .MuiSelect-select': {
                 zIndex: 1
               },
-              '& .MuiPopover-root': {
-                zIndex: 10002
-              },
-              '& .MuiMenu-root': {
-                zIndex: 10002
-              },
-              '& .MuiPaper-root': {
-                zIndex: 10002
-              }
+                             '& .MuiPopover-root': {
+                 zIndex: 99999
+               },
+               '& .MuiMenu-root': {
+                 zIndex: 99999
+               },
+               '& .MuiPaper-root': {
+                 zIndex: 99999
+               }
             }}
             dividers
           >
@@ -988,51 +988,51 @@ function EditProductModal(props) {
                   />
                   <FormControl fullWidth>
                     <InputLabel id="category-label">Категория</InputLabel>
-                    <Select 
-                      labelId="category-label" 
-                      label="Категория" 
-                      name="category" 
-                      value={formData.category} 
-                      onChange={handleInputChange} 
-                      open={openSelects.category}
-                      onOpen={() => handleSelectOpen('category')}
-                      onClose={() => handleSelectClose('category')}
-                      renderValue={selected => selected ? (categories.find(c => c.id === selected)?.label || categories.find(c => c.id === selected)?.name || selected) : 'Выберите категорию'}
-                      MenuProps={{
-                        PaperProps: {
-                          sx: { zIndex: 10002, maxHeight: 300 }
-                        },
-                        anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-                        transformOrigin: { vertical: 'top', horizontal: 'left' }
-                      }}
-                    >
+                                         <Select 
+                       labelId="category-label" 
+                       label="Категория" 
+                       name="category" 
+                       value={formData.category} 
+                       onChange={handleInputChange} 
+                       open={openSelects.category}
+                       onOpen={() => handleSelectOpen('category')}
+                       onClose={() => handleSelectClose('category')}
+                       renderValue={selected => selected ? (categories.find(c => c.id === selected)?.label || categories.find(c => c.id === selected)?.name || selected) : 'Выберите категорию'}
+                       MenuProps={{
+                         PaperProps: {
+                           sx: { zIndex: 99999, maxHeight: 300 }
+                         },
+                         anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                         transformOrigin: { vertical: 'top', horizontal: 'left' }
+                       }}
+                     >
                       {categories.filter(c => !c.parentId).map(c => <MenuItem key={c.id} value={c.id}>{c.label || c.name}</MenuItem>)}
                     </Select>
                   </FormControl>
                   <FormControl fullWidth disabled={!formData.category}>
                     <InputLabel id="subcategory-label">Подкатегория</InputLabel>
-                    <Select 
-                      labelId="subcategory-label" 
-                      label="Подкатегория" 
-                      name="subcategory" 
-                      value={subcategories.length > 0 && subcategories.find(sub => sub.id === formData.subcategory || sub.name === formData.subcategory) ? (subcategories.find(sub => sub.id === formData.subcategory || sub.name === formData.subcategory)?.id || '') : ''}
-                      onChange={handleInputChange} 
-                      open={openSelects.subcategory}
-                      onOpen={() => handleSelectOpen('subcategory')}
-                      onClose={() => handleSelectClose('subcategory')}
-                      renderValue={selected => {
-                        if (!selected) return 'Выберите подкатегорию';
-                        const subcategory = subcategories.find(sub => sub.id === selected || sub.name === selected);
-                        return subcategory ? subcategory.name : selected;
-                      }}
-                      MenuProps={{
-                        PaperProps: {
-                          sx: { zIndex: 10002, maxHeight: 300 }
-                        },
-                        anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-                        transformOrigin: { vertical: 'top', horizontal: 'left' }
-                      }}
-                    >
+                                         <Select 
+                       labelId="subcategory-label" 
+                       label="Подкатегория" 
+                       name="subcategory" 
+                       value={subcategories.length > 0 && subcategories.find(sub => sub.id === formData.subcategory || sub.name === formData.subcategory) ? (subcategories.find(sub => sub.id === formData.subcategory || sub.name === formData.subcategory)?.id || '') : ''}
+                       onChange={handleInputChange} 
+                       open={openSelects.subcategory}
+                       onOpen={() => handleSelectOpen('subcategory')}
+                       onClose={() => handleSelectClose('subcategory')}
+                       renderValue={selected => {
+                         if (!selected) return 'Выберите подкатегорию';
+                         const subcategory = subcategories.find(sub => sub.id === selected || sub.name === selected);
+                         return subcategory ? subcategory.name : selected;
+                       }}
+                       MenuProps={{
+                         PaperProps: {
+                           sx: { zIndex: 99999, maxHeight: 300 }
+                         },
+                         anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                         transformOrigin: { vertical: 'top', horizontal: 'left' }
+                       }}
+                     >
                       {subcategories.length > 0 ? (
                         subcategories.map(sub => <MenuItem key={sub.id} value={sub.id}>{sub.name}</MenuItem>)
                       ) : (
@@ -1082,24 +1082,24 @@ function EditProductModal(props) {
                   />
                   <FormControl fullWidth>
                     <InputLabel id="age-group-label">Возрастная группа</InputLabel>
-                    <Select 
-                      labelId="age-group-label" 
-                                              label="Возрастная группа" 
-                      name="ageGroup" 
-                      value={formData.ageGroup} 
-                      onChange={handleInputChange} 
-                      open={openSelects.ageGroup}
-                      onOpen={() => handleSelectOpen('ageGroup')}
-                      onClose={() => handleSelectClose('ageGroup')}
-                      renderValue={selected => selected || 'Выберите возрастную группу'}
-                      MenuProps={{
-                        PaperProps: {
-                          sx: { zIndex: 10002, maxHeight: 300 }
-                        },
-                        anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-                        transformOrigin: { vertical: 'top', horizontal: 'left' }
-                      }}
-                    >
+                                         <Select 
+                       labelId="age-group-label" 
+                                               label="Возрастная группа" 
+                       name="ageGroup" 
+                       value={formData.ageGroup} 
+                       onChange={handleInputChange} 
+                       open={openSelects.ageGroup}
+                       onOpen={() => handleSelectOpen('ageGroup')}
+                       onClose={() => handleSelectClose('ageGroup')}
+                       renderValue={selected => selected || 'Выберите возрастную группу'}
+                       MenuProps={{
+                         PaperProps: {
+                           sx: { zIndex: 99999, maxHeight: 300 }
+                         },
+                         anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                         transformOrigin: { vertical: 'top', horizontal: 'left' }
+                       }}
+                     >
                       {ageGroups.map(age => (
                         <MenuItem key={age} value={age}>{age}</MenuItem>
                       ))}
@@ -1107,24 +1107,24 @@ function EditProductModal(props) {
                   </FormControl>
                   <FormControl fullWidth>
                     <InputLabel id="gender-label">Пол</InputLabel>
-                    <Select
-                      labelId="gender-label"
-                      label="Пол"
-                      name="gender"
-                      value={formData.gender || ''}
-                      onChange={handleInputChange}
-                      open={openSelects.gender}
-                      onOpen={() => handleSelectOpen('gender')}
-                      onClose={() => handleSelectClose('gender')}
-                      renderValue={selected => selected || 'Выберите пол'}
-                      MenuProps={{
-                        PaperProps: {
-                          sx: { zIndex: 10002, maxHeight: 300 }
-                        },
-                        anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-                        transformOrigin: { vertical: 'top', horizontal: 'left' }
-                      }}
-                    >
+                                         <Select
+                       labelId="gender-label"
+                       label="Пол"
+                       name="gender"
+                       value={formData.gender || ''}
+                       onChange={handleInputChange}
+                       open={openSelects.gender}
+                       onOpen={() => handleSelectOpen('gender')}
+                       onClose={() => handleSelectClose('gender')}
+                       renderValue={selected => selected || 'Выберите пол'}
+                       MenuProps={{
+                         PaperProps: {
+                           sx: { zIndex: 99999, maxHeight: 300 }
+                         },
+                         anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                         transformOrigin: { vertical: 'top', horizontal: 'left' }
+                       }}
+                     >
                                       <MenuItem value="Для мальчиков">Для мальчиков</MenuItem>
                 <MenuItem value="Для девочек">Для девочек</MenuItem>
                       <MenuItem value="Универсальный">Универсальный</MenuItem>
