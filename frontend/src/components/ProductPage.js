@@ -1798,7 +1798,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 },
               }}
             >
-              Закрыть
+              {t('close')}
             </Button>
           </Box>
           
@@ -1834,7 +1834,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 },
               }}
             >
-              Закрыть
+              {t('close')}
             </Button>
           </Box>
         </Box>
