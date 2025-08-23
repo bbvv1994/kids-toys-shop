@@ -1,39 +1,130 @@
-import React, { useState, useRef } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, A11y, Autoplay } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import { Box, Typography, Button } from '@mui/material';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Box, Typography, IconButton, useTheme, useMediaQuery } from '@mui/material';
 import ProductCard from './ProductCard';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistToggle, onChangeCartQuantity, onEditProduct, wishlist, isAdmin }) {
-  const [swiperInstance, setSwiperInstance] = useState(null);
-  const [forceUpdate, setForceUpdate] = useState(0);
-  const swiperRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const containerRef = useRef(null);
+  const theme = useTheme();
+  
+  // Используем Material-UI breakpoints для лучшей адаптивности
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // < 600px
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 600px - 900px
+  const isSmallDesktop = useMediaQuery(theme.breakpoints.between('md', 'lg')); // 900px - 1200px
+  const isMediumDesktop = useMediaQuery(theme.breakpoints.between('lg', 'xl')); // 1200px - 1536px
+  const isLargeDesktop = useMediaQuery(theme.breakpoints.up('xl')); // >= 1536px
 
-  const handlePrev = () => {
-    if (swiperInstance) {
-      swiperInstance.slidePrev();
-      setForceUpdate(f => f + 1);
-    }
+  // Вычисляем количество видимых карточек
+  const getVisibleCount = () => {
+    if (isLargeDesktop) return 4; // >= 1536px
+    if (isMediumDesktop) return 3; // 1200px - 1536px
+    if (isSmallDesktop) return 3; // 900px - 1200px
+    if (isTablet) return 2; // 600px - 900px
+    return 1; // < 600px
   };
-  const handleNext = () => {
-    if (swiperInstance) {
-      swiperInstance.slideNext();
-      setForceUpdate(f => f + 1);
+
+  const visibleCount = getVisibleCount();
+  
+  // Текущий индекс (начинаем с первого продукта)
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Эффект для завершения переходов
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsTransitioning(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [currentIndex]);
+
+  // Эффект для сброса isResetting
+  useEffect(() => {
+    if (isResetting) {
+      const timer = setTimeout(() => {
+        setIsResetting(false);
+      }, 50);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [isResetting]);
+
+  const handlePrev = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    
+    setCurrentIndex(prev => {
+      const newIndex = prev - 1;
+      
+      // Если уходим в отрицательные числа, переходим к концу
+      if (newIndex < 0) {
+        setIsResetting(true);
+        return products.length - 3; // Переходим к третьему с конца продукту
+      }
+      
+      return newIndex;
+    });
+  }, [isTransitioning, products.length, visibleCount]);
+  
+  const handleNext = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    
+    setCurrentIndex(prev => {
+      const newIndex = prev + 1;
+      
+      // Если достигли конца (на 3 клика раньше), переходим к началу
+      if (newIndex >= products.length - 3) {
+        setIsResetting(true);
+        return 0; // Начинаем с первого продукта
+      }
+      
+      return newIndex;
+    });
+  }, [isTransitioning, products.length, visibleCount]);
+  // Пагинация
+  const totalPages = Math.ceil((products.length - 2) / visibleCount);
+  const currentPage = Math.floor(currentIndex / visibleCount) + 1;
+
+  const handlePageClick = useCallback((pageIndex) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    
+    // Вычисляем правильный индекс
+    const targetIndex = pageIndex * visibleCount;
+    
+    // Проверяем, что индекс не выходит за пределы
+    if (targetIndex >= products.length - 3) {
+      setCurrentIndex(0);
+    } else {
+      setCurrentIndex(targetIndex);
+    }
+  }, [isTransitioning, products.length, visibleCount]);
+
+  // Автопрокрутка (размещаем после объявления всех функций)
+  useEffect(() => {
+    if (products.length <= 1) return;
+
+         const interval = setInterval(() => {
+       if (!isPaused && !isTransitioning && !isResetting) {
+         handleNext();
+       }
+     }, 5000);
+
+    return () => clearInterval(interval);
+     }, [products.length, isPaused, isTransitioning, isResetting, handleNext]);
 
   if (!products || products.length === 0) return null;
+  
   return (
     <Box
       sx={{
         mt: { xs: 6, md: 10 },
         mb: 6,
-        ml: { xs: 0, md: '260px' },
-        width: { xs: '100vw', md: 'calc(100vw - 289px)' },
+        // Оставляем отступ слева как было изначально
+        ml: { xs: 0, sm: 0, md: 0, lg: '260px' },
+        width: { xs: '100vw', sm: '100vw', md: '100vw', lg: 'calc(100vw - 289px)' },
         maxWidth: '100%',
         transition: 'width 0.3s',
       }}
@@ -43,129 +134,177 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
         fontWeight: 800, 
         color: '#ff6600',
         fontFamily: '"Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
-        fontSize: '2.2rem',
+        fontSize: { xs: '1.8rem', sm: '2rem', md: '2.2rem' },
         textShadow: '0 2px 4px rgba(255, 102, 0, 0.2)',
         letterSpacing: '0.5px',
         background: 'linear-gradient(135deg, #ff6600 0%, #ff8533 100%)',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text'
+        backgroundClip: 'text',
+        // Центрируем заголовки на мобильных, оставляем по левому краю на больших экранах
+        textAlign: { xs: 'center', sm: 'center', md: 'center', lg: 'left' }
       }}>{title}</Typography>
-      <Box sx={{ width: '100%', position: 'relative', px: { xs: 2, md: 8 } }}
-        onMouseEnter={() => { swiperInstance && swiperInstance.autoplay && swiperInstance.autoplay.stop(); }}
-        onMouseLeave={() => { swiperInstance && swiperInstance.autoplay && swiperInstance.autoplay.start(); }}
+      
+      <Box 
+        sx={{ 
+          width: '100%', 
+          position: 'relative', 
+          px: { xs: 2, sm: 4, md: 8 }
+        }}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
       >
-        {/* Стрелки как в галерее (простые HTML) */}
-        {products.length > 3 && <button
-          onClick={() => swiperInstance && swiperInstance.slidePrev()}
-          style={{
+        {/* Стрелки навигации */}
+        {products.length > visibleCount && (
+          <>
+            <IconButton
+              onClick={handlePrev}
+              sx={{
             position: 'absolute',
             top: '50%',
-            left: '5px',
+                left: { xs: '2px', sm: '5px', md: '10px' },
             transform: 'translateY(-50%)',
-            width: 40,
-            height: 40,
+                width: { xs: 36, sm: 40, md: 60 },
+                height: { xs: 36, sm: 40, md: 60 },
             background: 'rgba(255, 255, 255, 0.9)',
-            border: 'none',
-            borderRadius: '50%',
-            fontSize: 20,
-            fontWeight: 600,
             color: '#ff6600',
-            cursor: 'pointer',
             zIndex: 2,
-            outline: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            userSelect: 'none',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          }}
-          sx={{
-            '@media (min-width: 900px)': {
-              left: '10px',
-              width: 60,
-              height: 60,
-              fontSize: 28,
-            }
-          }}
-        >
-          ‹
-        </button>}
-        {products.length > 3 && <button
-          onClick={() => swiperInstance && swiperInstance.slideNext()}
-          style={{
+                '&:hover': { background: 'rgba(255, 255, 255, 1)' },
+                display: { xs: 'none', sm: 'flex' } // Скрываем на очень маленьких экранах
+              }}
+            >
+              <ArrowBackIosNewIcon sx={{ fontSize: { xs: 20, sm: 24, md: 28 } }} />
+            </IconButton>
+            
+            <IconButton
+              onClick={handleNext}
+              sx={{
             position: 'absolute',
             top: '50%',
-            right: '5px',
+                right: { xs: '2px', sm: '5px', md: '10px' },
             transform: 'translateY(-50%)',
-            width: 40,
-            height: 40,
+                width: { xs: 36, sm: 40, md: 60 },
+                height: { xs: 36, sm: 40, md: 60 },
             background: 'rgba(255, 255, 255, 0.9)',
-            border: 'none',
-            borderRadius: '50%',
-            fontSize: 20,
-            fontWeight: 600,
             color: '#ff6600',
-            cursor: 'pointer',
             zIndex: 2,
-            outline: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            userSelect: 'none',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          }}
+                '&:hover': { background: 'rgba(255, 255, 255, 1)' },
+                display: { xs: 'none', sm: 'flex' } // Скрываем на очень маленьких экранах
+              }}
+            >
+              <ArrowForwardIosIcon sx={{ fontSize: { xs: 20, sm: 24, md: 28 } }} />
+            </IconButton>
+          </>
+        )}
+        
+                 {/* Карусель с плавным скольжением */}
+         <Box
           sx={{
-            '@media (min-width: 900px)': {
-              right: '10px',
-              width: 60,
-              height: 60,
-              fontSize: 28,
-            }
-          }}
-        >
-          ›
-        </button>}
-        <Swiper
-          modules={[Pagination, A11y, Autoplay]}
-          spaceBetween={10}
-          slidesPerView={1}
-          loop={products.length >= 3}
-          pagination={{ clickable: true }}
-          autoplay={{ delay: 5000, disableOnInteraction: false }}
-          breakpoints={{
-            600: { slidesPerView: Math.min(3, products.length), spaceBetween: 8 },
-            900: { slidesPerView: Math.min(3, products.length), spaceBetween: 10 },
-            1200: { slidesPerView: Math.min(4, products.length), spaceBetween: 15 },
-            1400: { slidesPerView: Math.min(5, products.length), spaceBetween: 20 },
-          }}
-          style={{ paddingBottom: 32, width: '100%', paddingLeft: 0, paddingRight: 0 }}
-          onSwiper={instance => {
-            setSwiperInstance(instance);
-            swiperRef.current = instance;
-          }}
-          onSlideChange={() => setForceUpdate(f => f + 1)}
-          centeredSlides={true}
-        >
-          {products.map(product => (
-            <SwiperSlide key={product.id}>
-              <ProductCard
-                product={product}
-                user={user}
-                inWishlist={wishlist?.some ? wishlist.some(item => item.productId === product.id) : false}
-                onWishlistToggle={onWishlistToggle}
-                onAddToCart={onAddToCart}
-                cart={cart}
-                onChangeCartQuantity={onChangeCartQuantity}
-                onEditProduct={onEditProduct}
-                viewMode="carousel"
-                isAdmin={isAdmin}
+             width: '100%',
+             maxWidth: `calc(${visibleCount} * 260px + ${visibleCount - 1} * 8px)`,
+             margin: '0 auto',
+             overflow: 'hidden',
+             position: 'relative',
+             // Адаптивные стили для разных размеров экрана
+             '@media (max-width: 599px)': {
+               maxWidth: '260px',
+             },
+             '@media (min-width: 600px) and (max-width: 899px)': {
+               maxWidth: 'calc(2 * 260px + 8px)',
+             },
+             '@media (min-width: 900px) and (max-width: 1199px)': {
+               maxWidth: 'calc(3 * 260px + 2 * 8px)',
+             },
+             '@media (min-width: 1200px) and (max-width: 1535px)': {
+               maxWidth: 'calc(3 * 260px + 2 * 8px)',
+             },
+             '@media (min-width: 1536px)': {
+               maxWidth: 'calc(4 * 260px + 3 * 8px)',
+             }
+           }}
+         >
+           <Box
+             ref={containerRef}
+             className="product-carousel-container"
+             sx={{
+               display: 'flex',
+               gap: '8px',
+               justifyContent: 'flex-start',
+                               transition: isResetting ? 'none' : 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                               transform: `translateX(-${currentIndex * 268}px)`,
+               width: 'max-content',
+             }}
+           >
+                                                                                               {/* Карусель с простой бесконечной прокруткой */}
+                       {(() => {
+              // Используем оригинальный массив продуктов без клонов
+              const extendedProducts = products;
+              
+              return extendedProducts.map((product, index) => {
+                return (
+                  <Box 
+                    key={`${product.id}-${index}`}
+                    sx={{ 
+                      width: '260px',
+                      maxWidth: '260px',
+                      minWidth: '260px',
+                      flexShrink: 0,
+                      transition: 'transform 0.3s ease',
+                      '&:hover': {
+                        transform: 'scale(1.02)',
+                        transition: 'transform 0.2s ease',
+                      }
+                    }}
+                  >
+                    <ProductCard
+                      product={product}
+                      user={user}
+                      inWishlist={wishlist?.some ? wishlist.some(item => item.productId === product.id) : false}
+                      onWishlistToggle={onWishlistToggle}
+                      onAddToCart={onAddToCart}
+                      cart={cart}
+                      onChangeCartQuantity={onChangeCartQuantity}
+                      onEditProduct={onEditProduct}
+                      viewMode="carousel"
+                      isAdmin={isAdmin}
+                    />
+                  </Box>
+                );
+              });
+            })()}
+           </Box>
+         </Box>
+
+        {/* Пагинация (точки) */}
+        {totalPages > 1 && (
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: { xs: '6px', sm: '8px' },
+            mt: { xs: 2, sm: 3 },
+            mb: { xs: 1, sm: 2 }
+          }}>
+            {Array.from({ length: totalPages }, (_, index) => (
+              <Box
+                key={index}
+                onClick={() => handlePageClick(index)}
+                sx={{
+                  width: { xs: '10px', sm: '12px' },
+                  height: { xs: '10px', sm: '12px' },
+                  borderRadius: '50%',
+                  backgroundColor: currentPage === index + 1 ? '#ff6600' : '#ddd',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    backgroundColor: currentPage === index + 1 ? '#ff6600' : '#bbb',
+                    transform: 'scale(1.2)'
+                  }
+                }}
               />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+            ))}
+          </Box>
+        )}
       </Box>
     </Box>
   );
