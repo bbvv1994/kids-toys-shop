@@ -36,6 +36,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   
 
   
+
+  
   // Функция для перевода категорий
   const translateCategory = (categoryName) => {
     const categoryMap = {
@@ -1798,7 +1800,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 },
               }}
             >
-              {t('close')}
+              {t('common.close')}
             </Button>
           </Box>
           
@@ -1834,7 +1836,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 },
               }}
             >
-              {t('close')}
+              {t('common.close')}
             </Button>
           </Box>
         </Box>
