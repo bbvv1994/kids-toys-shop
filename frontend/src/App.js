@@ -3617,16 +3617,43 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
             <Box sx={{
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
-              gap: 2,
+              gap: '8px',
               mt: 8,
               mb: 6,
-              maxWidth: 1100,
+              maxWidth: 'calc(4 * 260px + 3 * 8px)',
               margin: '0 auto',
-              justifyItems: { xs: 'center', sm: 'start' }
+              justifyItems: { xs: 'center', sm: 'start' },
+              // Адаптивные стили для разных размеров экрана как в карусели
+              '@media (max-width: 599px)': {
+                maxWidth: '260px',
+                gridTemplateColumns: '1fr'
+              },
+              '@media (min-width: 600px) and (max-width: 899px)': {
+                maxWidth: 'calc(2 * 260px + 8px)',
+                gridTemplateColumns: 'repeat(2, 1fr)'
+              },
+              '@media (min-width: 900px) and (max-width: 1199px)': {
+                maxWidth: 'calc(3 * 260px + 2 * 8px)',
+                gridTemplateColumns: 'repeat(3, 1fr)'
+              },
+              '@media (min-width: 1200px) and (max-width: 1535px)': {
+                maxWidth: 'calc(3 * 260px + 2 * 8px)',
+                gridTemplateColumns: 'repeat(3, 1fr)'
+              },
+              '@media (min-width: 1536px)': {
+                maxWidth: 'calc(4 * 260px + 3 * 8px)',
+                gridTemplateColumns: 'repeat(4, 1fr)'
+              }
             }}>
               {pagedProducts.length > 0 ? (
                 pagedProducts.map(product => (
-                  <Box key={product.id} sx={{ width: { xs: '320px', sm: '100%' }, minWidth: 0, maxWidth: '100%' }}>
+                  <Box key={product.id} sx={{ 
+                    width: '260px',
+                    minWidth: '260px',
+                    maxWidth: '260px',
+                    display: 'flex',
+                    justifyContent: 'center'
+                  }}>
                     <ProductCard
                       product={product}
                       user={user}
@@ -3636,7 +3663,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                       cart={cart}
                       onChangeCartQuantity={handleChangeCartQuantity}
                       onEditProduct={onEditProduct}
-                     viewMode={(isNarrow || isMobile) && window.innerWidth > window.innerHeight ? "carousel" : "grid"}
+                      viewMode="grid"
                       isAdmin={user?.role === 'admin'}
                     />
                   </Box>
@@ -10137,28 +10164,59 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
         <Box sx={{
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
-          gap: 3,
+          gap: '8px',
           mb: 6,
+          maxWidth: 'calc(4 * 260px + 3 * 8px)',
+          margin: '0 auto',
           justifyItems: { xs: 'center', sm: 'start' },
           pl: { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 },
           '@media (min-width: 1200px)': {
             pl: 9, // Отступ слева для больших экранов
           },
+          // Адаптивные стили для разных размеров экрана как в карусели
+          '@media (max-width: 599px)': {
+            maxWidth: '260px',
+            gridTemplateColumns: '1fr'
+          },
+          '@media (min-width: 600px) and (max-width: 899px)': {
+            maxWidth: 'calc(2 * 260px + 8px)',
+            gridTemplateColumns: 'repeat(2, 1fr)'
+          },
+          '@media (min-width: 900px) and (max-width: 1199px)': {
+            maxWidth: 'calc(3 * 260px + 2 * 8px)',
+            gridTemplateColumns: 'repeat(3, 1fr)'
+          },
+          '@media (min-width: 1200px) and (max-width: 1535px)': {
+            maxWidth: 'calc(3 * 260px + 2 * 8px)',
+            gridTemplateColumns: 'repeat(3, 1fr)'
+          },
+          '@media (min-width: 1536px)': {
+            maxWidth: 'calc(4 * 260px + 3 * 8px)',
+            gridTemplateColumns: 'repeat(4, 1fr)'
+          }
         }}>
           {filteredCategoryProducts.length > 0 ? (
             filteredCategoryProducts.map(product => (
-              <ProductCard 
-                key={product.id} 
-                product={product} 
-                user={user}
-                isAdmin={user?.role === 'admin'}
-                inWishlist={wishlist.some(item => item.productId === product.id)}
-                onWishlistToggle={onWishlistToggle}
-                onAddToCart={onAddToCart} 
-                cart={cart} 
-                onChangeCartQuantity={handleChangeCartQuantity} 
-                onEditProduct={onEditProduct}
-              />
+              <Box key={product.id} sx={{ 
+                width: '260px',
+                minWidth: '260px',
+                maxWidth: '260px',
+                display: 'flex',
+                justifyContent: 'center'
+              }}>
+                <ProductCard 
+                  product={product} 
+                  user={user}
+                  isAdmin={user?.role === 'admin'}
+                  inWishlist={wishlist.some(item => item.productId === product.id)}
+                  onWishlistToggle={onWishlistToggle}
+                  onAddToCart={onAddToCart} 
+                  cart={cart} 
+                  onChangeCartQuantity={handleChangeCartQuantity} 
+                  onEditProduct={onEditProduct}
+                  viewMode="grid"
+                />
+              </Box>
             ))
           ) : (
             <Typography sx={{ gridColumn: '1/-1', textAlign: 'center', color: '#888', fontSize: 20 }}>
@@ -10571,28 +10629,63 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
         <Box sx={{
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
-          gap: 3,
+          gap: '8px',
           mb: 6,
+          maxWidth: 'calc(4 * 260px + 3 * 8px)',
+          margin: '0 auto',
           justifyItems: { xs: 'center', sm: 'start' },
           pl: { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 },
           '@media (min-width: 1200px)': {
             pl: 9, // Отступ слева для больших экранов
           },
+          // Адаптивные стили для разных размеров экрана как в карусели
+          '@media (max-width: 599px)': {
+            maxWidth: '260px',
+            gridTemplateColumns: '1fr'
+          },
+          '@media (min-width: 600px) and (max-width: 899px)': {
+            maxWidth: 'calc(2 * 260px + 8px)',
+            gap: '8px',
+            gridTemplateColumns: 'repeat(2, 1fr)'
+          },
+          '@media (min-width: 900px) and (max-width: 1199px)': {
+            maxWidth: 'calc(3 * 260px + 2 * 8px)',
+            gap: '8px',
+            gridTemplateColumns: 'repeat(3, 1fr)'
+          },
+          '@media (min-width: 1200px) and (max-width: 1535px)': {
+            maxWidth: 'calc(3 * 260px + 2 * 8px)',
+            gap: '8px',
+            gridTemplateColumns: 'repeat(3, 1fr)'
+          },
+          '@media (min-width: 1536px)': {
+            maxWidth: 'calc(4 * 260px + 3 * 8px)',
+            gap: '8px',
+            gridTemplateColumns: 'repeat(4, 1fr)'
+          }
         }}>
           {filteredProducts.length > 0 ? (
             filteredProducts.map(product => (
-              <ProductCard 
-                key={product.id} 
-                product={product} 
-                user={user}
-                isAdmin={user?.role === 'admin'}
-                inWishlist={wishlist.some(item => item.productId === product.id)}
-                onWishlistToggle={onWishlistToggle}
-                onAddToCart={onAddToCart} 
-                cart={cart} 
-                onChangeCartQuantity={handleChangeCartQuantity} 
-                onEditProduct={onEditProduct}
-              />
+              <Box key={product.id} sx={{ 
+                width: '260px',
+                minWidth: '260px',
+                maxWidth: '260px',
+                display: 'flex',
+                justifyContent: 'center'
+              }}>
+                <ProductCard 
+                  product={product} 
+                  user={user}
+                  isAdmin={user?.role === 'admin'}
+                  inWishlist={wishlist.some(item => item.productId === product.id)}
+                  onWishlistToggle={onWishlistToggle}
+                  onAddToCart={onAddToCart} 
+                  cart={cart} 
+                  onChangeCartQuantity={handleChangeCartQuantity} 
+                  onEditProduct={onEditProduct}
+                  viewMode="grid"
+                />
+              </Box>
             ))
           ) : (
             <Typography sx={{ gridColumn: '1/-1', textAlign: 'center', color: '#888', fontSize: 20 }}>
