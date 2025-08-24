@@ -1843,15 +1843,17 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         <Box sx={{ mt: 5 }}>
           <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>Похожие товары</Typography>
           <Box sx={{
-            display: 'flex',
-            gap: 2,
-            overflowX: 'auto',
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+            gap: 3,
             pb: 1,
-            '::-webkit-scrollbar': { height: 8 },
-            '::-webkit-scrollbar-thumb': { background: '#b2f7ef', borderRadius: 4 }
+            width: '100%',
+            maxWidth: { xs: '285px', sm: 'calc(2 * 285px + 24px)', md: 'calc(3 * 285px + 48px)', lg: 'calc(4 * 285px + 72px)' },
+            margin: '0 auto',
+            justifyContent: 'center'
           }}>
             {similarProducts.map(similar => (
-              <Box key={similar.id} sx={{ minWidth: 220, maxWidth: 260, flex: '0 0 220px' }}>
+              <Box key={similar.id} sx={{ width: '100%' }}>
                 <ProductCard
                   product={similar}
                   user={user}

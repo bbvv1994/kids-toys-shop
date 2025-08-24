@@ -1113,7 +1113,7 @@ const theme = createTheme({
   const safeCategories = Array.isArray(navCategories) ? navCategories : [];
 
   // Определяем, нужно ли скрыть кнопку меню категорий для определенных страниц (только для десктопа)
-  const shouldHideCategories = (location.pathname === '/privacy' || location.pathname === '/terms' || location.pathname === '/attribution') && isDesktop;
+  const shouldHideCategories = (location.pathname === '/privacy' || location.pathname === '/terms' || location.pathname === '/attribution' || location.pathname.startsWith('/product/')) && isDesktop;
   
   const navItems = [
     { text: t('navigation.home'), path: '/', icon: <Home /> },
