@@ -205,8 +205,8 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             >
                               {!wishlistAnimPlaying && (
                   inWishlist
-                    ? <Favorite sx={{ fontSize: isMobile ? 18 : (viewMode === 'carousel' ? 27 : 22), marginTop: isMobile ? '2px' : '4px' }} />
-                    : <FavoriteBorder sx={{ fontSize: isMobile ? 18 : (viewMode === 'carousel' ? 27 : 22), marginTop: isMobile ? '2px' : '4px' }} />
+                    ? <Favorite sx={{ fontSize: isMobile ? 18 : (viewMode === 'carousel' ? 27 : 22) }} />
+                    : <FavoriteBorder sx={{ fontSize: isMobile ? 18 : (viewMode === 'carousel' ? 27 : 22) }} />
                 )}
             </IconButton>
           </Box>
@@ -283,7 +283,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
               size="small"
               sx={{ color: '#FFD600' }}
             />
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <RateReview sx={{ color: '#666', fontSize: 16 }} />
               <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 14 }}>{product.reviewCount || 0}</Typography>
             </Box>
@@ -333,14 +333,14 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           </div>
           {/* Счетчик и кнопка — просто в потоке, без absolute */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, marginTop: 8, justifyContent: 'center', position: 'relative' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: viewMode === 'carousel' ? 18 : 8, position: 'relative', flexWrap: 'wrap', justifyContent: 'center', rowGap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative', flexWrap: 'wrap', justifyContent: 'center', rowGap: 6 }}>
               <button
                 style={{
                   border: '1px solid #ddd',
                   background: '#fff',
-                  fontSize: viewMode === 'carousel' ? 17 : 18,
-                  width: viewMode === 'carousel' ? 26 : 28,
-                  height: viewMode === 'carousel' ? 26 : 28,
+                  fontSize: 18,
+                  width: 28,
+                  height: 28,
                   borderRadius: 6,
                   cursor: 'pointer',
                   color: '#888',
@@ -362,7 +362,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                 }}
                 disabled={!product.quantity || product.quantity <= 0 || !cart}
               >-</button>
-              <span style={{ minWidth: viewMode === 'carousel' ? 20 : 24, textAlign: 'center', fontWeight: 600, fontSize: viewMode === 'carousel' ? 14 : 16, display: isAdmin ? 'none' : 'inline-block' }}>
+              <span style={{ minWidth: 24, textAlign: 'center', fontWeight: 600, fontSize: 16, display: isAdmin ? 'none' : 'inline-block' }}>
                 {cart?.items?.some(item => item.product.id === product.id) 
                   ? cart.items.find(item => item.product.id === product.id).quantity 
                   : localQuantity}
@@ -371,9 +371,9 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                 style={{
                   border: '1px solid #ddd',
                   background: '#fff',
-                  fontSize: viewMode === 'carousel' ? 17 : 18,
-                  width: viewMode === 'carousel' ? 26 : 28,
-                  height: viewMode === 'carousel' ? 26 : 28,
+                  fontSize: 18,
+                  width: 28,
+                  height: 28,
                   borderRadius: 6,
                   cursor: 'pointer',
                   color: '#888',
@@ -408,7 +408,6 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                     width: 160,
                     height: 32,
                     borderRadius: 6,
-                    ml: 1,
                     px: 2,
                     lineHeight: '32px',
                     whiteSpace: 'nowrap',
@@ -431,13 +430,13 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                 <Button
                   variant="contained"
                   startIcon={
-                    <Box sx={{ position: 'relative', width: viewMode === 'carousel' ? 30 : 32, height: viewMode === 'carousel' ? 30 : 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Box sx={{ position: 'relative', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {cart?.items?.some(item => item.product.id === product.id) && !cartAnimPlaying ? (
                         <Lottie
                           animationData={addToCartAnim}
                           autoplay={false}
                           loop={false}
-                          style={{ width: viewMode === 'carousel' ? 30 : 32, height: viewMode === 'carousel' ? 30 : 32 }}
+                          style={{ width: 32, height: 32 }}
                           rendererSettings={{ preserveAspectRatio: 'xMidYMid meet' }}
                           initialSegment={[100, 100]}
                         />
@@ -447,7 +446,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                           animationData={addToCartAnim}
                           autoplay={cartAnimPlaying}
                           loop={false}
-                          style={{ width: viewMode === 'carousel' ? 30 : 32, height: viewMode === 'carousel' ? 30 : 32 }}
+                          style={{ width: 32, height: 32 }}
                           rendererSettings={{ preserveAspectRatio: 'xMidYMid meet' }}
                         />
                       )}
@@ -459,14 +458,13 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                       : '#5cb95d',
                     color: '#fff',
                     fontWeight: 600,
-                    fontSize: viewMode === 'carousel' ? 13 : 14,
+                    fontSize: 14,
                     minWidth: 0,
-                    width: viewMode === 'carousel' ? 103 : 110,
-                    height: viewMode === 'carousel' ? 30 : 32,
+                    width: 110,
+                    height: 32,
                     borderRadius: 6,
-                    ml: -0.25,
                     px: 2,
-                    lineHeight: viewMode === 'carousel' ? '30px' : '32px',
+                    lineHeight: '32px',
                     whiteSpace: 'nowrap',
                     textTransform: 'none',
                     boxShadow: '0 2px 4px rgba(72, 187, 120, 0.2)',
@@ -664,7 +662,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
               size="small"
               sx={{ color: '#FFD600' }}
             />
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <RateReview sx={{ color: '#666', fontSize: 16 }} />
               <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 14 }}>{product.reviewCount || 0}</Typography>
             </Box>
@@ -683,7 +681,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                 </>
               )}
               {isAdmin && (
-                <Typography sx={{ fontSize: 15, color: '#666', fontWeight: 400, ml: 2 }}>На складе: {product.quantity}</Typography>
+                <Typography sx={{ fontSize: 15, color: '#666', fontWeight: 400 }}>На складе: {product.quantity}</Typography>
               )}
             </Box>
           </Box>
@@ -746,7 +744,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
 
               {!isAdmin && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <button
                     style={{
                       border: '1px solid #ddd',
@@ -819,7 +817,6 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                     width: 160,
                     height: 32,
                     borderRadius: 6,
-                    ml: 1,
                     px: 2,
                     lineHeight: '32px',
                     whiteSpace: 'nowrap',
@@ -875,7 +872,6 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                     width: 110,
                     height: 32,
                     borderRadius: 6,
-                    ml: 1,
                     px: 2,
                     lineHeight: '32px',
                     whiteSpace: 'nowrap',
@@ -992,8 +988,8 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           >
             {!wishlistAnimPlaying && (
               inWishlist
-                ? <Favorite sx={{ fontSize: isMobile ? 18 : (viewMode === 'carousel' ? 27 : 28), marginTop: isMobile ? '2px' : '4px' }} />
-                : <FavoriteBorder sx={{ fontSize: isMobile ? 18 : (viewMode === 'carousel' ? 27 : 28), marginTop: isMobile ? '2px' : '4px' }} />
+                ? <Favorite sx={{ fontSize: isMobile ? 18 : (viewMode === 'carousel' ? 27 : 28) }} />
+                : <FavoriteBorder sx={{ fontSize: isMobile ? 18 : (viewMode === 'carousel' ? 27 : 28) }} />
             )}
           </IconButton>
         </Box>
@@ -1072,7 +1068,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             size="small"
             sx={{ color: '#FFD600' }}
           />
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <RateReview sx={{ color: '#666', fontSize: 16 }} />
             <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 14 }}>{product.reviewCount || 0}</Typography>
           </Box>
@@ -1215,7 +1211,6 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                   width: 160,
                   height: 32,
                   borderRadius: 6,
-                  ml: 1,
                   px: 2,
                   lineHeight: '32px',
                   whiteSpace: 'nowrap',
@@ -1271,7 +1266,6 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                   width: viewMode === 'carousel' ? 100 : 110,
                   height: 32,
                   borderRadius: 6,
-                  ml: viewMode === 'similar' ? 0.375 : 0.625,
                   px: 2,
                   lineHeight: '32px',
                   whiteSpace: 'nowrap',

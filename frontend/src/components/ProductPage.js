@@ -706,11 +706,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       <Box sx={{ 
         mb: 3, 
         mt: -3.625,
-        ml: { xs: 0, md: '280px' }, // Отступ слева для десктопа
-        pl: { xs: 2, md: 0 }, // Отступ слева для мобильных
-        pt: { xs: 1, md: 0 }, // Отступ сверху для мобильных
-        position: 'relative',
-        zIndex: 10
+        ml: 12, // Отступ слева 12px
+        pt: { xs: 1, md: 0 } // Отступ сверху для мобильных
       }}>
         <Breadcrumbs 
           separator={<NavigateNextIcon fontSize="small" />}

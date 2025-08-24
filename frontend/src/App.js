@@ -72,6 +72,8 @@ import {
   ListItemIcon,
   ListItemText as MuiListItemText,
   Grid,
+  Card,
+  CardContent,
   Snackbar,
   Breadcrumbs,
   Chip,
@@ -3434,24 +3436,27 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
           {/* Плитки категорий каталога */}
           <Box sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
-            gap: 2,
-            justifyItems: 'center',
-            alignItems: 'center',
-            justifyContent: { xs: 'center', sm: 'start' },
-            maxWidth: 1100,
-            margin: '0 auto',
-            overflowY: 'auto',
-            '&::-webkit-scrollbar': { display: 'none' },
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            mb: 4
+            gridTemplateColumns: 'repeat(auto-fit, minmax(285px, 285px))',
+            gap: 3,
+            justifyContent: 'center',
+            mx: 'auto',
           }}>
-            {catalogCategories.map(cat => (
-              <Box
-                key={cat.key}
-                className="category-tile"
-                onClick={() => {
+            {catalogCategories.map((cat, index) => {
+              return (
+                <Card key={index} sx={{
+                  borderRadius: 2,
+                  background: 'rgba(103, 126, 234, 0.05)',
+                  border: '1px solid rgba(103, 126, 234, 0.1)',
+                  cursor: 'pointer',
+                  height: '180px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  '&:hover': {
+                    background: 'rgba(103, 126, 234, 0.1)',
+                    transform: 'translateY(-2px)',
+                    transition: 'all 0.2s'
+                  }
+                }} onClick={() => {
                   if (dbCategories && dbCategories.length > 0) {
                     const dbCat = dbCategories.find(c => c.name === cat.baseName && !c.parentId);
                     if (dbCat) {
@@ -3463,50 +3468,39 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                   if (staticCat) {
                     navigate(`/category/${staticCat.id}`);
                   }
-                }}
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  width: { xs: '320px', sm: '100%' },
-                  height: { xs: 156, sm: 160 },
-                  p: 0,
-                  background: '#f7fafc',
-                  borderRadius: 3,
-                  border: '1px solid #e3f2fd',
+                }}>
+                  <CardContent sx={{ 
+                    p: 0, 
                   position: 'relative',
-                  overflow: 'hidden',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                    borderColor: '#4FC3F7'
-                  }
-                }}
-              >
-                <img
-                  src={cat.icon}
-                  alt={cat.label}
-                  style={{
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    flex: 1,
+                    '&:last-child': {
+                      pb: 0
+                    }
+                  }}>
+                    {/* Изображение как фон */}
+                    <Box sx={{
                     width: '100%',
                     height: '100%',
-                    objectFit: 'cover',
-                    display: 'block',
-                    background: '#fff'
-                  }}
-                  loading="lazy"
-                />
+                      borderRadius: 2,
+                      backgroundImage: `url(${cat.icon || '/toys.png'})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      position: 'relative',
+                      flex: 1
+                    }}>
+                      {/* Название категории внизу карточки */}
                 <Box sx={{
                   position: 'absolute',
                   left: 0,
                   right: 0,
-                  bottom: '-1px',
+                  bottom: 0,
                   background: 'rgba(255,255,255,0.82)',
                   py: 1,
                   px: 2,
-                  textAlign: 'center',
+                  textAlign: 'center'
                 }}>
                   <Typography sx={{
                     fontWeight: 700,
@@ -3514,14 +3508,20 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                     color: '#222',
                     textAlign: 'center',
                     m: 0,
-                    p: 0,
+                    p: 0
                   }}>
                     {cat.label}
                   </Typography>
                 </Box>
               </Box>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </Box>
+          
+          {/* Отступ между карточками категорий и блоком сортировки */}
+          <Box sx={{ mb: 6 }} />
           
           {/* Строка поиска удалена по просьбе пользователя */}
 {searchQuery && !isListening && (
@@ -3542,7 +3542,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
             justifyContent: 'space-between',
             gap: { xs: 1, md: 3 },
             mb: 5,
-            mt: 2,
+            mt: 3,
             flexWrap: 'wrap',
             maxWidth: 1100,
             margin: '0 auto',
@@ -3612,47 +3612,29 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
           </Box>
           {/* Отступ между сортировкой и товарами через mb */}
           <Box sx={{ mb: 5 }} />
+        </Box>
+      </Container>
+
+      {/* Контейнер товаров без левого отступа 270 */}
+      <Container maxWidth={false} sx={{ px: { xs: 2, md: 4 } }}>
+        <Box>
           {/* Сетка или список товаров каталога */}
           {viewMode === 'grid' ? (
             <Box sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 280px))',
+              justifyContent: 'center',
               gap: '8px',
               mt: 8,
               mb: 6,
-              maxWidth: 'calc(4 * 260px + 3 * 8px)',
-              margin: '0 auto',
-              justifyItems: { xs: 'center', sm: 'start' },
-              // Адаптивные стили для разных размеров экрана как в карусели
-              '@media (max-width: 599px)': {
-                maxWidth: '260px',
-                gridTemplateColumns: '1fr'
-              },
-              '@media (min-width: 600px) and (max-width: 899px)': {
-                maxWidth: 'calc(2 * 260px + 8px)',
-                gridTemplateColumns: 'repeat(2, 1fr)'
-              },
-              '@media (min-width: 900px) and (max-width: 1199px)': {
-                maxWidth: 'calc(3 * 260px + 2 * 8px)',
-                gridTemplateColumns: 'repeat(3, 1fr)'
-              },
-              '@media (min-width: 1200px) and (max-width: 1535px)': {
-                maxWidth: 'calc(3 * 260px + 2 * 8px)',
-                gridTemplateColumns: 'repeat(3, 1fr)'
-              },
-              '@media (min-width: 1536px)': {
-                maxWidth: 'calc(4 * 260px + 3 * 8px)',
-                gridTemplateColumns: 'repeat(4, 1fr)'
-              }
+              width: '100%',
+              maxWidth: { md: 'calc(5 * 280px + 4 * 8px)' },
+              mx: 'auto'
             }}>
               {pagedProducts.length > 0 ? (
                 pagedProducts.map(product => (
                   <Box key={product.id} sx={{ 
-                    width: '260px',
-                    minWidth: '260px',
-                    maxWidth: '260px',
-                    display: 'flex',
-                    justifyContent: 'center'
+                    display: 'flex'
                   }}>
                     <ProductCard
                       product={product}
@@ -9769,7 +9751,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
+      <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
         <Box sx={{ mb: 4, pt: { xs: 8, md: 10 }, textAlign: 'center' }}>
           <Typography variant="h4">Загрузка...</Typography>
         </Box>
@@ -9779,7 +9761,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
 
   if (!category) {
     return (
-      <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
+      <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
         <Box sx={{ mb: 4, pt: { xs: 8, md: 10 }, textAlign: 'center' }}>
           <Typography variant="h4" color="error">{t('category.notFound')}</Typography>
           <Button 
@@ -9991,7 +9973,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
+    <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 0 } }}>
       <Box sx={{ mb: 4, pt: { xs: 0, md: 3.75 } }}>
                 {/* Хлебные крошки */}
         <Box sx={{ 
@@ -10092,16 +10074,38 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
         {filteredSubcategories.length > 0 && (
           <Box sx={{
             display: 'grid',
+            // Match categories: fixed gaps, breakpoint-based columns and widths
             gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
             gap: 3,
-            mb: 6,
-            maxWidth: 1400,
-            mx: 'auto',
-            justifyItems: { xs: 'center', sm: 'start' },
-            pl: { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 },
-            '@media (min-width: 1200px)': {
-              pl: 9, // Отступ слева для больших экранов
+            mb: 8,
+            width: '100%',
+            maxWidth: 'calc(4 * 285px + 3 * 24px)',
+            margin: '0 auto',
+            justifyContent: 'center',
+            '@media (max-width: 599px)': {
+              maxWidth: '285px',
+              gridTemplateColumns: '1fr'
             },
+            '@media (min-width: 600px) and (max-width: 899px)': {
+              maxWidth: 'calc(2 * 285px + 24px)',
+              gridTemplateColumns: 'repeat(2, 1fr)'
+            },
+            '@media (min-width: 900px) and (max-width: 1199px)': {
+              maxWidth: 'calc(3 * 285px + 2 * 24px)',
+              gridTemplateColumns: 'repeat(3, 1fr)'
+            },
+            '@media (min-width: 1200px) and (max-width: 1535px)': {
+              maxWidth: 'calc(3 * 285px + 2 * 24px)',
+              gridTemplateColumns: 'repeat(3, 1fr)'
+            },
+            '@media (min-width: 1536px)': {
+              maxWidth: 'calc(4 * 285px + 3 * 24px)',
+              gridTemplateColumns: 'repeat(4, 1fr)'
+            },
+            // desktop alignment: center 3-cols region (≤1535px); 4-cols (≥1536px) left-align with indent
+            mx: { xs: 'auto', sm: 'auto', md: 'auto', lg: 0, xl: 0 },
+            // keep no manual left offset on mobile/tablet so centering works
+            ml: { lg: 'calc(280px + (100% - 280px - 903px)/2)', xl: '280px' },
           }}>
             {filteredSubcategories.map(subcat => {
               const nameTrimmed = subcat.name && subcat.name.trim();
@@ -10114,7 +10118,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
                   onClick={() => navigate(`/subcategory/${subcat.id}`)}
                   sx={{
                     position: 'relative',
-                    height: 156,
+                    height: 180,
                     border: 'none',
                     borderRadius: 3,
                     cursor: 'pointer',
@@ -10160,47 +10164,27 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
           </Box>
         )}
 
+        {/* Отступ между карточками подкатегорий и блоком товаров */}
+        <Box sx={{ mb: 6 }} />
+
         {/* Сетка товаров из этой категории */}
         <Box sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 280px))',
+          justifyContent: 'center',
           gap: '8px',
           mb: 6,
-          maxWidth: 'calc(4 * 260px + 3 * 8px)',
-          margin: '0 auto',
-          justifyItems: { xs: 'center', sm: 'start' },
-          pl: { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 },
-          '@media (min-width: 1200px)': {
-            pl: 9, // Отступ слева для больших экранов
-          },
-          // Адаптивные стили для разных размеров экрана как в карусели
-          '@media (max-width: 599px)': {
-            maxWidth: '260px',
-            gridTemplateColumns: '1fr'
-          },
-          '@media (min-width: 600px) and (max-width: 899px)': {
-            maxWidth: 'calc(2 * 260px + 8px)',
-            gridTemplateColumns: 'repeat(2, 1fr)'
-          },
-          '@media (min-width: 900px) and (max-width: 1199px)': {
-            maxWidth: 'calc(3 * 260px + 2 * 8px)',
-            gridTemplateColumns: 'repeat(3, 1fr)'
-          },
-          '@media (min-width: 1200px) and (max-width: 1535px)': {
-            maxWidth: 'calc(3 * 260px + 2 * 8px)',
-            gridTemplateColumns: 'repeat(3, 1fr)'
-          },
-          '@media (min-width: 1536px)': {
-            maxWidth: 'calc(4 * 260px + 3 * 8px)',
-            gridTemplateColumns: 'repeat(4, 1fr)'
+          width: '100%',
+          maxWidth: { md: 'calc(5 * 280px + 4 * 8px)' },
+          mx: 'auto',
+          // Центрирование для мобильных устройств
+          '@media (max-width: 899px)': {
+            justifyItems: 'center'
           }
         }}>
           {filteredCategoryProducts.length > 0 ? (
             filteredCategoryProducts.map(product => (
               <Box key={product.id} sx={{ 
-                width: '260px',
-                minWidth: '260px',
-                maxWidth: '260px',
                 display: 'flex',
                 justifyContent: 'center'
               }}>
@@ -10375,7 +10359,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
+      <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
         <Box sx={{ mb: 4, pt: { xs: 8, md: 10 }, textAlign: 'center' }}>
           <Typography variant="h4">Загрузка...</Typography>
         </Box>
@@ -10385,7 +10369,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
 
   if (!subcategory) {
     return (
-      <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
+      <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
         <Box sx={{ mb: 4, pt: { xs: 8, md: 10 }, textAlign: 'center' }}>
           <Typography variant="h4" color="error">{t('subcategory.notFound')}</Typography>
           <Button 
@@ -10510,14 +10494,17 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
+    <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 0 } }}>
       <Box sx={{ mb: 4, pt: { xs: 0, md: 3.75 } }}>
         {/* Хлебные крошки */}
         <Box sx={{ 
           mb: 3, 
           mt: -3.625,
-          ml: { xs: 0, md: '280px' }, // Отступ слева для десктопа
-          pl: { xs: 2, md: 0 }, // Отступ слева для мобильных
+          width: '100%',
+          // desktop alignment: center 3-cols region (≤1535px); 4-cols (≥1536px) left-align with indent
+          mx: { xs: 'auto', sm: 'auto', md: 'auto', lg: 0, xl: 0 },
+          // keep no manual left offset on mobile/tablet so centering works
+          ml: { lg: 'calc(280px + (100% - 280px - 903px)/2)', xl: '280px' },
           pt: { xs: 1, md: 0 } // Отступ сверху для мобильных
         }}>
           <Breadcrumbs 
@@ -10592,7 +10579,9 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
           flexDirection: 'column',
           alignItems: 'center', 
           textAlign: 'center',
-          mb: 4 
+          mb: 4,
+          width: '100%',
+          mx: 'auto'
         }}>
           <Typography variant="h3" sx={{ 
             fontWeight: 800, 
@@ -10613,13 +10602,18 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
         </Box>
 
         {/* Строка поиска удалена по просьбе пользователя */}
-{searchQuery && !isListening && (
+        {searchQuery && !isListening && (
           <Typography sx={{ 
             mt: 2, 
             textAlign: 'center', 
             color: '#666',
             fontSize: '1rem',
-            fontWeight: 500
+            fontWeight: 500,
+            width: '100%',
+            // desktop alignment: center 3-cols region (≤1535px); 4-cols (≥1536px) left-align with indent
+            mx: { xs: 'auto', sm: 'auto', md: 'auto', lg: 0, xl: 0 },
+            // keep no manual left offset on mobile/tablet so centering works
+            ml: { lg: 'calc(280px + (100% - 280px - 903px)/2)', xl: '280px' }
           }}>
             {t('catalog.foundProducts', { count: filteredProducts.length })}
           </Typography>
@@ -10628,51 +10622,23 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
         {/* Сетка товаров */}
         <Box sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 280px))',
+          justifyContent: 'center',
           gap: '8px',
           mb: 6,
-          maxWidth: 'calc(4 * 260px + 3 * 8px)',
-          margin: '0 auto',
-          justifyItems: { xs: 'center', sm: 'start' },
-          pl: { xs: 0, sm: 0, md: 0, lg: 0, xl: 0 },
-          '@media (min-width: 1200px)': {
-            pl: 9, // Отступ слева для больших экранов
-          },
-          // Адаптивные стили для разных размеров экрана как в карусели
-          '@media (max-width: 599px)': {
-            maxWidth: '260px',
-            gridTemplateColumns: '1fr'
-          },
-          '@media (min-width: 600px) and (max-width: 899px)': {
-            maxWidth: 'calc(2 * 260px + 8px)',
-            gap: '8px',
-            gridTemplateColumns: 'repeat(2, 1fr)'
-          },
-          '@media (min-width: 900px) and (max-width: 1199px)': {
-            maxWidth: 'calc(3 * 260px + 2 * 8px)',
-            gap: '8px',
-            gridTemplateColumns: 'repeat(3, 1fr)'
-          },
-          '@media (min-width: 1200px) and (max-width: 1535px)': {
-            maxWidth: 'calc(3 * 260px + 2 * 8px)',
-            gap: '8px',
-            gridTemplateColumns: 'repeat(3, 1fr)'
-          },
-          '@media (min-width: 1536px)': {
-            maxWidth: 'calc(4 * 260px + 3 * 8px)',
-            gap: '8px',
-            gridTemplateColumns: 'repeat(4, 1fr)'
+          width: '100%',
+          maxWidth: { md: 'calc(4 * 280px + 3 * 8px)' },
+          mx: { xs: 'auto', md: 0 },
+          // desktop alignment: center 3-cols region (≤1535px); 4-cols (≥1536px) left-align with indent
+          ml: { lg: 'calc(280px + (100% - 280px - 903px)/2)', xl: '280px' },
+          // Центрирование для мобильных устройств
+          '@media (max-width: 899px)': {
+            justifyItems: 'center'
           }
         }}>
           {filteredProducts.length > 0 ? (
             filteredProducts.map(product => (
-              <Box key={product.id} sx={{ 
-                width: '260px',
-                minWidth: '260px',
-                maxWidth: '260px',
-                display: 'flex',
-                justifyContent: 'center'
-              }}>
+              <Box key={product.id}>
                 <ProductCard 
                   product={product} 
                   user={user}
@@ -10688,7 +10654,14 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
               </Box>
             ))
           ) : (
-            <Typography sx={{ gridColumn: '1/-1', textAlign: 'center', color: '#888', fontSize: 20 }}>
+            <Typography sx={{ 
+              gridColumn: '1/-1', 
+              textAlign: 'center', 
+              color: '#888', 
+              fontSize: 20,
+              width: '100%',
+              mx: 'auto'
+            }}>
               {searchQuery ? t('subcategory.noProductsSearch', { query: searchQuery }) : t('subcategory.noProducts')}
             </Typography>
           )}
