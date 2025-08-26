@@ -1,8 +1,8 @@
 // Универсальная конфигурация для автоматического определения среды
 const config = {
   development: {
-    API_BASE_URL: 'http://localhost:5001',
-    FRONTEND_URL: 'http://localhost:3000'
+    API_BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://192.168.31.103:5001',
+    FRONTEND_URL: process.env.REACT_APP_FRONTEND_URL || 'http://192.168.31.103:3000'
   },
   production: {
     API_BASE_URL: process.env.REACT_APP_API_BASE_URL || 'https://kids-toys-backend.onrender.com',

@@ -233,6 +233,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   // Состояния для свайпа в галерее (для мобильных устройств)
   const [touchStart, setTouchStart] = useState(null);
+  const [touchStartY, setTouchStartY] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [isSwiping, setIsSwiping] = useState(false);
   
@@ -801,14 +802,23 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     e.preventDefault(); // Предотвращаем стандартные touch события
     
     if (e.targetTouches.length === 1) {
-      // Один палец - свайп
-      setTouchEnd(null);
-      setTouchStart(e.targetTouches[0].clientX);
-      setIsSwiping(true);
-      setIsZooming(false);
-      // Сбрасываем смещение при начале нового свайпа
-      setSwipeOffset(0);
-      console.log('ProductPage Gallery: Начало свайпа:', e.targetTouches[0].clientX);
+      // Если изображение увеличено, то движение - это pan, а не свайп
+      if (scale > 1) {
+        setIsSwiping(false);
+        setIsZooming(false);
+        setTouchStart(e.targetTouches[0].clientX);
+        setTouchStartY(e.targetTouches[0].clientY);
+        console.log('ProductPage Gallery: Начало pan при zoom');
+      } else {
+        // Один палец - свайп (только если изображение не увеличено)
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+        setIsSwiping(true);
+        setIsZooming(false);
+        // Сбрасываем смещение при начале нового свайпа
+        setSwipeOffset(0);
+        console.log('ProductPage Gallery: Начало свайпа:', e.targetTouches[0].clientX);
+      }
     } else if (e.targetTouches.length === 2) {
       // Два пальца - zoom
       setIsSwiping(false);
@@ -826,8 +836,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const onGalleryTouchMove = (e) => {
     e.preventDefault(); // Предотвращаем стандартные touch события
     
-    if (isSwiping && e.targetTouches.length === 1) {
-      // Обработка свайпа с плавной анимацией в реальном времени
+    if (isSwiping && e.targetTouches.length === 1 && scale <= 1) {
+      // Обработка свайпа с плавной анимацией в реальном времени (только если не увеличен)
       const currentTouch = e.targetTouches[0].clientX;
       setTouchEnd(currentTouch);
       
@@ -859,27 +869,44 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     } else if (scale > 1 && e.targetTouches.length === 1) {
       // Обработка pan (перемещения) при zoom
       const touch = e.targetTouches[0];
-      const deltaX = touch.clientX - (touch.clientX || touch.clientX);
-      const deltaY = touch.clientY - (touch.clientY || touch.clientY);
       
-      if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
-        setTranslateX(prev => {
-          const newX = prev + deltaX * 0.5;
-          // Ограничиваем перемещение, чтобы изображение не уходило слишком далеко
-          return Math.max(-200, Math.min(200, newX));
-        });
-        setTranslateY(prev => {
-          const newY = prev + deltaY * 0.5;
-          // Ограничиваем перемещение, чтобы изображение не уходило слишком далеко
-          return Math.max(-200, Math.min(200, newY));
-        });
+      // Используем сохраненные начальные координаты для вычисления delta
+      if (touchStart !== null && touchStartY !== null) {
+        const deltaX = touch.clientX - touchStart;
+        const deltaY = touch.clientY - touchStartY;
+        
+        if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+          setTranslateX(prev => {
+            const newX = prev + deltaX * 0.3; // Уменьшаем чувствительность для плавности
+            // Ограничиваем перемещение, чтобы изображение не уходило слишком далеко
+            return Math.max(-300, Math.min(300, newX));
+          });
+          setTranslateY(prev => {
+            const newY = prev + deltaY * 0.3; // Уменьшаем чувствительность для плавности
+            // Ограничиваем перемещение, чтобы изображение не уходило слишком далеко
+            return Math.max(-300, Math.min(300, newY));
+          });
+          
+          // Обновляем начальные координаты для следующего движения
+          setTouchStart(touch.clientX);
+          setTouchStartY(touch.clientY);
+        }
       }
     }
   };
 
   const onGalleryTouchEnd = () => {
+    // Если изображение увеличено, не обрабатываем свайп
+    if (scale > 1) {
+      console.log('ProductPage Gallery: Pan завершен при zoom');
+      // Сбрасываем только состояния pan
+      setTouchStart(null);
+      setTouchEnd(null);
+      return;
+    }
+    
     if (isSwiping && touchStart && touchEnd) {
-      // Обработка завершения свайпа
+      // Обработка завершения свайпа (только если изображение не увеличено)
       const distance = touchStart - touchEnd;
       const minSwipeDistance = 50; // Минимальное расстояние для свайпа
       const realImages = getRealImages();
@@ -914,6 +941,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     setIsZooming(false);
     setInitialDistance(null);
     setInitialScale(1);
+    setTouchStart(null);
+    setTouchStartY(null);
+    setTouchEnd(null);
   };
 
   // Функция для анимации перехода при свайпе
@@ -967,6 +997,10 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     setTranslateX(0);
     setTranslateY(0);
     setIsZooming(false);
+    setTouchStart(null);
+    setTouchStartY(null);
+    setTouchEnd(null);
+    setIsSwiping(false);
   };
 
   // Функция для двойного клика (сброс zoom)

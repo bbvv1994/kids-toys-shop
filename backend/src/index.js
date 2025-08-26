@@ -231,6 +231,9 @@ const corsOptions = {
       'http://localhost:3002',
       'http://192.168.31.156:3000',
       'http://192.168.31.156',
+      'http://192.168.31.103:3000',
+      'http://192.168.31.103:3001',
+      'http://192.168.31.103',
       'https://kids-toys-shop.vercel.app',
       'https://kids-toys-shop-git-main-bbvv1994.vercel.app',
       'https://kids-toys-shop-bbvv1994.vercel.app'
@@ -239,6 +242,12 @@ const corsOptions = {
     // Проверяем точное совпадение
     if (allowedOrigins.includes(origin)) {
       console.log('✅ CORS allowed origin:', origin);
+      return callback(null, true);
+    }
+    
+    // Разрешаем все локальные IP адреса (для мобильного тестирования)
+    if (origin.includes('192.168.') || origin.includes('10.') || origin.includes('172.')) {
+      console.log('✅ CORS allowed local network origin:', origin);
       return callback(null, true);
     }
     
