@@ -8,6 +8,9 @@ import AdminProductReviews from './components/AdminProductReviews';
 import CustomerReviews from './components/CustomerReviews';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import CustomSelect from './components/CustomSelect';
+import HomeBanners from './components/HomeBanners';
+import BoysToysPage from './components/BoysToysPage';
+import GirlsToysPage from './components/GirlsToysPage';
 import { useDeviceType } from './utils/deviceDetection';
 import { getImageUrl, API_BASE_URL } from './config';
 import { getTranslatedName, forceLanguageUpdate, checkTranslationsAvailable } from './utils/translationUtils';
@@ -276,7 +279,7 @@ const theme = createTheme({
 });
 
   // Компонент навигации
-  function Navigation({ cartCount, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups, mobileFiltersOpen, setMobileFiltersOpen, priceRange, setPriceRange, filtersMenuOpen, setFiltersMenuOpen, desktopSearchBarRef }) {
+  function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups, mobileFiltersOpen, setMobileFiltersOpen, priceRange, setPriceRange, filtersMenuOpen, setFiltersMenuOpen, desktopSearchBarRef }) {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
   const deviceType = useDeviceType();
@@ -1620,7 +1623,7 @@ const theme = createTheme({
             {/* Корзина и профиль - Desktop */}
             <Box sx={{ marginLeft: 'auto', display: { xs: 'none', lg: 'flex' }, alignItems: 'center', gap: 3, flexShrink: 0 }}>
               {/* Кнопка CMS для админа */}
-              {user?.role === 'admin' && (
+              {!userLoading && user?.role === 'admin' && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', mt: 2.5 }}>
                   <IconButton
                     color="inherit"
@@ -1643,7 +1646,7 @@ const theme = createTheme({
                 </Box>
               )}
               {/* Уведомления */}
-              {user && user.role !== 'admin' && (
+              {!userLoading && user && user.role !== 'admin' && (
                 <Box sx={{ display: 'flex', alignItems: 'center', height: 56, mr: 1, position: 'relative' }}>
                   <Button
                     color="inherit"
@@ -1729,7 +1732,7 @@ const theme = createTheme({
               )}
               {/* Профиль/Войти */}
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: 100, justifyContent: 'center', pt: 3.1 }}>
-                {user ? (
+                {!userLoading && user ? (
                   <Button
                     color="inherit"
                     component={RouterLink}
@@ -1768,7 +1771,7 @@ const theme = createTheme({
                       <path d="M4 20c0-3.3137 3.134-6 7-6s7 2.6863 7 6" stroke="white" strokeWidth="2" fill="none" />
                     </svg>
                   </Button>
-                ) : (
+                ) : !userLoading ? (
                   <Button
                     color="inherit"
                     onClick={() => setAuthOpen(true)}
@@ -1796,7 +1799,7 @@ const theme = createTheme({
                       <path d="M4 20c0-3.3137 3.134-6 7-6s7 2.6863 7 6" stroke="white" strokeWidth="2" fill="none" />
                     </svg>
                   </Button>
-                )}
+                ) : null}
                 <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#fff', mt: 0.5, textAlign: 'center', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {user ? (user.name && user.name.trim().length > 0 ? user.name : user.email) : t('header.login')}
                 </Typography>
@@ -1995,7 +1998,7 @@ const theme = createTheme({
          location.pathname !== '/checkout' && 
          location.pathname !== '/order-success' && 
          !shouldHideCategories && 
-         user?.role !== 'admin' && isDesktop && (
+         !userLoading && user?.role !== 'admin' && isDesktop && (
           <>
           <Box sx={{ 
             position: 'absolute',
@@ -2165,7 +2168,7 @@ const theme = createTheme({
           </>
         )}
         {/* Меню категорий с position: absolute */}
-        {isDesktop && !instantClose && !shouldHideCategories && (
+        {isDesktop && !instantClose && !shouldHideCategories && !userLoading && (
         <Box sx={{ position: 'relative' }}>
           <Paper
             ref={menuRef}
@@ -3026,6 +3029,8 @@ function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChang
 
   return (
     <Box sx={{ minHeight: '80vh', pt: 4, flexDirection: 'column' }}>
+      {/* Баннеры главной страницы */}
+      <HomeBanners />
       <ProductCarousel
         title={t('home.newArrivals')}
         products={newProducts}
@@ -4121,6 +4126,7 @@ function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const appBarRef = useRef(null);
   const [user, setUser] = useState(null);
+  const [userLoading, setUserLoading] = useState(true);
   const [submenuTimeout, setSubmenuTimeout] = useState(null);
   
   // Поддержка RTL для иврита - только для текста, не для компоновки
@@ -4228,6 +4234,7 @@ function App() {
         if (userData.emailVerified === false) {
           console.log('User email not verified, removing from localStorage');
           localStorage.removeItem('user');
+          setUserLoading(false);
           return; // Не устанавливаем пользователя, если email не подтвержден
         }
         
@@ -4243,6 +4250,9 @@ function App() {
         localStorage.removeItem('user');
       }
     }
+    
+    // Устанавливаем загрузку в false после попытки загрузки
+    setUserLoading(false);
   }, []);
 
   // Загрузка локальной корзины для гостей
@@ -5229,6 +5239,7 @@ function App() {
             cart={cart}
             cartLoading={cartLoading}
             user={user}
+            userLoading={userLoading}
             handleLogout={handleLogout}
             setAuthOpen={setAuthOpen}
             profileLoading={profileLoading}
@@ -5290,7 +5301,7 @@ function App() {
 }
 // Компонент для контента внутри Router
 function AppContent({ 
-  cart, cartLoading, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, 
+  cart, cartLoading, user, userLoading, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, 
   mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, 
   miniCartOpen, setMiniCartOpen, handleChangeCartQuantity, 
   handleRemoveFromCart, handleAddToCart, handleEditProduct, 
@@ -5465,7 +5476,7 @@ function AppContent({
             onClick={() => window.location.reload()}
             sx={{ background: '#4CAF50' }}
           >
-            Обновить страницу
+            רענן דף
           </Button>
         </Box>
       </Box>
@@ -5484,6 +5495,7 @@ function AppContent({
           cart={cart}
           cartCount={cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0}
           user={user}
+          userLoading={userLoading}
           handleLogout={handleLogout}
           setAuthOpen={setAuthOpen}
           profileLoading={profileLoading}
@@ -5643,6 +5655,8 @@ function AppContent({
           <Route path="/catalog" element={<CatalogPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} dbCategories={dbCategories} selectedGenders={selectedGenders} selectedBrands={selectedBrands} selectedAgeGroups={selectedAgeGroups} priceRange={priceRange} />} />
           <Route path="/category/:id" element={<CategoryPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} />} />
           <Route path="/subcategory/:id" element={<SubcategoryPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} selectedGenders={selectedGenders} />} />
+          <Route path="/boys-toys" element={<BoysToysPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} />} />
+          <Route path="/girls-toys" element={<GirlsToysPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} />} />
           <Route path="/cart" element={<CartPage cart={cart} onChangeCartQuantity={handleChangeCartQuantity} onRemoveFromCart={handleRemoveFromCart} />} />
           <Route path="/checkout" element={<CheckoutPage cart={cart} cartLoading={cartLoading} user={user} onClearCart={handleClearCart} />} />
           <Route path="/order-success" element={<OrderSuccessPage />} />
@@ -13935,4 +13949,4 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
     </>
   );
 }
-export default App;
+export default App; 
