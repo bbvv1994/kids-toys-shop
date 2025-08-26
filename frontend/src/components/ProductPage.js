@@ -230,6 +230,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [zoomLevel, setZoomLevel] = useState(1);
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 }); // Начинаем с центра
 
+  // Состояния для свайпа в галерее (для мобильных устройств)
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const [isSwiping, setIsSwiping] = useState(false);
+
   // Безопасно ищем товар в корзине только если product загружен
   const cartItem = product ? cart?.items?.find(item => item.product.id === product.id) : null;
   const inCart = !!cartItem;
@@ -261,6 +266,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
     loadProduct();
   }, [id]); // Убираем product?.updatedAt из зависимостей
+
+  // Отладочная информация для отслеживания изменений galleryIndex
+  useEffect(() => {
+    console.log('ProductPage Gallery: Индекс изображения изменился на:', galleryIndex);
+  }, [galleryIndex]);
 
   // Проверяем обновления товара каждые 15 секунд с дополнительной защитой
   useEffect(() => {
@@ -689,6 +699,56 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     const delta = e.deltaY > 0 ? -0.2 : 0.2;
     const newZoom = Math.max(1, Math.min(4, zoomLevel + delta));
     setZoomLevel(newZoom);
+  };
+
+  // Функции для свайпа в галерее (для мобильных устройств)
+  const onGalleryTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setIsSwiping(true);
+    console.log('ProductPage Gallery: Начало свайпа:', e.targetTouches[0].clientX);
+  };
+
+  const onGalleryTouchMove = (e) => {
+    if (isSwiping) {
+      setTouchEnd(e.targetTouches[0].clientX);
+      console.log('ProductPage Gallery: Движение свайпа:', e.targetTouches[0].clientX);
+    }
+  };
+
+  const onGalleryTouchEnd = () => {
+    if (!touchStart || !touchEnd) {
+      setIsSwiping(false);
+      return;
+    }
+
+    const distance = touchStart - touchEnd;
+    const minSwipeDistance = 50; // Минимальное расстояние для свайпа
+    const realImages = getRealImages();
+
+    console.log('ProductPage Gallery: Свайп завершен:', { 
+      distance, 
+      minSwipeDistance, 
+      currentIndex: galleryIndex, 
+      totalImages: realImages.length 
+    });
+
+    if (distance > minSwipeDistance) {
+      // Свайп влево - следующее изображение
+      if (realImages.length > 1) {
+        console.log('ProductPage Gallery: Переходим к следующему изображению');
+        setGalleryIndex((galleryIndex + 1) % realImages.length);
+      }
+    } else if (distance < -minSwipeDistance) {
+      // Свайп вправо - предыдущее изображение
+      if (realImages.length > 1) {
+        console.log('ProductPage Gallery: Переходим к предыдущему изображению');
+        setGalleryIndex((galleryIndex - 1 + realImages.length) % realImages.length);
+      }
+    }
+
+    // Сбрасываем состояние свайпа
+    setIsSwiping(false);
   };
 
 
@@ -1621,7 +1681,10 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             maxHeight: { xs: '100vh', sm: '95vh', md: '95vh' },
             overflow: 'hidden',
             zIndex: 99999,
-            border: 'none'
+            border: 'none',
+            touchAction: 'pan-y', // Разрешаем вертикальный скролл, но блокируем горизонтальный
+            userSelect: 'none', // Запрещаем выделение текста при свайпе
+            WebkitUserSelect: 'none' // Для Safari
           }}
 
           onClick={(e) => {
@@ -1630,6 +1693,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               setGalleryOpen(false);
             }
           }}
+          onTouchStart={onGalleryTouchStart}
+          onTouchMove={onGalleryTouchMove}
+          onTouchEnd={onGalleryTouchEnd}
         >
 
           {(() => {
@@ -1682,12 +1748,18 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                       top: { xs: 0, sm: 'auto' },
                       left: { xs: 'auto' },
                       right: { xs: 0, sm: 'auto' },
-                      cursor: isZoomEnabled ? 'zoom-out' : 'zoom-in'
+                      cursor: isZoomEnabled ? 'zoom-out' : 'zoom-in',
+                      touchAction: 'pan-y', // Разрешаем вертикальный скролл, но блокируем горизонтальный
+                      userSelect: 'none', // Запрещаем выделение текста при свайпе
+                      WebkitUserSelect: 'none' // Для Safari
                     }}
                     onClick={toggleZoom}
                     onDoubleClick={() => setGalleryOpen(false)}
                     onMouseMove={handleMouseMove}
                     onWheel={handleWheel}
+                    onTouchStart={onGalleryTouchStart}
+                    onTouchMove={onGalleryTouchMove}
+                    onTouchEnd={onGalleryTouchEnd}
                   >
                     {/* Изображение в модальном окне с экранной лупой для десктопа */}
                     <Box sx={{
