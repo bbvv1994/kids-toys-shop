@@ -232,7 +232,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             );
             if (!imgSrc || imgError) {
               return (
-                <img src="/photography.jpg" alt={t('productCard.noPhoto')} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px 8px 0px 0px', opacity: 0.5, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
+                <img src="/photography.jpg" alt={t('productCard.noPhoto')} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px 8px 0px 0px', opacity: 1, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
               );
             }
             return (
@@ -561,7 +561,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             );
             if (!imgSrc || imgError) {
               return (
-                <img src="/photography.jpg" alt={t('productCard.noPhoto')} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 0, opacity: 0.5, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
+                <img src="/photography.jpg" alt={t('productCard.noPhoto')} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 0, opacity: 1, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
               );
             }
             return (
@@ -1016,7 +1016,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           );
           if (!imgSrc || imgError) {
             return (
-                              <img src="/photography.jpg" alt={t('productCard.noPhoto')} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, opacity: 0.5, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
+                              <img src="/photography.jpg" alt={t('productCard.noPhoto')} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, opacity: 1, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
             );
           }
           return (
