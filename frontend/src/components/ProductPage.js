@@ -827,19 +827,23 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     e.preventDefault(); // Предотвращаем стандартные touch события
     
     if (isSwiping && e.targetTouches.length === 1) {
-      // Обработка свайпа с анимацией в реальном времени
+      // Обработка свайпа с плавной анимацией в реальном времени
       const currentTouch = e.targetTouches[0].clientX;
       setTouchEnd(currentTouch);
       
-      // Вычисляем смещение для анимации
+      // Вычисляем смещение для анимации с улучшенной плавностью
       if (touchStart) {
         const offset = currentTouch - touchStart;
-        // Ограничиваем смещение для плавности
-        const limitedOffset = Math.max(-100, Math.min(100, offset * 0.3));
-        setSwipeOffset(limitedOffset);
+        
+        // Используем более плавный коэффициент и меньшее ограничение
+        const maxOffset = 40; // Уменьшаем максимальное смещение
+        const sensitivity = 0.15; // Уменьшаем чувствительность для плавности
+        
+        if (Math.abs(offset) > 5) { // Минимальный порог для начала анимации
+          const limitedOffset = Math.max(-maxOffset, Math.min(maxOffset, offset * sensitivity));
+          setSwipeOffset(limitedOffset);
+        }
       }
-      
-      console.log('ProductPage Gallery: Движение свайпа:', currentTouch, 'смещение:', swipeOffset);
     } else if (isZooming && e.targetTouches.length === 2) {
       // Обработка zoom
       const currentDistance = Math.hypot(
@@ -916,41 +920,40 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const animateSwipeTransition = (direction) => {
     setIsAnimating(true);
     
-    // Анимация выхода текущего изображения
-    const exitAnimation = () => {
-      const exitOffset = direction === 'next' ? -100 : 100;
-      setSwipeOffset(exitOffset);
-      
-      setTimeout(() => {
-        // Меняем изображение
-        const realImages = getRealImages();
-        if (direction === 'next') {
-          setGalleryIndex((galleryIndex + 1) % realImages.length);
-        } else {
-          setGalleryIndex((galleryIndex - 1 + realImages.length) % realImages.length);
-        }
-        
-        // Сбрасываем zoom
-        resetZoom();
-        
-        // Анимация входа нового изображения
-        setSwipeOffset(direction === 'next' ? 100 : -100);
-        
-        setTimeout(() => {
-          setSwipeOffset(0);
-          setIsAnimating(false);
-        }, 150);
-      }, 150);
-    };
+    // Простая и плавная анимация
+    const realImages = getRealImages();
     
-    exitAnimation();
+    // Сначала плавно уводим текущее изображение
+    const exitOffset = direction === 'next' ? -100 : 100;
+    setSwipeOffset(exitOffset);
+    
+    // Через 150ms меняем изображение и плавно возвращаем в центр
+    setTimeout(() => {
+      // Меняем изображение
+      if (direction === 'next') {
+        setGalleryIndex((galleryIndex + 1) % realImages.length);
+      } else {
+        setGalleryIndex((galleryIndex - 1 + realImages.length) % realImages.length);
+      }
+      
+      // Сбрасываем zoom
+      resetZoom();
+      
+      // Плавно возвращаем в центр
+      setSwipeOffset(0);
+      
+      // Завершаем анимацию
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 150);
+    }, 150);
   };
 
   // Функция для анимации возврата при недостаточном свайпе
   const animateSwipeReturn = () => {
     setIsAnimating(true);
     
-    // Плавно возвращаем в исходное положение
+    // Просто и плавно возвращаем в центр
     setSwipeOffset(0);
     
     setTimeout(() => {
@@ -1177,7 +1180,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                           backgroundRepeat: 'no-repeat',
                           borderRadius: 2,
                           transform: `scale(${scale}) translate(${translateX + swipeOffset}px, ${translateY}px)`,
-                          transition: isAnimating ? 'transform 0.3s ease' : (scale > 1 ? 'none' : 'transform 0.3s ease'),
+                          transition: isAnimating ? 'transform 0.3s ease-out' : (scale > 1 ? 'none' : 'transform 0.2s ease-out'),
                           transformOrigin: 'center center',
                           cursor: scale > 1 ? 'move' : 'pointer',
                           ...(scale > 1 && {
@@ -1255,7 +1258,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                         borderRadius: 12, 
                         opacity: 0.7,
                         transform: `scale(${scale}) translate(${translateX + swipeOffset}px, ${translateY}px)`,
-                        transition: isAnimating ? 'transform 0.3s ease' : (scale > 1 ? 'none' : 'transform 0.3s ease'),
+                        transition: isAnimating ? 'transform 0.3s ease-out' : (scale > 1 ? 'none' : 'transform 0.2s ease-out'),
                         transformOrigin: 'center center'
                       }} 
                     />
@@ -1359,7 +1362,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                               backgroundPosition: 'center',
                               backgroundRepeat: 'no-repeat',
                               transform: `scale(${scale}) translate(${(translateX + swipeOffset) * 0.1}px, ${translateY * 0.1}px)`,
-                              transition: isAnimating ? 'transform 0.3s ease' : (scale > 1 ? 'none' : 'transform 0.3s ease'),
+                              transition: isAnimating ? 'transform 0.3s ease-out' : (scale > 1 ? 'none' : 'transform 0.2s ease-out'),
                               transformOrigin: 'center center'
                             }} />
                           </Box>
@@ -2125,7 +2128,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                       backgroundPosition: 'center',
                       backgroundRepeat: 'no-repeat',
                       transform: `scale(${scale}) translate(${translateX + swipeOffset}px, ${translateY}px)`,
-                      transition: isAnimating ? 'transform 0.3s ease' : (scale > 1 ? 'none' : 'transform 0.3s ease'),
+                      transition: isAnimating ? 'transform 0.3s ease-out' : (scale > 1 ? 'none' : 'transform 0.2s ease-out'),
                       overflow: 'hidden',
                       transformOrigin: 'center center',
                       // Для мобильных устройств используем pinch-to-zoom
