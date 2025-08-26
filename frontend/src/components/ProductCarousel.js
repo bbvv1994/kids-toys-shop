@@ -8,6 +8,9 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
   const [isPaused, setIsPaused] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const [isSwiping, setIsSwiping] = useState(false);
   const containerRef = useRef(null);
   const theme = useTheme();
   
@@ -34,8 +37,10 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
   
   // Эффект для завершения переходов
   useEffect(() => {
+    console.log('ProductCarousel: currentIndex изменился на:', currentIndex);
     const timer = setTimeout(() => {
       setIsTransitioning(false);
+      console.log('ProductCarousel: isTransitioning сброшен в false');
     }, 300);
     return () => clearTimeout(timer);
   }, [currentIndex]);
@@ -87,6 +92,75 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
   const totalPages = Math.ceil((products.length - 2) / visibleCount);
   const currentPage = Math.floor(currentIndex / visibleCount) + 1;
 
+  // Отладочная информация для свайпов
+  console.log('ProductCarousel: Состояние свайпа:', { 
+    isSwiping, 
+    touchStart, 
+    touchEnd, 
+    currentIndex, 
+    visibleCount, 
+    totalProducts: products.length,
+    canGoNext: currentIndex < products.length - 1,
+    canGoPrev: currentIndex > 0
+  });
+
+  // Функции для обработки свайпов
+  const onTouchStart = useCallback((e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setIsSwiping(true);
+    setIsPaused(true); // Останавливаем автопереключение при начале свайпа
+  }, []);
+
+  const onTouchMove = useCallback((e) => {
+    if (isSwiping) {
+      setTouchEnd(e.targetTouches[0].clientX);
+    }
+  }, [isSwiping]);
+
+  const onTouchEnd = useCallback(() => {
+    if (!touchStart || !touchEnd || isTransitioning) {
+      setIsSwiping(false);
+      setIsPaused(false);
+      return;
+    }
+    
+    const distance = touchStart - touchEnd;
+    const minSwipeDistance = 30; // Минимальное расстояние для свайпа
+    
+    if (distance > minSwipeDistance) {
+      // Свайп влево - следующий слайд
+      console.log('ProductCarousel: Свайп влево, расстояние:', distance, 'текущий индекс:', currentIndex, 'всего продуктов:', products.length);
+      // Проверяем, что можем двигаться дальше
+      if (currentIndex < products.length - 1) {
+        const newIndex = currentIndex + 1;
+        console.log('ProductCarousel: Переходим к следующему слайду с', currentIndex, 'на', newIndex);
+        setIsTransitioning(true);
+        setCurrentIndex(newIndex);
+      } else {
+        console.log('ProductCarousel: Достигнут конец карусели, текущий индекс:', currentIndex);
+      }
+    } else if (distance < -minSwipeDistance) {
+      // Свайп вправо - предыдущий слайд
+      console.log('ProductCarousel: Свайп вправо, расстояние:', distance, 'текущий индекс:', currentIndex, 'всего продуктов:', products.length);
+      // Проверяем, что можем двигаться назад
+      if (currentIndex > 0) {
+        const newIndex = currentIndex - 1;
+        console.log('ProductCarousel: Переходим к предыдущему слайду с', currentIndex, 'на', newIndex);
+        setIsTransitioning(true);
+        setCurrentIndex(newIndex);
+      } else {
+        console.log('ProductCarousel: Достигнуто начало карусели, текущий индекс:', currentIndex);
+      }
+    }
+    
+    // Сбрасываем состояние свайпа
+    setIsSwiping(false);
+    
+    // Возобновляем автопереключение через 2 секунды после свайпа
+    setTimeout(() => setIsPaused(false), 2000);
+  }, [touchStart, touchEnd, currentIndex, products.length, isTransitioning]);
+
   const handlePageClick = useCallback((pageIndex) => {
     if (isTransitioning) return;
     setIsTransitioning(true);
@@ -106,14 +180,15 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
   useEffect(() => {
     if (products.length <= 1) return;
 
-         const interval = setInterval(() => {
-       if (!isPaused && !isTransitioning && !isResetting) {
-         handleNext();
-       }
-     }, 5000);
+    // Временно отключаем автопрокрутку для тестирования свайпа
+    // const interval = setInterval(() => {
+    //   if (!isPaused && !isTransitioning && !isResetting) {
+    //     handleNext();
+    //   }
+    // }, 5000);
 
-    return () => clearInterval(interval);
-     }, [products.length, isPaused, isTransitioning, isResetting, handleNext]);
+    // return () => clearInterval(interval);
+  }, [products.length, isPaused, isTransitioning, isResetting, handleNext]);
 
   if (!products || products.length === 0) return null;
   
@@ -145,14 +220,20 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
         textAlign: { xs: 'center', sm: 'center', md: 'center', lg: 'left' }
       }}>{title}</Typography>
       
-      <Box 
-        sx={{ 
+            <Box
+        sx={{
           width: '100%', 
           position: 'relative', 
-          px: { xs: 2, sm: 4, md: 8 }
+          px: { xs: 2, sm: 4, md: 8 },
+          touchAction: 'pan-y', // Разрешаем вертикальный скролл, но блокируем горизонтальный
+          userSelect: 'none', // Запрещаем выделение текста при свайпе
+          WebkitUserSelect: 'none' // Для Safari
         }}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
       >
         {/* Стрелки навигации */}
         {products.length > visibleCount && (
@@ -205,6 +286,11 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
              margin: '0 auto',
              overflow: 'hidden',
              position: 'relative',
+             touchAction: 'pan-y', // Разрешаем вертикальный скролл, но блокируем горизонтальный
+             userSelect: 'none', // Запрещаем выделение текста при свайпе
+             WebkitUserSelect: 'none', // Для Safari
+             cursor: isSwiping ? 'grabbing' : 'grab', // Визуальная обратная связь
+             transition: 'cursor 0.2s ease',
              // Адаптивные стили для разных размеров экрана
              '@media (max-width: 599px)': {
                maxWidth: '260px',
@@ -222,6 +308,9 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
                maxWidth: 'calc(4 * 260px + 3 * 8px)',
              }
            }}
+           onTouchStart={onTouchStart}
+           onTouchMove={onTouchMove}
+           onTouchEnd={onTouchEnd}
          >
            <Box
              ref={containerRef}

@@ -87,6 +87,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  const [isSwiping, setIsSwiping] = useState(false);
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight
@@ -155,33 +156,48 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
   const onTouchStart = (e) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
+    setIsSwiping(true);
+    // Останавливаем автопереключение при начале свайпа
+    setIsAutoPlaying(false);
   };
 
   const onTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    if (isSwiping) {
+      setTouchEnd(e.targetTouches[0].clientX);
+    }
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
+    if (!touchStart || !touchEnd) {
+      setIsSwiping(false);
+      return;
+    }
     
     const distance = touchStart - touchEnd;
+    const minSwipeDistance = 30; // Уменьшаем минимальное расстояние для свайпа
+    
     let isLeftSwipe, isRightSwipe;
     
     if (isRTL) {
       // Для RTL языков инвертируем логику
-      isLeftSwipe = distance < -50;
-      isRightSwipe = distance > 50;
+      isLeftSwipe = distance < -minSwipeDistance;
+      isRightSwipe = distance > minSwipeDistance;
     } else {
-      isLeftSwipe = distance > 50;
-      isRightSwipe = distance < -50;
+      isLeftSwipe = distance > minSwipeDistance;
+      isRightSwipe = distance < -minSwipeDistance;
     }
 
     if (isLeftSwipe) {
       nextBanner();
-    }
-    if (isRightSwipe) {
+    } else if (isRightSwipe) {
       prevBanner();
     }
+    
+    // Сбрасываем состояние свайпа
+    setIsSwiping(false);
+    
+    // Возобновляем автопереключение через 3 секунды после свайпа
+    setTimeout(() => setIsAutoPlaying(true), 3000);
   };
 
   // Адаптивные размеры
@@ -257,6 +273,8 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
   console.log('HomeBanners: Размеры экрана - высота:', windowSize.height);
   console.log('HomeBanners: Применяемые размеры - мобильный:', isMobile, 'планшет:', isTablet);
   console.log('HomeBanners: marginTop для десктопа:', isMobile ? 'не применяется' : isTablet ? 'не применяется' : bannerStyles.marginTop);
+  console.log('HomeBanners: Состояние свайпа:', isSwiping);
+  console.log('HomeBanners: Автопереключение:', isAutoPlaying);
   
   return (
     <Box
@@ -266,6 +284,11 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
         height: bannerStyles.height,
         marginBottom: 3,
         overflow: 'hidden',
+        touchAction: 'pan-y', // Разрешаем вертикальный скролл, но блокируем горизонтальный
+        userSelect: 'none', // Запрещаем выделение текста при свайпе
+        WebkitUserSelect: 'none', // Для Safari
+        cursor: isSwiping ? 'grabbing' : 'grab', // Визуальная обратная связь
+        transition: 'cursor 0.2s ease',
         ...bannerStyles
       }}
       onMouseEnter={handleMouseEnter}
