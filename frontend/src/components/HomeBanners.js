@@ -23,40 +23,40 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
     {
       id: 1,
       image: '/banners/glav.png',
-      title: 'Добро пожаловать',
-      subtitle: '',
+      title: t('banners.welcome.title'),
+      subtitle: t('banners.welcome.subtitle'),
       link: '/catalog',
       color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
     },
     {
       id: 2,
       image: '/banners/sale1.png',
-      title: 'Специальные предложения',
-      subtitle: 'Акции и скидки',
+      title: t('banners.specialOffers.title'),
+      subtitle: t('banners.specialOffers.subtitle'),
       link: '/category/384',
       color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
     },
     {
       id: 3,
       image: '/banners/malysham.png',
-      title: 'Для самых маленьких',
-      subtitle: 'Безопасные и развивающие игрушки',
+      title: t('banners.forLittleOnes.title'),
+      subtitle: t('banners.forLittleOnes.subtitle'),
       link: '/category/401',
       color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
     },
     {
       id: 4,
       image: '/banners/plyazhniy.png',
-      title: 'Отдых на воде',
-      subtitle: 'Летние развлечения для детей',
+      title: t('banners.waterRecreation.title'),
+      subtitle: t('banners.waterRecreation.subtitle'),
       link: '/category/380',
       color: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
     },
     {
       id: 5,
       image: '/banners/vshkolu.png',
-      title: 'В школу с удовольствием',
-      subtitle: 'Канцтовары и сопутствующие товары',
+      title: t('banners.toSchool.title'),
+      subtitle: t('banners.toSchool.subtitle'),
       link: '/category/381',
       color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
     },

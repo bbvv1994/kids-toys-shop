@@ -214,29 +214,28 @@ export default function GirlsToysPage({
 
   return (
     <Container maxWidth={false} sx={{ py: 4, minHeight: '80vh', px: { xs: 2, md: 4 } }}>
-             {/* Заголовок страницы */}
-       <Box sx={{ textAlign: 'center', mb: 4 }}>
-         <Typography 
-           variant="h2" 
-           sx={{ 
-             textAlign: 'center', 
-             mb: 4,
-             fontWeight: 800, 
-             color: '#ff6600',
-             fontFamily: '"Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
-             fontSize: { xs: '2rem', md: '3rem' },
-             textShadow: '0 2px 4px rgba(255, 102, 0, 0.2)',
-             letterSpacing: '0.5px',
-             background: 'linear-gradient(135deg, #ff6600 0%, #ff8533 100%)',
-             WebkitBackgroundClip: 'text',
-             WebkitTextFillColor: 'transparent',
-             backgroundClip: 'text'
-           }}
-                    >
-             {t('catalog.pages.girlsToys.title')}
-           </Typography>
-
-       </Box>
+      {/* Заголовок страницы */}
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Typography 
+          variant="h2" 
+          sx={{ 
+            textAlign: 'center', 
+            mb: 4,
+            fontWeight: 800, 
+            color: '#ff6600',
+            fontFamily: '"Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
+            fontSize: { xs: '2rem', md: '3rem' },
+            textShadow: '0 2px 4px rgba(255, 102, 0, 0.2)',
+            letterSpacing: '0.5px',
+            background: 'linear-gradient(135deg, #ff6600 0%, #ff8533 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}
+        >
+          {t('catalog.pages.girlsToys.title')}
+        </Typography>
+      </Box>
 
       {/* Блок сортировки, количества и вида — как в каталоге */}
       <Box sx={{
@@ -250,119 +249,102 @@ export default function GirlsToysPage({
         maxWidth: 1100,
         margin: '0 auto',
       }}>
-                 {/* Сортировка и количество — слева */}
-         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-           <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#222', mr: 1 }}>{t('catalog.sortBy')}:</Typography>
-           <CustomSelect
-             value={sortBy}
-             onChange={handleSortChange}
-             width={180}
-             options={[
-               { value: 'popular', label: t('catalog.sortOptions.popular') },
-               { value: 'newest', label: t('catalog.sortOptions.newest') },
-               { value: 'price-low', label: t('catalog.sortOptions.priceLow') },
-               { value: 'price-high', label: t('catalog.sortOptions.priceHigh') },
-               { value: 'name-az', label: t('catalog.sortOptions.nameAZ') },
-               { value: 'name-za', label: t('catalog.sortOptions.nameZA') },
-             ]}
-             sx={{ minWidth: 160 }}
-           />
-           <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#222', ml: 3, mr: 1 }}>{t('catalog.itemsPerPage')}:</Typography>
-           <CustomSelect
-             value={pageSize}
-             onChange={v => setPageSize(Number(v))}
-             width={100}
-             options={[
-               { value: 24, label: '24' },
-               { value: 48, label: '48' },
-               { value: 96, label: '96' },
-             ]}
-             sx={{ minWidth: 60 }}
-           />
-         </Box>
-         {/* Переключатель вида — справа */}
-         <Box sx={{ 
-           display: 'flex', 
-           alignItems: 'center', 
-           gap: 0.5, 
-           ml: 'auto',
-           // Скрываем кнопки переключения в горизонтальном положении на мобильных
-           display: { xs: 'none', sm: 'flex' }
-         }}>
-           <IconButton
-             color={viewMode === 'grid' ? 'primary' : 'default'}
-             onClick={() => setViewMode('grid')}
-             sx={{ border: viewMode === 'grid' ? '2px solid #ff6600' : '2px solid transparent', background: viewMode === 'grid' ? '#fff7f0' : 'transparent', borderRadius: 2, p: 0.5 }}
-             title={t('catalog.viewMode.grid')}
-           >
-             <ViewModule sx={{ fontSize: 28, color: viewMode === 'grid' ? '#ff6600' : '#888' }} />
-           </IconButton>
-           <IconButton
-             color={viewMode === 'list' ? 'primary' : 'default'}
-             onClick={() => setViewMode('list')}
-             sx={{ 
-               display: { xs: 'none', sm: 'flex' },
-               border: viewMode === 'list' ? '2px solid #ff6600' : '2px solid transparent', 
-               background: viewMode === 'list' ? '#fff7f0' : 'transparent', 
-               borderRadius: 2, 
-               p: 0.5 
-             }}
-             title={t('catalog.viewMode.list')}
-           >
-             <ViewList sx={{ fontSize: 28, color: viewMode === 'list' ? '#ff6600' : '#888' }} />
-           </IconButton>
-         </Box>
+        {/* Сортировка и количество — слева */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+          <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#222', mr: 1 }}>{t('catalog.sortBy')}:</Typography>
+          <CustomSelect
+            value={sortBy}
+            onChange={handleSortChange}
+            width={180}
+            options={[
+              { value: 'popular', label: t('catalog.sortOptions.popular') },
+              { value: 'newest', label: t('catalog.sortOptions.newest') },
+              { value: 'price-low', label: t('catalog.sortOptions.priceLow') },
+              { value: 'price-high', label: t('catalog.sortOptions.priceHigh') },
+              { value: 'name-az', label: t('catalog.sortOptions.nameAZ') },
+              { value: 'name-za', label: t('catalog.sortOptions.nameZA') },
+            ]}
+            sx={{ minWidth: 160 }}
+          />
+          <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#222', ml: 3, mr: 1 }}>{t('catalog.itemsPerPage')}:</Typography>
+          <CustomSelect
+            value={pageSize}
+            onChange={v => setPageSize(Number(v))}
+            width={100}
+            options={[
+              { value: 24, label: '24' },
+              { value: 48, label: '48' },
+              { value: 96, label: '96' },
+            ]}
+            sx={{ minWidth: 60 }}
+          />
+        </Box>
+        {/* Переключатель вида — справа */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 0.5, 
+          ml: 'auto',
+          // Скрываем кнопки переключения в горизонтальном положении на мобильных
+          display: { xs: 'none', sm: 'flex' }
+        }}>
+          <IconButton
+            color={viewMode === 'grid' ? 'primary' : 'default'}
+            onClick={() => setViewMode('grid')}
+            sx={{ border: viewMode === 'grid' ? '2px solid #ff6600' : '2px solid transparent', background: viewMode === 'grid' ? '#fff7f0' : 'transparent', borderRadius: 2, p: 0.5 }}
+            title={t('catalog.viewMode.grid')}
+          >
+            <ViewModule sx={{ fontSize: 28, color: viewMode === 'grid' ? '#ff6600' : '#888' }} />
+          </IconButton>
+          <IconButton
+            color={viewMode === 'list' ? 'primary' : 'default'}
+            onClick={() => setViewMode('list')}
+            sx={{ 
+              display: { xs: 'none', sm: 'flex' },
+              border: viewMode === 'list' ? '2px solid #ff6600' : '2px solid transparent', 
+              background: viewMode === 'list' ? '#fff7f0' : 'transparent', 
+              borderRadius: 2, 
+              p: 0.5 
+            }}
+            title={t('catalog.viewMode.list')}
+          >
+            <ViewList sx={{ fontSize: 28, color: viewMode === 'list' ? '#ff6600' : '#888' }} />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* Отступ между фильтрами и карточками товаров */}
       <Box sx={{ height: '15px' }} />
 
-             {/* Список продуктов */}
-        {!isLoading && filteredProducts.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 6 }}>
-            <Typography variant="h5" sx={{ color: '#666', mb: 2 }}>
-              Товары не найдены
-            </Typography>
-            <Typography variant="body1" sx={{ color: '#888', maxWidth: 400, mx: 'auto' }}>
-              Попробуйте изменить параметры сортировки или загляните позже
-            </Typography>
-          </Box>
-        ) : (
-          <>
-            {viewMode === 'grid' ? (
-                            <Box sx={{
-                 display: 'grid',
-                 gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 280px))',
-                 justifyContent: 'center',
-                 gap: '8px',
-                 width: '100%',
-                 maxWidth: { md: 'calc(5 * 280px + 4 * 8px)' },
-                 mx: 'auto',
-                 mt: 8,
-                 mb: 6
-               }}>
-                {pagedProducts.map((product) => (
-                  <Box key={product.id} sx={{ 
-                    display: 'flex'
-                  }}>
-                    <ProductCard
-                      product={product}
-                      user={user}
-                      inWishlist={isInWishlist(product.id)}
-                      onWishlistToggle={handleWishlistToggle}
-                      onAddToCart={handleAddToCart}
-                      cart={cart}
-                      onChangeCartQuantity={handleQuantityChange}
-                      onEditProduct={onEditProduct}
-                    />
-                  </Box>
-                ))}
-              </Box>
-            ) : (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 6, mb: 6, maxWidth: 1100, margin: '0 auto', alignItems: { xs: 'center', sm: 'stretch' } }}>
-                {pagedProducts.map((product) => (
+      {/* Список продуктов */}
+      {!isLoading && filteredProducts.length === 0 ? (
+        <Box sx={{ textAlign: 'center', py: 6 }}>
+          <Typography variant="h5" sx={{ color: '#666', mb: 2 }}>
+            Товары не найдены
+          </Typography>
+          <Typography variant="body1" sx={{ color: '#888', maxWidth: 400, mx: 'auto' }}>
+            Попробуйте изменить параметры сортировки или загляните позже
+          </Typography>
+        </Box>
+      ) : (
+        <>
+          {viewMode === 'grid' ? (
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 280px))',
+              justifyContent: 'center',
+              gap: '8px',
+              width: '100%',
+              maxWidth: { md: 'calc(5 * 280px + 4 * 8px)' },
+              mx: 'auto',
+              mt: 8,
+              mb: 6
+            }}>
+              {pagedProducts.map((product) => (
+                <Box key={product.id} sx={{ 
+                  display: 'flex'
+                }}>
                   <ProductCard
-                    key={product.id}
                     product={product}
                     user={user}
                     inWishlist={isInWishlist(product.id)}
@@ -371,45 +353,62 @@ export default function GirlsToysPage({
                     cart={cart}
                     onChangeCartQuantity={handleQuantityChange}
                     onEditProduct={onEditProduct}
-                    viewMode="list"
                   />
-                ))}
-              </Box>
-            )}
-            
-            {/* Пагинация */}
-            {totalPages > 1 && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, gap: 1 }}>
+                </Box>
+              ))}
+            </Box>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 6, mb: 6, maxWidth: 1100, margin: '0 auto', alignItems: { xs: 'center', sm: 'stretch' } }}>
+              {pagedProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  user={user}
+                  inWishlist={isInWishlist(product.id)}
+                  onWishlistToggle={handleWishlistToggle}
+                  onAddToCart={handleAddToCart}
+                  cart={cart}
+                  onChangeCartQuantity={handleQuantityChange}
+                  onEditProduct={onEditProduct}
+                  viewMode="list"
+                />
+              ))}
+            </Box>
+          )}
+          
+          {/* Пагинация */}
+          {totalPages > 1 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, gap: 1 }}>
+              <Button
+                variant="outlined"
+                disabled={page === 1}
+                onClick={() => setPage(page - 1)}
+                sx={{ minWidth: 40 }}
+              >
+                ←
+              </Button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                 <Button
-                  variant="outlined"
-                  disabled={page === 1}
-                  onClick={() => setPage(page - 1)}
+                  key={pageNum}
+                  variant={pageNum === page ? 'contained' : 'outlined'}
+                  onClick={() => setPage(pageNum)}
                   sx={{ minWidth: 40 }}
                 >
-                  ←
+                  {pageNum}
                 </Button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                  <Button
-                    key={pageNum}
-                    variant={pageNum === page ? 'contained' : 'outlined'}
-                    onClick={() => setPage(pageNum)}
-                    sx={{ minWidth: 40 }}
-                  >
-                    {pageNum}
-                  </Button>
-                ))}
-                <Button
-                  variant="outlined"
-                  disabled={page === totalPages}
-                  onClick={() => setPage(page + 1)}
-                  sx={{ minWidth: 40 }}
-                >
-                  →
-                </Button>
-              </Box>
-            )}
-          </>
-        )}
-     </Container>
-   );
- }
+              ))}
+              <Button
+                variant="outlined"
+                disabled={page === totalPages}
+                onClick={() => setPage(page + 1)}
+                sx={{ minWidth: 40 }}
+              >
+                →
+              </Button>
+            </Box>
+          )}
+        </>
+      )}
+    </Container>
+  );
+}
