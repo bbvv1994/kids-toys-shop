@@ -1243,3 +1243,32 @@ body {
     height: 50px !important;
   }
 }
+
+/* Скрытие скроллбара на мобильных устройствах */
+@media (max-width: 767px) {
+  /* Скрываем скроллбар для WebKit браузеров */
+  ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+  }
+  
+  /* Скрываем скроллбар для Firefox */
+  html {
+    scrollbar-width: none !important;
+  }
+  
+  /* Скрываем скроллбар для IE/Edge */
+  body {
+    -ms-overflow-style: none !important;
+  }
+  
+  /* Убираем отступы для скроллбара */
+  html {
+    scrollbar-gutter: none !important;
+  }
+  
+  /* Для WebKit браузеров убираем отступы */
+  body {
+    padding-right: 0 !important;
+  }
+}
