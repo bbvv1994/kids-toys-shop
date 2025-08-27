@@ -148,31 +148,47 @@ class CloudinaryImageHandler {
     try {
       console.log(`🖼️ Creating HD versions for: ${publicId}`);
       
-      // Создаем @2x версию (1200x1200)
-      const hd2xUrl = cloudinary.url(publicId, {
-        transformation: [
-          { width: 1200, height: 1200, crop: 'limit' },
-          { quality: 'auto', fetch_format: 'auto' }
-        ]
-      });
+      // Создаем @2x версию (1200x1200) - загружаем реальное изображение
+      const hd2xResult = await cloudinary.uploader.upload(
+        cloudinary.url(publicId, {
+          transformation: [
+            { width: 1200, height: 1200, crop: 'limit' },
+            { quality: 'auto', fetch_format: 'auto' }
+          ]
+        }),
+        {
+          public_id: `${publicId}_hd2x`,
+          resource_type: 'image',
+          overwrite: true
+        }
+      );
 
-      // Создаем @4x версию (2400x2400)
-      const hd4xUrl = cloudinary.url(publicId, {
-        transformation: [
-          { width: 2400, height: 2400, crop: 'limit' },
-          { quality: 'auto', fetch_format: 'auto' }
-        ]
-      });
+      // Создаем @4x версию (2400x2400) - загружаем реальное изображение
+      const hd4xResult = await cloudinary.uploader.upload(
+        cloudinary.url(publicId, {
+          transformation: [
+            { width: 2400, height: 2400, crop: 'limit' },
+            { quality: 'auto', fetch_format: 'auto' }
+          ]
+        }),
+        {
+          public_id: `${publicId}_hd4x`,
+          resource_type: 'image',
+          overwrite: true
+        }
+      );
 
-      console.log(`✅ HD versions created for: ${publicId}`);
-      console.log(`   HD @2x: ${hd2xUrl}`);
-      console.log(`   HD @4x: ${hd4xUrl}`);
+      console.log(`✅ HD versions created and uploaded for: ${publicId}`);
+      console.log(`   HD @2x: ${hd2xResult.secure_url}`);
+      console.log(`   HD @4x: ${hd4xResult.secure_url}`);
       
       return {
         success: true,
-        hd2x: hd2xUrl,
-        hd4x: hd4xUrl,
-        publicId
+        hd2x: hd2xResult.secure_url,
+        hd4x: hd4xResult.secure_url,
+        publicId,
+        hd2xPublicId: hd2xResult.public_id,
+        hd4xPublicId: hd4xResult.public_id
       };
 
     } catch (error) {
@@ -187,7 +203,7 @@ class CloudinaryImageHandler {
   /**
    * Получает HD-версию изображения по URL
    */
-  getHdImageUrl(originalUrl, quality = '2x') {
+  async getHdImageUrl(originalUrl, quality = '2x') {
     try {
       if (!originalUrl || !originalUrl.includes('cloudinary.com')) {
         return originalUrl; // Возвращаем оригинал, если не Cloudinary
@@ -200,7 +216,22 @@ class CloudinaryImageHandler {
 
       const publicId = urlParts.slice(uploadIndex + 2).join('/').split('.')[0];
       
-      // Создаем HD-версию
+      // Сначала проверяем, есть ли уже загруженная HD версия
+      const hdPublicId = `${publicId}_hd${quality}`;
+      
+      try {
+        // Проверяем, существует ли HD версия
+        const hdResource = await cloudinary.api.resource(hdPublicId);
+        if (hdResource && hdResource.secure_url) {
+          console.log(`✅ Найдена существующая HD ${quality} версия: ${hdPublicId}`);
+          return hdResource.secure_url;
+        }
+      } catch (error) {
+        // HD версия не найдена, создаем через transformation
+        console.log(`🔧 HD ${quality} версия не найдена, используем transformation`);
+      }
+      
+      // Если HD версии нет, создаем через transformation
       const hdUrl = cloudinary.url(publicId, {
         transformation: [
           { 

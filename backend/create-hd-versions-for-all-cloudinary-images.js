@@ -42,36 +42,52 @@ async function createHdVersionsForAllImages() {
         console.log(`   Формат: ${resource.format}`);
         console.log(`   Размер: ${resource.width}x${resource.height}`);
         
-        // Создаем HD версии через Cloudinary transformations
-        const hd2xUrl = cloudinary.url(resource.public_id, {
-          transformation: [
-            { width: 1200, height: 1200, crop: 'limit' },
-            { quality: 'auto', fetch_format: 'auto' }
-          ]
-        });
+        // Создаем HD версии - реально загружаем их в Cloudinary
+        console.log(`   🔄 Загружаем HD @2x версию...`);
+        const hd2xResult = await cloudinary.uploader.upload(
+          cloudinary.url(resource.public_id, {
+            transformation: [
+              { width: 1200, height: 1200, crop: 'limit' },
+              { quality: 'auto', fetch_format: 'auto' }
+            ]
+          }),
+          {
+            public_id: `${resource.public_id}_hd2x`,
+            resource_type: 'image',
+            overwrite: true
+          }
+        );
         
-        const hd4xUrl = cloudinary.url(resource.public_id, {
-          transformation: [
-            { width: 2400, height: 2400, crop: 'limit' },
-            { quality: 'auto', fetch_format: 'auto' }
-          ]
-        });
+        console.log(`   🔄 Загружаем HD @4x версию...`);
+        const hd4xResult = await cloudinary.uploader.upload(
+          cloudinary.url(resource.public_id, {
+            transformation: [
+              { width: 2400, height: 2400, crop: 'limit' },
+              { quality: 'auto', fetch_format: 'auto' }
+            ]
+          }),
+          {
+            public_id: `${resource.public_id}_hd4x`,
+            resource_type: 'image',
+            overwrite: true
+          }
+        );
         
-        // Проверяем, что HD версии доступны
-        console.log(`✅ HD версии созданы для ${resource.public_id}:`);
-        console.log(`   HD @2x: ${hd2xUrl}`);
-        console.log(`   HD @4x: ${hd4xUrl}`);
+        // Проверяем, что HD версии загружены
+        console.log(`✅ HD версии загружены для ${resource.public_id}:`);
+        console.log(`   HD @2x: ${hd2xResult.secure_url}`);
+        console.log(`   HD @4x: ${hd4xResult.secure_url}`);
         
         // Проверяем доступность HD версий
         try {
-          const hd2xResponse = await fetch(hd2xUrl);
-          const hd4xResponse = await fetch(hd4xUrl);
+          const hd2xResponse = await fetch(hd2xResult.secure_url);
+          const hd4xResponse = await fetch(hd4xResult.secure_url);
           
           if (hd2xResponse.ok && hd4xResponse.ok) {
             console.log(`   ✅ HD версии доступны и загружаются`);
             hdVersionsCreated += 2;
           } else {
-            console.log(`   ⚠️ HD версии созданы, но могут быть недоступны`);
+            console.log(`   ⚠️ HD версии загружены, но могут быть недоступны`);
           }
         } catch (fetchError) {
           console.log(`   ⚠️ Не удалось проверить доступность HD версий: ${fetchError.message}`);
