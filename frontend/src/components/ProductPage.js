@@ -1545,7 +1545,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                          width: '100%', 
                          height: { xs: 280, sm: 320, md: 400 }, // Адаптивная высота для мобильных
                          maxWidth: 550,
-                         background: '#f6f6f6',
+                         background: { xs: 'white', md: '#f6f6f6' }, // Белый фон на мобильных, серый на десктопе
                          overflow: scale > 1 ? 'visible' : 'hidden',
                          cursor: 'pointer'
                        }}
@@ -1661,7 +1661,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'center', 
-                      background: '#f6f6f6', 
+                      background: window.innerWidth < 768 ? 'white' : '#f6f6f6', // Белый фон на мобильных, серый на десктопе
                       borderRadius: 12,
                       flexDirection: 'column',
                       gap: 2,
