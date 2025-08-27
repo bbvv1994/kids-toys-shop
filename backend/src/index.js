@@ -5068,6 +5068,71 @@ app.post('/api/images/hd-info/bulk', smartImageUploadMiddleware.getBulkHdImageIn
 app.post('/api/images/switch-mode', smartImageUploadMiddleware.switchMode.bind(smartImageUploadMiddleware));
 app.post('/api/images/cleanup', smartImageUploadMiddleware.cleanupUnusedHdVersions.bind(smartImageUploadMiddleware));
 
+// 🖼️ Endpoint для создания HD версий в продакшене
+app.get('/api/images/hd/:imagePath(*)', async (req, res) => {
+  try {
+    const { imagePath } = req.params;
+    const { quality = '4x' } = req.query;
+    
+    console.log(`🔧 Запрос HD версии: ${imagePath}, качество: ${quality}`);
+    
+    // Проверяем, что это локальное изображение
+    if (!imagePath.startsWith('/uploads/') && !imagePath.includes('/uploads/')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid image path. Must start with /uploads/'
+      });
+    }
+    
+    // Определяем размер для HD версии
+    const size = quality === '4x' ? 2400 : 1200;
+    
+    // Создаем HD версию через Sharp
+    const sharp = require('sharp');
+    const path = require('path');
+    const fs = require('fs').promises;
+    
+    // Путь к оригинальному файлу
+    const originalPath = path.join(__dirname, '..', '..', imagePath);
+    
+    // Проверяем существование файла
+    try {
+      await fs.access(originalPath);
+    } catch (error) {
+      return res.status(404).json({
+        success: false,
+        error: 'Original image not found'
+      });
+    }
+    
+    // Создаем HD версию
+    const hdBuffer = await sharp(originalPath)
+      .resize(size, size, { 
+        fit: 'inside',
+        withoutEnlargement: true 
+      })
+      .webp({ 
+        quality: 90,
+        effort: 5 
+      })
+      .toBuffer();
+    
+    // Отправляем HD версию
+    res.setHeader('Content-Type', 'image/webp');
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Кэшируем на год
+    res.send(hdBuffer);
+    
+    console.log(`✅ HD ${quality} версия создана и отправлена`);
+    
+  } catch (error) {
+    console.error('❌ Ошибка создания HD версии:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Diagnostic endpoint для тестирования создания продукта с переводами
 app.post('/api/debug/test-translations', async (req, res) => {
   try {

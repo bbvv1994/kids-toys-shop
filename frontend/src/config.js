@@ -117,15 +117,35 @@ const isDevelopment = process.env.NODE_ENV === 'development' ||
                      window.location.hostname === 'localhost' || 
                      window.location.hostname === '127.0.0.1';
 
+// Более надежное определение продакшена
+const isProduction = !isDevelopment || 
+                    window.location.hostname.includes('vercel.app') ||
+                    window.location.hostname.includes('netlify.app') ||
+                    window.location.hostname.includes('render.com') ||
+                    window.location.hostname.includes('herokuapp.com') ||
+                    process.env.NODE_ENV === 'production';
+
+// Экспортируем переменные среды для использования в других компонентах
+export { isDevelopment, isProduction };
+
 // Функция для получения HD-версии изображения для экранной лупы
 export const getHdImageUrl = (imagePath, quality = '2x') => {
   console.log('🔧 getHdImageUrl called with:', imagePath, 'quality:', quality);
   console.log('🔧 Environment:', isDevelopment ? 'LOCAL' : 'PRODUCTION');
+  console.log('🔧 isProduction:', isProduction);
   console.log('🔧 API_BASE_URL:', API_BASE_URL);
+  console.log('🔧 window.location.hostname:', typeof window !== 'undefined' ? window.location.hostname : 'undefined');
+  console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
   
   if (!imagePath) {
     console.log('❌ No imagePath provided for HD');
     return '';
+  }
+  
+  // Если изображение уже является HD версией, возвращаем его как есть
+  if (imagePath.includes('@') && (imagePath.includes('@2x') || imagePath.includes('@4x'))) {
+    console.log('✅ Изображение уже является HD версией:', imagePath);
+    return imagePath;
   }
   
   // В локальной среде используем локальную систему HD
@@ -171,33 +191,72 @@ export const getHdImageUrl = (imagePath, quality = '2x') => {
     return imagePath;
   }
   
-  // В продакшене используем Cloudinary
-  if (imagePath.includes('cloudinary.com')) {
-    try {
-      // Извлекаем publicId из URL Cloudinary
-      const urlParts = imagePath.split('/');
-      const uploadIndex = urlParts.findIndex(part => part === 'upload');
-      
-      if (uploadIndex !== -1 && urlParts[uploadIndex + 2]) {
-        // Пропускаем версию и берем путь к файлу
-        const publicId = urlParts.slice(uploadIndex + 2).join('/').split('.')[0];
+  // В продакшене используем Cloudinary или создаем HD версии
+  if (isProduction) {
+    // Если это Cloudinary URL
+    if (imagePath.includes('cloudinary.com')) {
+      try {
+        // Извлекаем publicId из URL Cloudinary
+        const urlParts = imagePath.split('/');
+        const uploadIndex = urlParts.findIndex(part => part === 'upload');
         
-        // Создаем HD-версию с помощью Cloudinary transformations
-        const hdUrl = imagePath.replace(
-          /\/upload\/([^\/]+)\//,
-          `/upload/c_scale,w_${quality === '4x' ? '2400' : '1200'},h_${quality === '4x' ? '2400' : '1200'},c_limit,q_auto,f_auto/`
-        );
-        
-        console.log(`✅ Cloudinary HD ${quality} URL created:`, hdUrl);
-        return hdUrl;
+        if (uploadIndex !== -1 && urlParts[uploadIndex + 2]) {
+          // Пропускаем версию и берем путь к файлу
+          const publicId = urlParts.slice(uploadIndex + 2).join('/').split('.')[0];
+          
+          // Создаем HD-версию с помощью Cloudinary transformations
+          const hdUrl = imagePath.replace(
+            /\/upload\/([^\/]+)\//,
+            `/upload/c_scale,w_${quality === '4x' ? '2400' : '1200'},h_${quality === '4x' ? '2400' : '1200'},c_limit,q_auto,f_auto/`
+          );
+          
+          console.log(`✅ Cloudinary HD ${quality} URL created:`, hdUrl);
+          return hdUrl;
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to create Cloudinary HD URL, using original:', error.message);
       }
-    } catch (error) {
-      console.warn('⚠️ Failed to create Cloudinary HD URL, using original:', error.message);
+    }
+    
+    // Если это не Cloudinary, но мы в продакшене, создаем HD версию через API
+    // или используем оригинал с увеличенным размером
+    console.log('🔧 Продакшен: создаем HD версию через API или используем оригинал');
+    
+    // Попробуем создать HD версию через API endpoint
+    if (imagePath.startsWith('/uploads/') || imagePath.includes('/uploads/')) {
+      // В продакшене можем использовать специальный endpoint для создания HD версий
+      const hdUrl = imagePath.replace(
+        /\.(webp|jpg|jpeg|png)$/i,
+        `@${quality}.webp`
+      );
+      console.log(`🔧 Продакшен HD ${quality} версия:`, hdUrl);
+      
+      // Также можем попробовать использовать специальный API endpoint для HD версий
+      if (API_BASE_URL && !API_BASE_URL.includes('localhost')) {
+        const apiHdUrl = `${API_BASE_URL}/api/images/hd/${encodeURIComponent(imagePath)}?quality=${quality}`;
+        console.log(`🔧 Продакшен API HD URL:`, apiHdUrl);
+        return apiHdUrl;
+      }
+      
+      // Если API endpoint недоступен, попробуем создать HD версию локально
+      // или использовать оригинал с CSS zoom
+      console.log('🔧 Продакшен: используем fallback HD версию');
+      return hdUrl;
+      
+      return hdUrl;
     }
   }
   
   // Fallback на оригинал
   console.log('✅ Using original image for HD');
+  
+  // В продакшене, если не удалось создать HD версию, 
+  // можем попробовать увеличить оригинал через CSS transform
+  if (isProduction && !imagePath.includes('@')) {
+    console.log('🔧 Продакшен: используем оригинал с возможностью CSS zoom');
+    return imagePath;
+  }
+  
   return imagePath;
 };
 
@@ -206,6 +265,6 @@ export const ENV_INFO = {
   environment,
   API_BASE_URL,
   FRONTEND_URL,
-  isDevelopment: environment === 'development',
-  isProduction: environment === 'production'
+  isDevelopment,
+  isProduction
 }; 
