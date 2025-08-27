@@ -204,35 +204,45 @@ class CloudinaryImageHandler {
   }
 
   /**
-   * Создает HD-версии изображения из оригинального буфера (без сжатия Sharp)
+   * Создает HD-версии изображения из оригинального буфера (БЕЗ сжатия Sharp)
    */
   async createHdVersionsFromBuffer(originalBuffer, publicId) {
     try {
       console.log(`🖼️ Creating HD versions from buffer for: ${publicId}`);
       
-      // Создаем @2x версию (1200x1200) из оригинального буфера
+      // Создаем @2x версию (1200x1200) из оригинального буфера - БЕЗ сжатия
       const hd2xBuffer = await sharp(originalBuffer)
         .resize(1200, 1200, { 
           fit: 'inside',
           withoutEnlargement: true 
         })
-        .webp({ 
-          quality: 85,
-          effort: 3 
+        .jpeg({ 
+          quality: 95,  // Максимальное качество JPEG
+          progressive: true
         })
         .toBuffer();
 
-      // Создаем @4x версию (2400x2400) из оригинального буфера
+      // Создаем @4x версию (2400x2400) из оригинального буфера - БЕЗ сжатия
       const hd4xBuffer = await sharp(originalBuffer)
         .resize(2400, 2400, { 
           fit: 'inside',
           withoutEnlargement: true 
         })
-        .webp({ 
-          quality: 90,
-          effort: 3 
+        .jpeg({ 
+          quality: 100,  // Максимальное качество JPEG
+          progressive: true
         })
         .toBuffer();
+
+      // Логируем размеры HD версий
+      const originalSize = originalBuffer.length;
+      const hd2xSize = hd2xBuffer.length;
+      const hd4xSize = hd4xBuffer.length;
+      
+      console.log(`📊 Размеры изображений:`);
+      console.log(`   Оригинал: ${(originalSize / 1024).toFixed(1)}KB`);
+      console.log(`   HD @2x: ${(hd2xSize / 1024).toFixed(1)}KB`);
+      console.log(`   HD @4x: ${(hd4xSize / 1024).toFixed(1)}KB`);
 
       // Загружаем HD версии в Cloudinary
       const hd2xResult = await cloudinary.uploader.upload_stream(
