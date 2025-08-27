@@ -104,7 +104,6 @@ class CloudinaryImageHandler {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
             public_id: publicId,
-            folder: 'kids-toys-shop',
             resource_type: 'image',
             transformation: [
               { width: 600, height: 600, crop: 'limit' },
