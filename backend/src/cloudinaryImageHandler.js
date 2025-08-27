@@ -56,6 +56,9 @@ class CloudinaryImageHandler {
       const uploadResult = await this.uploadToCloudinary(processedBuffer, originalName);
       
       if (uploadResult.success) {
+        // Создаем HD версии для экранной лупы
+        const hdVersions = await this.createHdVersions(uploadResult.publicId);
+        
         return {
           success: true,
           filename: uploadResult.filename,
@@ -64,7 +67,11 @@ class CloudinaryImageHandler {
           originalSize,
           processedSize,
           compressionRatio: parseFloat(compressionRatio),
-          mimetype: 'image/webp'
+          mimetype: 'image/webp',
+          hdVersions: hdVersions.success ? {
+            hd2x: hdVersions.hd2x,
+            hd4x: hdVersions.hd4x
+          } : null
         };
       } else {
         return {
@@ -159,11 +166,14 @@ class CloudinaryImageHandler {
       });
 
       console.log(`✅ HD versions created for: ${publicId}`);
+      console.log(`   HD @2x: ${hd2xUrl}`);
+      console.log(`   HD @4x: ${hd4xUrl}`);
       
       return {
         success: true,
         hd2x: hd2xUrl,
-        hd4x: hd4xUrl
+        hd4x: hd4xUrl,
+        publicId
       };
 
     } catch (error) {
