@@ -5069,10 +5069,16 @@ app.post('/api/images/switch-mode', smartImageUploadMiddleware.switchMode.bind(s
 app.post('/api/images/cleanup', smartImageUploadMiddleware.cleanupUnusedHdVersions.bind(smartImageUploadMiddleware));
 
 // 🖼️ Endpoint для создания HD версий в продакшене
-app.get('/api/images/hd/:imagePath(*)', async (req, res) => {
+app.get('/api/images/hd', async (req, res) => {
   try {
-    const { imagePath } = req.params;
-    const { quality = '4x' } = req.query;
+    const { path: imagePath, quality = '4x' } = req.query;
+    
+    if (!imagePath) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing image path parameter'
+      });
+    }
     
     console.log(`🔧 Запрос HD версии: ${imagePath}, качество: ${quality}`);
     

@@ -233,7 +233,7 @@ export const getHdImageUrl = (imagePath, quality = '2x') => {
       
       // Также можем попробовать использовать специальный API endpoint для HD версий
       if (API_BASE_URL && !API_BASE_URL.includes('localhost')) {
-        const apiHdUrl = `${API_BASE_URL}/api/images/hd/${encodeURIComponent(imagePath)}?quality=${quality}`;
+        const apiHdUrl = `${API_BASE_URL}/api/images/hd?path=${encodeURIComponent(imagePath)}&quality=${quality}`;
         console.log(`🔧 Продакшен API HD URL:`, apiHdUrl);
         return apiHdUrl;
       }
