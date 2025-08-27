@@ -129,13 +129,11 @@ const isProduction = !isDevelopment ||
 export { isDevelopment, isProduction };
 
 // Функция для получения HD-версии изображения для экранной лупы
+// В локальной среде возвращает оригинальное изображение (HD качество достигается через CSS scale)
+// В продакшене пытается найти или создать HD версии
 export const getHdImageUrl = (imagePath, quality = '2x') => {
   console.log('🔧 getHdImageUrl called with:', imagePath, 'quality:', quality);
   console.log('🔧 Environment:', isDevelopment ? 'LOCAL' : 'PRODUCTION');
-  console.log('🔧 isProduction:', isProduction);
-  console.log('🔧 API_BASE_URL:', API_BASE_URL);
-  console.log('🔧 window.location.hostname:', typeof window !== 'undefined' ? window.location.hostname : 'undefined');
-  console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
   
   if (!imagePath) {
     console.log('❌ No imagePath provided for HD');
@@ -148,46 +146,48 @@ export const getHdImageUrl = (imagePath, quality = '2x') => {
     return imagePath;
   }
   
-  // В локальной среде используем локальную систему HD
+  // В локальной среде проверяем, есть ли HD версии
   if (isDevelopment) {
-    // Если это локальное изображение, создаем HD-URL
-      if ((imagePath.startsWith('/uploads/') || imagePath.includes('/uploads/')) && !imagePath.includes('@')) {
-    console.log(`🔧 Обрабатываем локальное изображение:`, imagePath);
-    
-    // Извлекаем имя файла из пути
-    let filename;
-    if (imagePath.startsWith('/uploads/')) {
-      filename = imagePath.split('/').pop(); // Получаем имя файла
-      console.log(`🔧 Извлечено имя файла (относительный путь):`, filename);
-    } else {
-      // Если это полный URL, извлекаем имя файла
-      const urlParts = imagePath.split('/');
-      const uploadsIndex = urlParts.findIndex(part => part === 'uploads');
-      console.log(`🔧 URL части:`, urlParts);
-      console.log(`🔧 Индекс uploads:`, uploadsIndex);
-      if (uploadsIndex !== -1 && urlParts[uploadsIndex + 1]) {
-        filename = urlParts[uploadsIndex + 1];
-        console.log(`🔧 Извлечено имя файла (полный URL):`, filename);
+    // Если это локальное изображение, попробуем найти HD версию
+    if (imagePath.startsWith('/uploads/') || imagePath.includes('/uploads/')) {
+      // Извлекаем имя файла из пути
+      let filename;
+      if (imagePath.startsWith('/uploads/')) {
+        filename = imagePath.split('/').pop(); // Получаем имя файла
+      } else {
+        // Если это полный URL, извлекаем имя файла
+        const urlParts = imagePath.split('/');
+        const uploadsIndex = urlParts.findIndex(part => part === 'uploads');
+        if (uploadsIndex !== -1 && urlParts[uploadsIndex + 1]) {
+          filename = urlParts[uploadsIndex + 1];
+        }
       }
-    }
       
       if (filename) {
         const baseFilename = filename.replace(/\.[^/.]+$/, ''); // Убираем расширение
         
-        // Создаем HD-версию с полным URL
-        const hdFilename = quality === '4x' ? `${baseFilename}@4x.webp` : `${baseFilename}@2x.webp`;
-        const hdUrl = `${API_BASE_URL}/uploads/hd/${hdFilename}`;
+        // Пробуем найти HD версию в папке uploads/hd
+        // HD файлы имеют формат: filename@4x.webp, filename@2x.webp
+        const fileExtension = imagePath.split('.').pop(); // Получаем расширение файла
+        const hdFilename = `${baseFilename}@${quality}.${fileExtension}`;
         
-        console.log(`🔧 Локальная HD ${quality} версия:`, hdUrl);
-        console.log(`🔧 Исходный файл:`, filename);
-        console.log(`🔧 Базовое имя:`, baseFilename);
-        console.log(`🔧 HD имя файла:`, hdFilename);
-        return hdUrl;
+        // Для экранной лупы (4x) всегда возвращаем HD путь
+        // Если HD версия не существует, браузер покажет ошибку 404
+        if (quality === '4x') {
+          return `/uploads/hd/${hdFilename}`;
+        }
+        
+        // Для 2x качества также возвращаем HD версию
+        if (quality === '2x') {
+          return `/uploads/hd/${hdFilename}`;
+        }
+        
+        // Для других случаев возвращаем оригинал
+        return imagePath;
       }
     }
     
     // Для других изображений в локальной среде возвращаем оригинал
-    console.log('✅ Локальная среда: используем оригинальное изображение');
     return imagePath;
   }
   

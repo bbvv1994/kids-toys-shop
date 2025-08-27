@@ -977,7 +977,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     
     if (e.targetTouches.length === 1) {
       // Если изображение увеличено, то движение - это pan, а не свайп
-      if (scale > 1) {
+      if (modalScale > 1) {
         setIsSwiping(false);
         setIsZooming(false);
         setTouchStart(e.targetTouches[0].clientX);
@@ -1002,7 +1002,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         e.targetTouches[0].clientY - e.targetTouches[1].clientY
       );
       setInitialDistance(distance);
-      setInitialScale(scale);
+      setInitialScale(modalScale);
       console.log('ProductPage Gallery: Начало zoom, расстояние:', distance);
     }
   };
@@ -1010,7 +1010,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const onGalleryTouchMove = (e) => {
     e.preventDefault(); // Предотвращаем стандартные touch события
     
-    if (isSwiping && e.targetTouches.length === 1 && scale <= 1) {
+    if (isSwiping && e.targetTouches.length === 1 && modalScale <= 1) {
       // Обработка свайпа с плавной анимацией в реальном времени (только если не увеличен)
       const currentTouch = e.targetTouches[0].clientX;
       setTouchEnd(currentTouch);
@@ -1036,11 +1036,14 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       );
       
       if (initialDistance) {
-        const newScale = Math.max(0.5, Math.min(3, (currentDistance / initialDistance) * initialScale));
-        setScale(newScale);
-        console.log('ProductPage Gallery: Zoom, масштаб:', newScale);
+        // Максимальный масштаб такой же, как при двойном тапе
+        const maxScale = !isDesktop ? 3 : 2; // 3x для мобильных, 2x для десктопа
+        const minScale = 1; // Минимальный масштаб - по ширине экрана
+        const newScale = Math.max(minScale, Math.min(maxScale, (currentDistance / initialDistance) * initialScale));
+        setModalScale(newScale);
+        console.log('ProductPage Gallery: Zoom, масштаб:', newScale, 'максимум:', maxScale);
       }
-    } else if (scale > 1 && e.targetTouches.length === 1) {
+    } else if (modalScale > 1 && e.targetTouches.length === 1) {
       // Обработка pan (перемещения) при zoom
       const touch = e.targetTouches[0];
       
@@ -1050,15 +1053,20 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         const deltaY = touch.clientY - touchStartY;
         
         if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
-          setTranslateX(prev => {
-            const newX = prev - deltaX * 0.15; // Инвертируем направление и уменьшаем чувствительность
-            // Ограничиваем перемещение, чтобы изображение не уходило слишком далеко
-            return Math.max(-300, Math.min(300, newX));
+          // Вычисляем максимально допустимое смещение на основе масштаба
+          // Горизонтальное перемещение более свободное, вертикальное - строго ограничено
+          const maxOffsetX = Math.max(50, (modalScale - 1) * 80);
+          const maxOffsetY = Math.max(20, (modalScale - 1) * 30); // Вертикальное ограничение в 2.5 раза строже
+          
+          setModalTranslateX(prev => {
+            const newX = prev + deltaX * 0.08; // Уменьшаем чувствительность
+            // Ограничиваем перемещение, чтобы изображение не выходило за края
+            return Math.max(-maxOffsetX, Math.min(maxOffsetX, newX));
           });
-          setTranslateY(prev => {
-            const newY = prev - deltaY * 0.15; // Инвертируем направление и уменьшаем чувствительность
-            // Ограничиваем перемещение, чтобы изображение не уходило слишком далеко
-            return Math.max(-300, Math.min(300, newY));
+          setModalTranslateY(prev => {
+            const newY = prev + deltaY * 0.04; // Вертикальная чувствительность в 2 раза меньше
+            // Ограничиваем перемещение, чтобы изображение не выходило за края
+            return Math.max(-maxOffsetY, Math.min(maxOffsetY, newY));
           });
           
           // Обновляем начальные координаты для следующего движения
@@ -1071,7 +1079,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   const onGalleryTouchEnd = () => {
     // Если изображение увеличено, не обрабатываем свайп
-    if (scale > 1) {
+    if (modalScale > 1) {
       console.log('ProductPage Gallery: Pan завершен при zoom');
       // Сбрасываем только состояния pan
       setTouchStart(null);
@@ -1140,8 +1148,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         setGalleryIndex((galleryIndex - 1 + realImages.length) % realImages.length);
       }
       
-      // Сбрасываем zoom
-      resetZoom();
+      // Сбрасываем zoom для галереи - возвращаем к масштабу 1 (по ширине экрана)
+      resetModalZoom();
       
       // Плавно возвращаем в центр
       setSwipeOffset(0);
@@ -1180,6 +1188,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   // Функция для сброса zoom модального окна
   const resetModalZoom = () => {
+    // Возвращаем к масштабу 1 (по ширине экрана) для всех устройств
     setModalScale(1);
     setModalTranslateX(0);
     setModalTranslateY(0);
@@ -1191,6 +1200,17 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     setModalIsMouseDown(false);
   };
 
+  // Функция для открытия галереи с адаптивным масштабом
+  const openGalleryWithHd = (index = 0) => {
+    setGalleryIndex(index);
+    setGalleryOpen(true);
+    // Открываем с масштабом 1 (по ширине экрана) для всех устройств
+    setModalScale(1);
+    setModalTranslateX(0);
+    setModalTranslateY(0);
+    console.log('ProductPage Gallery: Открываем с адаптивным масштабом (1x) - изображение подстраивается по ширине');
+  };
+
   // Функция для сброса zoom (общая, для обратной совместимости)
   const resetZoom = () => {
     if (galleryOpen) {
@@ -1200,12 +1220,16 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     }
   };
 
-  // Функция для двойного клика в модальном окне (сброс zoom)
+  // Функция для двойного клика в модальном окне (переключение zoom)
   const onGalleryDoubleClick = () => {
     if (modalScale > 1) {
-      resetModalZoom();
+      resetModalZoom(); // Возвращаем к масштабу 1 (по ширине экрана)
     } else {
-      setModalScale(2);
+      if (!isDesktop) {
+        setModalScale(3); // Для мобильных увеличиваем до 3x
+      } else {
+        setModalScale(2); // Для десктопа увеличиваем до 2x
+      }
     }
   };
 
@@ -1216,16 +1240,26 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       const touch = e.targetTouches[0];
       
       if (touch.clientX !== undefined && touch.clientY !== undefined) {
-        const deltaX = touch.clientX - (touch.clientX || touch.clientX);
-        const deltaY = touch.clientY - (touch.clientY || touch.clientY);
+        // Вычисляем максимально допустимое смещение на основе масштаба
+        // Горизонтальное перемещение более свободное, вертикальное - строго ограничено
+        const maxOffsetX = Math.max(50, (modalScale - 1) * 80);
+        const maxOffsetY = Math.max(20, (modalScale - 1) * 30); // Вертикальное ограничение в 2.5 раза строже
+        
+        // Простое перемещение на основе текущих координат
+        // Уменьшаем чувствительность для более точного контроля
+        // Вертикальная чувствительность в 2 раза меньше
+        const moveX = (touch.clientX - window.innerWidth / 2) * 0.005;
+        const moveY = (touch.clientY - window.innerHeight / 2) * 0.0025;
         
         setModalTranslateX(prev => {
-          const newX = prev + deltaX * 0.5;
-          return Math.max(-200, Math.min(200, newX));
+          const newX = prev + moveX;
+          // Ограничиваем перемещение, чтобы изображение не выходило за края
+          return Math.max(-maxOffsetX, Math.min(maxOffsetX, newX));
         });
         setModalTranslateY(prev => {
-          const newY = prev + deltaY * 0.5;
-          return Math.max(-200, Math.min(200, newY));
+          const newY = prev + moveY;
+          // Ограничиваем перемещение, чтобы изображение не выходило за края
+          return Math.max(-maxOffsetY, Math.min(maxOffsetY, newY));
         });
       }
     }
@@ -1299,8 +1333,21 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     const deltaX = e.clientX - mainImageMouseStartPos.x;
     const deltaY = e.clientY - mainImageMouseStartPos.y;
     
-    setMainImageTranslateX(prev => prev + deltaX);
-    setMainImageTranslateY(prev => prev + deltaY);
+    // Вычисляем максимально допустимое смещение на основе масштаба
+    // Горизонтальное перемещение более свободное, вертикальное - строго ограничено
+    const maxOffsetX = Math.max(50, (mainImageScale - 1) * 80);
+    const maxOffsetY = Math.max(20, (mainImageScale - 1) * 30); // Вертикальное ограничение в 2.5 раза строже
+    
+    setMainImageTranslateX(prev => {
+      const newX = prev + deltaX;
+      // Ограничиваем перемещение, чтобы изображение не выходило за края
+      return Math.max(-maxOffsetX, Math.min(maxOffsetX, newX));
+    });
+    setMainImageTranslateY(prev => {
+      const newY = prev + deltaY;
+      // Ограничиваем перемещение, чтобы изображение не выходило за края
+      return Math.max(-maxOffsetY, Math.min(maxOffsetY, newY));
+    });
     setMainImageMouseStartPos({ x: e.clientX, y: e.clientY });
   };
 
@@ -1507,7 +1554,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                                                if (isDesktop) {
                                                  return;
                                                }
-                                               setGalleryOpen(true);
+                                               // Открываем галерею с текущим выбранным изображением
+                                               openGalleryWithHd(galleryIndex);
                                              }}
                        onDoubleClick={handleMainImageDoubleClick}
                        onTouchStart={handleMainImageTouchStart}
@@ -1591,7 +1639,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                             <Box sx={{
                               width: '100%',
                               height: '100%',
-                              backgroundImage: `url(${getHdImageUrl(imageSrc, '4x')})`,
+                              backgroundImage: `url(${getHdImageUrl(imageSrc, '4x') || getImageUrl(imageSrc)})`,
                               backgroundSize: `${100 * desktopZoomLevel}%`,
                               backgroundPosition: `${desktopZoomPosition.x}% ${desktopZoomPosition.y}%`,
                               backgroundRepeat: 'no-repeat'
@@ -1625,7 +1673,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                       if (isDesktop) {
                         return;
                       }
-                      setGalleryOpen(true);
+                      // Открываем галерею с текущим выбранным изображением
+                      openGalleryWithHd(galleryIndex);
                     }}
                     onTouchStart={handleMainImageTouchStart}
                     onTouchMove={handleMainImageTouchMove}
@@ -1755,7 +1804,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                               background: '#f6f6f6',
                               borderRadius: 6,
                               border: galleryIndex === idx ? '2px solid #4ECDC4' : '2px solid #eee',
-                              cursor: 'pointer',
+                              cursor: 'pointer', // Миниатюры кликабельны для переключения изображений
                               boxShadow: galleryIndex === idx ? '0 2px 8px #4ECDC455' : 'none',
                               overflow: 'hidden',
                               display: 'flex',
@@ -1763,20 +1812,14 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                               justifyContent: 'center'
                             }}
                             onClick={() => {
+                              // Переключаем изображение на основное
                               setGalleryIndex(idx);
-                              // На десктопе не открываем модальное окно
+                              
+                              // На мобильных устройствах также открываем галерею
                               if (!isDesktop) {
-                                setGalleryOpen(true);
+                                openGalleryWithHd(idx);
                               }
                             }}
-                            onDoubleClick={handleMainImageDoubleClick}
-                                                         onTouchStart={handleMainImageTouchStart}
-                             onTouchMove={handleMainImageTouchMove}
-                             onTouchEnd={handleMainImageTouchEnd}
-                             onWheel={handleMainImageWheel}
-                             onMouseMove={handleMainImageMouseMove}
-                             onMouseDown={handleMainImageMouseDown}
-                             onMouseUp={handleMainImageMouseUp}
                           >
                             {/* Миниатюра изображения - используем тот же принцип, что и в корзине */}
                             <Box sx={{
@@ -2487,52 +2530,52 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     flexWrap: 'wrap',
                     gap: 1
                   }}>
-                    <Box 
-                      sx={{ 
-                        width: '100vw', 
-                        height: '100vh', 
-                        margin: 0,
-                        background: 'transparent',
-                        overflow: scale > 1 ? 'visible' : 'hidden',
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        cursor: scale > 1 ? 'zoom-out' : 'zoom-in',
-                        touchAction: 'none',
-                        userSelect: 'none',
-                        WebkitUserSelect: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                      onClick={toggleZoom}
-                      onDoubleClick={onGalleryDoubleClick}
-                      onMouseMove={handleGalleryMouseMove}
-                      onMouseDown={handleMouseDown}
-                      onMouseUp={handleMouseUp}
-                      onWheel={handleWheel}
-                      onTouchStart={onGalleryTouchStart}
-                      onTouchMove={onGalleryTouchMove}
-                      onTouchEnd={onGalleryTouchEnd}
-                    >
-                      <Box sx={{
-                        width: '100%',
-                        height: '100%',
-                        backgroundImage: `url(${getImageUrl(realImages[galleryIndex])})`,
-                        backgroundSize: scale > 1 ? 'contain' : 'contain',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                        transform: `scale(${scale}) translate(${translateX + swipeOffset}px, ${translateY}px)`,
-                        transition: isAnimating ? 'transform 0.3s ease-out' : (scale > 1 ? 'none' : 'transform 0.2s ease-out'),
-                        overflow: scale > 1 ? 'visible' : 'hidden',
-                        transformOrigin: 'center center',
-                        ...(scale > 1 && {
-                          cursor: 'move',
-                          touchAction: 'none'
-                        })
-                      }} />
-                    </Box>
+                                          <Box 
+                        sx={{ 
+                          width: '100vw', 
+                          height: '100vh', 
+                          margin: 0,
+                          background: 'transparent',
+                          overflow: modalScale > 1 ? 'visible' : 'hidden',
+                          position: 'fixed',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          cursor: modalScale > 1 ? 'zoom-out' : 'zoom-in',
+                          touchAction: 'none',
+                          userSelect: 'none',
+                          WebkitUserSelect: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        onClick={toggleZoom}
+                        onDoubleClick={onGalleryDoubleClick}
+                        onMouseMove={handleGalleryMouseMove}
+                        onMouseDown={handleMouseDown}
+                        onMouseUp={handleMouseUp}
+                        onWheel={handleWheel}
+                        onTouchStart={onGalleryTouchStart}
+                        onTouchMove={onGalleryTouchMove}
+                        onTouchEnd={onGalleryTouchEnd}
+                      >
+                        <Box sx={{
+                          width: '100%',
+                          height: '100%',
+                          backgroundImage: `url(${getHdImageUrl(getImageUrl(realImages[galleryIndex]), '2x')})`,
+                          backgroundSize: 'contain', // Всегда contain для правильного масштабирования
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                          transform: `scale(${modalScale}) translate(${modalTranslateX + swipeOffset}px, ${modalTranslateY}px)`,
+                          transition: isAnimating ? 'transform 0.3s ease-out' : (modalScale > 1 ? 'none' : 'transform 0.2s ease-out'),
+                          overflow: modalScale > 1 ? 'visible' : 'hidden',
+                          transformOrigin: 'center center',
+                          ...(modalScale > 1 && {
+                            cursor: 'move',
+                            touchAction: 'none'
+                          })
+                        }} />
+                      </Box>
                   </Box>
                 );
               } else {
@@ -2545,7 +2588,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             })()}
             
             {/* Кнопка сброса zoom для мобильных устройств */}
-            {scale > 1 && (
+            {modalScale > 1 && (
               <Box sx={{
                 position: 'fixed',
                 top: 20,
