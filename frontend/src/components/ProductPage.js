@@ -1059,12 +1059,12 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           const maxOffsetY = Math.max(20, (modalScale - 1) * 30); // Вертикальное ограничение в 2.5 раза строже
           
           setModalTranslateX(prev => {
-            const newX = prev + deltaX * 0.08; // Уменьшаем чувствительность
+            const newX = prev + deltaX * 0.3; // Увеличиваем чувствительность для быстрого движения
             // Ограничиваем перемещение, чтобы изображение не выходило за края
             return Math.max(-maxOffsetX, Math.min(maxOffsetX, newX));
           });
           setModalTranslateY(prev => {
-            const newY = prev + deltaY * 0.04; // Вертикальная чувствительность в 2 раза меньше
+            const newY = prev + deltaY * 0.2; // Увеличиваем вертикальную чувствительность
             // Ограничиваем перемещение, чтобы изображение не выходило за края
             return Math.max(-maxOffsetY, Math.min(maxOffsetY, newY));
           });
@@ -1246,10 +1246,10 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         const maxOffsetY = Math.max(20, (modalScale - 1) * 30); // Вертикальное ограничение в 2.5 раза строже
         
         // Простое перемещение на основе текущих координат
-        // Уменьшаем чувствительность для более точного контроля
+        // Увеличиваем чувствительность для более быстрого движения
         // Вертикальная чувствительность в 2 раза меньше
-        const moveX = (touch.clientX - window.innerWidth / 2) * 0.005;
-        const moveY = (touch.clientY - window.innerHeight / 2) * 0.0025;
+        const moveX = (touch.clientX - window.innerWidth / 2) * 0.02;
+        const moveY = (touch.clientY - window.innerHeight / 2) * 0.01;
         
         setModalTranslateX(prev => {
           const newX = prev + moveX;
@@ -1339,12 +1339,12 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     const maxOffsetY = Math.max(20, (mainImageScale - 1) * 30); // Вертикальное ограничение в 2.5 раза строже
     
     setMainImageTranslateX(prev => {
-      const newX = prev + deltaX;
+      const newX = prev + deltaX * 0.5; // Увеличиваем чувствительность для быстрого движения
       // Ограничиваем перемещение, чтобы изображение не выходило за края
       return Math.max(-maxOffsetX, Math.min(maxOffsetX, newX));
     });
     setMainImageTranslateY(prev => {
-      const newY = prev + deltaY;
+      const newY = prev + deltaY * 0.5; // Увеличиваем вертикальную чувствительность
       // Ограничиваем перемещение, чтобы изображение не выходило за края
       return Math.max(-maxOffsetY, Math.min(maxOffsetY, newY));
     });
