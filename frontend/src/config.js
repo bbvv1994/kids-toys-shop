@@ -212,6 +212,8 @@ export const getHdImageUrl = (imagePath, quality = '2x') => {
           
           console.log(`✅ Cloudinary HD ${quality} URL created:`, hdUrl);
           console.log(`🔧 PublicId: ${publicId}`);
+          console.log(`🔧 Original URL: ${imagePath}`);
+          console.log(`🔧 HD URL: ${hdUrl}`);
           return hdUrl;
         }
       } catch (error) {

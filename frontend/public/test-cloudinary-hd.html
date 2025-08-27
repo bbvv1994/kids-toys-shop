@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест Cloudinary HD изображений</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .image-container {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .image-item {
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .image-item img {
+            max-width: 300px;
+            max-height: 300px;
+            border: 2px solid #4ECDC4;
+            border-radius: 4px;
+        }
+        .image-info {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        .hd-test {
+            background: #e8f5e8;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        button {
+            background: #4ECDC4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45b7aa;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Тест Cloudinary HD изображений</h1>
+    
+    <div class="test-section">
+        <h2>📋 Информация о среде</h2>
+        <div id="env-info">Загрузка...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🖼️ Тест HD изображений</h2>
+        <p>Введите URL изображения Cloudinary для тестирования HD версий:</p>
+        <input type="text" id="imageUrl" placeholder="https://res.cloudinary.com/.../image/upload/..." style="width: 100%; padding: 10px; margin: 10px 0;">
+        <button onclick="testHdImage()">🧪 Тестировать HD</button>
+        <button onclick="clearLog()">🗑️ Очистить лог</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Результаты тестирования</h2>
+        <div id="results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📝 Лог операций</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        // Функция для логирования
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? '#f44336' : type === 'success' ? '#4CAF50' : '#2196F3';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollTop + 1000;
+        }
+
+        // Очистка лога
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Получение информации о среде
+        async function getEnvInfo() {
+            try {
+                const response = await fetch('/api/images/config');
+                const data = await response.json();
+                
+                document.getElementById('env-info').innerHTML = `
+                    <p><strong>Режим:</strong> ${data.activeHandler}</p>
+                    <p><strong>Cloudinary:</strong> ${data.cloudinary ? '✅ Настроен' : '❌ Не настроен'}</p>
+                    <p><strong>Локальный:</strong> ${data.local ? '✅ Доступен' : '❌ Недоступен'}</p>
+                    <p><strong>Конфигурация:</strong> ${JSON.stringify(data.config, null, 2)}</p>
+                `;
+                
+                log('✅ Информация о среде загружена', 'success');
+            } catch (error) {
+                log(`❌ Ошибка загрузки информации о среде: ${error.message}`, 'error');
+                document.getElementById('env-info').innerHTML = '<p class="error">Ошибка загрузки информации о среде</p>';
+            }
+        }
+
+        // Тестирование HD изображения
+        async function testHdImage() {
+            const imageUrl = document.getElementById('imageUrl').value.trim();
+            if (!imageUrl) {
+                alert('Введите URL изображения!');
+                return;
+            }
+
+            log(`🧪 Начинаем тестирование HD для: ${imageUrl}`);
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Тестирование...</p>';
+
+            try {
+                // Тестируем разные качества
+                const qualities = ['2x', '4x'];
+                let resultsHtml = '<div class="image-container">';
+                
+                for (const quality of qualities) {
+                    const hdUrl = await getHdImageUrl(imageUrl, quality);
+                    
+                    resultsHtml += `
+                        <div class="image-item">
+                            <h3>HD ${quality}</h3>
+                            <img src="${hdUrl}" alt="HD ${quality}" onerror="this.style.borderColor='red'" onload="this.style.borderColor='green'">
+                            <div class="image-info">
+                                <p><strong>URL:</strong> ${hdUrl}</p>
+                                <p><strong>Качество:</strong> ${quality}</p>
+                                <p><strong>Статус:</strong> <span id="status-${quality}">Проверка...</span></p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    log(`✅ HD ${quality} URL создан: ${hdUrl}`, 'success');
+                }
+                
+                resultsHtml += '</div>';
+                resultsDiv.innerHTML = resultsHtml;
+                
+                // Проверяем загрузку изображений
+                setTimeout(() => {
+                    checkImageStatus();
+                }, 2000);
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования: ${error.message}`, 'error');
+                resultsDiv.innerHTML = `<p class="error">Ошибка: ${error.message}</p>`;
+            }
+        }
+
+        // Получение HD URL (имитация функции из config.js)
+        async function getHdImageUrl(imagePath, quality = '2x') {
+            if (imagePath.includes('cloudinary.com')) {
+                try {
+                    const urlParts = imagePath.split('/');
+                    const uploadIndex = urlParts.findIndex(part => part === 'upload');
+                    
+                    if (uploadIndex !== -1 && urlParts[uploadIndex + 2]) {
+                        const publicId = urlParts.slice(uploadIndex + 2).join('/').split('.')[0];
+                        
+                        const hdUrl = imagePath.replace(
+                            /\/upload\/([^\/]+)\//,
+                            `/upload/c_scale,w_${quality === '4x' ? '2400' : '1200'},h_${quality === '4x' ? '2400' : '1200'},c_limit,q_auto,f_auto/`
+                        );
+                        
+                        log(`🔧 Cloudinary HD ${quality} URL создан: ${hdUrl}`);
+                        return hdUrl;
+                    }
+                } catch (error) {
+                    log(`⚠️ Ошибка создания Cloudinary HD URL: ${error.message}`, 'error');
+                }
+            }
+            
+            return imagePath;
+        }
+
+        // Проверка статуса загрузки изображений
+        function checkImageStatus() {
+            const images = document.querySelectorAll('.image-item img');
+            images.forEach(img => {
+                const quality = img.alt.split(' ')[1];
+                const statusElement = document.getElementById(`status-${quality}`);
+                
+                if (img.complete && img.naturalWidth > 0) {
+                    statusElement.textContent = '✅ Загружено';
+                    statusElement.style.color = '#4CAF50';
+                    log(`✅ HD ${quality} изображение успешно загружено`, 'success');
+                } else {
+                    statusElement.textContent = '❌ Ошибка загрузки';
+                    statusElement.style.color = '#f44336';
+                    log(`❌ HD ${quality} изображение не загрузилось`, 'error');
+                }
+            });
+        }
+
+        // Инициализация при загрузке страницы
+        window.onload = function() {
+            log('🚀 Страница загружена, начинаем тестирование', 'info');
+            getEnvInfo();
+        };
+    </script>
+</body>
+</html>
