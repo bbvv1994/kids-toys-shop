@@ -32,7 +32,10 @@ class CloudinaryImageHandler {
       console.log(`🖼️ CloudinaryImageHandler: Processing image: ${originalName}`);
       console.log(`🖼️ CloudinaryImageHandler: Buffer size: ${buffer.length} bytes`);
       
-      // Обрабатываем изображение с оптимизацией
+      // Сохраняем оригинальный буфер для HD версий
+      const originalBuffer = buffer;
+      
+      // Обрабатываем изображение с оптимизацией (только для основного изображения)
       const processedBuffer = await sharp(buffer)
         .resize(600, 600, { 
           fit: 'inside',
@@ -56,8 +59,8 @@ class CloudinaryImageHandler {
       const uploadResult = await this.uploadToCloudinary(processedBuffer, originalName);
       
       if (uploadResult.success) {
-        // Создаем HD версии для экранной лупы
-        const hdVersions = await this.createHdVersions(uploadResult.publicId);
+        // Создаем HD версии для экранной лупы (используем оригинальный буфер)
+        const hdVersions = await this.createHdVersionsFromBuffer(originalBuffer, uploadResult.publicId);
         
         return {
           success: true,
@@ -199,6 +202,92 @@ class CloudinaryImageHandler {
       };
     }
   }
+
+  /**
+   * Создает HD-версии изображения из оригинального буфера (без сжатия Sharp)
+   */
+  async createHdVersionsFromBuffer(originalBuffer, publicId) {
+    try {
+      console.log(`🖼️ Creating HD versions from buffer for: ${publicId}`);
+      
+      // Создаем @2x версию (1200x1200) из оригинального буфера
+      const hd2xBuffer = await sharp(originalBuffer)
+        .resize(1200, 1200, { 
+          fit: 'inside',
+          withoutEnlargement: true 
+        })
+        .webp({ 
+          quality: 85,
+          effort: 3 
+        })
+        .toBuffer();
+
+      // Создаем @4x версию (2400x2400) из оригинального буфера
+      const hd4xBuffer = await sharp(originalBuffer)
+        .resize(2400, 2400, { 
+          fit: 'inside',
+          withoutEnlargement: true 
+        })
+        .webp({ 
+          quality: 90,
+          effort: 3 
+        })
+        .toBuffer();
+
+      // Загружаем HD версии в Cloudinary
+      const hd2xResult = await cloudinary.uploader.upload_stream(
+        {
+          public_id: `${publicId}_hd2x`,
+          resource_type: 'image',
+          overwrite: true
+        },
+        (error, result) => {
+          if (error) {
+            console.error('❌ HD @2x upload error:', error);
+          } else {
+            console.log(`✅ HD @2x uploaded: ${result.secure_url}`);
+          }
+        }
+      );
+      hd2xResult.end(hd2xBuffer);
+
+      const hd4xResult = await cloudinary.uploader.upload_stream(
+        {
+          public_id: `${publicId}_hd4x`,
+          resource_type: 'image',
+          overwrite: true
+        },
+        (error, result) => {
+          if (error) {
+            console.error('❌ HD @4x upload error:', error);
+          } else {
+            console.log(`✅ HD @4x uploaded: ${result.secure_url}`);
+          }
+        }
+      );
+      hd4xResult.end(hd4xBuffer);
+
+      console.log(`✅ HD versions created and uploaded from buffer for: ${publicId}`);
+      
+      // Получаем полные URL для HD версий
+      const hd2xUrl = cloudinary.url(`${publicId}_hd2x`);
+      const hd4xUrl = cloudinary.url(`${publicId}_hd4x`);
+
+      return {
+        success: true,
+        hd2x: hd2xUrl,
+        hd4x: hd4xUrl,
+        publicId
+      };
+
+    } catch (error) {
+      console.error(`❌ Error creating HD versions from buffer for ${publicId}:`, error.message);
+      return {
+        success: false,
+        error: error.message
+      };
+      }
+    }
 
   /**
    * Получает HD-версию изображения по URL
