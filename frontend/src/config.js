@@ -204,14 +204,22 @@ export const getHdImageUrl = (imagePath, quality = '2x') => {
           // Пропускаем версию и берем путь к файлу
           const publicId = urlParts.slice(uploadIndex + 2).join('/').split('.')[0];
           
-          // Создаем HD-версию с помощью Cloudinary transformations
+          // Создаем HD-версию используя реальные HD изображения из Cloudinary
+          const hdSuffix = quality === '4x' ? '_hd4x' : '_hd2x';
+          const hdPublicId = `${publicId}${hdSuffix}`;
+          
+          // Создаем URL для реального HD изображения
           const hdUrl = imagePath.replace(
             /\/upload\/([^\/]+)\//,
-            `/upload/c_scale,w_${quality === '4x' ? '2400' : '1200'},h_${quality === '4x' ? '2400' : '1200'},c_limit,q_auto,f_auto/`
+            `/upload/`
+          ).replace(
+            new RegExp(`${publicId}\\.[^/]+$`),
+            `${hdPublicId}.jpg`
           );
           
           console.log(`✅ Cloudinary HD ${quality} URL created:`, hdUrl);
           console.log(`🔧 PublicId: ${publicId}`);
+          console.log(`🔧 HD PublicId: ${hdPublicId}`);
           console.log(`🔧 Original URL: ${imagePath}`);
           console.log(`🔧 HD URL: ${hdUrl}`);
           return hdUrl;
