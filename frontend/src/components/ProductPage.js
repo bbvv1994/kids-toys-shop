@@ -1509,7 +1509,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       <Box sx={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 4,
+        gap: { xs: 2, md: 4 },
         background: 'white',
         borderRadius: 3,
         p: { xs: 2, md: 4 },
@@ -1521,12 +1521,12 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         <Box sx={{
           display: 'flex',
           flexDirection: { xs: 'column', md: 'row' },
-          gap: 4,
+          gap: { xs: 2, md: 4 },
           alignItems: { md: 'flex-start' }
         }}>
           {/* Галерея фото */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Box sx={{ position: 'relative', mb: 2 }}>
+            <Box sx={{ position: 'relative', mb: { xs: 1, md: 2 } }}>
               {(() => {
                 // Проверяем, есть ли у товара изображения
                 const hasImages = product.imageUrls && (
@@ -1543,7 +1543,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     return (
                                              <Box sx={{ 
                          width: '100%', 
-                         height: 400, 
+                         height: { xs: 280, sm: 320, md: 400 }, // Адаптивная высота для мобильных
                          maxWidth: 550,
                          background: '#f6f6f6',
                          overflow: scale > 1 ? 'visible' : 'hidden',
@@ -1578,7 +1578,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                           width: '100%',
                           height: '100%',
                           backgroundImage: `url(${imageSrc})`,
-                          backgroundSize: scale > 1 ? 'contain' : 'cover',
+                          backgroundSize: scale > 1 ? 'contain' : (isDesktop ? 'cover' : 'contain'), // На мобильных используем contain
                           backgroundPosition: 'center',
                           backgroundRepeat: 'no-repeat',
                           borderRadius: 2,
@@ -1657,7 +1657,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   <div 
                     style={{ 
                       width: '100%', 
-                      height: 400, 
+                      height: window.innerWidth < 768 ? 280 : 400, // Адаптивная высота для мобильных
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'center', 
@@ -1812,13 +1812,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                               justifyContent: 'center'
                             }}
                             onClick={() => {
-                              // Переключаем изображение на основное
+                              // Переключаем изображение на основное, но не открываем галерею
                               setGalleryIndex(idx);
-                              
-                              // На мобильных устройствах также открываем галерею
-                              if (!isDesktop) {
-                                openGalleryWithHd(idx);
-                              }
                             }}
                           >
                             {/* Миниатюра изображения - используем тот же принцип, что и в корзине */}
