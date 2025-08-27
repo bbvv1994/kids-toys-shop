@@ -112,6 +112,95 @@ export const getImageUrl = (imagePath) => {
   return url;
 };
 
+// Определяем, в какой среде мы работаем
+const isDevelopment = process.env.NODE_ENV === 'development' || 
+                     window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1';
+
+// Функция для получения HD-версии изображения для экранной лупы
+export const getHdImageUrl = (imagePath, quality = '2x') => {
+  console.log('🔧 getHdImageUrl called with:', imagePath, 'quality:', quality);
+  console.log('🔧 Environment:', isDevelopment ? 'LOCAL' : 'PRODUCTION');
+  console.log('🔧 API_BASE_URL:', API_BASE_URL);
+  
+  if (!imagePath) {
+    console.log('❌ No imagePath provided for HD');
+    return '';
+  }
+  
+  // В локальной среде используем локальную систему HD
+  if (isDevelopment) {
+    // Если это локальное изображение, создаем HD-URL
+      if ((imagePath.startsWith('/uploads/') || imagePath.includes('/uploads/')) && !imagePath.includes('@')) {
+    console.log(`🔧 Обрабатываем локальное изображение:`, imagePath);
+    
+    // Извлекаем имя файла из пути
+    let filename;
+    if (imagePath.startsWith('/uploads/')) {
+      filename = imagePath.split('/').pop(); // Получаем имя файла
+      console.log(`🔧 Извлечено имя файла (относительный путь):`, filename);
+    } else {
+      // Если это полный URL, извлекаем имя файла
+      const urlParts = imagePath.split('/');
+      const uploadsIndex = urlParts.findIndex(part => part === 'uploads');
+      console.log(`🔧 URL части:`, urlParts);
+      console.log(`🔧 Индекс uploads:`, uploadsIndex);
+      if (uploadsIndex !== -1 && urlParts[uploadsIndex + 1]) {
+        filename = urlParts[uploadsIndex + 1];
+        console.log(`🔧 Извлечено имя файла (полный URL):`, filename);
+      }
+    }
+      
+      if (filename) {
+        const baseFilename = filename.replace(/\.[^/.]+$/, ''); // Убираем расширение
+        
+        // Создаем HD-версию с полным URL
+        const hdFilename = quality === '4x' ? `${baseFilename}@4x.webp` : `${baseFilename}@2x.webp`;
+        const hdUrl = `${API_BASE_URL}/uploads/hd/${hdFilename}`;
+        
+        console.log(`🔧 Локальная HD ${quality} версия:`, hdUrl);
+        console.log(`🔧 Исходный файл:`, filename);
+        console.log(`🔧 Базовое имя:`, baseFilename);
+        console.log(`🔧 HD имя файла:`, hdFilename);
+        return hdUrl;
+      }
+    }
+    
+    // Для других изображений в локальной среде возвращаем оригинал
+    console.log('✅ Локальная среда: используем оригинальное изображение');
+    return imagePath;
+  }
+  
+  // В продакшене используем Cloudinary
+  if (imagePath.includes('cloudinary.com')) {
+    try {
+      // Извлекаем publicId из URL Cloudinary
+      const urlParts = imagePath.split('/');
+      const uploadIndex = urlParts.findIndex(part => part === 'upload');
+      
+      if (uploadIndex !== -1 && urlParts[uploadIndex + 2]) {
+        // Пропускаем версию и берем путь к файлу
+        const publicId = urlParts.slice(uploadIndex + 2).join('/').split('.')[0];
+        
+        // Создаем HD-версию с помощью Cloudinary transformations
+        const hdUrl = imagePath.replace(
+          /\/upload\/([^\/]+)\//,
+          `/upload/c_scale,w_${quality === '4x' ? '2400' : '1200'},h_${quality === '4x' ? '2400' : '1200'},c_limit,q_auto,f_auto/`
+        );
+        
+        console.log(`✅ Cloudinary HD ${quality} URL created:`, hdUrl);
+        return hdUrl;
+      }
+    } catch (error) {
+      console.warn('⚠️ Failed to create Cloudinary HD URL, using original:', error.message);
+    }
+  }
+  
+  // Fallback на оригинал
+  console.log('✅ Using original image for HD');
+  return imagePath;
+};
+
 // Экспортируем информацию о текущей среде для отладки
 export const ENV_INFO = {
   environment,

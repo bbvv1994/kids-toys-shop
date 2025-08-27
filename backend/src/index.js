@@ -17,6 +17,7 @@ const BatchImageProcessor = require('./batchImageProcessor');
 const ProductionUploadMiddleware = require('./productionUploadMiddleware');
 const CloudinaryUploadMiddleware = require('./cloudinaryUploadMiddleware');
 const FlexibleUploadMiddleware = require('./flexibleUploadMiddleware');
+const SmartImageUploadMiddleware = require('./smartImageUploadMiddleware');
 const TranslationService = require('./services/translationService');
 const SafeMigration = require('../safe-migration');
 
@@ -25,6 +26,7 @@ const imageMiddleware = new ImageMiddleware();
 const productionUploadMiddleware = new ProductionUploadMiddleware();
 const cloudinaryUploadMiddleware = new CloudinaryUploadMiddleware();
 const flexibleUploadMiddleware = new FlexibleUploadMiddleware();
+const smartImageUploadMiddleware = new SmartImageUploadMiddleware();
 require('dotenv').config();
 
 // Настройка Brevo
@@ -281,7 +283,8 @@ app.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   next();
 });
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, '..', '..', 'uploads')));
+app.use('/uploads/hd', express.static(path.join(__dirname, '..', '..', 'uploads', 'hd')));
 app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
 app.use(passport.initialize());
@@ -302,6 +305,51 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     database: 'connected'
   });
+});
+
+// Тестовый endpoint для проверки статических файлов
+app.get('/api/test-static', (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  
+  const uploadsPath = path.join(__dirname, '..', '..', 'uploads');
+  const hdPath = path.join(__dirname, '..', '..', 'uploads', 'hd');
+  
+  try {
+    const uploadsExists = fs.existsSync(uploadsPath);
+    const hdExists = fs.existsSync(hdPath);
+    
+    let uploadsFiles = [];
+    let hdFiles = [];
+    
+    if (uploadsExists) {
+      uploadsFiles = fs.readdirSync(uploadsPath).slice(0, 5); // Первые 5 файлов
+    }
+    
+    if (hdExists) {
+      hdFiles = fs.readdirSync(hdPath).slice(0, 5); // Первые 5 файлов
+    }
+    
+    res.json({
+      success: true,
+      uploadsPath,
+      hdPath,
+      uploadsExists,
+      hdExists,
+      uploadsFiles,
+      hdFiles,
+      currentDir: __dirname,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      uploadsPath,
+      hdPath,
+      currentDir: __dirname
+    });
+  }
 });
 
 // Debug endpoint для проверки категорий
@@ -563,7 +611,7 @@ passport.use(new FacebookStrategy({
 }));
 
 app.post('/api/products', authMiddleware, upload.array('images', 7), 
-  flexibleUploadMiddleware.processUploadedFiles.bind(flexibleUploadMiddleware), 
+  smartImageUploadMiddleware.processUploadedFiles.bind(smartImageUploadMiddleware), 
   async (req, res) => {
   // Проверка роли admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
@@ -2655,7 +2703,7 @@ app.patch('/api/products/:id/hidden', authMiddleware, async (req, res) => {
 });
 
 app.put('/api/products/:id', authMiddleware, upload.array('images', 7), 
-  flexibleUploadMiddleware.processUploadedFiles.bind(flexibleUploadMiddleware), 
+  smartImageUploadMiddleware.processUploadedFiles.bind(smartImageUploadMiddleware), 
   async (req, res) => {
   // Проверка роли admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
@@ -5012,6 +5060,13 @@ app.get('/api/debug/database-structure', async (req, res) => {
     });
   }
 });
+
+// 🖼️ API роуты для умной системы HD-изображений
+app.get('/api/images/config', smartImageUploadMiddleware.getConfigInfo.bind(smartImageUploadMiddleware));
+app.get('/api/images/hd-info/:imageUrl', smartImageUploadMiddleware.getHdImageInfo.bind(smartImageUploadMiddleware));
+app.post('/api/images/hd-info/bulk', smartImageUploadMiddleware.getBulkHdImageInfo.bind(smartImageUploadMiddleware));
+app.post('/api/images/switch-mode', smartImageUploadMiddleware.switchMode.bind(smartImageUploadMiddleware));
+app.post('/api/images/cleanup', smartImageUploadMiddleware.cleanupUnusedHdVersions.bind(smartImageUploadMiddleware));
 
 // Diagnostic endpoint для тестирования создания продукта с переводами
 app.post('/api/debug/test-translations', async (req, res) => {

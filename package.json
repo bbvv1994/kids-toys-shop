@@ -7,7 +7,9 @@
     "frontend": "cd frontend && npm start",
     "dev": "concurrently \"npm run backend:dev\" \"npm run frontend\"",
     "backend:dev": "cd backend && npm run dev",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "serve": "node server.js",
+    "build": "cd frontend && npm run build"
   },
   "dependencies": {
     "@prisma/client": "^6.11.1",

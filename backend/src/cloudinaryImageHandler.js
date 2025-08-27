@@ -136,6 +136,82 @@ class CloudinaryImageHandler {
   }
 
   /**
+   * Создает HD-версии изображения для экранной лупы
+   */
+  async createHdVersions(publicId) {
+    try {
+      console.log(`🖼️ Creating HD versions for: ${publicId}`);
+      
+      // Создаем @2x версию (1200x1200)
+      const hd2xUrl = cloudinary.url(publicId, {
+        transformation: [
+          { width: 1200, height: 1200, crop: 'limit' },
+          { quality: 'auto', fetch_format: 'auto' }
+        ]
+      });
+
+      // Создаем @4x версию (2400x2400)
+      const hd4xUrl = cloudinary.url(publicId, {
+        transformation: [
+          { width: 2400, height: 2400, crop: 'limit' },
+          { quality: 'auto', fetch_format: 'auto' }
+        ]
+      });
+
+      console.log(`✅ HD versions created for: ${publicId}`);
+      
+      return {
+        success: true,
+        hd2x: hd2xUrl,
+        hd4x: hd4xUrl
+      };
+
+    } catch (error) {
+      console.error(`❌ Error creating HD versions for ${publicId}:`, error.message);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Получает HD-версию изображения по URL
+   */
+  getHdImageUrl(originalUrl, quality = '2x') {
+    try {
+      if (!originalUrl || !originalUrl.includes('cloudinary.com')) {
+        return originalUrl; // Возвращаем оригинал, если не Cloudinary
+      }
+
+      // Извлекаем publicId из URL
+      const urlParts = originalUrl.split('/');
+      const uploadIndex = urlParts.findIndex(part => part === 'upload');
+      if (uploadIndex === -1) return originalUrl;
+
+      const publicId = urlParts.slice(uploadIndex + 2).join('/').split('.')[0];
+      
+      // Создаем HD-версию
+      const hdUrl = cloudinary.url(publicId, {
+        transformation: [
+          { 
+            width: quality === '4x' ? 2400 : 1200, 
+            height: quality === '4x' ? 2400 : 1200, 
+            crop: 'limit' 
+          },
+          { quality: 'auto', fetch_format: 'auto' }
+        ]
+      });
+
+      return hdUrl;
+
+    } catch (error) {
+      console.error('❌ Error getting HD image URL:', error.message);
+      return originalUrl; // Возвращаем оригинал в случае ошибки
+    }
+  }
+
+  /**
    * Обрабатывает массив изображений
    */
   async processMultipleImages(files) {

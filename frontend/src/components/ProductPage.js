@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL, getImageUrl } from '../config';
+import { API_BASE_URL, getImageUrl, getHdImageUrl } from '../config';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
@@ -230,24 +230,80 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 }); // Начинаем с центра
+  
+  // Состояния для экранной лупы в галерее
+  const desktopZoomLevel = 5; // Фиксированное значение зума 5x
+  const [desktopZoomPosition, setDesktopZoomPosition] = useState({ x: 0, y: 0 });
+  const [isDesktopZoomActive, setIsDesktopZoomActive] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   // Состояния для свайпа в галерее (для мобильных устройств)
   const [touchStart, setTouchStart] = useState(null);
   const [touchStartY, setTouchStartY] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [isSwiping, setIsSwiping] = useState(false);
-  
-  // Состояния для анимации свайпа
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  
-  // Состояния для pinch-to-zoom
+
+  // Состояния для масштабирования и перемещения изображений
   const [scale, setScale] = useState(1);
-  const [initialDistance, setInitialDistance] = useState(null);
-  const [initialScale, setInitialScale] = useState(1);
   const [translateX, setTranslateX] = useState(0);
   const [translateY, setTranslateY] = useState(0);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
+  const [initialDistance, setInitialDistance] = useState(0);
+  const [initialScale, setInitialScale] = useState(1);
+  const [isMouseDown, setIsMouseDown] = useState(false);
+  const [mouseStartPos, setMouseStartPos] = useState({ x: 0, y: 0 });
+
+  // Состояния для основного изображения
+  const [mainImageScale, setMainImageScale] = useState(1);
+  const [mainImageTranslateX, setMainImageTranslateX] = useState(0);
+  const [mainImageTranslateY, setMainImageTranslateY] = useState(0);
+  const [mainImageSwipeOffset, setMainImageSwipeOffset] = useState(0);
+  const [mainImageIsAnimating, setMainImageIsAnimating] = useState(false);
+  const [mainImageIsSwiping, setMainImageIsSwiping] = useState(false);
+  const [mainImageIsZooming, setMainImageIsZooming] = useState(false);
+  const [mainImageTouchStart, setMainImageTouchStart] = useState(null);
+  const [mainImageTouchStartY, setMainImageTouchStartY] = useState(null);
+  const [mainImageTouchEnd, setMainImageTouchEnd] = useState(null);
+  const [mainImageInitialDistance, setMainImageInitialDistance] = useState(0);
+  const [mainImageInitialScale, setMainImageInitialScale] = useState(1);
+  const [mainImageIsMouseDown, setMainImageIsMouseDown] = useState(false);
+  const [mainImageMouseStartPos, setMainImageMouseStartPos] = useState({ x: 0, y: 0 });
+
+  // Состояния для модального окна галереи
+  const [modalScale, setModalScale] = useState(1);
+  const [modalTranslateX, setModalTranslateX] = useState(0);
+  const [modalTranslateY, setModalTranslateY] = useState(0);
+  const [modalSwipeOffset, setModalSwipeOffset] = useState(0);
+  const [modalIsAnimating, setModalIsAnimating] = useState(false);
+  const [modalIsSwiping, setModalIsSwiping] = useState(false);
+  const [modalIsZooming, setModalIsZooming] = useState(false);
+  const [modalTouchStart, setModalTouchStart] = useState(null);
+  const [modalTouchStartY, setModalTouchStartY] = useState(null);
+  const [modalTouchEnd, setModalTouchEnd] = useState(null);
+  const [modalInitialDistance, setModalInitialDistance] = useState(0);
+  const [modalInitialScale, setModalInitialScale] = useState(1);
+  const [modalIsMouseDown, setModalIsMouseDown] = useState(false);
+  const [modalMouseStartPos, setModalMouseStartPos] = useState({ x: 0, y: 0 });
+
+  // Функции-геттеры для состояний в зависимости от контекста
+  const getCurrentScale = () => galleryOpen ? modalScale : mainImageScale;
+  const getCurrentTranslateX = () => galleryOpen ? modalTranslateX : mainImageTranslateX;
+  const getCurrentTranslateY = () => galleryOpen ? modalTranslateY : mainImageTranslateY;
+  const getCurrentSwipeOffset = () => galleryOpen ? modalSwipeOffset : mainImageSwipeOffset;
+  const getCurrentIsAnimating = () => galleryOpen ? modalIsAnimating : mainImageIsAnimating;
+  const getCurrentIsSwiping = () => galleryOpen ? modalIsSwiping : mainImageIsSwiping;
+  const getCurrentIsZooming = () => galleryOpen ? modalIsZooming : mainImageIsZooming;
+  const getCurrentTouchStart = () => galleryOpen ? modalTouchStart : mainImageTouchStart;
+  const getCurrentTouchStartY = () => galleryOpen ? modalTouchStartY : mainImageTouchStartY;
+  const getCurrentTouchEnd = () => galleryOpen ? modalTouchEnd : mainImageTouchEnd;
+  const getCurrentInitialDistance = () => galleryOpen ? modalInitialDistance : mainImageInitialDistance;
+  const getCurrentInitialScale = () => galleryOpen ? modalInitialScale : mainImageInitialScale;
+  const getCurrentIsMouseDown = () => galleryOpen ? modalIsMouseDown : mainImageIsMouseDown;
+  const getCurrentMouseStartPos = () => galleryOpen ? modalMouseStartPos : mainImageMouseStartPos;
+  
+
 
   // Безопасно ищем товар в корзине только если product загружен
   const cartItem = product ? cart?.items?.find(item => item.product.id === product.id) : null;
@@ -281,11 +337,25 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     loadProduct();
   }, [id]); // Убираем product?.updatedAt из зависимостей
 
+  // Определяем размер экрана при загрузке
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   // Отладочная информация для отслеживания изменений galleryIndex
   useEffect(() => {
     console.log('ProductPage Gallery: Индекс изображения изменился на:', galleryIndex);
     // Сбрасываем zoom при смене изображения
     resetZoom();
+    // Сбрасываем экранную лупу при смене изображения
+    setIsDesktopZoomActive(false);
   }, [galleryIndex]);
 
   // Блокировка скролла страницы при открытии галереи
@@ -734,7 +804,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     } else if (e.key === 'ArrowRight') {
       setGalleryIndex((galleryIndex + 1) % realImages.length);
     } else if (e.key === 'Escape') {
-      setGalleryOpen(false);
+      handleCloseGallery();
     }
   };
 
@@ -753,47 +823,151 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     setMousePosition({ x: xPercent, y: yPercent });
   };
 
-  const toggleZoom = () => {
+  // Функция для обработки движения мыши в галерее (для десктопа)
+  const handleGalleryMouseMove = (e) => {
+    // Движение мыши работает только если изображение увеличено и зажата мышь
+    if (scale <= 1 || window.innerWidth < 768 || !isMouseDown) return;
+    
+    // Если изображение увеличено на десктопе и зажата мышь, обрабатываем перемещение
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    // Вычисляем смещение от начальной позиции
+    const deltaX = mouseX - mouseStartPos.x;
+    const deltaY = mouseY - mouseStartPos.y;
+    
+    // Применяем смещение с правильным направлением и меньшей чувствительностью
+    setTranslateX(prev => {
+      const newX = prev + deltaX * 0.1; // Уменьшаем чувствительность
+      return Math.max(-300, Math.min(300, newX));
+    });
+    setTranslateY(prev => {
+      const newY = prev + deltaY * 0.1; // Уменьшаем чувствительность
+      return Math.max(-300, Math.min(300, newY));
+    });
+    
+    // Обновляем начальную позицию для следующего движения
+    setMouseStartPos({ x: mouseX, y: mouseY });
+  };
+
+  // Функция для начала зажатия мыши
+  const handleMouseDown = (e) => {
+    // Мышь работает только если изображение увеличено и это десктоп
+    if (scale <= 1 || window.innerWidth < 768) return;
+    
+    setIsMouseDown(true);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMouseStartPos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  // Функция для окончания зажатия мыши
+  const handleMouseUp = () => {
+    setIsMouseDown(false);
+  };
+
+  // Функция для зума основного изображения
+  const toggleMainImageZoom = () => {
     if (window.innerWidth >= 768) { // Только для десктопа
-      setIsZoomEnabled(!isZoomEnabled);
-      if (!isZoomEnabled) {
-        setZoomLevel(2); // Увеличение в 2 раза для начала
+      // Для десктопа: клик увеличивает, повторный клик уменьшает
+      if (mainImageScale > 1) {
+        resetMainImageZoom();
       } else {
-        setZoomLevel(1);
-        setMousePosition({ x: 50, y: 50 }); // Центрируем при отключении
+        setMainImageScale(2);
+        // Сбрасываем позицию при увеличении
+        setMainImageTranslateX(0);
+        setMainImageTranslateY(0);
       }
     } else {
       // Для мобильных устройств используем новую систему zoom
-      if (scale > 1) {
-        resetZoom();
+      if (mainImageScale > 1) {
+        resetMainImageZoom();
       } else {
-        setScale(2);
+        setMainImageScale(2);
       }
     }
   };
 
-  const handleWheel = (e) => {
-    if (!isZoomEnabled || window.innerWidth < 768) return;
+  // Функция для зума в модальном окне
+  const toggleModalZoom = () => {
+    if (window.innerWidth >= 768) { // Только для десктопа
+      // Для десктопа: клик увеличивает, повторный клик уменьшает
+      if (modalScale > 1) {
+        resetModalZoom();
+      } else {
+        setModalScale(2);
+        // Сбрасываем позицию при увеличении
+        setModalTranslateX(0);
+        setModalTranslateY(0);
+      }
+    } else {
+      // Для мобильных устройств используем новую систему zoom
+      if (modalScale > 1) {
+        resetModalZoom();
+      } else {
+        setModalScale(2);
+      }
+    }
+  };
+
+  // Общая функция для зума (для обратной совместимости)
+  const toggleZoom = () => {
+    if (galleryOpen) {
+      toggleModalZoom();
+    } else {
+      toggleMainImageZoom();
+    }
+  };
+
+  // Функция для обработки колесика основного изображения
+  const handleMainImageWheel = (e) => {
+    if (window.innerWidth < 768) return; // Только для десктопа
     
     e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.2 : 0.2;
-    const newZoom = Math.max(1, Math.min(4, zoomLevel + delta));
-    setZoomLevel(newZoom);
     
-    // Центрируем zoom относительно позиции мыши
-    if (newZoom > 1) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
+    if (mainImageScale > 1) {
+      // Если изображение уже увеличено, обрабатываем zoom колесиком
+      const delta = e.deltaY > 0 ? -0.2 : 0.2;
+      const newScale = Math.max(1, Math.min(4, mainImageScale + delta));
+      setMainImageScale(newScale);
       
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
+      // Если вернулись к нормальному размеру, сбрасываем позицию
+      if (newScale <= 1) {
+        setMainImageTranslateX(0);
+        setMainImageTranslateY(0);
+      }
+    }
+  };
+
+  // Функция для обработки колесика в модальном окне
+  const handleModalWheel = (e) => {
+    if (window.innerWidth < 768) return; // Только для десктопа
+    
+    e.preventDefault();
+    
+    if (modalScale > 1) {
+      // Если изображение уже увеличено, обрабатываем zoom колесиком
+      const delta = e.deltaY > 0 ? -0.2 : 0.2;
+      const newScale = Math.max(1, Math.min(4, modalScale + delta));
+      setModalScale(newScale);
       
-      setTranslateX((mouseX - centerX) * 0.1);
-      setTranslateY((mouseY - centerY) * 0.1);
+      // Если вернулись к нормальному размеру, сбрасываем позицию
+      if (newScale <= 1) {
+        setModalTranslateX(0);
+        setModalTranslateY(0);
+      }
+    }
+  };
+
+  // Общая функция для обработки колесика (для обратной совместимости)
+  const handleWheel = (e) => {
+    if (galleryOpen) {
+      handleModalWheel(e);
     } else {
-      setTranslateX(0);
-      setTranslateY(0);
+      handleMainImageWheel(e);
     }
   };
 
@@ -877,12 +1051,12 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         
         if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
           setTranslateX(prev => {
-            const newX = prev + deltaX * 0.3; // Уменьшаем чувствительность для плавности
+            const newX = prev - deltaX * 0.15; // Инвертируем направление и уменьшаем чувствительность
             // Ограничиваем перемещение, чтобы изображение не уходило слишком далеко
             return Math.max(-300, Math.min(300, newX));
           });
           setTranslateY(prev => {
-            const newY = prev + deltaY * 0.3; // Уменьшаем чувствительность для плавности
+            const newY = prev - deltaY * 0.15; // Инвертируем направление и уменьшаем чувствительность
             // Ограничиваем перемещение, чтобы изображение не уходило слишком далеко
             return Math.max(-300, Math.min(300, newY));
           });
@@ -991,30 +1165,53 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     }, 200);
   };
 
-  // Функция для сброса zoom
-  const resetZoom = () => {
-    setScale(1);
-    setTranslateX(0);
-    setTranslateY(0);
-    setIsZooming(false);
-    setTouchStart(null);
-    setTouchStartY(null);
-    setTouchEnd(null);
-    setIsSwiping(false);
+  // Функция для сброса zoom основного изображения
+  const resetMainImageZoom = () => {
+    setMainImageScale(1);
+    setMainImageTranslateX(0);
+    setMainImageTranslateY(0);
+    setMainImageIsZooming(false);
+    setMainImageTouchStart(null);
+    setMainImageTouchStartY(null);
+    setMainImageTouchEnd(null);
+    setMainImageIsSwiping(false);
+    setMainImageIsMouseDown(false);
   };
 
-  // Функция для двойного клика (сброс zoom)
-  const onGalleryDoubleClick = () => {
-    if (scale > 1) {
-      resetZoom();
+  // Функция для сброса zoom модального окна
+  const resetModalZoom = () => {
+    setModalScale(1);
+    setModalTranslateX(0);
+    setModalTranslateY(0);
+    setModalIsZooming(false);
+    setModalTouchStart(null);
+    setModalTouchStartY(null);
+    setModalTouchEnd(null);
+    setModalIsSwiping(false);
+    setModalIsMouseDown(false);
+  };
+
+  // Функция для сброса zoom (общая, для обратной совместимости)
+  const resetZoom = () => {
+    if (galleryOpen) {
+      resetModalZoom();
     } else {
-      setScale(2);
+      resetMainImageZoom();
     }
   };
 
-  // Функция для обработки перемещения изображения при zoom
+  // Функция для двойного клика в модальном окне (сброс zoom)
+  const onGalleryDoubleClick = () => {
+    if (modalScale > 1) {
+      resetModalZoom();
+    } else {
+      setModalScale(2);
+    }
+  };
+
+  // Функция для обработки перемещения изображения при zoom в модальном окне
   const onGalleryPan = (e) => {
-    if (scale > 1 && e.targetTouches.length === 1) {
+    if (modalScale > 1 && e.targetTouches.length === 1) {
       e.preventDefault();
       const touch = e.targetTouches[0];
       
@@ -1022,11 +1219,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         const deltaX = touch.clientX - (touch.clientX || touch.clientX);
         const deltaY = touch.clientY - (touch.clientY || touch.clientY);
         
-        setTranslateX(prev => {
+        setModalTranslateX(prev => {
           const newX = prev + deltaX * 0.5;
           return Math.max(-200, Math.min(200, newX));
         });
-        setTranslateY(prev => {
+        setModalTranslateY(prev => {
           const newY = prev + deltaY * 0.5;
           return Math.max(-200, Math.min(200, newY));
         });
@@ -1034,6 +1231,123 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     }
   };
 
+  // Глобальный обработчик для отпускания мыши
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (galleryOpen) {
+        setModalIsMouseDown(false);
+      } else {
+        setMainImageIsMouseDown(false);
+      }
+    };
+
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+    
+    return () => {
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [galleryOpen]);
+
+  // Функция для зума основного изображения (с проверкой модального окна)
+  const handleMainImageZoom = () => {
+    // Если открыто модальное окно, не обрабатываем зум на основном изображении
+    if (galleryOpen) return;
+    
+    toggleZoom();
+  };
+
+  // Обработчики для основного изображения
+  const handleMainImageDoubleClick = () => {
+    if (galleryOpen) return;
+    toggleMainImageZoom();
+  };
+
+  const handleMainImageTouchStart = (e) => {
+    if (galleryOpen) return;
+    const touch = e.touches[0];
+    setMainImageTouchStart(touch);
+    setMainImageTouchStartY(touch.clientY);
+    setMainImageTouchEnd(null);
+    setMainImageIsSwiping(false);
+    setMainImageIsZooming(false);
+  };
+
+  const handleMainImageTouchMove = (e) => {
+    if (galleryOpen) return;
+    if (!mainImageTouchStart) return;
+    
+    const touch = e.touches[0];
+    const deltaY = Math.abs(touch.clientY - mainImageTouchStartY);
+    
+    if (deltaY > 10) {
+      setMainImageIsSwiping(true);
+    }
+  };
+
+  const handleMainImageTouchEnd = () => {
+    if (galleryOpen) return;
+    setMainImageTouchStart(null);
+    setMainImageTouchStartY(null);
+    setMainImageTouchEnd(null);
+    setMainImageIsSwiping(false);
+  };
+
+  const handleMainImageMouseMove = (e) => {
+    if (galleryOpen) return;
+    if (!mainImageIsMouseDown) return;
+    
+    const deltaX = e.clientX - mainImageMouseStartPos.x;
+    const deltaY = e.clientY - mainImageMouseStartPos.y;
+    
+    setMainImageTranslateX(prev => prev + deltaX);
+    setMainImageTranslateY(prev => prev + deltaY);
+    setMainImageMouseStartPos({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMainImageMouseDown = (e) => {
+    if (galleryOpen) return;
+    setMainImageIsMouseDown(true);
+    setMainImageMouseStartPos({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMainImageMouseUp = () => {
+    if (galleryOpen) return;
+    setMainImageIsMouseDown(false);
+  };
+
+  // Функции для экранной лупы на десктопе
+  const handleDesktopZoomMouseMove = (e) => {
+    if (!isDesktopZoomActive) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Вычисляем позицию для экранной лупы
+    const zoomX = (x / rect.width) * 100;
+    const zoomY = (y / rect.height) * 100;
+    
+    setDesktopZoomPosition({ x: zoomX, y: zoomY });
+  };
+
+  const handleDesktopZoomMouseEnter = () => {
+    if (isDesktop) { // Только для десктопа
+      setIsDesktopZoomActive(true);
+    }
+  };
+
+  const handleDesktopZoomMouseLeave = () => {
+    setIsDesktopZoomActive(false);
+  };
+
+
+
+  const handleCloseGallery = () => {
+    setGalleryOpen(false);
+    setIsDesktopZoomActive(false);
+  };
+
+  // Состояние для галереи
 
 
   if (loading) {
@@ -1180,28 +1494,35 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     const imageSrc = getImageUrl(realImages[galleryIndex]);
                     
                     return (
-                      <Box sx={{ 
-                        width: '100%', 
-                        height: 400, 
-                        maxWidth: 550,
-                        background: '#f6f6f6',
-                        overflow: 'hidden',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => setGalleryOpen(true)}
-                      onDoubleClick={() => {
-                        if (scale > 1) {
-                          resetZoom();
-                        } else {
-                          setScale(2);
-                        }
-                      }}
-                      onTouchStart={onGalleryTouchStart}
-                      onTouchMove={onGalleryTouchMove}
-                      onTouchEnd={onGalleryTouchEnd}
-                      onWheel={handleWheel}
-                      onMouseMove={handleMouseMove}
-                      onKeyDown={handleGalleryKeyDown}
+                                             <Box sx={{ 
+                         width: '100%', 
+                         height: 400, 
+                         maxWidth: 550,
+                         background: '#f6f6f6',
+                         overflow: scale > 1 ? 'visible' : 'hidden',
+                         cursor: 'pointer'
+                       }}
+                                             onClick={() => {
+                                               // На десктопе не открываем модальное окно вообще
+                                               if (isDesktop) {
+                                                 return;
+                                               }
+                                               setGalleryOpen(true);
+                                             }}
+                       onDoubleClick={handleMainImageDoubleClick}
+                       onTouchStart={handleMainImageTouchStart}
+                       onTouchMove={handleMainImageTouchMove}
+                       onTouchEnd={handleMainImageTouchEnd}
+                       onWheel={handleMainImageWheel}
+                       onMouseMove={(e) => {
+                         handleMainImageMouseMove(e);
+                         handleDesktopZoomMouseMove(e);
+                       }}
+                       onMouseEnter={handleDesktopZoomMouseEnter}
+                       onMouseLeave={handleDesktopZoomMouseLeave}
+                       onMouseDown={handleMainImageMouseDown}
+                       onMouseUp={handleMainImageMouseUp}
+                       onKeyDown={handleGalleryKeyDown}
                       tabIndex={0}
                       >
                         {/* Основное изображение товара - используем тот же принцип, что и в корзине */}
@@ -1209,7 +1530,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                           width: '100%',
                           height: '100%',
                           backgroundImage: `url(${imageSrc})`,
-                          backgroundSize: scale > 1 ? 'cover' : 'cover',
+                          backgroundSize: scale > 1 ? 'contain' : 'cover',
                           backgroundPosition: 'center',
                           backgroundRepeat: 'no-repeat',
                           borderRadius: 2,
@@ -1247,6 +1568,36 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                             </Button>
                           </Box>
                         )}
+
+
+
+
+
+                        {/* Экранная лупа для десктопа */}
+                        {isDesktopZoomActive && isDesktop && (
+                          <Box sx={{
+                            position: 'absolute',
+                            top: 20,
+                            right: -370,
+                            width: 350,
+                            height: 350,
+                            borderRadius: 0,
+                            border: '2px solid #4ECDC4',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                            overflow: 'hidden',
+                            zIndex: 1000,
+                            background: '#fff'
+                          }}>
+                            <Box sx={{
+                              width: '100%',
+                              height: '100%',
+                              backgroundImage: `url(${getHdImageUrl(imageSrc, '4x')})`,
+                              backgroundSize: `${100 * desktopZoomLevel}%`,
+                              backgroundPosition: `${desktopZoomPosition.x}% ${desktopZoomPosition.y}%`,
+                              backgroundRepeat: 'no-repeat'
+                            }} />
+                          </Box>
+                        )}
                       </Box>
                     );
                   }
@@ -1267,20 +1618,28 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                       flexDirection: 'column',
                       gap: 2,
                       position: 'relative',
-                      overflow: 'hidden'
+                      overflow: scale > 1 ? 'visible' : 'hidden'
                     }}
-                    onTouchStart={onGalleryTouchStart}
-                    onTouchMove={onGalleryTouchMove}
-                    onTouchEnd={onGalleryTouchEnd}
-                    onWheel={handleWheel}
-                    onMouseMove={handleMouseMove}
-                    onDoubleClick={() => {
-                      if (scale > 1) {
-                        resetZoom();
-                      } else {
-                        setScale(2);
+                    onClick={() => {
+                      // На десктопе не открываем модальное окно вообще
+                      if (isDesktop) {
+                        return;
                       }
+                      setGalleryOpen(true);
                     }}
+                    onTouchStart={handleMainImageTouchStart}
+                    onTouchMove={handleMainImageTouchMove}
+                    onTouchEnd={handleMainImageTouchEnd}
+                    onWheel={handleMainImageWheel}
+                    onMouseMove={(e) => {
+                      handleMainImageMouseMove(e);
+                      handleDesktopZoomMouseMove(e);
+                    }}
+                    onMouseEnter={handleDesktopZoomMouseEnter}
+                    onMouseLeave={handleDesktopZoomMouseLeave}
+                    onMouseDown={handleMainImageMouseDown}
+                    onMouseUp={handleMainImageMouseUp}
+                    onDoubleClick={handleMainImageDoubleClick}
                   >
                     <img 
                       src="/photography.jpg" 
@@ -1319,6 +1678,36 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                         >
                           <ZoomOutIcon />
                         </Button>
+                      </Box>
+                    )}
+
+
+
+
+
+                    {/* Экранная лупа для заглушки (только для десктопа) */}
+                    {isDesktopZoomActive && isDesktop && (
+                      <Box sx={{
+                        position: 'absolute',
+                        top: 20,
+                        right: -370,
+                        width: 350,
+                        height: 350,
+                        borderRadius: 0,
+                        border: '2px solid #4ECDC4',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                        overflow: 'hidden',
+                        zIndex: 1000,
+                        background: '#fff'
+                      }}>
+                        <Box sx={{
+                          width: '100%',
+                          height: '100%',
+                          backgroundImage: `url(${getHdImageUrl('/photography.jpg', '4x')})`,
+                          backgroundSize: `${100 * desktopZoomLevel}%`,
+                          backgroundPosition: `${desktopZoomPosition.x}% ${desktopZoomPosition.y}%`,
+                          backgroundRepeat: 'no-repeat'
+                        }} />
                       </Box>
                     )}
                     
@@ -1373,19 +1762,21 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                               alignItems: 'center',
                               justifyContent: 'center'
                             }}
-                            onClick={() => setGalleryIndex(idx)}
-                            onDoubleClick={() => {
-                              if (scale > 1) {
-                                resetZoom();
-                              } else {
-                                setScale(2);
+                            onClick={() => {
+                              setGalleryIndex(idx);
+                              // На десктопе не открываем модальное окно
+                              if (!isDesktop) {
+                                setGalleryOpen(true);
                               }
                             }}
-                            onTouchStart={onGalleryTouchStart}
-                            onTouchMove={onGalleryTouchMove}
-                            onTouchEnd={onGalleryTouchEnd}
-                            onWheel={handleWheel}
-                            onMouseMove={handleMouseMove}
+                            onDoubleClick={handleMainImageDoubleClick}
+                                                         onTouchStart={handleMainImageTouchStart}
+                             onTouchMove={handleMainImageTouchMove}
+                             onTouchEnd={handleMainImageTouchEnd}
+                             onWheel={handleMainImageWheel}
+                             onMouseMove={handleMainImageMouseMove}
+                             onMouseDown={handleMainImageMouseDown}
+                             onMouseUp={handleMainImageMouseUp}
                           >
                             {/* Миниатюра изображения - используем тот же принцип, что и в корзине */}
                             <Box sx={{
@@ -2037,302 +2428,183 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         )}
       </Box>
 
-      {/* Модальное окно для просмотра всех изображений товара */}
-      <Modal 
-        open={galleryOpen} 
-        onClose={() => setGalleryOpen(false)}
-        onKeyDown={handleGalleryKeyDown}
-        tabIndex={0}
-        sx={{
-          zIndex: 99999,
-          '& .MuiBackdrop-root': {
-            backgroundColor: { xs: '#000000', sm: 'rgba(0, 0, 0, 0.5)' }
-          }
-        }}
-      >
-        <Box 
-          sx={{ 
-            position: 'fixed', 
-            top: { xs: 0, sm: '50%' }, 
-            left: { xs: 0, sm: '50%' }, 
-            transform: { xs: 'none', sm: 'translate(-50%, -50%)' }, 
-            bgcolor: { xs: '#000000', sm: 'background.paper' }, 
-            boxShadow: { xs: 'none', sm: '0 20px 60px rgba(0, 0, 0, 0.3)' }, 
-            p: { xs: 0, sm: 2, md: 3 }, 
-            borderRadius: 0, 
-            outline: 'none', 
-            maxWidth: { xs: '100%', sm: 600, md: 800 }, 
-            width: { xs: '100%', sm: '95%', md: '95%' }, 
-            textAlign: 'center',
-            maxHeight: { xs: '100vh', sm: '95vh', md: '95vh' },
-            overflow: 'hidden',
+            {/* Модальное окно для просмотра всех изображений товара (только для мобильных устройств) */}
+      {!isDesktop && (
+        <Modal 
+          open={galleryOpen} 
+          onClose={handleCloseGallery}
+          onKeyDown={handleGalleryKeyDown}
+          tabIndex={0}
+          sx={{
             zIndex: 99999,
-            border: 'none',
-            touchAction: 'none', // Блокируем все touch события для предотвращения скролла
-            userSelect: 'none', // Запрещаем выделение текста при свайпе
-            WebkitUserSelect: 'none', // Для Safari
-            // Дополнительные стили для блокировки скролла
-            overscrollBehavior: 'none', // Предотвращаем overscroll на мобильных
-            WebkitOverflowScrolling: 'touch' // Плавный скролл для iOS
-          }}
-
-          onClick={(e) => {
-            // Закрываем галерею при клике по пустому месту на мобильных
-            if (e.target === e.currentTarget) {
-              setGalleryOpen(false);
+            '& .MuiBackdrop-root': {
+              backgroundColor: '#000000'
             }
           }}
-          onTouchStart={onGalleryTouchStart}
-          onTouchMove={onGalleryTouchMove}
-          onTouchEnd={onGalleryTouchEnd}
         >
-
-          {(() => {
-            const realImages = getRealImages();
-            
-            if (realImages.length > 0 && galleryIndex < realImages.length && galleryIndex >= 0) {
-              return (
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  mb: 2,
-                  minHeight: { xs: 150, sm: 200, md: 200 },
-                  flexWrap: 'wrap',
-                  gap: { xs: 1, sm: 2, md: 2 }
-                }}>
-                  <Button 
-                    onClick={() => setGalleryIndex((galleryIndex - 1 + realImages.length) % realImages.length)} 
-                    disabled={realImages.length < 2}
-                    sx={{
-                      display: { xs: 'none', sm: 'flex' },
-                      background: 'rgba(255, 255, 255, 0.9)',
-                      color: realImages.length < 2 ? '#ccc' : '#333',
-                      borderRadius: '50%',
-                      fontWeight: 600,
-                      fontSize: { xs: 24, sm: 28, md: 32 },
-                      minWidth: { xs: 40, sm: 50, md: 60 },
-                      height: { xs: 40, sm: 50, md: 60 },
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                      border: '2px solid rgba(0, 0, 0, 0.1)',
-                      '&:hover': {
-                        background: 'rgba(255, 255, 255, 1)',
-                        color: realImages.length < 2 ? '#ccc' : '#000',
-                        boxShadow: '0 6px 20px rgba(0, 0, 0, 0.2)',
-                        transform: 'scale(1.05)'
-                      },
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    ‹
-                  </Button>
-                  <Box 
-                    sx={{ 
-                      width: { xs: '100vw', sm: 400, md: 500 }, 
-                      height: { xs: '100vh', sm: 400, md: 500 }, 
-                      margin: { xs: 0, sm: '0 12px', md: '0 16px' },
-                      background: 'transparent',
-                      overflow: 'hidden',
-                      position: { xs: 'fixed', sm: 'static' },
-                      top: { xs: 0, sm: 'auto' },
-                      left: { xs: 'auto' },
-                      right: { xs: 0, sm: 'auto' },
-                      cursor: scale > 1 ? 'zoom-out' : 'zoom-in',
-                      touchAction: 'none', // Блокируем все touch события для zoom
-                      userSelect: 'none', // Запрещаем выделение текста при свайпе
-                      WebkitUserSelect: 'none', // Для Safari
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                    onClick={toggleZoom}
-                    onDoubleClick={onGalleryDoubleClick}
-                    onMouseMove={handleMouseMove}
-                    onWheel={handleWheel}
-                    onTouchStart={onGalleryTouchStart}
-                    onTouchMove={onGalleryTouchMove}
-                    onTouchEnd={onGalleryTouchEnd}
-                  >
-                    {/* Изображение в модальном окне с поддержкой pinch-to-zoom для мобильных */}
-                    <Box sx={{
-                      width: '100%',
-                      height: '100%',
-                      backgroundImage: `url(${getImageUrl(realImages[galleryIndex])})`,
-                      backgroundSize: scale > 1 ? 'cover' : 'contain',
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat',
-                      transform: `scale(${scale}) translate(${translateX + swipeOffset}px, ${translateY}px)`,
-                      transition: isAnimating ? 'transform 0.3s ease-out' : (scale > 1 ? 'none' : 'transform 0.2s ease-out'),
-                      overflow: 'hidden',
-                      transformOrigin: 'center center',
-                      // Для мобильных устройств используем pinch-to-zoom
-                      ...(scale > 1 && {
-                        cursor: 'move',
-                        touchAction: 'none'
-                      })
-                    }} />
-                  </Box>
-                  <Button 
-                    onClick={() => setGalleryIndex((galleryIndex + 1) % realImages.length)} 
-                    disabled={realImages.length < 2}
-                    sx={{
-                      display: { xs: 'none', sm: 'flex' },
-                      background: 'rgba(255, 255, 255, 0.9)',
-                      color: realImages.length < 2 ? '#ccc' : '#333',
-                      borderRadius: '50%',
-                      fontWeight: 600,
-                      fontSize: { xs: 24, sm: 28, md: 32 },
-                      minWidth: { xs: 40, sm: 50, md: 60 },
-                      height: { xs: 40, sm: 50, md: 60 },
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                      border: '2px solid rgba(0, 0, 0, 0.1)',
-                      '&:hover': {
-                        background: 'rgba(255, 255, 255, 1)',
-                        color: realImages.length < 2 ? '#ccc' : '#000',
-                        boxShadow: '0 6px 20px rgba(0, 0, 0, 0.2)',
-                        transform: 'scale(1.05)'
-                      },
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    ›
-                  </Button>
-                </Box>
-              );
-            } else {
-              return (
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2, height: 400 }}>
-                  <span style={{ color: '#bbb', fontSize: 18, textAlign: 'center' }}>Нет изображений для просмотра</span>
-                </Box>
-              );
-            }
-          })()}
-          {/* Кнопка сброса zoom для мобильных устройств */}
-          {scale > 1 && (
-            <Box sx={{
-              position: 'fixed',
-              top: { xs: 20, sm: 30 },
-              right: { xs: 20, sm: 30 },
-              zIndex: 100000
-            }}>
-              <Button
-                onClick={resetZoom}
-                sx={{
-                  background: 'rgba(0, 0, 0, 0.7)',
-                  color: 'white',
-                  borderRadius: '50%',
-                  minWidth: 48,
-                  height: 48,
-                  '&:hover': {
-                    background: 'rgba(0, 0, 0, 0.9)'
-                  }
-                }}
-              >
-                <ZoomOutIcon />
-              </Button>
-            </Box>
-          )}
-          
-          {(() => {
-            const realImages = getRealImages();
-            if (realImages.length > 1) {
-              return (
-                <Box sx={{ 
-                  display: { xs: 'none', sm: 'flex' }, 
-                  gap: 1, 
-                  justifyContent: 'center', 
-                  mb: 2, 
-                  flexWrap: 'wrap' 
-                }}>
-                  {realImages.map((url, idx) => (
-                    <Box
-                      key={idx}
-                      sx={{
-                        width: 48,
-                        height: 48,
-                        backgroundImage: `url(${getImageUrl(url)})`,
-                        backgroundSize: 'cover',
+          <Box 
+            sx={{ 
+              position: 'fixed', 
+              top: 0, 
+              left: 0, 
+              bgcolor: '#000000', 
+              p: 0, 
+              borderRadius: 0, 
+              outline: 'none', 
+              maxWidth: '100%', 
+              width: '100%', 
+              textAlign: 'center',
+              maxHeight: '100vh',
+              overflow: 'hidden',
+              zIndex: 99999,
+              border: 'none',
+              touchAction: 'none',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              overscrollBehavior: 'none',
+              WebkitOverflowScrolling: 'touch'
+            }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                handleCloseGallery();
+              }
+            }}
+            onTouchStart={onGalleryTouchStart}
+            onTouchMove={onGalleryTouchMove}
+            onTouchEnd={onGalleryTouchEnd}
+          >
+            {(() => {
+              const realImages = getRealImages();
+              
+              if (realImages.length > 0 && galleryIndex < realImages.length && galleryIndex >= 0) {
+                return (
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    mb: 2,
+                    minHeight: 150,
+                    flexWrap: 'wrap',
+                    gap: 1
+                  }}>
+                    <Box 
+                      sx={{ 
+                        width: '100vw', 
+                        height: '100vh', 
+                        margin: 0,
+                        background: 'transparent',
+                        overflow: scale > 1 ? 'visible' : 'hidden',
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        cursor: scale > 1 ? 'zoom-out' : 'zoom-in',
+                        touchAction: 'none',
+                        userSelect: 'none',
+                        WebkitUserSelect: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      onClick={toggleZoom}
+                      onDoubleClick={onGalleryDoubleClick}
+                      onMouseMove={handleGalleryMouseMove}
+                      onMouseDown={handleMouseDown}
+                      onMouseUp={handleMouseUp}
+                      onWheel={handleWheel}
+                      onTouchStart={onGalleryTouchStart}
+                      onTouchMove={onGalleryTouchMove}
+                      onTouchEnd={onGalleryTouchEnd}
+                    >
+                      <Box sx={{
+                        width: '100%',
+                        height: '100%',
+                        backgroundImage: `url(${getImageUrl(realImages[galleryIndex])})`,
+                        backgroundSize: scale > 1 ? 'contain' : 'contain',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
-                        borderRadius: 1,
-                        border: galleryIndex === idx ? '2px solid #4ECDC4' : '2px solid #eee',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => setGalleryIndex(idx)}
-                    />
-                  ))}
-                </Box>
-              );
-            }
-            return null;
-          })()}
-          {/* Кнопка закрытия для планшетов и десктопа */}
-          <Box sx={{ 
-            display: { xs: 'none', sm: 'block' }
-          }}>
-            <Button 
-              onClick={() => setGalleryOpen(false)} 
-              sx={{ 
-                mt: 2,
-                background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
-                color: '#fff',
-                borderRadius: 2,
-                fontWeight: 600,
-                fontSize: 15,
-                px: 3,
-                py: 1.5,
-                height: 44,
-                boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
-                textTransform: 'none',
-                minWidth: 120,
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
-                  boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
-                  transform: 'translateY(-1px)'
-                },
-              }}
-            >
-              {t('common.close')}
-            </Button>
+                        transform: `scale(${scale}) translate(${translateX + swipeOffset}px, ${translateY}px)`,
+                        transition: isAnimating ? 'transform 0.3s ease-out' : (scale > 1 ? 'none' : 'transform 0.2s ease-out'),
+                        overflow: scale > 1 ? 'visible' : 'hidden',
+                        transformOrigin: 'center center',
+                        ...(scale > 1 && {
+                          cursor: 'move',
+                          touchAction: 'none'
+                        })
+                      }} />
+                    </Box>
+                  </Box>
+                );
+              } else {
+                return (
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2, height: 400 }}>
+                    <span style={{ color: '#bbb', fontSize: 18, textAlign: 'center' }}>Нет изображений для просмотра</span>
+                  </Box>
+                );
+              }
+            })()}
+            
+            {/* Кнопка сброса zoom для мобильных устройств */}
+            {scale > 1 && (
+              <Box sx={{
+                position: 'fixed',
+                top: 20,
+                right: 20,
+                zIndex: 100000
+              }}>
+                <Button
+                  onClick={resetZoom}
+                  sx={{
+                    background: 'rgba(0, 0, 0, 0.7)',
+                    color: 'white',
+                    borderRadius: '50%',
+                    minWidth: 48,
+                    height: 48,
+                    '&:hover': {
+                      background: 'rgba(0, 0, 0, 0.9)'
+                    }
+                  }}
+                >
+                  <ZoomOutIcon />
+                </Button>
+              </Box>
+            )}
+            
+            {/* Кнопка закрытия для мобильных */}
+            <Box sx={{ 
+              position: 'fixed',
+              bottom: 20,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 100000
+            }}>
+              <Button 
+                onClick={handleCloseGallery} 
+                sx={{ 
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  color: '#333',
+                  borderRadius: 25,
+                  fontWeight: 600,
+                  fontSize: 16,
+                  px: 4,
+                  py: 2,
+                  height: 50,
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                  textTransform: 'none',
+                  minWidth: 140,
+                  border: '2px solid rgba(0, 0, 0, 0.1)',
+                  '&:hover': {
+                    background: 'rgba(255, 255, 255, 1)',
+                    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)',
+                  },
+                }}
+              >
+                {t('common.close')}
+              </Button>
+            </Box>
           </Box>
-          
-
-          
-          {/* Кнопка закрытия для мобильных (временная, пока не заработает двойной тап) */}
-          <Box sx={{ 
-            display: { xs: 'block', sm: 'none' },
-            position: 'fixed',
-            bottom: 20,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 100000
-          }}>
-            <Button 
-              onClick={() => setGalleryOpen(false)} 
-              sx={{ 
-                background: 'rgba(255, 255, 255, 0.9)',
-                color: '#333',
-                borderRadius: 25,
-                fontWeight: 600,
-                fontSize: 16,
-                px: 4,
-                py: 2,
-                height: 50,
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-                textTransform: 'none',
-                minWidth: 140,
-                border: '2px solid rgba(0, 0, 0, 0.1)',
-                '&:hover': {
-                  background: 'rgba(255, 255, 255, 1)',
-                  boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)',
-                },
-              }}
-            >
-              {t('common.close')}
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
+        </Modal>
+      )}
       {/* Блок похожих товаров */}
       {similarProducts.length > 0 && (
         <Box sx={{ mt: 5 }}>

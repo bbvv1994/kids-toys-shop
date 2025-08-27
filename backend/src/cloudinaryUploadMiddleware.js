@@ -37,7 +37,8 @@ class CloudinaryUploadMiddleware {
       const imageUrls = [];
       const processedFiles = [];
 
-      results.forEach(result => {
+      // Обрабатываем результаты и создаем HD-версии
+      for (const result of results) {
         if (result.success) {
           const fileInfo = {
             filename: result.filename,
@@ -52,10 +53,24 @@ class CloudinaryUploadMiddleware {
           imageUrls.push(result.url); // Используем URL из Cloudinary
           
           console.log(`✅ Processed: ${result.filename} -> ${result.url}`);
+          
+          // Создаем HD-версии для экранной лупы
+          try {
+            if (result.publicId) {
+              const hdVersions = await this.imageHandler.createHdVersions(result.publicId);
+              if (hdVersions.success) {
+                console.log(`🖼️ HD versions created for: ${result.filename}`);
+                console.log(`   @2x: ${hdVersions.hd2x}`);
+                console.log(`   @4x: ${hdVersions.hd4x}`);
+              }
+            }
+          } catch (hdError) {
+            console.warn(`⚠️ Failed to create HD versions for ${result.filename}:`, hdError.message);
+          }
         } else {
           console.error(`❌ Failed to process: ${result.originalName} - ${result.error}`);
         }
-      });
+      }
 
       // Добавляем обработанные данные в request
       req.imageUrls = imageUrls;
