@@ -1,5 +1,7 @@
 ﻿
 
+
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProductCard from './components/ProductCard';
@@ -288,6 +290,7 @@ const theme = createTheme({
   const isNarrow = useMediaQuery(theme.breakpoints.down('lg')); // < 1200px
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm')); // < 600px
+  const isMediumOrSmaller = useMediaQuery(theme.breakpoints.down('lg')); // < 1200px (включает md)
   const location = useLocation();
   const navigate = useNavigate();
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -1621,7 +1624,8 @@ const theme = createTheme({
             
             
             {/* Корзина и профиль - Desktop */}
-            <Box sx={{ marginLeft: 'auto', display: { xs: 'none', lg: 'flex' }, alignItems: 'center', gap: 3, flexShrink: 0 }}>
+            {!isMediumOrSmaller && (
+            <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
               {/* Кнопка CMS для админа */}
               {!userLoading && user?.role === 'admin' && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', mt: 2.5 }}>
@@ -1849,10 +1853,10 @@ const theme = createTheme({
                 </Typography>
               </Box>
             </Box>
-            
+            )}
 
             {/* Корзина и язык для мобильных - справа */}
-            {(isNarrow || isMobile) && (
+            {isMediumOrSmaller && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, ml: 'auto' }}>
                 {/* Кнопка профиля для мобильных */}
                 <IconButton
@@ -11381,7 +11385,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
       mb: 3, 
       color: '#ff6600',
       fontFamily: '"Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
-      fontSize: '2.2rem',
+                      fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2.2rem', lg: '2.5rem', xl: '2.8rem' },
       textShadow: '0 2px 4px rgba(255, 102, 0, 0.2)',
       letterSpacing: '0.5px',
       background: 'linear-gradient(135deg, #ff6600 0%, #ff8533 100%)',
@@ -11402,14 +11406,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-              p: { xs: 2, md: 4 },
-              maxWidth: { xs: '100%', md: 1100 },
-              minWidth: { xs: 'auto', md: 1100 },
+              p: { xs: 2, md: 2, lg: 2 },
+              maxWidth: { xs: '100%', md: '100%', lg: '100%' },
+              minWidth: { xs: 'auto', md: 'auto', lg: 'auto' },
               minHeight: 320,
-              margin: '0 auto',
+              margin: 0,
               mt: 0,
               position: 'relative',
-              left: { xs: 0, md: '-80px' },
+              left: 0,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -11486,7 +11490,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               {/* Основная информация */}
               <Box sx={{ 
                 display: 'grid',
-                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                                  gridTemplateColumns: { xs: '1fr', md: '1fr 1fr', lg: '1fr 1fr' },
                 gap: { xs: 4, md: 6 },
                 width: '100%',
                 maxWidth: { xs: '100%', md: 1000 }
@@ -11505,9 +11509,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     mb: 3,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1
+                    gap: 1,
+                    fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' }
                   }}>
-                    <PersonIcon sx={{ color: '#4caf50', fontSize: 24 }} />
+                    <PersonIcon sx={{ color: '#4caf50', fontSize: { xs: 20, sm: 22, md: 24 } }} />
                     {t('profile.sections.personalInfo')}
                   </Typography>
                   
@@ -11529,10 +11534,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     }}>
                       <PersonIcon sx={{ color: '#4caf50', fontSize: 20 }} />
                       <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        <Typography sx={{ color: '#666', fontSize: { xs: 11, sm: 12 }, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                           {t('profile.fields.firstName')}
                         </Typography>
-                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500, mt: 0.5 }}>
+                        <Typography sx={{ color: '#333', fontSize: { xs: 14, sm: 15, md: 16 }, fontWeight: 500, mt: 0.5 }}>
                           {profileData?.name || user?.name || t('profile.value.notSpecified')}
                         </Typography>
                       </Box>
@@ -11555,10 +11560,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     }}>
                       <PersonIcon sx={{ color: '#4caf50', fontSize: 20 }} />
                       <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        <Typography sx={{ color: '#666', fontSize: { xs: 11, sm: 12 }, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                           {t('profile.fields.lastName')}
                         </Typography>
-                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500, mt: 0.5 }}>
+                        <Typography sx={{ color: '#333', fontSize: { xs: 14, sm: 15, md: 16 }, fontWeight: 500, mt: 0.5 }}>
                           {profileData?.surname || user?.surname || t('profile.value.notSpecifiedF')}
                         </Typography>
                       </Box>
@@ -11581,10 +11586,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     }}>
                       <EmailIcon sx={{ color: '#4caf50', fontSize: 20 }} />
                       <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        <Typography sx={{ color: '#666', fontSize: { xs: 11, sm: 12 }, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                           Email
                         </Typography>
-                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500, mt: 0.5 }}>
+                        <Typography sx={{ color: '#333', fontSize: { xs: 14, sm: 15, md: 16 }, fontWeight: 500, mt: 0.5 }}>
                           {profileData?.email || user?.email}
                         </Typography>
                       </Box>
@@ -11607,10 +11612,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     }}>
                       <PhoneIcon sx={{ color: '#4caf50', fontSize: 20 }} />
                       <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        <Typography sx={{ color: '#666', fontSize: { xs: 11, sm: 12 }, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                           {t('profile.fields.phone')}
                         </Typography>
-                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500, mt: 0.5 }}>
+                        <Typography sx={{ color: '#333', fontSize: { xs: 14, sm: 15, md: 16 }, fontWeight: 500, mt: 0.5 }}>
                           {profileData?.phone || user?.phone || t('profile.value.notSpecified')}
                         </Typography>
                       </Box>
@@ -11633,10 +11638,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     }}>
                       <CalendarTodayIcon sx={{ color: '#4caf50', fontSize: 20 }} />
                       <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        <Typography sx={{ color: '#666', fontSize: { xs: 11, sm: 12 }, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                           {t('profile.fields.registeredAt')}
                         </Typography>
-                        <Typography sx={{ color: '#333', fontSize: 16, fontWeight: 500, mt: 0.5 }}>
+                        <Typography sx={{ color: '#333', fontSize: { xs: 14, sm: 15, md: 16 }, fontWeight: 500, mt: 0.5 }}>
                           {profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString('ru-RU') : user?.createdAt ? new Date(user.createdAt).toLocaleDateString('ru-RU') : t('profile.value.notSpecifiedF')}
                         </Typography>
                       </Box>
@@ -11658,9 +11663,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     mb: 3,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1
+                    gap: 1,
+                    fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' }
                   }}>
-                    <BarChartIcon sx={{ color: '#4caf50', fontSize: 24 }} />
+                    <BarChartIcon sx={{ color: '#4caf50', fontSize: { xs: 20, sm: 22, md: 24 } }} />
                     {t('profile.sections.stats')}
                   </Typography>
                   
@@ -11696,10 +11702,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         <ShoppingCartIcon sx={{ color: '#4caf50', fontSize: 24 }} />
                       </Box>
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        <Typography sx={{ color: '#666', fontSize: { xs: 11, sm: 12 }, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                           {t('profile.stats.cartItems')}
                         </Typography>
-                        <Typography sx={{ color: '#333', fontSize: 24, fontWeight: 700, mt: 0.5 }}>
+                        <Typography sx={{ color: '#333', fontSize: { xs: 20, sm: 22, md: 24 }, fontWeight: 700, mt: 0.5 }}>
                           {cart?.length || 0}
                         </Typography>
                       </Box>
@@ -11732,10 +11738,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         <FavoriteIcon sx={{ color: '#4caf50', fontSize: 24 }} />
                       </Box>
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        <Typography sx={{ color: '#666', fontSize: { xs: 11, sm: 12 }, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                           {t('profile.stats.wishlistItems')}
                         </Typography>
-                        <Typography sx={{ color: '#333', fontSize: 24, fontWeight: 700, mt: 0.5 }}>
+                        <Typography sx={{ color: '#333', fontSize: { xs: 20, sm: 22, md: 24 }, fontWeight: 700, mt: 0.5 }}>
                           {localWishlist?.length || 0}
                         </Typography>
                       </Box>
@@ -11768,10 +11774,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         <VisibilityIcon sx={{ color: '#4caf50', fontSize: 24 }} />
                       </Box>
                       <Box>
-                        <Typography sx={{ color: '#666', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        <Typography sx={{ color: '#666', fontSize: { xs: 11, sm: 12 }, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                           {t('profile.stats.viewedItems')}
                         </Typography>
-                        <Typography sx={{ color: '#333', fontSize: 24, fontWeight: 700, mt: 0.5 }}>
+                        <Typography sx={{ color: '#333', fontSize: { xs: 20, sm: 22, md: 24 }, fontWeight: 700, mt: 0.5 }}>
                           {localViewed?.length || 0}
                         </Typography>
                       </Box>
@@ -11785,10 +11791,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
       case 'notifications': {
         const getNotificationIcon = (type) => {
           switch (type) {
-            case 'order': return <ShoppingCartIcon sx={{ color: '#4caf50', fontSize: 28 }} />;
-            case 'promo': return <FavoriteIcon sx={{ color: '#ff9800', fontSize: 28 }} />;
-            case 'system': return <NotificationsIcon sx={{ color: '#2196f3', fontSize: 28 }} />;
-            default: return <NotificationsIcon sx={{ color: '#666', fontSize: 28 }} />;
+            case 'order': return <ShoppingCartIcon sx={{ color: '#4caf50', fontSize: { xs: 24, md: 28 } }} />;
+            case 'promo': return <FavoriteIcon sx={{ color: '#ff9800', fontSize: { xs: 24, md: 28 } }} />;
+            case 'system': return <NotificationsIcon sx={{ color: '#2196f3', fontSize: { xs: 24, md: 28 } }} />;
+            default: return <NotificationsIcon sx={{ color: '#666', fontSize: { xs: 24, md: 28 } }} />;
           }
         };
         // --- Новое: функции удаления ---
@@ -11954,14 +11960,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-              p: { xs: 2, md: 4 },
-              maxWidth: { xs: '100%', md: 1100 },
-              minWidth: { xs: 'auto', md: 1100 },
+              p: { xs: 2, md: 2, lg: 2 },
+              maxWidth: { xs: '100%', md: '100%', lg: '100%' },
+              minWidth: { xs: 'auto', md: 'auto', lg: 'auto' },
               minHeight: 320,
-              margin: '0 auto',
+              margin: 0,
               mt: 0,
               position: 'relative',
-              left: { xs: 0, md: '-80px' },
+              left: 0,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -11995,7 +12001,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       height: 44,
                       boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
                       textTransform: 'none',
-                      minWidth: { xs: '100%', md: 120 },
+                      minWidth: { xs: 'auto', md: 120 },
                       '&:hover': {
                         background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
                         boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
@@ -12021,7 +12027,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   flexDirection: 'column', 
                   gap: 3,
                   width: '100%',
-                  maxWidth: { xs: '100%', md: 1000 }
+                  maxWidth: { xs: '100%', md: '100%', lg: '100%' }
                 }}>
                   {notifications.map((notif) => {
                     const isSubmitted = isReviewSubmitted(notif);
@@ -12056,7 +12062,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         <Typography sx={{ 
                           fontWeight: 600, 
                           color: isSubmitted || isCompleted ? '#999' : (notif.isRead ? '#888' : '#ff0844'), 
-                          fontSize: { xs: 14, md: 16 },
+                          fontSize: { xs: 13, sm: 14, md: 16 },
                           wordBreak: 'break-word',
                           overflowWrap: 'break-word'
                         }}>
@@ -12064,7 +12070,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         </Typography>
                         <Typography sx={{ 
                           color: '#333', 
-                          fontSize: { xs: 13, md: 15 }, 
+                          fontSize: { xs: 12, sm: 13, md: 15 }, 
                           mt: 1, 
                           mb: 1,
                           wordBreak: 'break-word',
@@ -12075,7 +12081,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         </Typography>
                         <Typography sx={{ 
                           color: '#999', 
-                          fontSize: { xs: 11, md: 13 } 
+                          fontSize: { xs: 10, sm: 11, md: 13 } 
                         }}>
                           {notif.createdAt ? new Date(notif.createdAt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
                         </Typography>
@@ -12218,14 +12224,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-              p: { xs: 2, md: 4 },
-              maxWidth: { xs: '100%', md: 1100 },
-              minWidth: { xs: 'auto', md: 1100 },
+              p: { xs: 2, md: 2, lg: 2 },
+              maxWidth: { xs: '100%', md: '100%', lg: '100%' },
+              minWidth: { xs: 'auto', md: 'auto', lg: 'auto' },
               minHeight: 320,
-              margin: '0 auto',
+              margin: 0,
               mt: 0,
               position: 'relative',
-              left: { xs: 0, md: '-80px' },
+              left: 0,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -12260,7 +12266,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   flexDirection: 'column', 
                   gap: 3,
                   width: '100%',
-                  maxWidth: { xs: '100%', md: 1000 }
+                  maxWidth: { xs: '100%', md: '100%', lg: '100%' }
                 }}>
                   {orders.map((order) => (
                     <Box
@@ -12306,13 +12312,13 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           <Typography sx={{ 
                             fontWeight: 600, 
                             color: '#333', 
-                            fontSize: { xs: 14, md: 16 } 
+                            fontSize: { xs: 13, sm: 14, md: 16 } 
                           }}>
                             {t('profile.orders.orderN', { id: order.id })}
                           </Typography>
                           <Typography sx={{ 
                             color: '#666', 
-                            fontSize: { xs: 12, md: 14 } 
+                            fontSize: { xs: 11, sm: 12, md: 14 } 
                           }}>
                             {new Date(order.createdAt).toLocaleDateString('ru-RU')}
                           </Typography>
@@ -12492,14 +12498,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-              p: { xs: 2, md: 4 },
-              maxWidth: { xs: '100%', md: 1100 },
-              minWidth: { xs: 'auto', md: 1100 },
+              p: { xs: 2, md: 2, lg: 2 },
+              maxWidth: { xs: '100%', md: '100%', lg: '100%' },
+              minWidth: { xs: 'auto', md: 'auto', lg: 'auto' },
               minHeight: 320,
-              margin: '0 auto',
+              margin: 0,
               mt: 0,
               position: 'relative',
-              left: { xs: 0, md: '-80px' },
+              left: 0,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -12534,7 +12540,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   flexDirection: 'column', 
                   gap: 3,
                   width: '100%',
-                  maxWidth: { xs: '100%', md: 1000 }
+                  maxWidth: { xs: '100%', md: '100%', lg: '100%' }
                 }}>
                   {userReviews.map((review) => (
                     <Box
@@ -12599,7 +12605,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                               <Typography sx={{ 
                                 fontWeight: 600, 
                                 color: '#333', 
-                              fontSize: { xs: 14, md: 16 },
+                              fontSize: { xs: 13, sm: 14, md: 16 },
                               mb: 1,
                               wordBreak: 'break-word',
                               overflowWrap: 'break-word'
@@ -12608,7 +12614,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                               </Typography>
                             <Typography sx={{ 
                               color: '#666', 
-                              fontSize: { xs: 12, md: 14 } 
+                              fontSize: { xs: 11, sm: 12, md: 14 } 
                             }}>
                               {new Date(review.createdAt).toLocaleDateString('ru-RU')}
                             </Typography>
@@ -12649,7 +12655,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         )}
                         <Typography sx={{ 
                           color: '#666', 
-                          fontSize: { xs: 13, md: 14 }, 
+                          fontSize: { xs: 12, sm: 13, md: 14 }, 
                           lineHeight: 1.6,
                           wordBreak: 'break-word',
                           overflowWrap: 'break-word'
@@ -12670,14 +12676,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           <Typography sx={{ 
                             fontWeight: 600, 
                             color: '#1976d2', 
-                            fontSize: { xs: 13, md: 14 }, 
+                            fontSize: { xs: 12, sm: 13, md: 14 }, 
                             mb: 1 
                           }}>
                             Ответ:
                           </Typography>
                           <Typography sx={{ 
                             color: '#333', 
-                            fontSize: { xs: 13, md: 14 }, 
+                            fontSize: { xs: 12, sm: 13, md: 14 }, 
                             lineHeight: 1.6,
                             wordBreak: 'break-word',
                             overflowWrap: 'break-word'
@@ -12703,14 +12709,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 background: '#fff',
                 borderRadius: 4,
                 boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-                p: { xs: 2, md: 4 },
-                maxWidth: { xs: '100%', md: 1100 },
-                minWidth: { xs: 'auto', md: 1100 },
+                p: { xs: 2, md: 2, lg: 2 },
+                maxWidth: { xs: '100%', md: '100%', lg: '100%' },
+                minWidth: { xs: 'auto', md: 'auto', lg: 'auto' },
                 minHeight: 320,
-                margin: '0 auto',
+                margin: 0,
                 mt: 0,
                 position: 'relative',
-                left: { xs: 0, md: '-80px' },
+                left: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -12766,8 +12772,8 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   justifyItems: 'center',
                   alignItems: 'center',
                   justifyContent: { xs: 'center', sm: 'start' },
-                  maxWidth: 1100,
-                  margin: '0 auto',
+                  maxWidth: '100%',
+                  margin: 0,
                 }}>
                   {localWishlist.map(item => (
                     <ProductCard
@@ -12801,14 +12807,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 background: '#fff',
                 borderRadius: 4,
                 boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-                p: { xs: 2, md: 4 },
-                maxWidth: { xs: '100%', md: 1100 },
-                minWidth: { xs: 'auto', md: 1100 },
+                p: { xs: 2, md: 2, lg: 2 },
+                maxWidth: { xs: '100%', md: '100%', lg: '100%' },
+                minWidth: { xs: 'auto', md: 'auto', lg: 'auto' },
                 minHeight: 320,
-                margin: '0 auto',
+                margin: 0,
                 mt: 0,
                 position: 'relative',
-                left: { xs: 0, md: '-80px' },
+                left: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -12865,8 +12871,8 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   justifyItems: 'center',
                   alignItems: 'center',
                   justifyContent: { xs: 'center', sm: 'start' },
-                  maxWidth: 1100,
-                  margin: '0 auto',
+                  maxWidth: '100%',
+                  margin: 0,
                 }}>
                   {localViewed.map(product => (
                     <ProductCard
@@ -12895,14 +12901,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-              p: { xs: 2, md: 4 },
-              maxWidth: { xs: '100%', md: 1100 },
-              minWidth: { xs: 'auto', md: 1100 },
+              p: { xs: 2, md: 2, lg: 2 },
+              maxWidth: { xs: '100%', md: '100%', lg: '100%' },
+              minWidth: { xs: 'auto', md: 'auto', lg: 'auto' },
               minHeight: 320,
-              margin: '0 auto',
+              margin: 0,
               mt: 0,
               position: 'relative',
-              left: { xs: 0, md: '-80px' },
+              left: 0,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -13002,14 +13008,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               background: '#fff',
               borderRadius: 4,
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-              p: { xs: 2, md: 4 },
-              maxWidth: { xs: '100%', md: 1100 },
-              minWidth: { xs: 'auto', md: 1100 },
+              p: { xs: 2, md: 2, lg: 2 },
+              maxWidth: { xs: '100%', md: '100%', lg: '100%' },
+              minWidth: { xs: 'auto', md: 'auto', lg: 'auto' },
               minHeight: 320,
-              margin: '0 auto',
+              margin: 0,
               mt: 0,
               position: 'relative',
-              left: { xs: 0, md: '-80px' },
+              left: 0,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -13033,10 +13039,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               {/* Смена пароля */}
               <Box sx={{ mb: 6 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                  <Lock sx={{ color: '#ff0844', fontSize: 28 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 600, color: '#333' }}>
-                    {t('profile.auth.changePassword')}
-                  </Typography>
+                  <Lock sx={{ color: '#ff0844', fontSize: { xs: 24, sm: 26, md: 28, lg: 32, xl: 36 } }} />
+                                     <Typography variant="h5" sx={{ fontWeight: 600, color: '#333', fontSize: { xs: '1.2rem', sm: '1.4rem', md: '1.5rem', lg: '1.8rem', xl: '2rem' } }}>
+                     {t('profile.auth.changePassword')}
+                   </Typography>
                 </Box>
                 
                 <Box component="form" onSubmit={handlePasswordSave} sx={{ maxWidth: { xs: '100%', md: 500 } }}>
@@ -13164,10 +13170,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               {/* Подключенные аккаунты */}
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                  <AccountCircle sx={{ color: '#ff0844', fontSize: 28 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 600, color: '#333' }}>
-                    {t('profile.auth.connectedAccounts')}
-                  </Typography>
+                  <AccountCircle sx={{ color: '#ff0844', fontSize: { xs: 24, sm: 26, md: 28, lg: 32, xl: 36 } }} />
+                                     <Typography variant="h5" sx={{ fontWeight: 600, color: '#333', fontSize: { xs: '1.2rem', sm: '1.4rem', md: '1.5rem', lg: '1.8rem', xl: '2rem' } }}>
+                     {t('profile.auth.connectedAccounts')}
+                   </Typography>
                 </Box>
                 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -13184,7 +13190,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     background: '#fafafa'
                   }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Google sx={{ color: '#4285f4', fontSize: 24 }} />
+                      <Google sx={{ color: '#4285f4', fontSize: { xs: 20, sm: 22, md: 24, lg: 28, xl: 32 } }} />
                       <Box>
                         <Typography sx={{ fontWeight: 600, color: '#333' }}>
                           Google
@@ -13232,7 +13238,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     background: '#fafafa'
                   }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Facebook sx={{ color: '#1877f2', fontSize: 24 }} />
+                      <Facebook sx={{ color: '#1877f2', fontSize: { xs: 20, sm: 22, md: 24, lg: 28, xl: 32 } }} />
                       <Box>
                         <Typography sx={{ fontWeight: 600, color: '#333' }}>
                           Facebook
@@ -13303,7 +13309,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
   }
   return (
     <>
-      <Container maxWidth="lg" disableGutters sx={{
+      <Container maxWidth={false} disableGutters sx={{
         mt: 0,
         mb: 0,
         px: { xs: 0, md: 0 },
@@ -13323,7 +13329,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               flexShrink: 0,
               borderRight: '1px solid #eee',
               background: '#fafbfc',
-              display: { xs: 'none', md: 'block' },
+              display: { xs: 'none', md: 'none', lg: 'block' },
               position: 'sticky',
               top: 'var(--appbar-height)',
               height: 'fit-content',
@@ -13596,7 +13602,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             </Box>
           </Box>
           {/* Контент */}
-          <Box sx={{ flex: 1, p: { xs: 2, md: 4 }, minHeight: 0, ml: { xs: 0, md: '130px' } }}>
+          <Box sx={{ 
+             flex: 1, 
+             p: { xs: 2, md: 2, lg: 2 }, 
+             minHeight: 0, 
+             ml: { xs: 0, md: 0, lg: 0 },
+             width: { xs: '100%', md: '100%', lg: '100%' },
+             maxWidth: { xs: '100%', md: '100%', lg: '100%' }
+           }}>
             {renderSection()}
           </Box>
         </Box>

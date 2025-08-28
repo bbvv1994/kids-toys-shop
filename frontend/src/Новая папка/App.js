@@ -275,6 +275,7 @@ const theme = createTheme({
   function Navigation({ cartCount, user, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMediumOrSmaller = useMediaQuery(theme.breakpoints.down('lg')); // < 1200px (включает md)
   const location = useLocation();
   const navigate = useNavigate();
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -1251,6 +1252,7 @@ const theme = createTheme({
               </form>
             )}
             {/* Корзина и профиль */}
+            {!isMediumOrSmaller && (
             <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 3 }}>
               {/* Кнопка CMS для админа */}
               {user?.role === 'admin' && (
@@ -1488,6 +1490,7 @@ const theme = createTheme({
                 </Typography>
               </Box>
             </Box>
+            )}
           </Toolbar>
         </AppBar>
         {/* Кнопка категорий под AppBar */}
