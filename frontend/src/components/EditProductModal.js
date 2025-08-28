@@ -31,13 +31,7 @@ import { Close, Delete, CloudUpload, Toys, Add as AddIcon, DragIndicator, Star }
 function EditProductModal(props) {
   const { t } = useTranslation();
   const { open, product, onClose, onSave, onDelete, categories = [] } = props;
-  console.log('=== EditProductModal RENDER ===');
-  console.log('open:', open);
-  console.log('product:', product);
-  console.log('product.nameHe:', product?.nameHe);
-  console.log('product.descriptionHe:', product?.descriptionHe);
-  console.log('categories length:', categories.length);
-  console.log('props:', props);
+
   const [formData, setFormData] = useState({
     name: '',
     nameHe: '',
@@ -382,10 +376,6 @@ function EditProductModal(props) {
         return '';
       };
 
-      console.log('EditProductModal: product data:', product);
-      console.log('EditProductModal: categories:', categories);
-      console.log('EditProductModal: Available categories (first 5):', categories.slice(0, 5).map(cat => ({ id: cat.id, name: cat.name, parentId: cat.parentId })));
-      
       // Универсально определяем ID категории
       let categoryId = '';
       if (product.category) {
@@ -442,12 +432,7 @@ function EditProductModal(props) {
         }
       }
 
-      console.log('EditProductModal: determined categoryId:', categoryId);
-      console.log('EditProductModal: determined subcategoryId:', subcategoryId);
-      console.log('EditProductModal: product.category:', safeString(product.category));
-      console.log('EditProductModal: product.subcategory:', safeString(product.subcategory));
-      console.log('EditProductModal: product.categoryId:', product.categoryId);
-      console.log('EditProductModal: product.subcategoryId:', product.subcategoryId);
+
 
       // Проверяем, существуют ли выбранные категории в списке доступных
       const categoryExists = categories.find(cat => cat.id === categoryId);
@@ -458,7 +443,7 @@ function EditProductModal(props) {
         const firstCategory = categories.find(cat => !cat.parentId); // Главная категория
         if (firstCategory) {
           categoryId = firstCategory.id;
-          console.log('EditProductModal: Using fallback category:', firstCategory.name, 'ID:', firstCategory.id);
+  
         }
       }
       
@@ -469,12 +454,12 @@ function EditProductModal(props) {
       if (!subcategoryExists && subcategoriesInCategory.length > 0) {
         const firstSubcategory = subcategoriesInCategory[0];
         subcategoryId = firstSubcategory.id;
-        console.log('EditProductModal: Using fallback subcategory:', firstSubcategory.name, 'ID:', firstSubcategory.id);
+
       }
       // Если в категории нет подкатегорий, оставляем subcategoryId пустым
       else if (subcategoriesInCategory.length === 0) {
         subcategoryId = '';
-        console.log('EditProductModal: No subcategories in category, setting subcategory to empty');
+
       }
 
       setFormData({
@@ -545,7 +530,7 @@ function EditProductModal(props) {
   const handleInputChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
     
-    console.log('EditProductModal: handleInputChange - name:', name, 'value:', value);
+
     
     if (name === 'isHidden') {
       setFormData(prev => ({ ...prev, isHidden: checked }));
@@ -649,11 +634,7 @@ function EditProductModal(props) {
     setLoading(true);
     setError('');
     try {
-      console.log('EditProductModal: Submitting form data:', formData);
-      console.log('EditProductModal: Category:', formData.category);
-      console.log('EditProductModal: Subcategory:', formData.subcategory);
-      console.log('EditProductModal: Original product category:', product.category);
-      console.log('EditProductModal: Original product subcategory:', product.subcategory);
+      
       
       // Определяем язык ввода на основе содержимого полей
       const detectInputLanguage = (text) => {
@@ -667,7 +648,7 @@ function EditProductModal(props) {
       const descriptionLanguage = detectInputLanguage(formData.description);
       const inputLanguage = nameLanguage === 'he' || descriptionLanguage === 'he' ? 'he' : 'ru';
       
-      console.log('EditProductModal: Detected input language:', inputLanguage);
+      
       
       const updatedProduct = {
         ...product,
@@ -679,11 +660,7 @@ function EditProductModal(props) {
         inputLanguage: inputLanguage // Передаем язык ввода для автоматического перевода
       };
 
-      console.log('EditProductModal: Updated product data:', updatedProduct);
-      console.log('EditProductModal: formData.nameHe:', formData.nameHe);
-      console.log('EditProductModal: formData.descriptionHe:', formData.descriptionHe);
-      console.log('EditProductModal: updatedProduct.nameHe:', updatedProduct.nameHe);
-      console.log('EditProductModal: updatedProduct.descriptionHe:', updatedProduct.descriptionHe);
+      
       await onSave(updatedProduct);
     } catch (err) {
       setError('Ошибка сохранения товара');
@@ -716,7 +693,7 @@ function EditProductModal(props) {
             const subcategoryExists = data.find(sub => sub.id === formData.subcategory || sub.name === formData.subcategory);
             if (!subcategoryExists) {
               // Если subcategory не найден в новых подкатегориях, сбрасываем его
-              console.log('EditProductModal: Subcategory not found in new subcategories, resetting');
+  
               setFormData(prev => ({ ...prev, subcategory: '' }));
             }
           }
@@ -738,9 +715,7 @@ function EditProductModal(props) {
   // Инициализируем форму данными товара при каждом открытии модального окна
   useEffect(() => {
     if (product && open) {
-      console.log('EditProductModal: Initializing form with product data:', product);
-      console.log('EditProductModal: Product imageUrls:', product.imageUrls);
-      console.log('EditProductModal: Product images:', product.images);
+
       
       // Безопасная функция для извлечения строкового значения
       const safeString = (value) => {
@@ -750,14 +725,114 @@ function EditProductModal(props) {
         return '';
       };
 
+      // Определяем правильные ID для категории и подкатегории
+      let categoryId = '';
+      let subcategoryId = '';
+      
+
+      
+      // Определяем ID категории
+      if (product.category) {
+        if (typeof product.category === 'object' && product.category.id) {
+          categoryId = product.category.id;
+
+        } else if (typeof product.category === 'number' || !isNaN(parseInt(product.category))) {
+          categoryId = parseInt(product.category);
+
+        } else if (typeof product.category === 'string') {
+          const category = categories.find(c => c.name === product.category);
+          categoryId = category ? category.id : '';
+
+        }
+      }
+      
+      // Если категория не определена, но есть categoryId
+      if (!categoryId && product.categoryId) {
+        categoryId = product.categoryId;
+
+      }
+      
+      // Проверяем, является ли найденная категория подкатегорией
+      // Если да, то находим её родительскую категорию
+      if (categoryId) {
+        const foundCategory = categories.find(c => c.id === categoryId);
+        if (foundCategory && foundCategory.parentId) {
+          // Это подкатегория, используем её родительскую категорию
+          categoryId = foundCategory.parentId;
+
+        }
+      }
+      
+      // Определяем ID подкатегории
+      if (product.subcategory) {
+        if (typeof product.subcategory === 'object' && product.subcategory.id) {
+          subcategoryId = product.subcategory.id;
+
+        } else if (typeof product.subcategory === 'number' || !isNaN(parseInt(product.subcategory))) {
+          subcategoryId = parseInt(product.subcategory);
+
+        } else if (typeof product.subcategory === 'string') {
+          // Ищем подкатегорию по названию среди всех категорий
+          const subcategory = categories.find(c => c.name === product.subcategory);
+          subcategoryId = subcategory ? subcategory.id : '';
+
+        }
+      }
+      
+      // Если подкатегория не определена, но есть subcategoryId
+      if (!subcategoryId && product.subcategoryId) {
+        subcategoryId = product.subcategoryId;
+
+      }
+      
+      // Если подкатегория не определена, но product.category указывает на подкатегорию
+      if (!subcategoryId && product.category) {
+        let potentialSubcategoryId = '';
+        if (typeof product.category === 'object' && product.category.id) {
+          potentialSubcategoryId = product.category.id;
+        } else if (typeof product.category === 'number' || !isNaN(parseInt(product.category))) {
+          potentialSubcategoryId = parseInt(product.category);
+        }
+        
+        if (potentialSubcategoryId) {
+          const foundCategory = categories.find(c => c.id === potentialSubcategoryId);
+          if (foundCategory && foundCategory.parentId) {
+            // product.category указывает на подкатегорию
+            subcategoryId = potentialSubcategoryId;
+
+          }
+        }
+      }
+      
+      
+      
+      // Fallback: если категория не определена, используем первую доступную
+      if (!categoryId && categories.length > 0) {
+        const firstCategory = categories.find(c => !c.parentId); // Главная категория
+        if (firstCategory) {
+          categoryId = firstCategory.id;
+        }
+      }
+      
+      // Дополнительная проверка: если категория определена, но подкатегория нет,
+      // попробуем найти подкатегорию по названию среди всех категорий
+      if (categoryId && !subcategoryId) {
+        const allSubcategories = categories.filter(c => c.parentId === categoryId);
+        if (allSubcategories.length > 0) {
+          // Используем первую доступную подкатегорию как fallback
+          subcategoryId = allSubcategories[0].id;
+  
+        }
+      }
+      
       const initialFormData = {
         name: safeString(product.name) || '',
         nameHe: safeString(product.nameHe) || '',
         description: safeString(product.description) || '',
         descriptionHe: safeString(product.descriptionHe) || '',
         price: product.price || '',
-        category: safeString(product.category) || '',
-        subcategory: safeString(product.subcategory) || '',
+        category: categoryId,
+        subcategory: subcategoryId,
         ageGroup: normalizeAgeGroup(safeString(product.ageGroup)) || '',
         quantity: product.quantity || '',
         article: safeString(product.article) || '',
@@ -770,20 +845,34 @@ function EditProductModal(props) {
         isHidden: product.isHidden || false
       };
       
-        console.log('EditProductModal: Setting initial form data:', initialFormData);
-  console.log('EditProductModal: nameHe value:', initialFormData.nameHe);
-  console.log('EditProductModal: descriptionHe value:', initialFormData.descriptionHe);
-  setFormData(initialFormData);
+        
+        setFormData(initialFormData);
+
+      // Загружаем подкатегории для выбранной категории
+      if (categoryId) {
+        fetch(`${API_BASE_URL}/api/categories?parentId=${categoryId}`)
+          .then(res => res.json())
+          .then(data => {
+            setSubcategories(data);
+
+          })
+          .catch(error => {
+            console.error('Error loading initial subcategories:', error);
+            setSubcategories([]);
+          });
+      } else {
+        setSubcategories([]);
+      }
 
       // Загружаем существующие изображения
       if (product.imageUrls && product.imageUrls.length > 0) {
-        console.log('EditProductModal: Setting existing images:', product.imageUrls);
+
         setExistingImages(product.imageUrls);
       } else if (product.images && product.images.length > 0) {
-        console.log('EditProductModal: Setting existing images (fallback):', product.images);
+        
         setExistingImages(product.images);
       } else {
-        console.log('EditProductModal: No existing images found');
+        
         setExistingImages([]);
       }
 
@@ -815,22 +904,20 @@ function EditProductModal(props) {
             setSubcategories(data);
             // Проверяем, что subcategoryId существует в загруженных подкатегориях
             const subcategoryId = product.subcategoryId || (product.subcategory && product.subcategory.id) || (typeof product.subcategory === 'string' ? product.subcategory : '');
-            console.log('EditProductModal: Loading subcategories for categoryId:', categoryId);
-            console.log('EditProductModal: Found subcategories:', data);
-            console.log('EditProductModal: Product subcategoryId:', subcategoryId);
+
             
             // Только если есть подкатегории и subcategoryId не найден
             if (data.length > 0 && subcategoryId) {
               const subcategoryExists = data.find(sub => sub.id === subcategoryId || sub.name === subcategoryId);
               if (!subcategoryExists) {
                 // Если subcategoryId не найден в подкатегориях, сбрасываем его
-                console.log('EditProductModal: Subcategory not found in loaded subcategories, resetting');
+
                 setFormData(prev => ({ ...prev, subcategory: '' }));
               }
             }
             // Если подкатегорий нет, оставляем subcategory как есть
             if (data.length === 0) {
-              console.log('EditProductModal: No subcategories found for this category');
+
             }
           })
           .catch(error => {
@@ -845,7 +932,7 @@ function EditProductModal(props) {
 
   // Отслеживаем изменения в existingImages для отладки
   useEffect(() => {
-    console.log('EditProductModal: existingImages changed:', existingImages);
+
   }, [existingImages]);
 
 
@@ -1044,14 +1131,14 @@ function EditProductModal(props) {
                        labelId="subcategory-label" 
                        label="Подкатегория" 
                        name="subcategory" 
-                       value={subcategories.length > 0 && subcategories.find(sub => sub.id === formData.subcategory || sub.name === formData.subcategory) ? (subcategories.find(sub => sub.id === formData.subcategory || sub.name === formData.subcategory)?.id || '') : ''}
+                       value={formData.subcategory || ''}
                        onChange={handleInputChange} 
                        open={openSelects.subcategory}
                        onOpen={() => handleSelectOpen('subcategory')}
                        onClose={() => handleSelectClose('subcategory')}
                        renderValue={selected => {
                          if (!selected) return 'Выберите подкатегорию';
-                         const subcategory = subcategories.find(sub => sub.id === selected || sub.name === selected);
+                         const subcategory = subcategories.find(sub => sub.id === selected);
                          return subcategory ? subcategory.name : selected;
                        }}
                        MenuProps={{
