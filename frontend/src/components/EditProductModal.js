@@ -373,7 +373,7 @@ function EditProductModal(props) {
 
 
   useEffect(() => {
-    if (product) {
+    if (product && open) {
       // Безопасная функция для извлечения строкового значения
       const safeString = (value) => {
         if (typeof value === 'string') return value;
@@ -509,8 +509,37 @@ function EditProductModal(props) {
       // Не сбрасываем главное изображение - оставляем как есть или устанавливаем 0 если изображений нет
       setMainImageIndex(product.imageUrls && product.imageUrls.length > 0 ? 0 : 0);
     }
-  }, [product, categories]);
+  }, [product, categories, open]);
 
+  // Сброс формы при закрытии модального окна
+  useEffect(() => {
+    if (!open) {
+      setFormData({
+        name: '',
+        nameHe: '',
+        description: '',
+        descriptionHe: '',
+        price: '',
+        category: '',
+        subcategory: '',
+        ageGroup: '',
+        quantity: '',
+        article: '',
+        brand: '',
+        country: '',
+        length: '',
+        width: '',
+        height: '',
+        gender: '',
+        isHidden: false
+      });
+      setNewImages([]);
+      setExistingImages([]);
+      setRemovedExistingImages([]);
+      setMainImageIndex(0);
+      setError('');
+    }
+  }, [open]);
 
 
   const handleInputChange = useCallback((e) => {
