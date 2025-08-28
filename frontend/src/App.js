@@ -12767,7 +12767,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 </Box>
                 <Box sx={{
                   display: 'grid',
-                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' },
                   gap: 2,
                   justifyItems: 'center',
                   alignItems: 'center',
@@ -12789,7 +12789,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                       viewMode="grid"
                     />
                   ))}
-                  {Array.from({ length: Math.max(0, 4 - localWishlist.length) }).map((_, idx) => (
+                  {Array.from({ length: Math.max(0, (window.innerWidth >= 1400 ? 4 : 3) - localWishlist.length) }).map((_, idx) => (
                     <Box key={`empty-wishlist-${idx}`} />
                   ))}
                 </Box>
@@ -12866,7 +12866,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                 
                                 <Box sx={{
                   display: 'grid',
-                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' },
                   gap: 2,
                   justifyItems: 'center',
                   alignItems: 'center',
