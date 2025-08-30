@@ -706,7 +706,7 @@ export default function TermsOfService() {
                     שירות לקוחות / Customer Service
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#666' }}>
-                    Email: support@simba-toys.co.il
+                    Email: simbakingoftoys@gmail.com
                   </Typography>
                 </Box>
               </Box>

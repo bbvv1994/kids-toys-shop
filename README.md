@@ -87,7 +87,7 @@ npm start
 
 - **Телефон**: 053-377-4509
 - **WhatsApp**: 053-377-4509
-- **Email**: info@kids-toys-shop.com
+- **Email**: simbakingoftoys@gmail.com
 
 ## 🕒 Часы работы
 

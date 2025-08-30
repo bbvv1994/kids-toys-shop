@@ -21,8 +21,8 @@ async function updateCurrentUserRole() {
       console.log(`- ID: ${user.id}, Email: ${user.email}, Name: ${user.name}, Role: ${user.role}`);
     });
     
-    // Находим пользователя с email wexkwasexort@gmail.com (если это ваш email)
-    const targetEmail = 'wexkwasexort@gmail.com';
+    // Находим пользователя с email simbakingoftoys@gmail.com (если это ваш email)
+const targetEmail = 'wexkwasexort@gmail.com';
     const user = await prisma.user.findUnique({
       where: { email: targetEmail }
     });

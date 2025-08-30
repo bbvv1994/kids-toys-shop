@@ -176,7 +176,7 @@ async function sendEmail(to, subject, htmlContent) {
     sendSmtpEmail.htmlContent = htmlContent;
     sendSmtpEmail.sender = { 
       name: 'Kids Toys Shop', 
-      email: 'wexkwasexort@gmail.com' 
+              email: 'wexkwasexort@gmail.com' 
     };
     
     console.log('Sending email with sender:', sendSmtpEmail.sender);

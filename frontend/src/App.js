@@ -5924,7 +5924,7 @@ function AppContent({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Email sx={{ color: '#e3f2fd', fontSize: 20 }} />
                   <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.9 }}>
-                    info@kids-toys-shop.com
+                    simbakingoftoys@gmail.com
                   </Typography>
                 </Box>
               </Box>
