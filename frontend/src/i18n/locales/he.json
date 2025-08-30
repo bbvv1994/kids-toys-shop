@@ -515,7 +515,7 @@
     "sales": "מבצעים",
     "subcategories": {
       "toys": {
-        "for_babies": "צעצועיםטנטנים",
+        "for_babies": "צעצועים קטנטנים",
         "dolls": "בובות",
         "toy_weapons": "נשק צעצוע",
         "tracks_parking_railway": "מסלולים, חניות ורכבות",
@@ -557,7 +557,7 @@
         "school_bags": "תיקים לבית ספר",
         "kindergarten_bags": "תיקים לגני ילדים",
         "pencil_cases": "קלמרים",
-        "pens_pencils": "עטים ועיפרונות",
+        "pens_pencils": "עטים ועפרונות",
         "sharpeners": "מחדדים",
         "markers": "טושים ומרקרים",
         "paints": "צבעים",
@@ -572,8 +572,8 @@
       },
       "water_recreation": {
         "pools": "בריכות",
-        "mattresses_floats": "מזרנים ורפסודות",
-        "inflatable_circles": "עיגולים מתנפחים",
+        "mattresses_floats": "מזרונים וגלשנים",
+        "inflatable_circles": "גלגל ים",
         "armbands_vests": "שרוולים וגופיות",
         "swimming_accessories": "אביזרי שחייה",
         "rackets": "מחבטים",
@@ -857,8 +857,8 @@
     },
     "phones": {
       "title": "טלפונים",
-      "primary": "+972 53-377-4509",
-      "secondary": "+972 77-700-5171"
+              "primary": "053-377-4509",
+        "secondary": "077-700-5171"
     },
     "whatsapp": {
       "title": "WhatsApp",
@@ -888,8 +888,8 @@
       "title": "!נענה לך תוך יום עבודה אחד",
       "description": "!השאר לנו הודעה ונצור איתך קשר בהקדם. אנחנו תמיד שמחים לעזור בבחירת צעצועים, לענות על שאלות על משלוח או פשוט לשוחח עם הלקוחות שלנו",
       "email": "info@kids-toys-shop.com :אימייל",
-      "phone": "+972 53-377-4509 :טלפון",
-      "phone2": "+972 77-700-5171 :טלפון"
+              "phone": "053-377-4509 :טלפון",
+        "phone2": "077-700-5171 :טלפון"
     },
     "map": {
       "title": "איך למצוא אותנו",

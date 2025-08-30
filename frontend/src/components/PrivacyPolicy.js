@@ -759,7 +759,7 @@ export default function PrivacyPolicy() {
                     טלפון / Phone
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#666' }}>
-                    +972 53-377-4509
+                    053-377-4509
                   </Typography>
                 </Box>
               </Box>

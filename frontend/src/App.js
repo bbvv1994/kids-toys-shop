@@ -1135,7 +1135,6 @@ const theme = createTheme({
   
   useEffect(() => {
     if (!isSpeechRecognitionSupported()) {
-      console.log('Navigation: Speech recognition not supported');
       return;
     }
     
@@ -1144,7 +1143,7 @@ const theme = createTheme({
       try {
         recognitionRef.current.stop();
       } catch (error) {
-        console.log('Navigation: Error stopping previous recognition:', error);
+        // Error stopping previous recognition
       }
       recognitionRef.current = null;
     }
@@ -1184,25 +1183,21 @@ const theme = createTheme({
         setInterimTranscript(""); 
       };
       recognitionRef.current.onend = () => { 
-        console.log('Navigation: Speech recognition ended');
         setIsListening(false); 
         setInterimTranscript(""); 
       };
       
-      console.log('Navigation: Speech recognition initialized with language:', getSpeechRecognitionLanguage(i18n.language));
+
     } catch (error) {
       console.error('Navigation: Error initializing speech recognition:', error);
     }
   }, [i18n.language]);
 
   const handleMicClick = () => {
-    console.log('Navigation: handleMicClick called, isListening:', isListening);
-    
     if (recognitionRef.current) {
       try {
         // Убеждаемся, что язык установлен правильно перед запуском
         recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
-        console.log('Navigation: Setting speech recognition language to:', recognitionRef.current.lang);
         setIsListening(true);
         recognitionRef.current.start();
       } catch (error) {
@@ -1210,7 +1205,6 @@ const theme = createTheme({
         setIsListening(false);
       }
     } else {
-      console.log('Navigation: No recognition object available');
       alert(getSpeechRecognitionErrorMessage(i18n.language));
     }
   };
@@ -1243,9 +1237,9 @@ const theme = createTheme({
           }
           // Логируем для отладки
           if (scrollable !== paper) {
-            console.log('Lenis wrapper for Drawer:', scrollable);
+            // Lenis wrapper for Drawer
           } else {
-            console.log('Lenis wrapper for Drawer: Drawer paper');
+            // Lenis wrapper for Drawer paper
           }
           drawerPaperRef.current = scrollable;
           lenisDrawerRef.current = new Lenis({
@@ -1498,7 +1492,7 @@ const theme = createTheme({
   const scrollYRef = React.useRef(0);
 
   // ЛОГ cart перед Navigation
-  // console.log('cart перед Navigation:', cart);
+
 
   return (
     <>
@@ -2014,7 +2008,6 @@ const theme = createTheme({
             <button
               ref={categoryBtnRef}
               onClick={() => {
-                console.log('Category button clicked!');
                 handleCategoryBtnClick();
               }}
               style={{
@@ -3327,7 +3320,6 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
       try {
         // Убеждаемся, что язык установлен правильно перед запуском
         recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
-        console.log('CatalogPage: Setting speech recognition language to:', recognitionRef.current.lang);
         recognitionRef.current.start();
         setIsListening(true);
       } catch (error) {
@@ -3994,7 +3986,6 @@ function OAuthSuccessPage() {
       
       // Дополнительное декодирование имени пользователя
       let userName = payload.name;
-      console.log('Original user name from JWT:', userName);
       
       if (userName) {
         try {
@@ -4004,18 +3995,15 @@ function OAuthSuccessPage() {
           // Если имя содержит %XX кодировку, декодируем
           if (userName.includes('%')) {
             decoded = decodeURIComponent(userName);
-            console.log('Decoded user name:', decoded);
           }
           
           // Если результат содержит еще %XX, декодируем еще раз
           if (decoded.includes('%')) {
             decoded = decodeURIComponent(decoded);
-            console.log('Second decode attempt:', decoded);
           }
           
           // Очищаем и нормализуем имя
           userName = decoded.trim().replace(/\s+/g, ' ') || userName;
-          console.log('Final user name:', userName);
         } catch (error) {
           console.error('Error decoding user name on frontend:', error);
           // В случае ошибки оставляем оригинальное имя
@@ -4182,11 +4170,7 @@ function App() {
   // Отладчик переводов для production
   useEffect(() => {
     if (process.env.NODE_ENV === 'production') {
-      console.log('🔍 Translation Debugger Active');
-      console.log('Current language:', i18n.language);
-      console.log('Available languages:', i18n.languages);
-      console.log('Has resources:', i18n.hasResourceBundle(i18n.language, 'translation'));
-      console.log('LocalStorage language:', localStorage.getItem('i18nextLng'));
+      // Translation Debugger Active
     }
   }, [i18n.language]);
 
@@ -4264,12 +4248,6 @@ function App() {
     if (!user) {
       // Если пользователь не авторизован, загружаем локальную корзину
       const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');
-      console.log('🔍 Загружаем локальную корзину для гостя:', localCart);
-      console.log('🔍 Локальная корзина items:', localCart.items);
-      if (localCart.items && localCart.items.length > 0) {
-        console.log('🔍 Первый товар в корзине:', localCart.items[0]);
-        console.log('🔍 imageUrls первого товара:', localCart.items[0].product?.imageUrls);
-      }
       setCart(localCart);
     }
   }, [user]);
@@ -4373,8 +4351,6 @@ function App() {
 
   // Функции для работы с корзиной
   const handleAddToCart = async (product, category, quantity = 1) => {
-    console.log('🛒 handleAddToCart: Добавляем товар в корзину:', product);
-    console.log('🛒 handleAddToCart: imageUrls товара:', product.imageUrls);
     if (!user || !user.token) {
       // Для незарегистрированных пользователей используем локальную корзину
       const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');
@@ -4516,7 +4492,7 @@ function App() {
         setCart(updatedCart);
       }
       
-      console.log('Корзина очищена после успешного заказа');
+
     } catch (error) {
       console.error('Error clearing cart:', error);
     }
@@ -4526,13 +4502,11 @@ function App() {
   const handleWishlistToggle = async (productId, isInWishlist) => {
     setLottiePlayingMap(prev => {
       const newMap = { ...prev, [Number(productId)]: true };
-      console.log('setLottiePlayingMap', newMap);
       return newMap;
     });
     setTimeout(() => {
       setLottiePlayingMap(prev => {
         const newMap = { ...prev, [Number(productId)]: false };
-        console.log('setLottiePlayingMap (timeout)', newMap);
         return newMap;
       });
     }, 1200);
@@ -4568,7 +4542,6 @@ function App() {
   const handleLogin = async (userData) => {
     // Проверяем, что пользователь подтвердил email
     if (userData && userData.emailVerified === false) {
-      console.log('User email not verified, login blocked');
       return; // Не входим в систему, если email не подтвержден
     }
     
@@ -4579,7 +4552,6 @@ function App() {
   const handleRegister = async (userData) => {
     // При регистрации пользователь не должен сразу входить в систему
     // Показываем модальное окно с просьбой подтвердить email
-    console.log('Registration successful, email verification required');
     
     // Сохраняем данные для модального окна
     setEmailConfirmData({
@@ -4684,12 +4656,7 @@ function App() {
       const userData = localStorage.getItem('user');
       const token = userData ? JSON.parse(userData).token : null;
 
-      console.log('App: Sending request to:', `${API_BASE_URL}/api/products/${updatedProduct.id}`);
-      console.log('App: Request method: PUT');
-      console.log('App: FormData contents:');
-      for (let [key, value] of formData.entries()) {
-        console.log('App: FormData entry:', key, '=', value);
-      }
+
       
       const response = await fetch(`${API_BASE_URL}/api/products/${updatedProduct.id}`, {
         method: 'PUT',
@@ -4699,16 +4666,8 @@ function App() {
         body: formData
       });
       
-      console.log('App: Response status:', response.status);
-      console.log('App: Response ok:', response.ok);
-
       if (response.ok) {
         const savedProduct = await response.json();
-        console.log('App: Saved product response:', savedProduct);
-        console.log('App: Saved product category:', savedProduct.category);
-        console.log('App: Saved product subcategory:', savedProduct.subcategory);
-        console.log('App: Saved product categoryId:', savedProduct.categoryId);
-        console.log('App: Saved product subcategoryId:', savedProduct.subcategoryId);
     
         setEditModalOpen(false);
         setEditingProduct(null);
@@ -4734,7 +4693,6 @@ function App() {
         
         // Вызываем callback для обновления списка товаров, если он передан
         if (updatedProduct.onSaveCallback) {
-          console.log('App: Calling onSaveCallback for product update');
           updatedProduct.onSaveCallback();
         }
       } else {
@@ -5108,7 +5066,6 @@ function App() {
       
       const headers = user?.token ? { 'Authorization': `Bearer ${user.token}` } : {};
       
-      console.log('Fetching categories from:', categoriesUrl);
       const res = await fetch(categoriesUrl, { headers });
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -5116,7 +5073,6 @@ function App() {
       
             const response = await res.json();
       const data = response.value || response; // Поддерживаем оба формата
-      console.log('loadCategoriesFromAPI - received data:', data);
 
       
           // Преобразуем серверные категории в нужный формат
@@ -5147,7 +5103,6 @@ function App() {
               parentId: cat.parentId // сохраняем parentId для построения дерева
             };
           });
-          console.log('loadCategoriesFromAPI - transformed categories:', transformedCategories);
           setDbCategories(transformedCategories);
       
       return transformedCategories;
@@ -5407,7 +5362,7 @@ function AppContent({
           setIsListening(false);
         };
         
-        console.log('Speech recognition initialized with language:', getSpeechRecognitionLanguage(i18n.language));
+
       } catch (error) {
         console.error('Error initializing speech recognition:', error);
       }
@@ -5416,10 +5371,7 @@ function AppContent({
 
   // Функции для голосового поиска
   const handleMicClick = () => {
-    console.log('handleMicClick called, isListening:', isListening);
-    
     if (!recognitionRef.current) {
-      console.log('No recognition object available');
       alert(getSpeechRecognitionErrorMessage(i18n.language));
       return;
     }
@@ -5427,13 +5379,10 @@ function AppContent({
     try {
       // Убеждаемся, что язык установлен правильно перед запуском
       recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
-      console.log('Setting speech recognition language to:', recognitionRef.current.lang);
 
       if (isListening) {
-        console.log('Stopping speech recognition');
         recognitionRef.current.stop();
       } else {
-        console.log('Starting speech recognition');
         recognitionRef.current.start();
       }
     } catch (error) {
@@ -5955,13 +5904,13 @@ function AppContent({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Phone sx={{ color: '#e3f2fd', fontSize: 20 }} />
                   <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.9 }}>
-                    +972 53-377-4509
+                    053-377-4509
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Phone sx={{ color: '#e3f2fd', fontSize: 20 }} />
                   <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.9 }}>
-                    +972 77-700-5171
+                    077-700-5171
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -6530,8 +6479,6 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
       });
       if (response.ok) {
         const data = await response.json();
-        console.log('Fetched products:', data.length, 'products');
-        console.log('Sample product:', data[0]);
         setProducts(data);
       }
     } catch (error) {
@@ -6542,8 +6489,6 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
   };
 
   const handleDelete = async (id) => {
-    console.log('Попытка удаления товара с ID:', id);
-    
     // Проверяем, есть ли токен
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || !user.token) {
@@ -6558,8 +6503,6 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
     // }
 
     try {
-      console.log('Отправка запроса на удаление товара ID:', id);
-      
       // Сначала проверим, существует ли товар
       const checkResponse = await fetch(`${API_BASE_URL}/api/products/${id}`, {
         method: 'GET',
@@ -6582,7 +6525,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         }
       });
 
-      console.log('Ответ сервера:', response.status, response.statusText);
+
 
       if (response.ok) {
         // Убираем alert - товар удаляется без уведомления
@@ -6612,9 +6555,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
 
   const handleToggleHidden = async (product) => {
     try {
-      console.log('Toggling hidden for product:', product.id, 'Current isHidden:', product.isHidden);
       const newHiddenValue = !product.isHidden;
-      console.log('New hidden value:', newHiddenValue);
       
       const response = await fetch(`${API_BASE_URL}/api/products/${product.id}/hidden`, {
         method: 'PATCH',
@@ -6625,10 +6566,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         body: JSON.stringify({ isHidden: newHiddenValue })
       });
       
-      console.log('Response status:', response.status);
-      
       if (response.ok) {
-        console.log('Successfully toggled hidden status');
         fetchProducts();
         // Обновляем все состояния товаров в приложении
         if (window.refreshAllProducts) {
@@ -7003,8 +6941,6 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
                       <IconButton 
                         size="small" 
                         onClick={() => {
-                          console.log('Клик по кнопке удаления для товара:', p);
-                          console.log('ID товара:', p.id, 'Тип ID:', typeof p.id);
                           handleDelete(p.id);
                         }}
                         sx={{ 
@@ -7948,8 +7884,6 @@ function CMSCategories({ loadCategoriesFromAPI }) {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
       const data = await res.json();
-      console.log('CMSCategories fetchCategories - received data:', data);
-  
       setCategories(data);
     } catch (e) {
       console.error('CMSCategories fetchCategories - error:', e);
@@ -7971,7 +7905,6 @@ function CMSCategories({ loadCategoriesFromAPI }) {
       
       // Проверяем, что перетаскиваемые категории находятся на одном уровне
       if (activeCategory.parentId !== overCategory.parentId) {
-        console.log('Можно перетаскивать только категории одного уровня');
         return;
       }
       
@@ -8061,8 +7994,6 @@ function CMSCategories({ loadCategoriesFromAPI }) {
   // Отключение категории
   const handleToggleActive = async (cat) => {
     try {
-      console.log('Frontend: Toggle категории:', cat.name, 'ID:', cat.id);
-      
       const response = await fetch(`${API_BASE_URL}/api/categories/${cat.id}/toggle`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${user.token}` }
@@ -8070,7 +8001,6 @@ function CMSCategories({ loadCategoriesFromAPI }) {
       
       if (response.ok) {
         const updatedCategory = await response.json();
-        console.log('Frontend: Категория обновлена:', updatedCategory);
         
         // Обновляем состояние локально используя данные с сервера
         setCategories(prevCategories => 
@@ -8169,7 +8099,6 @@ function CMSCategories({ loadCategoriesFromAPI }) {
 
     // Сохраняем ID категории до сброса формы
     const categoryId = editForm.id;
-    console.log('Frontend: Начинаем обновление категории с ID:', categoryId);
 
     // Сразу закрываем диалог и сбрасываем форму
     setEditForm({ id: null, name: '', parent: '', icon: null });
@@ -8190,15 +8119,9 @@ function CMSCategories({ loadCategoriesFromAPI }) {
       }
 
       const updatedCategory = await response.json();
-      console.log('Frontend: Категория обновлена:', updatedCategory);
-      console.log('Frontend: Новое изображение:', updatedCategory.image);
       
       // Обновляем состояние локально используя данные с сервера
       setCategories(prevCategories => {
-        console.log('Frontend: Обновляем состояние категорий');
-        console.log('Frontend: Ищем категорию с ID:', categoryId);
-        console.log('Frontend: Доступные категории:', prevCategories.map(c => ({ id: c.id, name: c.name })));
-        
         return prevCategories.map(category => 
           category.id === categoryId 
             ? { 
@@ -8224,7 +8147,6 @@ function CMSCategories({ loadCategoriesFromAPI }) {
       
       // Добавляем задержку для гарантии обновления изображения
       setTimeout(() => {
-        console.log('Frontend: Финальное обновление UI через 500ms');
         setCategories(prevCategories => [...prevCategories]);
       }, 500);
       

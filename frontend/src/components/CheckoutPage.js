@@ -58,17 +58,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
         // Автоматически заполняем форму данными пользователя
         let phoneNumber = data.user.phone || '';
         
-        // Очищаем номер телефона от кода страны, если он есть
-        if (phoneNumber.startsWith('+972')) {
-          phoneNumber = phoneNumber.substring(4);
-        } else if (phoneNumber.startsWith('972')) {
-          phoneNumber = phoneNumber.substring(3);
-        }
-        
-        // Убираем ведущий ноль, если есть
-        if (phoneNumber.startsWith('0')) {
-          phoneNumber = phoneNumber.substring(1);
-        }
+        // Используем номер телефона как есть
         
         setFormData({
           firstName: data.user.name || '',
@@ -148,19 +138,9 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
        // Убираем все символы кроме цифр
        value = value.replace(/\D/g, '');
        
-       // Если номер начинается с 972, убираем его (чтобы избежать дублирования)
-       if (value.startsWith('972')) {
-         value = value.substring(3);
-       }
-       
-       // Если номер начинается с 0, убираем его
-       if (value.startsWith('0')) {
-         value = value.substring(1);
-       }
-       
-       // Ограничиваем длину номера (без кода страны)
-       if (value.length > 9) {
-         value = value.substring(0, 9);
+       // Ограничиваем длину номера до 15 цифр
+       if (value.length > 15) {
+         value = value.substring(0, 15);
        }
      }
      
@@ -251,10 +231,10 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
           return;
         }
 
-        // Добавляем код страны к номеру телефона
+        // Используем номер телефона как есть
         const customerInfoWithPhone = {
           ...formData,
-          phone: formData.phone.startsWith('+972') ? formData.phone : `+972${formData.phone.replace(/^0/, '')}`
+          phone: formData.phone
         };
 
         const requestBody = {
@@ -312,10 +292,10 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
           return;
         }
 
-        // Добавляем код страны к номеру телефона для авторизованных пользователей
+        // Используем номер телефона как есть для авторизованных пользователей
         const customerInfoWithPhone = {
           ...formData,
-          phone: formData.phone.startsWith('+972') ? formData.phone : `+972${formData.phone.replace(/^0/, '')}`
+          phone: formData.phone
         };
 
         // Подготавливаем данные корзины для авторизованных пользователей
@@ -490,8 +470,9 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
                    variant="outlined"
                    error={!!validationErrors.phone}
                    helperText={validationErrors.phone}
-                   InputProps={{
-                     startAdornment: <span style={{ color: '#000', marginRight: '8px' }}>+972</span>,
+                   inputProps={{
+                     maxLength: 15,
+                     pattern: '[0-9]*'
                    }}
                    sx={{ mb: 2 }}
                  />

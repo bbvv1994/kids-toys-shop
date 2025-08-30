@@ -4586,6 +4586,8 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
   console.log('editModalOpen:', editModalOpen);
   console.log('editingProduct:', editingProduct);
   console.log('dbCategories length:', dbCategories ? dbCategories.length : 0);
+  const navigate = useNavigate();
+  console.log('🚀 navigate функция:', typeof navigate);
   const categories = dbCategories || categoriesData;
   const [products, setProducts] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -4704,6 +4706,30 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
   const handleCloseEdit = () => {
     setEditingProduct(null);
     setEditModalOpen(false);
+  };
+
+  // Функция для перехода на страницу товара
+  const handleViewProduct = (productId) => {
+    console.log('🚀 handleViewProduct вызван с productId:', productId);
+    console.log('🚀 navigate функция в handleViewProduct:', typeof navigate);
+    // Добавляем небольшую задержку для анимации клика
+    setTimeout(() => {
+      console.log('🔄 Переходим на страницу товара:', `/product/${productId}`);
+      navigate(`/product/${productId}`);
+    }, 150);
+  };
+
+  // Функция для обработки клика по картинке с анимацией
+  const handleImageClick = (e, productId) => {
+    console.log('🖱️ handleImageClick вызван!', { productId, event: e });
+    console.log('🖱️ e.target:', e.target);
+    console.log('🖱️ e.currentTarget:', e.currentTarget);
+    console.log('🖱️ e.type:', e.type);
+    e.target.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      e.target.style.transform = 'scale(1.1)';
+    }, 100);
+    handleViewProduct(productId);
   };
   
   // Простые обработчики как в форме категорий
@@ -5061,6 +5087,9 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
     console.log('Количество товаров:', products.length);
     console.log('filteredProducts:', filteredProducts);
     console.log('Товары:', products);
+    console.log('handleImageClick функция:', typeof handleImageClick);
+    console.log('handleViewProduct функция:', typeof handleViewProduct);
+    console.log('navigate функция в ProductList:', typeof navigate);
     
     const [imageErrors, setImageErrors] = useState({});
 
@@ -5073,7 +5102,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
           <thead>
             <tr style={{ background: '#f5f5f5' }}>
-              <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Картинка</th>
+              <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }} title="Кликните на картинку для просмотра товара">Картинка 👆</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '200px' }}>Название</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '80px' }}>Цена</th>
               <th style={{ padding: 8, border: '1px solid #eee', width: '120px' }}>Категория</th>
@@ -5092,9 +5121,27 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
                     <img 
                       src={getImageUrl(p.imageUrls[0])} 
                       alt="img" 
-                      style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4 }} 
+                      style={{ 
+                        width: 48, 
+                        height: 48, 
+                        objectFit: 'cover', 
+                        borderRadius: 4,
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s ease-in-out'
+                      }} 
                       onError={() => handleImageError(p.id)}
                       onLoad={() => console.log('✅ Image loaded successfully for product:', p.id, 'URL:', getImageUrl(p.imageUrls[0]))}
+                      onClick={(e) => {
+                        console.log('🖱️ onClick сработал для картинки товара:', p.id, p.name);
+                        handleImageClick(e, p.id);
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = 'scale(1.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = 'scale(1)';
+                      }}
+                      title="Кликните для просмотра товара"
                     />
                   ) : (
                     <img 
@@ -5104,8 +5151,26 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
                         width: 48, 
                         height: 48, 
                         objectFit: 'cover', 
-                        borderRadius: 4
+                        borderRadius: 4,
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s ease-in-out'
                       }} 
+                      onClick={(e) => {
+                        console.log('🖱️ onClick сработал для placeholder картинки товара:', p.id, p.name);
+                        console.log('🖱️ e.target в onClick placeholder:', e.target);
+                        console.log('🖱️ e.currentTarget в onClick placeholder:', e.currentTarget);
+                        console.log('🖱️ e.type в onClick placeholder:', e.type);
+                        console.log('🖱️ Вызываем handleImageClick с параметрами:', e, p.id);
+                        console.log('🖱️ handleImageClick функция:', typeof handleImageClick);
+                        handleImageClick(e, p.id);
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = 'scale(1.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = 'scale(1)';
+                      }}
+                      title="Кликните для просмотра товара"
                     />
                   )}
                 </td>

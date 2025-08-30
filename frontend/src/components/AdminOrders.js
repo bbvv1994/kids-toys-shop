@@ -163,7 +163,7 @@ export default function AdminOrders({ user }) {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    {order.pickupStore === 'store1' ? 'ул. Роберт Солд 8, Кирьят-Ям' : order.pickupStore === 'store2' ? 'ул. Вейцман 6, Кирьят-Моцкин' : 'Не выбран'}
+                    {order.pickupStore === 'store1' ? 'ул. Роберт Сольд 8, Кирьят-Ям' : order.pickupStore === 'store2' ? 'ул. Вайцман 6, Кирьят-Моцкин' : 'Не выбран'}
                   </TableCell>
                   <TableCell>
                     <Button
