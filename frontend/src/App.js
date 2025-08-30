@@ -1196,6 +1196,10 @@ const theme = createTheme({
   const handleMicClick = () => {
     if (recognitionRef.current) {
       try {
+        // Очищаем предыдущие результаты при новом нажатии на микрофон
+        setSearchValue("");
+        setInterimTranscript("");
+        
         // Убеждаемся, что язык установлен правильно перед запуском
         recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
         setIsListening(true);
@@ -5377,6 +5381,10 @@ function AppContent({
     }
 
     try {
+      // Очищаем предыдущие результаты при новом нажатии на микрофон
+      setSearchQuery("");
+      setInterimTranscript("");
+      
       // Убеждаемся, что язык установлен правильно перед запуском
       recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
 
@@ -9650,6 +9658,10 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
   const startListening = () => {
     if (recognitionRef.current) {
       try {
+        // Очищаем предыдущие результаты при новом нажатии на микрофон
+        setSearchQuery("");
+        setInterimTranscript("");
+        
         // Убеждаемся, что язык установлен правильно перед запуском
         recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
         console.log('CategoryPage: Setting speech recognition language to:', recognitionRef.current.lang);
@@ -10257,6 +10269,10 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
   const startListening = () => {
     if (recognitionRef.current) {
       try {
+        // Очищаем предыдущие результаты при новом нажатии на микрофон
+        setSearchQuery("");
+        setInterimTranscript("");
+        
         // Убеждаемся, что язык установлен правильно перед запуском
         recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
         console.log('SubcategoryPage: Setting speech recognition language to:', recognitionRef.current.lang);

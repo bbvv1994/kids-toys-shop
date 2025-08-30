@@ -883,6 +883,10 @@ const theme = createTheme({
 
   const handleMicClick = () => {
     if (recognitionRef.current) {
+      // Очищаем предыдущие результаты при новом нажатии на микрофон
+      setSearchValue("");
+      setInterimTranscript("");
+      
       setIsListening(true);
       recognitionRef.current.start();
     } else {
