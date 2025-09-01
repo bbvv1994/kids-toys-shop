@@ -2530,7 +2530,7 @@ const theme = createTheme({
                 valueLabelDisplay="auto"
                 min={priceLimits[0]}
                 max={priceLimits[1]}
-                step={10}
+                step={1}
                 sx={{ width: '100%', mt: 1 }}
               />
               <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#888', mt: 1 }}>
@@ -5678,7 +5678,7 @@ function AppContent({
                      valueLabelDisplay="auto"
                      min={priceLimits[0]}
                      max={priceLimits[1]}
-                     step={10}
+                     step={1}
                      sx={{
                        '& .MuiSlider-thumb': {
                          backgroundColor: '#FF9800',
