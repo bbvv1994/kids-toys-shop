@@ -2044,134 +2044,7 @@ const theme = createTheme({
               {t('catalog.categoriesButton')}
             </button>
           </Box>
-          {/* Выпадающее меню фильтров */}
-          {true && (
-            <Paper
-              ref={filtersPanelRef}
-              sx={{
-                position: 'fixed',
-                top: desktopSearchBarRef?.current ? 
-                  desktopSearchBarRef.current.getBoundingClientRect().bottom + 5 : 184,
-                left: desktopSearchBarRef?.current ? 
-                  desktopSearchBarRef.current.getBoundingClientRect().right - 250 : 0,
-                width: 250,
-                zIndex: 2000,
-                m: 0,
-                p: 2,
-                borderRadius: 0,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                background: '#ff0000',
-                maxHeight: 520,
-                overflowY: 'auto',
-                border: '3px solid #00ff00',
-              }}
-              onWheel={e => { e.stopPropagation(); /* wheel-событие не блокируется, скролл работает */ }}
-            >
-              {/* Заголовок Фильтры */}
-              <Box sx={{ 
-                background: '#FFB300', 
-                color: '#fff', 
-                fontWeight: 'bold', 
-                fontSize: 18, 
-                textAlign: 'center', 
-                py: 1,
-                mb: 2,
-                borderRadius: 1
-              }}>
-                {t('filters.title')}
-              </Box>
-              {/* Фильтры */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {/* Цена */}
-                <Box>
-                  <span style={{ fontWeight: 500, marginRight: 4 }}>{t('common.price')}:</span>
-                  <Slider
-                    value={priceRange}
-                    onChange={(_, newValue) => setPriceRange(newValue)}
-                    valueLabelDisplay="auto"
-                    min={priceLimits[0]}
-                    max={priceLimits[1]}
-                    sx={{ width: '90%', ml: 1 }}
-                  />
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#888', mt: -1 }}>
-                    <span>{new Intl.NumberFormat('ru-RU', { style: 'currency', currency }).format(priceRange[0])}</span>
-                    <span>{new Intl.NumberFormat('ru-RU', { style: 'currency', currency }).format(priceRange[1])}</span>
-                  </Box>
-                </Box>
-                {/* Возраст */}
-                <Box>
-                  <span style={{ fontWeight: 500, marginRight: 4 }}>{t('catalog.ageGroup')}:</span>
-                  <Box sx={{ pl: 1 }}>
-                    {ageGroups.map(age => (
-                      <FormControlLabel
-                        key={age}
-                        control={
-                          <Checkbox
-                            checked={selectedAgeGroups.includes(age)}
-                            onChange={e => {
-                              if (e.target.checked) setSelectedAgeGroups([...selectedAgeGroups, age]);
-                              else setSelectedAgeGroups(selectedAgeGroups.filter(a => a !== age));
-                            }}
-                          />
-                        }
-                        label={age}
-                        sx={{ display: 'block', fontSize: 14 }}
-                      />
-                    ))}
-                  </Box>
-                </Box>
-                {/* Пол */}
-                <Box>
-                  <span style={{ fontWeight: 500, marginRight: 4 }}>{t('catalog.gender')}:</span>
-                  <Box sx={{ pl: 1 }}>
-                    {genderOptions.map(opt => (
-                      <FormControlLabel
-                        key={opt.value}
-                        control={
-                          <Checkbox
-                            checked={selectedGenders.includes(opt.value)}
-                            onChange={e => {
-                              if (e.target.checked) {
-                                onGendersChange([...selectedGenders, opt.value]);
-                              } else {
-                                onGendersChange(selectedGenders.filter(g => g !== opt.value));
-                              }
-                            }}
-                          />
-                        }
-                        label={opt.label}
-                        sx={{ display: 'block', fontSize: 14 }}
-                      />
-                    ))}
-                  </Box>
-                </Box>
-                {/* Бренды */}
-                {brandOptions.length > 0 && (
-                  <Box>
-                    <span style={{ fontWeight: 500, marginRight: 4 }}>{t('catalog.brands')}:</span>
-                    <Box sx={{ pl: 1 }}>
-                      {brandOptions.map(brand => (
-                        <FormControlLabel
-                          key={brand}
-                          control={
-                            <Checkbox
-                              checked={selectedBrands.includes(brand)}
-                              onChange={e => {
-                                if (e.target.checked) setSelectedBrands([...selectedBrands, brand]);
-                                else setSelectedBrands(selectedBrands.filter(b => b !== brand));
-                              }}
-                            />
-                          }
-                          label={brand}
-                          sx={{ display: 'block', fontSize: 14 }}
-                        />
-                      ))}
-                    </Box>
-                  </Box>
-                )}
-              </Box>
-            </Paper>
-          )}
+
           </>
         )}
         {/* Меню категорий с position: absolute */}
@@ -3378,7 +3251,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
       console.log(`Product ${product.name} filtered out by age: ${product.ageGroup} not in ${currentFilters.ageGroups}`);
       return false;
     }
-        // Фильтр по полу
+    // Фильтр по полу
     if (currentFilters.genders && currentFilters.genders.length > 0) {
       // Преобразуем выбранные английские коды в русские названия
       const selectedRussianGenders = currentFilters.genders.map(code => genderMapping[code]).filter(Boolean);
@@ -3387,7 +3260,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
         console.log(`Product ${product.name} filtered out by gender: ${product.gender} not in ${selectedRussianGenders}`);
         return false;
       }
-    }
+          }
       // Фильтр по цене
       const productPrice = Number(product.price);
       if (productPrice < currentFilters.priceRange[0] || productPrice > currentFilters.priceRange[1]) {
@@ -5767,9 +5640,7 @@ function AppContent({
                <Paper
                  ref={filtersPanelRef}
                  data-filters-panel
-                 onWheel={(e) => {
-                   e.stopPropagation();
-                 }}
+                 
                  sx={{
                    position: 'absolute',
                    top: '100%',
@@ -5785,24 +5656,6 @@ function AppContent({
                    overflowY: 'auto',
                    border: '1px solid #e0e0e0',
                    mt: 1,
-                   // Кастомный скроллбар
-                   '&::-webkit-scrollbar': {
-                     width: '8px',
-                   },
-                   '&::-webkit-scrollbar-track': {
-                     background: '#f1f1f1',
-                     borderRadius: '4px',
-                   },
-                   '&::-webkit-scrollbar-thumb': {
-                     background: '#FF9800',
-                     borderRadius: '4px',
-                     '&:hover': {
-                       background: '#F57C00',
-                     },
-                   },
-                   // Firefox
-                   scrollbarWidth: 'thin',
-                   scrollbarColor: '#FF9800 #f1f1f1',
                  }}
                >
                  {/* Цена */}
@@ -5937,16 +5790,16 @@ function AppContent({
 
                  {/* Кнопки сброса и применения */}
                  <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-                   <Button
+                 <Button
                      fullWidth
                      variant="contained"
-                     onClick={() => {
+                   onClick={() => {
                        setTempSelectedGenders([]);
                        setTempSelectedBrands([]);
                        setTempSelectedAgeGroups([]);
                        setTempPriceRange(priceLimits);
-                     }}
-                     sx={{
+                   }}
+                   sx={{
                        background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
                        color: '#fff',
                        borderRadius: 2,
@@ -5956,15 +5809,15 @@ function AppContent({
                        height: 44,
                        boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
                        textTransform: 'none',
-                       '&:hover': {
+                     '&:hover': {
                          background: 'linear-gradient(135deg, #ef5350 0%, #f44336 100%)',
                          boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
                          transform: 'translateY(-1px)'
-                       },
-                     }}
-                   >
+                     },
+                   }}
+                 >
                      Сбросить
-                   </Button>
+                 </Button>
                    <Button
                      fullWidth
                      variant="contained"
@@ -7165,7 +7018,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
       alert('Ошибка при массовом удалении товаров.');
     }
   };
-  
+
   const handleBulkToggleHidden = async (hide) => {
     if (selectedProducts.length === 0) return;
     

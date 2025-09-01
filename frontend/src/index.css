@@ -53,9 +53,6 @@ html, body {
 }
 
 /* Стили для учета скроллбара */
-html {
-  overflow-y: scroll;
-}
 
 /* Для Firefox */
 @supports (scrollbar-gutter: stable) {
@@ -804,9 +801,6 @@ p, h1, h2, h3, h4, h5, h6, span, div {
 */
 
 /* Простые стили для скроллбара */
-html {
-  overflow-y: auto;
-}
 
 ::-webkit-scrollbar {
   width: 8px;
@@ -882,9 +876,7 @@ html {
   margin-left: 4px !important;
 }
 
-body {
-  overflow-y: scroll;
-}
+
 
 .main-banner-img {
   margin-left: 50px;
