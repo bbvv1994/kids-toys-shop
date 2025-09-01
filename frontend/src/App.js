@@ -5242,7 +5242,7 @@ function AppContent({
     if (validPrices.length === 0) return [0, 10000];
     
     const minPrice = Math.floor(Math.min(...validPrices) / 100) * 100; // Округляем вниз до сотен
-    const maxPrice = Math.ceil(Math.max(...validPrices) / 100) * 100; // Округляем вверх до сотен
+    const maxPrice = Math.max(...validPrices); // Используем точную максимальную цену товара
     
     return [minPrice, maxPrice];
   }, [products]);
