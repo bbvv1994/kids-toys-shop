@@ -5184,3 +5184,39 @@ app.post('/api/debug/test-translations', async (req, res) => {
     });
   }
 });
+// API для метрик системы
+const { getSystemMetrics } = require('./metrics');
+
+app.get('/api/system-metrics', (req, res) => {
+    try {
+        const metrics = getSystemMetrics();
+        res.json(metrics);
+    } catch (error) {
+        res.status(500).json({ error: 'Ошибка получения метрик' });
+    }
+});
+// API для получения всех подкатегорий (алиас для /api/categories?parentId=null)
+app.get('/api/subcategories', async (req, res) => {
+  try {
+    const subcategories = await prisma.category.findMany({
+      where: {
+        parentId: { not: null },
+        active: true
+      },
+      orderBy: { order: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        active: true,
+        image: true,
+        parentId: true,
+        order: true
+      }
+    });
+
+    res.json(subcategories);
+  } catch (error) {
+    console.error('Error fetching subcategories:', error);
+    res.status(500).json({ error: 'Failed to fetch subcategories' });
+  }
+});
