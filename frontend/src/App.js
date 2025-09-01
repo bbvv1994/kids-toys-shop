@@ -2,6 +2,7 @@
 
 
 
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProductCard from './components/ProductCard';
@@ -2040,7 +2041,7 @@ const theme = createTheme({
             </button>
           </Box>
           {/* Выпадающее меню фильтров */}
-          {filtersMenuOpen && (
+          {true && (
             <Paper
               ref={filtersPanelRef}
               sx={{
@@ -2055,9 +2056,10 @@ const theme = createTheme({
                 p: 2,
                 borderRadius: 0,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                background: '#fff',
+                background: '#ff0000',
                 maxHeight: 520,
                 overflowY: 'auto',
+                border: '3px solid #00ff00',
               }}
               onWheel={e => { e.stopPropagation(); /* wheel-событие не блокируется, скролл работает */ }}
             >
@@ -5284,6 +5286,7 @@ function AppContent({
   const isHome = location.pathname === '/';
   const isCatalog = location.pathname === '/catalog';
   const shouldShowDesktopSearch = isHome || isCatalog;
+  const shouldShowDesktopFilters = isCatalog; // Фильтры только на каталоге
   
   // Состояния для мобильного поиска и фильтров
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -5372,6 +5375,25 @@ function AppContent({
       }
     }
   }, [i18n.language]); // Переинициализируем только при смене языка
+
+  // Обработчик клика вне панели фильтров
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filtersMenuOpen) {
+        const filterButton = event.target.closest('[data-filter-button]');
+        const filtersPanel = event.target.closest('[data-filters-panel]');
+        
+        if (!filterButton && !filtersPanel) {
+          setFiltersMenuOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [filtersMenuOpen]);
 
   // Функции для голосового поиска
   const handleMicClick = () => {
@@ -5589,23 +5611,201 @@ function AppContent({
              </form>
 
              {/* Кнопка фильтров для десктопа */}
-             <IconButton
-               data-filter-button
-               onClick={() => setFiltersMenuOpen(!filtersMenuOpen)}
-               sx={{
-                 color: '#FF9800',
-                 backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.1)' : 'white',
-                 border: '1px solid #FF9800',
-                 borderRadius: 2,
-                 width: 48,
-                 height: 40,
-                 '&:hover': {
-                   backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.15)' : 'rgba(255, 152, 0, 0.04)',
-                 },
-               }}
-             >
-               <FilterList />
-             </IconButton>
+             {shouldShowDesktopFilters && (
+               <IconButton
+                 data-filter-button
+                 onClick={() => setFiltersMenuOpen(!filtersMenuOpen)}
+                 sx={{
+                   color: '#FF9800',
+                   backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.1)' : 'white',
+                   border: '1px solid #FF9800',
+                   borderRadius: 2,
+                   width: 48,
+                   height: 40,
+                   '&:hover': {
+                     backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.15)' : 'rgba(255, 152, 0, 0.04)',
+                   },
+                 }}
+               >
+                 <FilterList />
+               </IconButton>
+             )}
+
+             {/* Панель фильтров для десктопа */}
+             {shouldShowDesktopFilters && filtersMenuOpen && (
+               <Paper
+                 data-filters-panel
+                 sx={{
+                   position: 'absolute',
+                   top: '100%',
+                   right: 0,
+                   width: 250,
+                   zIndex: '999999 !important',
+                   m: 0,
+                   p: 2,
+                   borderRadius: 2,
+                   boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                   background: '#fff',
+                   maxHeight: 520,
+                   overflowY: 'auto',
+                   border: '1px solid #e0e0e0',
+                   mt: 1,
+                 }}
+               >
+                 {/* Цена */}
+                 <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+                   Цена
+                 </Typography>
+                 <Box sx={{ px: 1, mb: 3 }}>
+                   <Slider
+                     value={priceRange}
+                     onChange={(event, newValue) => setPriceRange(newValue)}
+                     valueLabelDisplay="auto"
+                     min={0}
+                     max={10000}
+                     step={100}
+                     sx={{
+                       '& .MuiSlider-thumb': {
+                         backgroundColor: '#FF9800',
+                       },
+                       '& .MuiSlider-track': {
+                         backgroundColor: '#FF9800',
+                       },
+                       '& .MuiSlider-rail': {
+                         backgroundColor: '#e0e0e0',
+                       },
+                     }}
+                   />
+                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                     <Typography variant="body2" color="text.secondary">
+                       ₪{priceRange[0]}
+                     </Typography>
+                     <Typography variant="body2" color="text.secondary">
+                       ₪{priceRange[1]}
+                     </Typography>
+                   </Box>
+                 </Box>
+
+                 {/* Возраст */}
+                 <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+                   Возраст
+                 </Typography>
+                 <Box sx={{ mb: 3 }}>
+                   {['0-1', '1-3', '3-6', '6-12', '12+'].map((age) => (
+                     <FormControlLabel
+                       key={age}
+                       control={
+                         <Checkbox
+                           checked={selectedAgeGroups.includes(age)}
+                           onChange={(e) => {
+                             if (e.target.checked) {
+                               setSelectedAgeGroups([...selectedAgeGroups, age]);
+                             } else {
+                               setSelectedAgeGroups(selectedAgeGroups.filter(g => g !== age));
+                             }
+                           }}
+                           sx={{
+                             color: '#FF9800',
+                             '&.Mui-checked': {
+                               color: '#FF9800',
+                             },
+                           }}
+                         />
+                       }
+                       label={age}
+                       sx={{ display: 'block', mb: 1 }}
+                     />
+                   ))}
+                 </Box>
+
+                 {/* Пол */}
+                 <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+                   Пол
+                 </Typography>
+                 <Box sx={{ mb: 3 }}>
+                   {['Мальчики', 'Девочки', 'Унисекс'].map((gender) => (
+                     <FormControlLabel
+                       key={gender}
+                       control={
+                         <Checkbox
+                           checked={selectedGenders.includes(gender)}
+                           onChange={(e) => {
+                             if (e.target.checked) {
+                               onGendersChange([...selectedGenders, gender]);
+                             } else {
+                               onGendersChange(selectedGenders.filter(g => g !== gender));
+                             }
+                           }}
+                           sx={{
+                             color: '#FF9800',
+                             '&.Mui-checked': {
+                               color: '#FF9800',
+                             },
+                           }}
+                         />
+                       }
+                       label={gender}
+                       sx={{ display: 'block', mb: 1 }}
+                     />
+                   ))}
+                 </Box>
+
+                 {/* Бренды */}
+                 <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+                   Бренды
+                 </Typography>
+                 <Box sx={{ mb: 2 }}>
+                   {Array.from(new Set(products.map(p => p.brand))).filter(Boolean).slice(0, 10).map((brand) => (
+                     <FormControlLabel
+                       key={brand}
+                       control={
+                         <Checkbox
+                           checked={selectedBrands.includes(brand)}
+                           onChange={(e) => {
+                             if (e.target.checked) {
+                               setSelectedBrands([...selectedBrands, brand]);
+                             } else {
+                               setSelectedBrands(selectedBrands.filter(b => b !== brand));
+                             }
+                           }}
+                           sx={{
+                             color: '#FF9800',
+                             '&.Mui-checked': {
+                               color: '#FF9800',
+                             },
+                           }}
+                         />
+                       }
+                       label={brand}
+                       sx={{ display: 'block', mb: 1 }}
+                     />
+                   ))}
+                 </Box>
+
+                 {/* Кнопка сброса */}
+                 <Button
+                   variant="outlined"
+                   onClick={() => {
+                     setPriceRange([0, 10000]);
+                     setSelectedAgeGroups([]);
+                     onGendersChange([]);
+                     setSelectedBrands([]);
+                   }}
+                   sx={{
+                     width: '100%',
+                     mt: 2,
+                     borderColor: '#FF9800',
+                     color: '#FF9800',
+                     '&:hover': {
+                       borderColor: '#F57C00',
+                       backgroundColor: 'rgba(255, 152, 0, 0.04)',
+                     },
+                   }}
+                 >
+                   Сбросить фильтры
+                 </Button>
+               </Paper>
+             )}
            </Box>
          )}
 
