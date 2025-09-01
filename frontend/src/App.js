@@ -11576,7 +11576,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
     setDeleteProfileDialogOpen(false);
   };
 
-  // Функция для создания красивого заголовка
+  // Создание красивого заголовка
   const createHeader = (title) => (
     <Typography variant="h5" sx={{ 
       fontWeight: 800, 
