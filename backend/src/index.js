@@ -203,7 +203,7 @@ prisma.$connect()
     process.exit(1);
   });
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 
 // Настройка multer для production и development
 let storage;
@@ -228,17 +228,17 @@ const corsOptions = {
     // Разрешаем запросы без origin (например, Postman)
     if (!origin) return callback(null, true);
     
+    const envAllowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+
     const allowedOrigins = [
       'http://localhost:3000',
-      'http://localhost:3002',
-      'http://192.168.31.156:3000',
-      'http://192.168.31.156',
-      'http://192.168.31.103:3000',
-      'http://192.168.31.103:3001',
-      'http://192.168.31.103',
-      'https://kids-toys-shop.vercel.app',
-      'https://kids-toys-shop-git-main-bbvv1994.vercel.app',
-      'https://kids-toys-shop-bbvv1994.vercel.app'
+      'http://localhost:3001',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      ...envAllowedOrigins
     ];
     
     // Проверяем точное совпадение

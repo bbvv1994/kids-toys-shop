@@ -1,12 +1,13 @@
 // Универсальная конфигурация для автоматического определения среды
 const config = {
   development: {
-    API_BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://192.168.31.103:5001',
-    FRONTEND_URL: process.env.REACT_APP_FRONTEND_URL || 'http://192.168.31.103:3000'
+    API_BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000',
+    FRONTEND_URL: process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3000'
   },
   production: {
-    API_BASE_URL: process.env.REACT_APP_API_BASE_URL || 'https://kids-toys-backend.onrender.com',
-    FRONTEND_URL: process.env.REACT_APP_FRONTEND_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://kids-toys-shop.vercel.app')
+    // В продакшене предпочитаем тот же origin, чтобы избежать CORS, env — как запасной вариант
+    API_BASE_URL: (typeof window !== 'undefined' && window.location.origin) || process.env.REACT_APP_API_BASE_URL || '',
+    FRONTEND_URL: (typeof window !== 'undefined' && window.location.origin) || process.env.REACT_APP_FRONTEND_URL || ''
   }
 };
 
