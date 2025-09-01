@@ -1602,6 +1602,9 @@ const theme = createTheme({
                     to={item.path}
                     color="inherit"
                     startIcon={item.icon}
+                    onClick={() => {
+                      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                    }}
                     sx={{
                       backgroundColor: location.pathname === item.path ? 'rgba(255,255,255,0.2)' : 'transparent',
                       borderRadius: 25,
@@ -5199,6 +5202,11 @@ function AppContent({
   const [interimTranscript, setInterimTranscript] = React.useState('');
   const recognitionRef = React.useRef(null);
   const filtersPanelRef = React.useRef(null);
+  
+  // Прокрутка к началу страницы при переходе между вкладками
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, [location.pathname]);
   
   // Обработка ошибок рендера
   const [hasError, setHasError] = React.useState(false);
