@@ -188,8 +188,12 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import { searchInProductNames } from './utils/translationUtils';
 
-// Глобальный маппинг английских кодов на русские названия для фильтра по полу
+// Глобальный маппинг русских названий на русские названия для фильтра по полу
 const genderMapping = {
+  'Мальчики': 'Для мальчиков',
+  'Девочки': 'Для девочек', 
+  'Универсальный': 'Универсальный',
+  // Также поддерживаем английские коды для совместимости
   'boy': 'Для мальчиков',
   'girl': 'Для девочек', 
   'unisex': 'Универсальный'
@@ -481,14 +485,14 @@ const theme = createTheme({
   const [selectedCategories, setSelectedCategories] = React.useState([]);
   const categories = ['Игрушки', 'Конструкторы', 'Пазлы', 'Творчество', 'Канцтовары', 'Транспорт', 'Отдых на воде', 'Настольные игры', 'Развивающие игры', 'Акции'];
   const ageGroups = [
-    t('catalog.ageGroups.0-1_year'),
-    t('catalog.ageGroups.1-3_years'),
-    t('catalog.ageGroups.3-5_years'),
-    t('catalog.ageGroups.5-7_years'),
-    t('catalog.ageGroups.7-10_years'),
-    t('catalog.ageGroups.10-12_years'),
-    t('catalog.ageGroups.12-14_years'),
-    t('catalog.ageGroups.14-16_years')
+    '0-1 год',
+    '1-3 года',
+    '3-5 лет',
+    '5-7 лет',
+    '7-10 лет',
+    '10-12 лет',
+    '12-14 лет',
+    '14-16 лет'
   ];
   const genderOptions = [
     { value: 'boy', label: t('catalog.genderOptions.boy') },
@@ -3348,21 +3352,48 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   // Фильтрация товаров по поисковому запросу
 
   const filteredProducts = products.filter(product => {
+    // Используем основные состояния фильтров
+    const currentFilters = {
+      genders: selectedGenders,
+      brands: selectedBrands,
+      ageGroups: selectedAgeGroups,
+      priceRange: priceRange
+    };
+    
+    // Отладочная информация
+    console.log('Filtering with:', {
+      genders: currentFilters.genders,
+      brands: currentFilters.brands,
+      ageGroups: currentFilters.ageGroups,
+      priceRange: currentFilters.priceRange
+    });
+    
     // Фильтр по брендам
-    if (selectedBrands && selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) return false;
+    if (currentFilters.brands && currentFilters.brands.length > 0 && !currentFilters.brands.includes(product.brand)) {
+      console.log(`Product ${product.name} filtered out by brand: ${product.brand} not in ${currentFilters.brands}`);
+      return false;
+    }
     // Фильтр по возрасту
-    if (selectedAgeGroups && selectedAgeGroups.length > 0 && !selectedAgeGroups.includes(product.ageGroup)) return false;
-    // Фильтр по полу
-    if (selectedGenders && selectedGenders.length > 0) {
+    if (currentFilters.ageGroups && currentFilters.ageGroups.length > 0 && !currentFilters.ageGroups.includes(product.ageGroup)) {
+      console.log(`Product ${product.name} filtered out by age: ${product.ageGroup} not in ${currentFilters.ageGroups}`);
+      return false;
+    }
+        // Фильтр по полу
+    if (currentFilters.genders && currentFilters.genders.length > 0) {
       // Преобразуем выбранные английские коды в русские названия
-      const selectedRussianGenders = selectedGenders.map(code => genderMapping[code]);
+      const selectedRussianGenders = currentFilters.genders.map(code => genderMapping[code]).filter(Boolean);
+      console.log(`Gender filter: selected codes=${currentFilters.genders}, mapped to=${selectedRussianGenders}, product gender=${product.gender}`);
       if (!selectedRussianGenders.includes(product.gender)) {
+        console.log(`Product ${product.name} filtered out by gender: ${product.gender} not in ${selectedRussianGenders}`);
         return false;
       }
-          }
+    }
       // Фильтр по цене
       const productPrice = Number(product.price);
-      if (productPrice < priceRange[0] || productPrice > priceRange[1]) return false;
+      if (productPrice < currentFilters.priceRange[0] || productPrice > currentFilters.priceRange[1]) {
+        console.log(`Product ${product.name} filtered out by price: ${productPrice} not in range ${currentFilters.priceRange}`);
+        return false;
+      }
       // Поиск (если есть)
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase();
@@ -5294,10 +5325,110 @@ function AppContent({
   const [isListening, setIsListening] = React.useState(false);
   const [interimTranscript, setInterimTranscript] = React.useState('');
   const recognitionRef = React.useRef(null);
+  const filtersPanelRef = React.useRef(null);
   
   // Обработка ошибок рендера
   const [hasError, setHasError] = React.useState(false);
   const [errorInfo, setErrorInfo] = React.useState(null);
+  
+  // Временные состояния для фильтров (не применяются до нажатия кнопки)
+  const [tempSelectedGenders, setTempSelectedGenders] = React.useState([]);
+  const [tempSelectedBrands, setTempSelectedBrands] = React.useState([]);
+  const [tempSelectedAgeGroups, setTempSelectedAgeGroups] = React.useState([]);
+  const [tempPriceRange, setTempPriceRange] = React.useState([0, 10000]);
+  
+  // Массив возрастных групп (как в форме редактирования)
+  const ageGroups = [
+    '0-1 год',
+    '1-3 года',
+    '3-5 лет',
+    '5-7 лет',
+    '7-10 лет',
+    '10-12 лет',
+    '12-14 лет',
+    '14-16 лет'
+  ];
+  
+  // Вычисляем реальные лимиты цен на основе товаров
+  const priceLimits = React.useMemo(() => {
+    if (!products || products.length === 0) return [0, 10000];
+    
+    const validPrices = products
+      .map(product => Number(product.price))
+      .filter(price => !isNaN(price) && price > 0);
+    
+    if (validPrices.length === 0) return [0, 10000];
+    
+    const minPrice = Math.floor(Math.min(...validPrices) / 100) * 100; // Округляем вниз до сотен
+    const maxPrice = Math.ceil(Math.max(...validPrices) / 100) * 100; // Округляем вверх до сотен
+    
+    return [minPrice, maxPrice];
+  }, [products]);
+  
+  // Инициализация временных состояний при открытии фильтров
+  React.useEffect(() => {
+    if (filtersMenuOpen) {
+      setTempSelectedGenders(selectedGenders);
+      setTempSelectedBrands(selectedBrands);
+      setTempSelectedAgeGroups(selectedAgeGroups);
+      setTempPriceRange(priceRange);
+    }
+  }, [filtersMenuOpen, selectedGenders, selectedBrands, selectedAgeGroups, priceRange]);
+  
+  // Инициализация priceRange на основе реальных цен при загрузке товаров
+  React.useEffect(() => {
+    if (products && products.length > 0 && priceRange[0] === 0 && priceRange[1] === 10000) {
+      setPriceRange(priceLimits);
+    }
+  }, [products, priceLimits, priceRange]);
+  
+  // Инициализация Lenis для фильтров
+  React.useEffect(() => {
+    if (filtersMenuOpen && filtersPanelRef.current) {
+      if (window.lenisFiltersRef) {
+        window.lenisFiltersRef.destroy();
+        window.lenisFiltersRef = null;
+      }
+      window.lenisFiltersRef = new Lenis({
+        wrapper: filtersPanelRef.current,
+        duration: 0.8,
+        wheelMultiplier: 1,
+        touchMultiplier: 2,
+        normalizeWheel: true,
+        infinite: false,
+        showScrollbar: true,
+      });
+      function raf(time) {
+        window.lenisFiltersRef?.raf(time);
+        if (filtersMenuOpen) requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+      return () => {
+        if (window.lenisFiltersRef) {
+          window.lenisFiltersRef.destroy();
+          window.lenisFiltersRef = null;
+        }
+      };
+    } else {
+      if (window.lenisFiltersRef) {
+        window.lenisFiltersRef.destroy();
+        window.lenisFiltersRef = null;
+      }
+    }
+  }, [filtersMenuOpen]);
+  
+  // Получаем актуальные состояния фильтров
+  const currentFilterStates = filtersMenuOpen ? {
+    genders: tempSelectedGenders,
+    brands: tempSelectedBrands,
+    ageGroups: tempSelectedAgeGroups,
+    priceRange: tempPriceRange
+  } : {
+    genders: selectedGenders,
+    brands: selectedBrands,
+    ageGroups: selectedAgeGroups,
+    priceRange: priceRange
+  };
   
   // Функция поиска
   const handleSearch = () => {
@@ -5634,7 +5765,11 @@ function AppContent({
              {/* Панель фильтров для десктопа */}
              {shouldShowDesktopFilters && filtersMenuOpen && (
                <Paper
+                 ref={filtersPanelRef}
                  data-filters-panel
+                 onWheel={(e) => {
+                   e.stopPropagation();
+                 }}
                  sx={{
                    position: 'absolute',
                    top: '100%',
@@ -5650,6 +5785,24 @@ function AppContent({
                    overflowY: 'auto',
                    border: '1px solid #e0e0e0',
                    mt: 1,
+                   // Кастомный скроллбар
+                   '&::-webkit-scrollbar': {
+                     width: '8px',
+                   },
+                   '&::-webkit-scrollbar-track': {
+                     background: '#f1f1f1',
+                     borderRadius: '4px',
+                   },
+                   '&::-webkit-scrollbar-thumb': {
+                     background: '#FF9800',
+                     borderRadius: '4px',
+                     '&:hover': {
+                       background: '#F57C00',
+                     },
+                   },
+                   // Firefox
+                   scrollbarWidth: 'thin',
+                   scrollbarColor: '#FF9800 #f1f1f1',
                  }}
                >
                  {/* Цена */}
@@ -5658,11 +5811,11 @@ function AppContent({
                  </Typography>
                  <Box sx={{ px: 1, mb: 3 }}>
                    <Slider
-                     value={priceRange}
-                     onChange={(event, newValue) => setPriceRange(newValue)}
+                     value={tempPriceRange}
+                     onChange={(event, newValue) => setTempPriceRange(newValue)}
                      valueLabelDisplay="auto"
-                     min={0}
-                     max={10000}
+                     min={priceLimits[0]}
+                     max={priceLimits[1]}
                      step={100}
                      sx={{
                        '& .MuiSlider-thumb': {
@@ -5678,10 +5831,10 @@ function AppContent({
                    />
                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                      <Typography variant="body2" color="text.secondary">
-                       ₪{priceRange[0]}
+                       ₪{tempPriceRange[0]}
                      </Typography>
                      <Typography variant="body2" color="text.secondary">
-                       ₪{priceRange[1]}
+                       ₪{tempPriceRange[1]}
                      </Typography>
                    </Box>
                  </Box>
@@ -5691,17 +5844,17 @@ function AppContent({
                    Возраст
                  </Typography>
                  <Box sx={{ mb: 3 }}>
-                   {['0-1', '1-3', '3-6', '6-12', '12+'].map((age) => (
+                   {ageGroups.map((age) => (
                      <FormControlLabel
                        key={age}
                        control={
                          <Checkbox
-                           checked={selectedAgeGroups.includes(age)}
+                           checked={tempSelectedAgeGroups.includes(age)}
                            onChange={(e) => {
                              if (e.target.checked) {
-                               setSelectedAgeGroups([...selectedAgeGroups, age]);
+                               setTempSelectedAgeGroups([...tempSelectedAgeGroups, age]);
                              } else {
-                               setSelectedAgeGroups(selectedAgeGroups.filter(g => g !== age));
+                               setTempSelectedAgeGroups(tempSelectedAgeGroups.filter(g => g !== age));
                              }
                            }}
                            sx={{
@@ -5728,12 +5881,12 @@ function AppContent({
                        key={gender}
                        control={
                          <Checkbox
-                           checked={selectedGenders.includes(gender)}
+                           checked={tempSelectedGenders.includes(gender)}
                            onChange={(e) => {
                              if (e.target.checked) {
-                               onGendersChange([...selectedGenders, gender]);
+                               setTempSelectedGenders([...tempSelectedGenders, gender]);
                              } else {
-                               onGendersChange(selectedGenders.filter(g => g !== gender));
+                               setTempSelectedGenders(tempSelectedGenders.filter(g => g !== gender));
                              }
                            }}
                            sx={{
@@ -5760,12 +5913,12 @@ function AppContent({
                        key={brand}
                        control={
                          <Checkbox
-                           checked={selectedBrands.includes(brand)}
+                           checked={tempSelectedBrands.includes(brand)}
                            onChange={(e) => {
                              if (e.target.checked) {
-                               setSelectedBrands([...selectedBrands, brand]);
+                               setTempSelectedBrands([...tempSelectedBrands, brand]);
                              } else {
-                               setSelectedBrands(selectedBrands.filter(b => b !== brand));
+                               setTempSelectedBrands(tempSelectedBrands.filter(b => b !== brand));
                              }
                            }}
                            sx={{
@@ -5782,28 +5935,73 @@ function AppContent({
                    ))}
                  </Box>
 
-                 {/* Кнопка сброса */}
-                 <Button
-                   variant="outlined"
-                   onClick={() => {
-                     setPriceRange([0, 10000]);
-                     setSelectedAgeGroups([]);
-                     onGendersChange([]);
-                     setSelectedBrands([]);
-                   }}
-                   sx={{
-                     width: '100%',
-                     mt: 2,
-                     borderColor: '#FF9800',
-                     color: '#FF9800',
-                     '&:hover': {
-                       borderColor: '#F57C00',
-                       backgroundColor: 'rgba(255, 152, 0, 0.04)',
-                     },
-                   }}
-                 >
-                   Сбросить фильтры
-                 </Button>
+                 {/* Кнопки сброса и применения */}
+                 <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                   <Button
+                     fullWidth
+                     variant="contained"
+                     onClick={() => {
+                       setTempSelectedGenders([]);
+                       setTempSelectedBrands([]);
+                       setTempSelectedAgeGroups([]);
+                       setTempPriceRange(priceLimits);
+                     }}
+                     sx={{
+                       background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
+                       color: '#fff',
+                       borderRadius: 2,
+                       fontWeight: 600,
+                       fontSize: 15,
+                       py: 1.5,
+                       height: 44,
+                       boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
+                       textTransform: 'none',
+                       '&:hover': {
+                         background: 'linear-gradient(135deg, #ef5350 0%, #f44336 100%)',
+                         boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                         transform: 'translateY(-1px)'
+                       },
+                     }}
+                   >
+                     Сбросить
+                   </Button>
+                   <Button
+                     fullWidth
+                     variant="contained"
+                     onClick={() => {
+                       console.log('Applying filters:', {
+                         genders: tempSelectedGenders,
+                         brands: tempSelectedBrands,
+                         ageGroups: tempSelectedAgeGroups,
+                         priceRange: tempPriceRange
+                       });
+                       console.log('Gender mapping check:', tempSelectedGenders.map(code => ({ code, mapped: genderMapping[code] })));
+                       onGendersChange(tempSelectedGenders);
+                       setSelectedBrands(tempSelectedBrands);
+                       setSelectedAgeGroups(tempSelectedAgeGroups);
+                       setPriceRange(tempPriceRange);
+                       setFiltersMenuOpen(false);
+                     }}
+                     sx={{
+                       background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                       color: '#fff',
+                       borderRadius: 2,
+                       fontWeight: 600,
+                       fontSize: 15,
+                       py: 1.5,
+                       height: 44,
+                       boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                       textTransform: 'none',
+                       '&:hover': {
+                         background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                         boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                         transform: 'translateY(-1px)'
+                       },
+                     }}
+                   >
+                     Применить
+                   </Button>
+                 </Box>
                </Paper>
              )}
            </Box>
@@ -6967,7 +7165,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
       alert('Ошибка при массовом удалении товаров.');
     }
   };
-
+  
   const handleBulkToggleHidden = async (hide) => {
     if (selectedProducts.length === 0) return;
     
