@@ -229,7 +229,7 @@ const AdminUsers = () => {
             Статистика пользователей
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
                   {users.length}
@@ -239,7 +239,7 @@ const AdminUsers = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="error.main" sx={{ fontWeight: 'bold' }}>
                   {users.filter(u => u.role === 'admin').length}
@@ -249,7 +249,7 @@ const AdminUsers = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
                   {users.filter(u => u.role === 'user').length}
@@ -259,7 +259,7 @@ const AdminUsers = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="info.main" sx={{ fontWeight: 'bold' }}>
                   {users.filter(u => u.email).length}

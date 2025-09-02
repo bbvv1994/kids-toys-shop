@@ -358,12 +358,12 @@ const ReviewPage = () => {
           
           <Grid container spacing={3}>
             {productReviews.map((review, index) => (
-              <Grid item xs={12} key={review.productId}>
+              <Grid size={{ xs: 12 }} key={review.productId}>
                 <Card>
                   <CardContent>
                     <Grid container spacing={2} alignItems="center">
                       {review.productImage && (
-                        <Grid item>
+                        <Grid>
                           <CardMedia
                             component="img"
                             image={review.productImage.startsWith('http') ? review.productImage : `${API_BASE_URL}${review.productImage}`}
@@ -372,7 +372,7 @@ const ReviewPage = () => {
                           />
                         </Grid>
                       )}
-                      <Grid item xs>
+                      <Grid size={{ xs: true }}>
                         <Typography variant="h6" sx={{ mb: 1 }}>
                           {review.productName}
                         </Typography>

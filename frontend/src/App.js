@@ -6016,7 +6016,7 @@ function AppContent({
         <Container maxWidth="lg" sx={{ py: 6 }}>
           <Grid container spacing={4}>
             {/* Информация о компании */}
-            <Grid item xs={12} md={i18n.language === 'he' ? 4 : 3} sx={{ ml: { md: -5 } }}>
+            <Grid size={{ xs: 12, md: i18n.language === 'he' ? 4 : 3 }} sx={{ ml: { md: -5 } }}>
               <Typography variant="h5" sx={{ 
                 fontWeight: 700, 
                 mb: 2, 
@@ -6077,7 +6077,7 @@ function AppContent({
             </Grid>
 
             {/* Быстрые ссылки */}
-            <Grid item xs={12} sm={6} md={2}>
+            <Grid size={{ xs: 12, sm: 6, md: 2 }}>
               <Typography variant="h6" sx={{ 
                 fontWeight: 600, 
                 mb: 3, 
@@ -6131,7 +6131,7 @@ function AppContent({
             </Grid>
 
             {/* Часы работы */}
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Typography variant="h6" sx={{ 
                 fontWeight: 600, 
                 mb: 3, 
@@ -6154,7 +6154,7 @@ function AppContent({
             </Grid>
 
             {/* Контактная информация */}
-            <Grid item xs={12} sm={6} md={i18n.language === 'he' ? 3 : 4}>
+            <Grid size={{ xs: 12, sm: 6, md: i18n.language === 'he' ? 3 : 4 }}>
               <Typography variant="h6" sx={{ 
                 fontWeight: 600, 
                 mb: 3, 

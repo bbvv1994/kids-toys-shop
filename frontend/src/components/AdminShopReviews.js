@@ -243,7 +243,7 @@ const AdminShopReviews = () => {
             Статистика отзывов
           </Typography>
           <Grid container spacing={4}>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status !== 'archived').length}
@@ -253,7 +253,7 @@ const AdminShopReviews = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status === 'pending').length}
@@ -263,7 +263,7 @@ const AdminShopReviews = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status === 'published').length}
@@ -273,7 +273,7 @@ const AdminShopReviews = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="error.main" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status === 'rejected').length}
@@ -283,7 +283,7 @@ const AdminShopReviews = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="default" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status === 'hidden').length}

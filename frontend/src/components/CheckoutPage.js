@@ -414,7 +414,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
               </Alert>
             )}
             <Grid container spacing={2} key={i18n.language}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                                                                   <TextField
                    fullWidth
                    label={t('checkout.firstName')}
@@ -427,7 +427,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
                     sx={{ mb: 2 }}
                   />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                                  <TextField
                    fullWidth
                    label={t('checkout.lastName')}
@@ -440,7 +440,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
                    sx={{ mb: 2 }}
                  />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                                  <TextField
                    fullWidth
                    label={t('checkout.email')}
@@ -454,7 +454,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
                    sx={{ mb: 2 }}
                  />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                                  <TextField
                    fullWidth
                    label={t('checkout.phone')}
@@ -477,7 +477,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
                    sx={{ mb: 2 }}
                  />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                                  <FormControl fullWidth error={!!validationErrors.pickupStore} sx={{ mb: 2 }}>
                    <FormLabel error={!!validationErrors.pickupStore}>{t('checkout.pickupStore')}</FormLabel>
                    <RadioGroup
