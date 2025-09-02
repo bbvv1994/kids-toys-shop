@@ -128,7 +128,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
          setValidationErrors(errors);
        }
      }
-   }, [i18n.language, formData, pickupStore, validationErrors]);
+   }, [i18n.language, formData, pickupStore]);
 
    // Обновляем общее сообщение об ошибке при смене языка
    useEffect(() => {
