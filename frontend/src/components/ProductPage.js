@@ -2462,7 +2462,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           </Box>
         )}
         {!user && (
-          <Typography sx={{ mt: 2, color: '#888' }}>{t('productPage.loginToReview')}</Typography>
+          <Typography sx={{ mt: 2, color: '#888' }}>{t('productPage.loginToAskQuestion')}</Typography>
         )}
       </Box>
 
