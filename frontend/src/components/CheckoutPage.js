@@ -4,13 +4,14 @@ import {
   Radio, RadioGroup, FormControlLabel, FormControl, 
   FormLabel, FormHelperText, Divider, Paper, Grid, Alert, CircularProgress
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { API_BASE_URL, getImageUrl } from '../config';
 import { useTranslation } from 'react-i18next';
 import { getTranslatedName } from '../utils/translationUtils';
 
 export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearCart }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, i18n } = useTranslation();
   
 
@@ -127,6 +128,16 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
        setError(t('checkout.noItemsError'));
      }
    }, [i18n.language, error]);
+
+   // Сбрасываем состояние при навигации (когда пользователь покидает страницу)
+   useEffect(() => {
+     return () => {
+       // Очищаем состояние при размонтировании компонента
+       setValidationErrors({});
+       setError('');
+       setLoading(false);
+     };
+   }, [location.pathname]);
 
    
 

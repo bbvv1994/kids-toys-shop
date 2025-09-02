@@ -5864,7 +5864,7 @@ function AppContent({
           <Route path="/boys-toys" element={<BoysToysPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} />} />
           <Route path="/girls-toys" element={<GirlsToysPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} />} />
           <Route path="/cart" element={<CartPage cart={cart} onChangeCartQuantity={handleChangeCartQuantity} onRemoveFromCart={handleRemoveFromCart} />} />
-          <Route path="/checkout" element={<CheckoutPage cart={cart} cartLoading={cartLoading} user={user} onClearCart={handleClearCart} />} />
+          <Route path="/checkout" element={<CheckoutPage key={location.pathname} cart={cart} cartLoading={cartLoading} user={user} onClearCart={handleClearCart} />} />
           <Route path="/order-success" element={<OrderSuccessPage />} />
           <Route path="/wishlist" element={<WishlistPage user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} />} />
           <Route path="/profile" element={<UserCabinetPage user={user} handleLogout={handleLogout} wishlist={wishlist} handleWishlistToggle={handleWishlistToggle} cart={cart} handleAddToCart={handleAddToCart} handleChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} handleUserUpdate={handleUserUpdate} handleOpenReviewForm={handleOpenReviewForm} />} />
