@@ -5,18 +5,18 @@ import {
   Button, 
   Select, 
   MenuItem, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
   Paper,
   Container,
   CircularProgress,
-  Alert
+  Alert,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  Chip
 } from '@mui/material';
 import { getTranslatedName } from '../utils/translationUtils';
+import { API_BASE_URL } from '../config';
 
 const ORDER_STATUSES = [
   'pending',
@@ -97,58 +97,122 @@ export default function AdminOrders({ user }) {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
-      <Typography variant="h3" sx={{ mb: 4, textAlign: 'center', fontWeight: 'bold', color: '#333' }}>
-        Управление заказами
-      </Typography>
-      
-      {orders.length === 0 ? (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" sx={{ color: '#666' }}>
-            Заказов пока нет
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2, minHeight: 'calc(100vh - 200px)' }}>
+        {/* Заголовок */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+          <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#333' }}>
+            Управление заказами
           </Typography>
         </Box>
-      ) : (
-        <TableContainer component={Paper} sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell sx={{ fontWeight: 'bold' }}>ID заказа</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Клиент</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Товары</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Сумма</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Статус</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Дата</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Магазин</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Действия</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {orders.map((order) => (
-                <TableRow key={order.id} sx={{ '&:hover': { backgroundColor: '#f9f9f9' } }}>
-                  <TableCell>#{order.id}</TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                      {order.user?.name || order.user?.email || 'Неизвестно'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    {order.items.map((item, index) => (
-                      <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
-                        {getTranslatedName(item.product)} × {item.quantity}
+        
+        {orders.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" sx={{ color: '#666' }}>
+              Заказов пока нет
+            </Typography>
+          </Box>
+        ) : (
+          <List>
+            {orders.map((order) => (
+              <ListItem 
+                key={order.id}
+                sx={{ 
+                  mb: 2, 
+                  border: '1px solid #e0e0e0', 
+                  borderRadius: 2,
+                  backgroundColor: 'white'
+                }}
+              >
+                <ListItemText
+                  primary={
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                      <Typography variant="h6" component="h3">
+                        Заказ #{order.id}
                       </Typography>
-                    ))}
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-                      ₪{order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
+                    </Box>
+                  }
+                  secondary={
+                    <Box sx={{ 
+                      maxWidth: { xs: '100%', sm: 'calc(100% - 200px)' },
+                      pr: { xs: 0, sm: 2 }
+                    }}>
+                      <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                        Клиент: {order.user?.name || order.user?.email || 'Неизвестно'}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                        Магазин: {order.pickupStore === 'store1' ? 'ул. Роберт Сольд 8, Кирьят-Ям' : order.pickupStore === 'store2' ? 'ул. Вайцман 6, Кирьят-Моцкин' : 'Не выбран'}
+                      </Typography>
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                          Товары:
+                        </Typography>
+                        {order.items?.slice(0, 3).map((item, index) => (
+                          <Typography key={index} variant="body2" sx={{ 
+                            ml: 1,
+                            color: 'textSecondary'
+                          }}>
+                            • {getTranslatedName(item.product)} × {item.quantity}
+                          </Typography>
+                        ))}
+                        {order.items?.length > 3 && (
+                          <Typography variant="caption" color="textSecondary" sx={{ ml: 1 }}>
+                            и еще {order.items.length - 3} товаров
+                          </Typography>
+                        )}
+                      </Box>
+                      <Typography variant="body1" sx={{ 
+                        fontWeight: 'bold',
+                        color: '#1976d2'
+                      }}>
+                        Сумма: ₪{order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
+                      </Typography>
+                      <Typography variant="caption" sx={{ 
+                        color: 'textSecondary',
+                        display: 'block',
+                        mt: 1
+                      }}>
+                        {new Date(order.createdAt).toLocaleDateString('ru-RU', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </Typography>
+                    </Box>
+                  }
+                />
+                <ListItemSecondaryAction>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: { xs: 'column', sm: 'row' }, 
+                    gap: 1, 
+                    alignItems: { xs: 'flex-end', sm: 'center' },
+                    flexWrap: 'wrap'
+                  }}>
+                    {/* Статус */}
+                    <Chip
+                      label={STATUS_LABELS[order.status]}
+                      color={
+                        order.status === 'pending' ? 'warning' :
+                        order.status === 'confirmed' ? 'info' :
+                        order.status === 'ready' ? 'primary' :
+                        order.status === 'pickedup' ? 'success' :
+                        'error'
+                      }
+                      size="small"
+                      sx={{ fontWeight: 'medium' }}
+                    />
+                    
+                    {/* Селект статуса */}
                     <Select
                       value={order.status}
                       onChange={(e) => handleStatusChange(order.id, e.target.value)}
                       size="small"
-                      sx={{ minWidth: 120 }}
+                      sx={{ 
+                        minWidth: { xs: 120, sm: 140 },
+                        maxWidth: { xs: 140, sm: 'none' }
+                      }}
                     >
                       {ORDER_STATUSES.map((status) => (
                         <MenuItem key={status} value={status}>
@@ -156,30 +220,31 @@ export default function AdminOrders({ user }) {
                         </MenuItem>
                       ))}
                     </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    {order.pickupStore === 'store1' ? 'ул. Роберт Сольд 8, Кирьят-Ям' : order.pickupStore === 'store2' ? 'ул. Вайцман 6, Кирьят-Моцкин' : 'Не выбран'}
-                  </TableCell>
-                  <TableCell>
+                    
+                    {/* Кнопка обновления */}
                     <Button
                       size="small"
                       variant="outlined"
                       onClick={() => handleStatusChange(order.id, order.status)}
+                      sx={{
+                        borderRadius: 2,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        px: 2,
+                        py: 0.5,
+                        height: 28,
+                        minWidth: { xs: 80, sm: 'auto' }
+                      }}
                     >
                       Обновить
                     </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+                  </Box>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </Paper>
     </Container>
   );
 } 
