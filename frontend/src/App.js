@@ -3241,28 +3241,26 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
     
     // Фильтр по брендам
     if (currentFilters.brands && currentFilters.brands.length > 0 && !currentFilters.brands.includes(product.brand)) {
-      console.log(`Product ${product.name} filtered out by brand: ${product.brand} not in ${currentFilters.brands}`);
+
       return false;
     }
     // Фильтр по возрасту
     if (currentFilters.ageGroups && currentFilters.ageGroups.length > 0 && !currentFilters.ageGroups.includes(product.ageGroup)) {
-      console.log(`Product ${product.name} filtered out by age: ${product.ageGroup} not in ${currentFilters.ageGroups}`);
+
       return false;
     }
     // Фильтр по полу
     if (currentFilters.genders && currentFilters.genders.length > 0) {
       // Преобразуем выбранные английские коды в русские названия
       const selectedRussianGenders = currentFilters.genders.map(code => genderMapping[code]).filter(Boolean);
-      console.log(`Gender filter: selected codes=${currentFilters.genders}, mapped to=${selectedRussianGenders}, product gender=${product.gender}`);
       if (!selectedRussianGenders.includes(product.gender)) {
-        console.log(`Product ${product.name} filtered out by gender: ${product.gender} not in ${selectedRussianGenders}`);
         return false;
       }
           }
       // Фильтр по цене
       const productPrice = Number(product.price);
       if (productPrice < currentFilters.priceRange[0] || productPrice > currentFilters.priceRange[1]) {
-        console.log(`Product ${product.name} filtered out by price: ${productPrice} not in range ${currentFilters.priceRange}`);
+
         return false;
       }
       // Поиск (если есть)
@@ -4128,7 +4126,7 @@ function App() {
         
         // Проверяем, что пользователь подтвердил email
         if (userData.emailVerified === false) {
-          console.log('User email not verified, removing from localStorage');
+
           localStorage.removeItem('user');
           setUserLoading(false);
           return; // Не устанавливаем пользователя, если email не подтвержден
@@ -4187,7 +4185,7 @@ function App() {
             // Очищаем URL от токена
             window.history.replaceState({}, document.title, window.location.pathname);
             
-            console.log('Email подтвержден, пользователь автоматически вошел в систему');
+
           }
         })
         .catch(error => {
@@ -4380,7 +4378,7 @@ function App() {
       // Для незарегистрированных пользователей очищаем локальную корзину
       localStorage.removeItem('localCart');
       setCart({ items: [] });
-      console.log('Локальная корзина очищена после успешного заказа');
+
       return;
     }
     
@@ -4512,9 +4510,7 @@ function App() {
     }
 
     try {
-      console.log('App: handleSaveProduct - updatedProduct:', updatedProduct);
-      console.log('App: Category:', updatedProduct.category);
-      console.log('App: Subcategory:', updatedProduct.subcategory);
+
       
       const formData = new FormData();
       formData.append('name', updatedProduct.name);
@@ -5318,7 +5314,7 @@ function AppContent({
   // Инициализация голосового поиска
   React.useEffect(() => {
     if (!isSpeechRecognitionSupported()) {
-      console.log('Speech recognition not supported');
+
       return;
     }
     
@@ -5327,7 +5323,7 @@ function AppContent({
       try {
         recognitionRef.current.stop();
       } catch (error) {
-        console.log('Error stopping previous recognition:', error);
+
       }
       recognitionRef.current = null;
     }
@@ -5343,7 +5339,7 @@ function AppContent({
 
         recognitionRef.current.onstart = () => {
           setIsListening(true);
-          console.log('Speech recognition started with language:', recognitionRef.current.lang);
+
         };
 
         recognitionRef.current.onresult = (event) => {
@@ -5826,13 +5822,7 @@ function AppContent({
                      fullWidth
                      variant="contained"
                      onClick={() => {
-                       console.log('Applying filters:', {
-                         genders: tempSelectedGenders,
-                         brands: tempSelectedBrands,
-                         ageGroups: tempSelectedAgeGroups,
-                         priceRange: tempPriceRange
-                       });
-                       console.log('Gender mapping check:', tempSelectedGenders.map(code => ({ code, mapped: genderMapping[code] })));
+
                        onGendersChange(tempSelectedGenders);
                        setSelectedBrands(tempSelectedBrands);
                        setSelectedAgeGroups(tempSelectedAgeGroups);
@@ -8077,24 +8067,21 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
 
 // Глобальная функция getCategoryIcon
 const getCategoryIcon = (category) => {
-  console.log('getCategoryIcon called with:', category);
-  
   if (!category) {
-    console.log('No category provided, returning default');
     return `${API_BASE_URL}/public/toys.png?t=${Date.now()}`;
   }
   
   // Если есть загруженное изображение, используем его
   if (category.image && /^175\d+/.test(category.image)) {
     const url = `${API_BASE_URL}/uploads/${category.image}?t=${Date.now()}`;
-    console.log('Returning uploads URL:', url);
+
     return url;
   }
   
   // Если есть изображение, но это не загруженный файл, используем его
   if (category.image) {
     const url = `${API_BASE_URL}/public/${category.image}?t=${Date.now()}`;
-    console.log('Returning public URL:', url);
+
     return url;
   }
   
@@ -8113,11 +8100,11 @@ const getCategoryIcon = (category) => {
   };
   
   const fallbackIcon = fallbackIcons[category.name] || '/toys.png';
-  console.log(`No image for category "${category.name}", using fallback: ${fallbackIcon}`);
+
   return `${API_BASE_URL}/public${fallbackIcon}?t=${Date.now()}`;
 };
 function CMSCategories({ loadCategoriesFromAPI }) {
-  console.log('CMSCategories RENDER - Component is loading');
+
   
   const [categories, setCategories] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -9919,7 +9906,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
         
         // Убеждаемся, что язык установлен правильно перед запуском
         recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
-        console.log('CategoryPage: Setting speech recognition language to:', recognitionRef.current.lang);
+
         recognitionRef.current.start();
         setIsListening(true);
       } catch (error) {
@@ -10530,7 +10517,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
         
         // Убеждаемся, что язык установлен правильно перед запуском
         recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
-        console.log('SubcategoryPage: Setting speech recognition language to:', recognitionRef.current.lang);
+
         recognitionRef.current.start();
         setIsListening(true);
       } catch (error) {
