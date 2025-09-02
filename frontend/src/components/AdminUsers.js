@@ -22,7 +22,8 @@ import {
   Button,
   Grid,
   Chip,
-  Divider
+  Divider,
+  Container
 } from '@mui/material';
 import {
   Edit,
@@ -189,24 +190,25 @@ const AdminUsers = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress size={60} />
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+          <CircularProgress />
+        </Box>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <Box sx={{ p: 4, maxWidth: 800, mx: 'auto', mt: 4 }}>
-        <Alert severity="error" sx={{ borderRadius: 2 }}>
-          {error}
-        </Alert>
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
+        <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+        <Button onClick={loadUsers} variant="contained">Повторить</Button>
+      </Container>
     );
   }
 
   return (
-    <Box sx={{ p: 4, width: 1250, mx: 'auto', mt: 4, minHeight: '100vh' }}>
+    <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2, minHeight: 'calc(100vh - 200px)' }}>
         {/* Заголовок */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
@@ -548,7 +550,8 @@ const AdminUsers = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+      </Paper>
+    </Container>
   );
 };
 

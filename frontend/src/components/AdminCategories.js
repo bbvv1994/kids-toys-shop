@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, List, ListItem, ListItemText, IconButton, Menu, MenuItem, Switch, CircularProgress, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, Card, CardContent } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText, IconButton, Menu, MenuItem, Switch, CircularProgress, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, Card, CardContent, Container } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { API_BASE_URL } from '../config';
@@ -199,10 +199,18 @@ const AdminCategories = () => {
     }
   };
 
-  if (loading) return <Box sx={{ p: 4, textAlign: 'center' }}><CircularProgress /></Box>;
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+          <CircularProgress />
+        </Box>
+      </Container>
+    );
+  }
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
       <Typography variant="h4" sx={{ mb: 3 }}>Категории товаров</Typography>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
         <Button variant="contained" onClick={handleAddOpen} sx={{ fontWeight: 'bold' }}>
@@ -365,7 +373,7 @@ const AdminCategories = () => {
           <Button onClick={handleAddSave} variant="contained" disabled={addLoading || !addName.trim()}>Сохранить</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </Container>
   );
 };
 
