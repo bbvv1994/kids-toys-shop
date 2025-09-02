@@ -1605,7 +1605,7 @@ const theme = createTheme({
                     onClick={() => {
                       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
                       // Принудительная перезагрузка при навигации с checkout страницы
-                      if (location.pathname === '/checkout') {
+                      if (window.location.pathname === '/checkout') {
                         setTimeout(() => window.location.reload(), 100);
                       }
                     }}
@@ -3820,7 +3820,7 @@ function ConfirmEmailPage() {
             <Button 
               onClick={() => {
                 navigate('/');
-                if (location.pathname === '/checkout') {
+                if (window.location.pathname === '/checkout') {
                   setTimeout(() => window.location.reload(), 100);
                 }
               }}
@@ -4000,7 +4000,7 @@ function OAuthSuccessPage() {
               variant="contained" 
               onClick={() => {
                 navigate('/');
-                if (location.pathname === '/checkout') {
+                if (window.location.pathname === '/checkout') {
                   setTimeout(() => window.location.reload(), 100);
                 }
               }}
@@ -9976,7 +9976,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
             variant="contained" 
             onClick={() => {
               navigate('/catalog');
-              if (location.pathname === '/checkout') {
+              if (window.location.pathname === '/checkout') {
                 setTimeout(() => window.location.reload(), 100);
               }
             }}
@@ -10330,7 +10330,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
                   className="category-tile"
                   onClick={() => {
                     navigate(`/subcategory/${subcat.id}`);
-                    if (location.pathname === '/checkout') {
+                    if (window.location.pathname === '/checkout') {
                       setTimeout(() => window.location.reload(), 100);
                     }
                   }}
@@ -10598,7 +10598,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
             variant="contained" 
             onClick={() => {
               navigate('/catalog');
-              if (location.pathname === '/checkout') {
+              if (window.location.pathname === '/checkout') {
                 setTimeout(() => window.location.reload(), 100);
               }
             }}
