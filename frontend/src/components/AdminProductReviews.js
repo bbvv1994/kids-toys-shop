@@ -535,24 +535,82 @@ const AdminProductReviews = () => {
           <Button 
             onClick={() => setModerationDialog(false)}
             disabled={moderating}
+            sx={{
+              background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 14,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              minWidth: 100,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
+                boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: '#ccc',
+                color: '#666'
+              }
+            }}
           >
             Отмена
           </Button>
           <Button
             variant="contained"
-            color="success"
             onClick={() => handleModerate(selectedReview.id, 'published')}
             disabled={moderating}
             startIcon={<ThumbUp />}
+            sx={{
+              background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 14,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              minWidth: 120,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: '#ccc',
+                color: '#666'
+              }
+            }}
           >
             {moderating ? 'Одобрение...' : 'Одобрить'}
           </Button>
           <Button
             variant="contained"
-            color="error"
             onClick={() => handleModerate(selectedReview.id, 'rejected')}
             disabled={moderating}
             startIcon={<ThumbDown />}
+            sx={{
+              background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 14,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              minWidth: 120,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+                boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: '#ccc',
+                color: '#666'
+              }
+            }}
           >
             {moderating ? 'Отклонение...' : 'Отклонить'}
           </Button>
@@ -594,15 +652,54 @@ const AdminProductReviews = () => {
           <Button 
             onClick={closeDeleteDialog}
             disabled={moderating}
+            sx={{
+              background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 14,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              minWidth: 100,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
+                boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: '#ccc',
+                color: '#666'
+              }
+            }}
           >
             Отмена
           </Button>
           <Button
             variant="contained"
-            color="error"
             onClick={() => handleDelete(reviewToDelete?.id)}
             disabled={moderating}
             startIcon={<Delete />}
+            sx={{
+              background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 14,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              minWidth: 120,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+                boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: '#ccc',
+                color: '#666'
+              }
+            }}
           >
             {moderating ? 'Удаление...' : 'Удалить'}
           </Button>

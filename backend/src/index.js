@@ -3979,11 +3979,38 @@ app.put('/api/admin/reviews/shop/:id', authMiddleware, async (req, res) => {
 app.delete('/api/admin/reviews/shop/:id', authMiddleware, async (req, res) => {
   try {
     if (req.user.role !== 'admin') return res.status(403).json({ error: 'Нет доступа' });
-    await prisma.shopReview.delete({
-      where: { id: parseInt(req.params.id) }
+    
+    const reviewId = parseInt(req.params.id);
+    if (isNaN(reviewId)) {
+      return res.status(400).json({ error: 'Неверный ID отзыва' });
+    }
+    
+    console.log(`Attempting to delete shop review with ID: ${reviewId}`);
+    
+    // Проверяем, существует ли отзыв
+    const existingReview = await prisma.shopReview.findUnique({
+      where: { id: reviewId }
     });
+    
+    if (!existingReview) {
+      console.log(`Shop review with ID ${reviewId} not found`);
+      return res.status(404).json({ error: 'Отзыв не найден' });
+    }
+    
+    // Сначала удаляем все связанные записи HiddenShopReview
+    await prisma.hiddenShopReview.deleteMany({
+      where: { shopReviewId: reviewId }
+    });
+    
+    // Затем удаляем сам отзыв
+    await prisma.shopReview.delete({
+      where: { id: reviewId }
+    });
+    
+    console.log(`Successfully deleted shop review with ID: ${reviewId}`);
     res.json({ message: 'Отзыв о магазине удален' });
   } catch (error) {
+    console.error('Error deleting shop review:', error);
     res.status(500).json({ error: 'Ошибка удаления отзыва о магазине' });
   }
 });
