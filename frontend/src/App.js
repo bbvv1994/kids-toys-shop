@@ -1604,6 +1604,10 @@ const theme = createTheme({
                     startIcon={item.icon}
                     onClick={() => {
                       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                      // Принудительная перезагрузка при навигации с checkout страницы
+                      if (location.pathname === '/checkout') {
+                        setTimeout(() => window.location.reload(), 100);
+                      }
                     }}
                     sx={{
                       backgroundColor: location.pathname === item.path ? 'rgba(255,255,255,0.2)' : 'transparent',
@@ -3814,7 +3818,12 @@ function ConfirmEmailPage() {
               {message}
             </Typography>
             <Button 
-              onClick={() => navigate('/')}
+              onClick={() => {
+                navigate('/');
+                if (location.pathname === '/checkout') {
+                  setTimeout(() => window.location.reload(), 100);
+                }
+              }}
               sx={{
                 background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
                 color: '#fff',
@@ -3989,7 +3998,12 @@ function OAuthSuccessPage() {
             </Typography>
             <Button 
               variant="contained" 
-              onClick={() => navigate('/')}
+              onClick={() => {
+                navigate('/');
+                if (location.pathname === '/checkout') {
+                  setTimeout(() => window.location.reload(), 100);
+                }
+              }}
               sx={{ mr: 2 }}
             >
               На главную
@@ -5864,7 +5878,7 @@ function AppContent({
           <Route path="/boys-toys" element={<BoysToysPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} />} />
           <Route path="/girls-toys" element={<GirlsToysPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} />} />
           <Route path="/cart" element={<CartPage cart={cart} onChangeCartQuantity={handleChangeCartQuantity} onRemoveFromCart={handleRemoveFromCart} />} />
-          <Route path="/checkout" element={<CheckoutPage key={location.pathname} cart={cart} cartLoading={cartLoading} user={user} onClearCart={handleClearCart} />} />
+          <Route path="/checkout" element={<CheckoutPage cart={cart} cartLoading={cartLoading} user={user} onClearCart={handleClearCart} />} />
           <Route path="/order-success" element={<OrderSuccessPage />} />
           <Route path="/wishlist" element={<WishlistPage user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} />} />
           <Route path="/profile" element={<UserCabinetPage user={user} handleLogout={handleLogout} wishlist={wishlist} handleWishlistToggle={handleWishlistToggle} cart={cart} handleAddToCart={handleAddToCart} handleChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} handleUserUpdate={handleUserUpdate} handleOpenReviewForm={handleOpenReviewForm} />} />
@@ -9960,7 +9974,12 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
           <Typography variant="h4" color="error">{t('category.notFound')}</Typography>
           <Button 
             variant="contained" 
-            onClick={() => navigate('/catalog')}
+            onClick={() => {
+              navigate('/catalog');
+              if (location.pathname === '/checkout') {
+                setTimeout(() => window.location.reload(), 100);
+              }
+            }}
             sx={{ mt: 2 }}
           >
             {t('category.backToCatalog')}
@@ -10309,7 +10328,12 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
                 <Box
                   key={subcat.id}
                   className="category-tile"
-                  onClick={() => navigate(`/subcategory/${subcat.id}`)}
+                  onClick={() => {
+                    navigate(`/subcategory/${subcat.id}`);
+                    if (location.pathname === '/checkout') {
+                      setTimeout(() => window.location.reload(), 100);
+                    }
+                  }}
                   sx={{
                     position: 'relative',
                     height: 180,
@@ -10572,7 +10596,12 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
           <Typography variant="h4" color="error">{t('subcategory.notFound')}</Typography>
           <Button 
             variant="contained" 
-            onClick={() => navigate('/catalog')}
+            onClick={() => {
+              navigate('/catalog');
+              if (location.pathname === '/checkout') {
+                setTimeout(() => window.location.reload(), 100);
+              }
+            }}
             sx={{ mt: 2 }}
           >
             {t('subcategory.backToCatalog')}

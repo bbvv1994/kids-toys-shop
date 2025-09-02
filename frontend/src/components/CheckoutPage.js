@@ -12,6 +12,18 @@ import { getTranslatedName } from '../utils/translationUtils';
 export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearCart }) {
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Принудительно очищаем состояние при попытке навигации
+  const handleNavigation = (path) => {
+    // Очищаем состояние формы
+    setValidationErrors({});
+    setError('');
+    setLoading(false);
+    // Принудительная навигация с заменой истории
+    navigate(path, { replace: true });
+    // Принудительный перерендер
+    window.location.reload();
+  };
   const { t, i18n } = useTranslation();
   
 
@@ -129,7 +141,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
      }
    }, [i18n.language, error]);
 
-   // Сбрасываем состояние при навигации (когда пользователь покидает страницу)
+   // Сбрасываем состояние при размонтировании компонента
    useEffect(() => {
      return () => {
        // Очищаем состояние при размонтировании компонента
@@ -137,12 +149,22 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
        setError('');
        setLoading(false);
      };
-   }, [location.pathname]);
+   }, []);
+
+
 
    
 
      const handleInputChange = (e) => {
      let value = e.target.value;
+     
+     // Очищаем ошибку валидации для этого поля при изменении
+     if (validationErrors[e.target.name]) {
+       setValidationErrors(prev => ({
+         ...prev,
+         [e.target.name]: ''
+       }));
+     }
      
      // Специальная обработка для поля телефона
      if (e.target.name === 'phone') {
@@ -391,7 +413,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
     return (
       <Container maxWidth="md" sx={{ mt: 4 }}>
         <Alert severity="info">
-          {t('checkout.emptyCart')} <Button onClick={() => navigate('/catalog')}>{t('checkout.goToProducts')}</Button>
+          {t('checkout.emptyCart')} <Button onClick={() => handleNavigation('/catalog')}>{t('checkout.goToProducts')}</Button>
         </Alert>
       </Container>
     );
