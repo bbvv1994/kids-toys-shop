@@ -67,49 +67,40 @@ export const getUploadUrl = (filename) => {
 
 // Функция для получения URL изображений
 export const getImageUrl = (imagePath) => {
-  console.log('🔧 getImageUrl called with:', imagePath);
-  
   if (!imagePath) {
-    console.log('❌ No imagePath provided');
     return '';
   }
   
   // Если это уже полный URL
   if (imagePath.startsWith('http')) {
-    console.log('✅ Full URL detected:', imagePath);
     return imagePath;
   }
   
   // Если это путь /uploads/...
   if (imagePath.startsWith('/uploads/')) {
     const url = `${API_BASE_URL}${imagePath}`;
-    console.log('✅ Uploads path detected:', url);
     return url;
   }
   
   // Если это загруженный файл (начинается с цифр)
   if (/^\d+/.test(imagePath)) {
     const url = getUploadUrl(imagePath);
-    console.log('✅ Uploaded file detected:', url);
     return url;
   }
   
   // Если это статический файл из public папки (PNG, JPG, etc.)
   if (imagePath.match(/\.(png|jpg|jpeg|gif|webp)$/i)) {
     const url = `${API_BASE_URL}/public/${imagePath}`;
-    console.log('✅ Static file detected:', url);
     return url;
   }
   
   // Если это статический файл
   if (imagePath.startsWith('/')) {
-    console.log('✅ Static path detected:', imagePath);
     return imagePath;
   }
   
   // По умолчанию считаем загруженным файлом
   const url = getUploadUrl(imagePath);
-  console.log('✅ Default upload file:', url);
   return url;
 };
 
@@ -133,17 +124,12 @@ export { isDevelopment, isProduction };
 // В локальной среде возвращает оригинальное изображение (HD качество достигается через CSS scale)
 // В продакшене пытается найти или создать HD версии
 export const getHdImageUrl = (imagePath, quality = '2x') => {
-  console.log('🔧 getHdImageUrl called with:', imagePath, 'quality:', quality);
-  console.log('🔧 Environment:', isDevelopment ? 'LOCAL' : 'PRODUCTION');
-  
   if (!imagePath) {
-    console.log('❌ No imagePath provided for HD');
     return '';
   }
   
   // Если изображение уже является HD версией, возвращаем его как есть
   if (imagePath.includes('@') && (imagePath.includes('@2x') || imagePath.includes('@4x'))) {
-    console.log('✅ Изображение уже является HD версией:', imagePath);
     return imagePath;
   }
   
@@ -218,11 +204,6 @@ export const getHdImageUrl = (imagePath, quality = '2x') => {
             `${hdPublicId}.jpg`
           );
           
-          console.log(`✅ Cloudinary HD ${quality} URL created:`, hdUrl);
-          console.log(`🔧 PublicId: ${publicId}`);
-          console.log(`🔧 HD PublicId: ${hdPublicId}`);
-          console.log(`🔧 Original URL: ${imagePath}`);
-          console.log(`🔧 HD URL: ${hdUrl}`);
           return hdUrl;
         }
       } catch (error) {
@@ -232,7 +213,6 @@ export const getHdImageUrl = (imagePath, quality = '2x') => {
     
     // Если это не Cloudinary, но мы в продакшене, создаем HD версию через API
     // или используем оригинал с увеличенным размером
-    console.log('🔧 Продакшен: создаем HD версию через API или используем оригинал');
     
     // Попробуем создать HD версию через API endpoint
     if (imagePath.startsWith('/uploads/') || imagePath.includes('/uploads/')) {
@@ -241,31 +221,24 @@ export const getHdImageUrl = (imagePath, quality = '2x') => {
         /\.(webp|jpg|jpeg|png)$/i,
         `@${quality}.webp`
       );
-      console.log(`🔧 Продакшен HD ${quality} версия:`, hdUrl);
       
       // Также можем попробовать использовать специальный API endpoint для HD версий
       if (API_BASE_URL && !API_BASE_URL.includes('localhost')) {
         const apiHdUrl = `${API_BASE_URL}/api/images/hd?path=${encodeURIComponent(imagePath)}&quality=${quality}`;
-        console.log(`🔧 Продакшен API HD URL:`, apiHdUrl);
         return apiHdUrl;
       }
       
       // Если API endpoint недоступен, попробуем создать HD версию локально
       // или использовать оригинал с CSS zoom
-      console.log('🔧 Продакшен: используем fallback HD версию');
-      return hdUrl;
-      
       return hdUrl;
     }
   }
   
   // Fallback на оригинал
-  console.log('✅ Using original image for HD');
   
   // В продакшене, если не удалось создать HD версию, 
   // можем попробовать увеличить оригинал через CSS transform
   if (isProduction && !imagePath.includes('@')) {
-    console.log('🔧 Продакшен: используем оригинал с возможностью CSS zoom');
     return imagePath;
   }
   

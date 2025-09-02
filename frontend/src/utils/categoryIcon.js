@@ -34,7 +34,6 @@ export function getCategoryIcon(category) {
   
   // Сначала проверяем точное совпадение
   if (fallbackIcons[category.name]) {
-    console.log(`Exact match found for "${category.name}": ${fallbackIcons[category.name]}`);
     return fallbackIcons[category.name];
   }
   
@@ -43,7 +42,6 @@ export function getCategoryIcon(category) {
   for (const [key, icon] of Object.entries(fallbackIcons)) {
     const keyLower = key.toLowerCase();
     if (categoryNameLower.includes(keyLower) || keyLower.includes(categoryNameLower)) {
-      console.log(`Partial match found: "${category.name}" matches "${key}": ${icon}`);
       return icon;
     }
   }
@@ -77,7 +75,6 @@ export function getCategoryIcon(category) {
   
   for (const [keyword, icon] of Object.entries(partialMatches)) {
     if (categoryNameLower.includes(keyword)) {
-      console.log(`Keyword match found: "${category.name}" contains "${keyword}": ${icon}`);
       return icon;
     }
   }

@@ -14,9 +14,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
   const isRTL = i18n.language === 'he';
   
   // Отладочная информация для размеров экрана
-  console.log('HomeBanners: isMobile:', isMobile);
-  console.log('HomeBanners: isTablet:', isTablet);
-  console.log('HomeBanners: drawerWidth:', drawerWidth);
+
   
   // Данные баннеров (можно вынести в отдельный файл или получать с сервера)
   const banners = [
@@ -79,9 +77,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
   ];
 
   // Отладочная информация
-  console.log('HomeBanners: Компонент загружен');
-  console.log('HomeBanners: Количество баннеров:', banners.length);
-  console.log('HomeBanners: Первый баннер:', banners[0]);
+
 
   const [currentBanner, setCurrentBanner] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -266,15 +262,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
   const bannerStyles = getBannerStyles();
 
   // Отладочная информация для рендера
-  console.log('HomeBanners: Рендеринг компонента');
-  console.log('HomeBanners: Текущий баннер:', currentBanner);
-  console.log('HomeBanners: Стили баннера:', bannerStyles);
-  console.log('HomeBanners: Размеры экрана - ширина:', windowSize.width);
-  console.log('HomeBanners: Размеры экрана - высота:', windowSize.height);
-  console.log('HomeBanners: Применяемые размеры - мобильный:', isMobile, 'планшет:', isTablet);
-  console.log('HomeBanners: marginTop для десктопа:', isMobile ? 'не применяется' : isTablet ? 'не применяется' : bannerStyles.marginTop);
-  console.log('HomeBanners: Состояние свайпа:', isSwiping);
-  console.log('HomeBanners: Автопереключение:', isAutoPlaying);
+
   
   return (
     <Box

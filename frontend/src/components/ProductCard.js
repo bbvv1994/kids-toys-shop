@@ -45,18 +45,9 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
   // Функция для получения переведенного названия товара
   const getTranslatedName = (product) => {
     const currentLanguage = i18n.language;
-    console.log('🔧 getTranslatedName:', { 
-      currentLanguage, 
-      name: product?.name, 
-      nameHe: product?.nameHe,
-      hasNameHe: !!product?.nameHe 
-    });
-    
     if (currentLanguage === 'he' && product?.nameHe) {
-      console.log('✅ Using Hebrew name:', product.nameHe);
       return product.nameHe;
     }
-    console.log('✅ Using original name:', product?.name);
     return product?.name;
   };
   

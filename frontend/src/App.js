@@ -3237,13 +3237,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
       priceRange: priceRange
     };
     
-    // Отладочная информация
-    console.log('Filtering with:', {
-      genders: currentFilters.genders,
-      brands: currentFilters.brands,
-      ageGroups: currentFilters.ageGroups,
-      priceRange: currentFilters.priceRange
-    });
+
     
     // Фильтр по брендам
     if (currentFilters.brands && currentFilters.brands.length > 0 && !currentFilters.brands.includes(product.brand)) {
@@ -4060,7 +4054,7 @@ function App() {
           forceLanguageUpdate('ru');
         }
         
-        console.log('✅ App translations initialized. Current language:', i18n.language);
+
       } catch (error) {
         console.error('❌ Error initializing app translations:', error);
         // Fallback на русский
@@ -4884,7 +4878,8 @@ function App() {
   // ];
 
   useEffect(() => {
-    document.body.style.background = "url('/background.png') no-repeat center center fixed";
+    const backgroundUrl = getImageUrl('background.png');
+    document.body.style.background = `url('${backgroundUrl}') no-repeat center center fixed`;
     document.body.style.backgroundSize = "cover";
     return () => {
       document.body.style.background = "";
