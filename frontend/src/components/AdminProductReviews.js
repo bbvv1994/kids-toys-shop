@@ -7,7 +7,6 @@ import {
   Paper,
   Rating,
   Grid,
-  Chip,
   CircularProgress,
   Alert,
   Button,
@@ -23,7 +22,7 @@ import {
   IconButton,
   Container
 } from '@mui/material';
-import { Star, ShoppingBag, ThumbUp, ThumbDown, CheckCircle, Cancel, Visibility, VisibilityOff, Delete } from '@mui/icons-material';
+import { Star, ShoppingBag, ThumbUp, ThumbDown, Visibility, VisibilityOff, Delete } from '@mui/icons-material';
 
 const AdminProductReviews = () => {
   // const { t } = useTranslation(); // Убираем переводы для CMS
@@ -197,15 +196,7 @@ const AdminProductReviews = () => {
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'pending': return <CircularProgress size={16} />;
-      case 'published': return <CheckCircle />;
-      case 'rejected': return <Cancel />;
-      case 'hidden': return <VisibilityOff />;
-      default: return null;
-    }
-  };
+
 
   if (loading) {
     return (
@@ -228,7 +219,7 @@ const AdminProductReviews = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2, minHeight: 'calc(100vh - 200px)' }}>
         {/* Заголовок */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
           <ShoppingBag color="primary" sx={{ fontSize: 40 }} />
@@ -707,7 +698,6 @@ const AdminProductReviews = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      </Paper>
     </Container>
   );
 };

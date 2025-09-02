@@ -2186,7 +2186,7 @@ const theme = createTheme({
               } else if (hoveredCategory) {
                 // Для мобильного меню (hoveredCategory)
                 cat = safeCategories.find(c => c.label === hoveredCategory);
-                subcats = cat && Array.isArray(cat.sub) ? cat.sub : [];
+                subcats = cat ? getSubcategories(cat) : [];
               } else if (touchedCategory) {
                 // Для сенсорного устройства (touchedCategory)
                 cat = rootCategories.find(c => c.id === touchedCategory);
@@ -8526,7 +8526,7 @@ function CMSCategories({ loadCategoriesFromAPI }) {
             }}
           />
         </span>
-        {cat.sub.length > 0 && (
+        {cat.sub && cat.sub.length > 0 && (
           <IconButton onClick={e => { e.stopPropagation(); handleExpand(cat.id); }} data-no-drag>
             {expanded.includes(cat.id) ? <ExpandMore /> : <ChevronRight />}
           </IconButton>

@@ -631,7 +631,6 @@ const AdminShopReviews = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      </Paper>
     </Container>
   );
 };

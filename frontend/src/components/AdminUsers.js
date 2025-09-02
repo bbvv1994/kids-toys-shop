@@ -202,7 +202,7 @@ const AdminUsers = () => {
     return (
       <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
         <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
-        <Button onClick={loadUsers} variant="contained">Повторить</Button>
+        <Button onClick={fetchUsers} variant="contained">Повторить</Button>
       </Container>
     );
   }
@@ -550,7 +550,6 @@ const AdminUsers = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      </Paper>
     </Container>
   );
 };

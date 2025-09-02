@@ -93,27 +93,33 @@ export function transformCategoriesForNavigation(categories) {
   if (!Array.isArray(categories)) return [];
   
   // Фильтруем только активные категории
-  const activeCategories = categories.filter(cat => cat.active !== false);
+  const activeCategories = categories.filter(cat => cat && cat.active !== false);
   
   // Создаём карту по id
   const map = {};
   activeCategories.forEach(cat => {
-    map[cat.id] = {
-      ...cat,
-      label: cat.label || cat.name,
-      icon: getCategoryIcon(cat),
-      sub: [],
-    };
+    if (cat && cat.id !== undefined && cat.id !== null) {
+      map[cat.id] = {
+        ...cat,
+        label: cat.label || cat.name,
+        icon: getCategoryIcon(cat),
+        sub: [],
+      };
+    }
   });
   // Формируем дерево
   const tree = [];
   categories.forEach(cat => {
-    if (cat.parentId) {
-      if (map[cat.parentId]) {
-        map[cat.parentId].sub.push(map[cat.id]);
+    if (cat && cat.id !== undefined && cat.id !== null) {
+      if (cat.parentId) {
+        if (map[cat.parentId] && map[cat.id]) {
+          map[cat.parentId].sub.push(map[cat.id]);
+        }
+      } else {
+        if (map[cat.id]) {
+          tree.push(map[cat.id]);
+        }
       }
-    } else {
-      tree.push(map[cat.id]);
     }
   });
   // Сортируем корневые категории по order, если есть
