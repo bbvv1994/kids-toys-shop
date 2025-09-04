@@ -21,6 +21,16 @@ const SmartImageUploadMiddleware = require('./smartImageUploadMiddleware');
 const TranslationService = require('./services/translationService');
 const SafeMigration = require('../safe-migration');
 
+// Инициализация кэширования
+const cacheManager = require('./cache');
+const { cacheMiddleware, smartInvalidateCache } = require('./cacheMiddleware');
+
+// Подключение к Redis
+cacheManager.connect().then(() => {
+  console.log('✅ Кэширование инициализировано');
+}).catch(err => {
+  console.log('❌ Ошибка инициализации кэширования:', err.message);
+});
 // Создаем один экземпляр ImageMiddleware для использования во всех маршрутах
 const imageMiddleware = new ImageMiddleware();
 const productionUploadMiddleware = new ProductionUploadMiddleware();
@@ -708,7 +718,7 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
   }
 });
 
-app.get('/api/products', async (req, res) => {
+app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req, res) => {
   try {
     const { category, subcategoryId, admin } = req.query;
     
@@ -1007,7 +1017,7 @@ app.get('/api/admin/questions', authMiddleware, async (req, res) => {
 });
 
 // Получить все опубликованные вопросы (публичный доступ)
-app.get('/api/questions', async (req, res) => {
+app.get('/api/questions', cacheMiddleware(300), smartInvalidateCache, async (req, res) => {
   try {
     const questions = await prisma.productQuestion.findMany({
       where: { status: 'published' },
@@ -3215,7 +3225,7 @@ app.get('/api/stores', async (req, res) => {
 });
 
 // --- Категории ---
-app.get('/api/categories', async (req, res) => {
+app.get('/api/categories', cacheMiddleware(300), smartInvalidateCache, async (req, res) => {
   try {
     // Проверяем, является ли пользователь администратором
     const token = req.headers.authorization?.split(' ')[1];
