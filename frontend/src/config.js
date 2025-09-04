@@ -90,8 +90,8 @@ export const getImageUrl = (imagePath) => {
   
   // Если это статический файл из public папки (PNG, JPG, etc.)
   if (imagePath.match(/\.(png|jpg|jpeg|gif|webp)$/i)) {
-    const url = `${API_BASE_URL}/public/${imagePath}`;
-    return url;
+    // Статические файлы из public папки доступны напрямую через корень
+    return `/${imagePath}`;
   }
   
   // Если это статический файл
