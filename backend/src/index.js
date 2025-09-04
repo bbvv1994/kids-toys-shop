@@ -20,6 +20,9 @@ const FlexibleUploadMiddleware = require('./flexibleUploadMiddleware');
 const SmartImageUploadMiddleware = require('./smartImageUploadMiddleware');
 const TranslationService = require('./services/translationService');
 const SafeMigration = require('../safe-migration');
+const cacheManager = require('./cache');
+const { cacheMiddleware, invalidateCache, CACHE_PATTERNS } = require('./cacheMiddleware');
+const ImageCacheMiddleware = require('./imageCacheMiddleware');
 
 // Создаем один экземпляр ImageMiddleware для использования во всех маршрутах
 const imageMiddleware = new ImageMiddleware();
@@ -27,6 +30,7 @@ const productionUploadMiddleware = new ProductionUploadMiddleware();
 const cloudinaryUploadMiddleware = new CloudinaryUploadMiddleware();
 const flexibleUploadMiddleware = new FlexibleUploadMiddleware();
 const smartImageUploadMiddleware = new SmartImageUploadMiddleware();
+const imageCacheMiddleware = new ImageCacheMiddleware();
 require('dotenv').config();
 
 // Настройка Brevo
@@ -196,6 +200,14 @@ async function sendEmail(to, subject, htmlContent) {
 const app = express();
 const prisma = new PrismaClient();
 
+// Инициализация кэша
+cacheManager.connect();
+
+// Периодическая очистка кэша изображений (каждые 6 часов)
+setInterval(async () => {
+  await imageCacheMiddleware.cleanup();
+}, 6 * 60 * 60 * 1000);
+
 prisma.$connect()
   .then(() => {})
   .catch((err) => {
@@ -283,8 +295,8 @@ app.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   next();
 });
-app.use('/uploads', express.static(path.join(__dirname, '..', '..', 'uploads')));
-app.use('/uploads/hd', express.static(path.join(__dirname, '..', '..', 'uploads', 'hd')));
+app.use('/uploads', imageCacheMiddleware.middleware(), express.static(path.join(__dirname, '..', '..', 'uploads')));
+app.use('/uploads/hd', imageCacheMiddleware.middleware(), express.static(path.join(__dirname, '..', '..', 'uploads', 'hd')));
 app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
 app.use(passport.initialize());
@@ -612,6 +624,7 @@ passport.use(new FacebookStrategy({
 
 app.post('/api/products', authMiddleware, upload.array('images', 7), 
   smartImageUploadMiddleware.processUploadedFiles.bind(smartImageUploadMiddleware), 
+  invalidateCache([CACHE_PATTERNS.PRODUCTS, CACHE_PATTERNS.CATEGORIES]),
   async (req, res) => {
   // Проверка роли admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
@@ -708,7 +721,7 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
   }
 });
 
-app.get('/api/products', async (req, res) => {
+app.get('/api/products', cacheMiddleware(1800), async (req, res) => {
   try {
     const { category, subcategoryId, admin } = req.query;
     
@@ -1063,7 +1076,7 @@ app.put('/api/admin/questions/:id', authMiddleware, async (req, res) => {
   }
 });
 
-app.get('/api/products/:id', async (req, res) => {
+app.get('/api/products/:id', cacheMiddleware(1800), async (req, res) => {
   try {
     const { admin } = req.query;
     
@@ -1183,7 +1196,7 @@ app.get('/api/products/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/products/:id', authMiddleware, async (req, res) => {
+app.delete('/api/products/:id', authMiddleware, invalidateCache([CACHE_PATTERNS.PRODUCTS, CACHE_PATTERNS.CATEGORIES]), async (req, res) => {
   try {
     console.log('DELETE /api/products/:id - Starting deletion process');
     
@@ -2704,6 +2717,7 @@ app.patch('/api/products/:id/hidden', authMiddleware, async (req, res) => {
 
 app.put('/api/products/:id', authMiddleware, upload.array('images', 7), 
   smartImageUploadMiddleware.processUploadedFiles.bind(smartImageUploadMiddleware), 
+  invalidateCache([CACHE_PATTERNS.PRODUCTS, CACHE_PATTERNS.CATEGORIES]),
   async (req, res) => {
   // Проверка роли admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
@@ -3215,7 +3229,7 @@ app.get('/api/stores', async (req, res) => {
 });
 
 // --- Категории ---
-app.get('/api/categories', async (req, res) => {
+app.get('/api/categories', cacheMiddleware(3600), async (req, res) => {
   try {
     // Проверяем, является ли пользователь администратором
     const token = req.headers.authorization?.split(' ')[1];
@@ -3504,7 +3518,7 @@ app.patch('/api/categories/:id/image', authMiddleware, upload.single('image'), p
 });
 
 // Получить отзывы по товару (только published)
-app.get('/api/products/:id/reviews', async (req, res) => {
+app.get('/api/products/:id/reviews', cacheMiddleware(900), async (req, res) => {
   try {
     const reviews = await prisma.review.findMany({
       where: { productId: parseInt(req.params.id), status: 'published' },
@@ -3837,7 +3851,8 @@ app.delete('/api/profile/notifications', authMiddleware, async (req, res) => {
 
 
 process.on('SIGINT', async () => {
-
+  console.log('🔄 Graceful shutdown...');
+  await cacheManager.disconnect();
   await prisma.$disconnect();
   process.exit(0);
 });
@@ -3896,7 +3911,7 @@ app.post('/api/reviews/shop', authMiddleware, async (req, res) => {
 });
 
 // GET /api/reviews/shop/published — получить только опубликованные отзывы о магазине
-app.get('/api/reviews/shop/published', async (req, res) => {
+app.get('/api/reviews/shop/published', cacheMiddleware(1800), async (req, res) => {
   try {
     const reviews = await prisma.shopReview.findMany({
       where: { status: 'published' },
@@ -5223,7 +5238,7 @@ app.get('/api/system-metrics', (req, res) => {
     }
 });
 // API для получения всех подкатегорий (алиас для /api/categories?parentId=null)
-app.get('/api/subcategories', async (req, res) => {
+app.get('/api/subcategories', cacheMiddleware(3600), async (req, res) => {
   try {
     const subcategories = await prisma.category.findMany({
       where: {
