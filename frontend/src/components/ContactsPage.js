@@ -151,7 +151,7 @@ export default function ContactsPage() {
              {/* Контактные данные */}
        <Grid container spacing={{ xs: 1, md: 4 }} sx={{ mb: { xs: 2, md: 6 }, justifyContent: 'center' }}>
          {/* Адреса магазинов */}
-         <Grid item xs={12} sm={6} md={4}>
+         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
            <Card sx={{ 
              height: '100%', 
              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
@@ -199,7 +199,7 @@ export default function ContactsPage() {
          </Grid>
 
          {/* Телефоны */}
-         <Grid item xs={12} sm={6} md={2}>
+         <Grid size={{ xs: 12, sm: 6, md: 2 }}>
            <Card sx={{ 
              height: '100%', 
              background: 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)', 
@@ -237,7 +237,7 @@ export default function ContactsPage() {
          </Grid>
 
          {/* WhatsApp */}
-         <Grid item xs={12} sm={6} md={2}>
+         <Grid size={{ xs: 12, sm: 6, md: 2 }}>
            <Card sx={{ 
              height: '100%', 
              background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)', 
@@ -284,7 +284,7 @@ export default function ContactsPage() {
          </Grid>
 
          {/* Часы работы */}
-         <Grid item xs={12} sm={6} md={4}>
+         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
            <Card sx={{ 
              height: '100%', 
              background: 'linear-gradient(135deg, #FFD93D 0%, #FF6B6B 100%)',
@@ -348,7 +348,7 @@ export default function ContactsPage() {
 
         {/* Ссылки на Waze */}
         <Grid container spacing={{ xs: 2, md: 3 }} sx={{ justifyContent: 'center' }}>
-          <Grid item xs={12} sm={6} md={6}>
+          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
             <Card sx={{ 
               p: { xs: 2, md: 3 }, 
               background: 'linear-gradient(135deg, #33CCFF 0%, #0066CC 100%)', 
@@ -404,7 +404,7 @@ export default function ContactsPage() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={6}>
+          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
             <Card sx={{ 
               p: { xs: 2, md: 3 }, 
               background: 'linear-gradient(135deg, #33CCFF 0%, #0066CC 100%)', 
@@ -464,7 +464,7 @@ export default function ContactsPage() {
 
       {/* Форма обратной связи */}
       <Grid container spacing={{ xs: 3, md: 6 }} sx={{ mb: { xs: 3, md: 6 } }}>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ p: { xs: 2, md: 4 }, height: 'fit-content' }}>
             <Typography variant="h5" sx={{ 
               mb: { xs: 2, md: 3 }, 
@@ -552,7 +552,7 @@ export default function ContactsPage() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Box sx={{ p: 3, background: '#f8f9fa', borderRadius: 2, height: '100%' }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#333' }}>
               {t('contacts.info.title')}

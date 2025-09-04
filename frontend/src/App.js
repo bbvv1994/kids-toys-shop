@@ -2,6 +2,7 @@
 
 
 
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProductCard from './components/ProductCard';
@@ -187,8 +188,12 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import { searchInProductNames } from './utils/translationUtils';
 
-// Глобальный маппинг английских кодов на русские названия для фильтра по полу
+// Глобальный маппинг русских названий на русские названия для фильтра по полу
 const genderMapping = {
+  'Мальчики': 'Для мальчиков',
+  'Девочки': 'Для девочек', 
+  'Универсальный': 'Универсальный',
+  // Также поддерживаем английские коды для совместимости
   'boy': 'Для мальчиков',
   'girl': 'Для девочек', 
   'unisex': 'Универсальный'
@@ -480,14 +485,14 @@ const theme = createTheme({
   const [selectedCategories, setSelectedCategories] = React.useState([]);
   const categories = ['Игрушки', 'Конструкторы', 'Пазлы', 'Творчество', 'Канцтовары', 'Транспорт', 'Отдых на воде', 'Настольные игры', 'Развивающие игры', 'Акции'];
   const ageGroups = [
-    t('catalog.ageGroups.0-1_year'),
-    t('catalog.ageGroups.1-3_years'),
-    t('catalog.ageGroups.3-5_years'),
-    t('catalog.ageGroups.5-7_years'),
-    t('catalog.ageGroups.7-10_years'),
-    t('catalog.ageGroups.10-12_years'),
-    t('catalog.ageGroups.12-14_years'),
-    t('catalog.ageGroups.14-16_years')
+    '0-1 год',
+    '1-3 года',
+    '3-5 лет',
+    '5-7 лет',
+    '7-10 лет',
+    '10-12 лет',
+    '12-14 лет',
+    '14-16 лет'
   ];
   const genderOptions = [
     { value: 'boy', label: t('catalog.genderOptions.boy') },
@@ -1597,6 +1602,13 @@ const theme = createTheme({
                     to={item.path}
                     color="inherit"
                     startIcon={item.icon}
+                    onClick={() => {
+                      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                      // Принудительная перезагрузка при навигации с checkout страницы
+                      if (window.location.pathname === '/checkout') {
+                        setTimeout(() => window.location.reload(), 100);
+                      }
+                    }}
                     sx={{
                       backgroundColor: location.pathname === item.path ? 'rgba(255,255,255,0.2)' : 'transparent',
                       borderRadius: 25,
@@ -2039,133 +2051,7 @@ const theme = createTheme({
               {t('catalog.categoriesButton')}
             </button>
           </Box>
-          {/* Выпадающее меню фильтров */}
-          {filtersMenuOpen && (
-            <Paper
-              ref={filtersPanelRef}
-              sx={{
-                position: 'fixed',
-                top: desktopSearchBarRef?.current ? 
-                  desktopSearchBarRef.current.getBoundingClientRect().bottom + 5 : 184,
-                left: desktopSearchBarRef?.current ? 
-                  desktopSearchBarRef.current.getBoundingClientRect().right - 250 : 0,
-                width: 250,
-                zIndex: 2000,
-                m: 0,
-                p: 2,
-                borderRadius: 0,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                background: '#fff',
-                maxHeight: 520,
-                overflowY: 'auto',
-              }}
-              onWheel={e => { e.stopPropagation(); /* wheel-событие не блокируется, скролл работает */ }}
-            >
-              {/* Заголовок Фильтры */}
-              <Box sx={{ 
-                background: '#FFB300', 
-                color: '#fff', 
-                fontWeight: 'bold', 
-                fontSize: 18, 
-                textAlign: 'center', 
-                py: 1,
-                mb: 2,
-                borderRadius: 1
-              }}>
-                {t('filters.title')}
-              </Box>
-              {/* Фильтры */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {/* Цена */}
-                <Box>
-                  <span style={{ fontWeight: 500, marginRight: 4 }}>{t('common.price')}:</span>
-                  <Slider
-                    value={priceRange}
-                    onChange={(_, newValue) => setPriceRange(newValue)}
-                    valueLabelDisplay="auto"
-                    min={priceLimits[0]}
-                    max={priceLimits[1]}
-                    sx={{ width: '90%', ml: 1 }}
-                  />
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#888', mt: -1 }}>
-                    <span>{new Intl.NumberFormat('ru-RU', { style: 'currency', currency }).format(priceRange[0])}</span>
-                    <span>{new Intl.NumberFormat('ru-RU', { style: 'currency', currency }).format(priceRange[1])}</span>
-                  </Box>
-                </Box>
-                {/* Возраст */}
-                <Box>
-                  <span style={{ fontWeight: 500, marginRight: 4 }}>{t('catalog.ageGroup')}:</span>
-                  <Box sx={{ pl: 1 }}>
-                    {ageGroups.map(age => (
-                      <FormControlLabel
-                        key={age}
-                        control={
-                          <Checkbox
-                            checked={selectedAgeGroups.includes(age)}
-                            onChange={e => {
-                              if (e.target.checked) setSelectedAgeGroups([...selectedAgeGroups, age]);
-                              else setSelectedAgeGroups(selectedAgeGroups.filter(a => a !== age));
-                            }}
-                          />
-                        }
-                        label={age}
-                        sx={{ display: 'block', fontSize: 14 }}
-                      />
-                    ))}
-                  </Box>
-                </Box>
-                {/* Пол */}
-                <Box>
-                  <span style={{ fontWeight: 500, marginRight: 4 }}>{t('catalog.gender')}:</span>
-                  <Box sx={{ pl: 1 }}>
-                    {genderOptions.map(opt => (
-                      <FormControlLabel
-                        key={opt.value}
-                        control={
-                          <Checkbox
-                            checked={selectedGenders.includes(opt.value)}
-                            onChange={e => {
-                              if (e.target.checked) {
-                                onGendersChange([...selectedGenders, opt.value]);
-                              } else {
-                                onGendersChange(selectedGenders.filter(g => g !== opt.value));
-                              }
-                            }}
-                          />
-                        }
-                        label={opt.label}
-                        sx={{ display: 'block', fontSize: 14 }}
-                      />
-                    ))}
-                  </Box>
-                </Box>
-                {/* Бренды */}
-                {brandOptions.length > 0 && (
-                  <Box>
-                    <span style={{ fontWeight: 500, marginRight: 4 }}>{t('catalog.brands')}:</span>
-                    <Box sx={{ pl: 1 }}>
-                      {brandOptions.map(brand => (
-                        <FormControlLabel
-                          key={brand}
-                          control={
-                            <Checkbox
-                              checked={selectedBrands.includes(brand)}
-                              onChange={e => {
-                                if (e.target.checked) setSelectedBrands([...selectedBrands, brand]);
-                                else setSelectedBrands(selectedBrands.filter(b => b !== brand));
-                              }}
-                            />
-                          }
-                          label={brand}
-                          sx={{ display: 'block', fontSize: 14 }}
-                        />
-                      ))}
-                    </Box>
-                  </Box>
-                )}
-              </Box>
-            </Paper>
-          )}
+
           </>
         )}
         {/* Меню категорий с position: absolute */}
@@ -2304,7 +2190,7 @@ const theme = createTheme({
               } else if (hoveredCategory) {
                 // Для мобильного меню (hoveredCategory)
                 cat = safeCategories.find(c => c.label === hoveredCategory);
-                subcats = cat && Array.isArray(cat.sub) ? cat.sub : [];
+                subcats = cat ? getSubcategories(cat) : [];
               } else if (touchedCategory) {
                 // Для сенсорного устройства (touchedCategory)
                 cat = rootCategories.find(c => c.id === touchedCategory);
@@ -2648,6 +2534,7 @@ const theme = createTheme({
                 valueLabelDisplay="auto"
                 min={priceLimits[0]}
                 max={priceLimits[1]}
+                step={1}
                 sx={{ width: '100%', mt: 1 }}
               />
               <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#888', mt: 1 }}>
@@ -3346,21 +3233,40 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   // Фильтрация товаров по поисковому запросу
 
   const filteredProducts = products.filter(product => {
+    // Используем основные состояния фильтров
+    const currentFilters = {
+      genders: selectedGenders,
+      brands: selectedBrands,
+      ageGroups: selectedAgeGroups,
+      priceRange: priceRange
+    };
+    
+
+    
     // Фильтр по брендам
-    if (selectedBrands && selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) return false;
+    if (currentFilters.brands && currentFilters.brands.length > 0 && !currentFilters.brands.includes(product.brand)) {
+
+      return false;
+    }
     // Фильтр по возрасту
-    if (selectedAgeGroups && selectedAgeGroups.length > 0 && !selectedAgeGroups.includes(product.ageGroup)) return false;
+    if (currentFilters.ageGroups && currentFilters.ageGroups.length > 0 && !currentFilters.ageGroups.includes(product.ageGroup)) {
+
+      return false;
+    }
     // Фильтр по полу
-    if (selectedGenders && selectedGenders.length > 0) {
+    if (currentFilters.genders && currentFilters.genders.length > 0) {
       // Преобразуем выбранные английские коды в русские названия
-      const selectedRussianGenders = selectedGenders.map(code => genderMapping[code]);
+      const selectedRussianGenders = currentFilters.genders.map(code => genderMapping[code]).filter(Boolean);
       if (!selectedRussianGenders.includes(product.gender)) {
         return false;
       }
           }
       // Фильтр по цене
       const productPrice = Number(product.price);
-      if (productPrice < priceRange[0] || productPrice > priceRange[1]) return false;
+      if (productPrice < currentFilters.priceRange[0] || productPrice > currentFilters.priceRange[1]) {
+
+        return false;
+      }
       // Поиск (если есть)
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase();
@@ -3912,7 +3818,12 @@ function ConfirmEmailPage() {
               {message}
             </Typography>
             <Button 
-              onClick={() => navigate('/')}
+              onClick={() => {
+                navigate('/');
+                if (window.location.pathname === '/checkout') {
+                  setTimeout(() => window.location.reload(), 100);
+                }
+              }}
               sx={{
                 background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
                 color: '#fff',
@@ -4087,7 +3998,12 @@ function OAuthSuccessPage() {
             </Typography>
             <Button 
               variant="contained" 
-              onClick={() => navigate('/')}
+              onClick={() => {
+                navigate('/');
+                if (window.location.pathname === '/checkout') {
+                  setTimeout(() => window.location.reload(), 100);
+                }
+              }}
               sx={{ mr: 2 }}
             >
               На главную
@@ -4150,7 +4066,7 @@ function App() {
           forceLanguageUpdate('ru');
         }
         
-        console.log('✅ App translations initialized. Current language:', i18n.language);
+
       } catch (error) {
         console.error('❌ Error initializing app translations:', error);
         // Fallback на русский
@@ -4224,7 +4140,7 @@ function App() {
         
         // Проверяем, что пользователь подтвердил email
         if (userData.emailVerified === false) {
-          console.log('User email not verified, removing from localStorage');
+
           localStorage.removeItem('user');
           setUserLoading(false);
           return; // Не устанавливаем пользователя, если email не подтвержден
@@ -4283,7 +4199,7 @@ function App() {
             // Очищаем URL от токена
             window.history.replaceState({}, document.title, window.location.pathname);
             
-            console.log('Email подтвержден, пользователь автоматически вошел в систему');
+
           }
         })
         .catch(error => {
@@ -4476,7 +4392,7 @@ function App() {
       // Для незарегистрированных пользователей очищаем локальную корзину
       localStorage.removeItem('localCart');
       setCart({ items: [] });
-      console.log('Локальная корзина очищена после успешного заказа');
+
       return;
     }
     
@@ -4608,9 +4524,7 @@ function App() {
     }
 
     try {
-      console.log('App: handleSaveProduct - updatedProduct:', updatedProduct);
-      console.log('App: Category:', updatedProduct.category);
-      console.log('App: Subcategory:', updatedProduct.subcategory);
+
       
       const formData = new FormData();
       formData.append('name', updatedProduct.name);
@@ -4974,7 +4888,8 @@ function App() {
   // ];
 
   useEffect(() => {
-    document.body.style.background = "url('/background.png') no-repeat center center fixed";
+    const backgroundUrl = getImageUrl('background.png');
+    document.body.style.background = `url('${backgroundUrl}') no-repeat center center fixed`;
     document.body.style.backgroundSize = "cover";
     return () => {
       document.body.style.background = "";
@@ -5284,6 +5199,7 @@ function AppContent({
   const isHome = location.pathname === '/';
   const isCatalog = location.pathname === '/catalog';
   const shouldShowDesktopSearch = isHome || isCatalog;
+  const shouldShowDesktopFilters = isCatalog; // Фильтры только на каталоге
   
   // Состояния для мобильного поиска и фильтров
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -5291,10 +5207,115 @@ function AppContent({
   const [isListening, setIsListening] = React.useState(false);
   const [interimTranscript, setInterimTranscript] = React.useState('');
   const recognitionRef = React.useRef(null);
+  const filtersPanelRef = React.useRef(null);
+  
+  // Прокрутка к началу страницы при переходе между вкладками
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, [location.pathname]);
   
   // Обработка ошибок рендера
   const [hasError, setHasError] = React.useState(false);
   const [errorInfo, setErrorInfo] = React.useState(null);
+  
+  // Временные состояния для фильтров (не применяются до нажатия кнопки)
+  const [tempSelectedGenders, setTempSelectedGenders] = React.useState([]);
+  const [tempSelectedBrands, setTempSelectedBrands] = React.useState([]);
+  const [tempSelectedAgeGroups, setTempSelectedAgeGroups] = React.useState([]);
+  const [tempPriceRange, setTempPriceRange] = React.useState([0, 10000]);
+  
+  // Массив возрастных групп (как в форме редактирования)
+  const ageGroups = [
+    '0-1 год',
+    '1-3 года',
+    '3-5 лет',
+    '5-7 лет',
+    '7-10 лет',
+    '10-12 лет',
+    '12-14 лет',
+    '14-16 лет'
+  ];
+  
+  // Вычисляем реальные лимиты цен на основе товаров
+  const priceLimits = React.useMemo(() => {
+    if (!products || products.length === 0) return [0, 10000];
+    
+    const validPrices = products
+      .map(product => Number(product.price))
+      .filter(price => !isNaN(price) && price > 0);
+    
+    if (validPrices.length === 0) return [0, 10000];
+    
+    const minPrice = Math.floor(Math.min(...validPrices) / 100) * 100; // Округляем вниз до сотен
+    const maxPrice = Math.max(...validPrices); // Используем точную максимальную цену товара
+    
+    return [minPrice, maxPrice];
+  }, [products]);
+  
+  // Инициализация временных состояний при открытии фильтров
+  React.useEffect(() => {
+    if (filtersMenuOpen) {
+      setTempSelectedGenders(selectedGenders);
+      setTempSelectedBrands(selectedBrands);
+      setTempSelectedAgeGroups(selectedAgeGroups);
+      setTempPriceRange(priceRange);
+    }
+  }, [filtersMenuOpen, selectedGenders, selectedBrands, selectedAgeGroups, priceRange]);
+  
+  // Инициализация priceRange на основе реальных цен при загрузке товаров
+  React.useEffect(() => {
+    if (products && products.length > 0 && priceRange[0] === 0 && priceRange[1] === 10000) {
+      setPriceRange(priceLimits);
+    }
+  }, [products, priceLimits, priceRange]);
+  
+  // Инициализация Lenis для фильтров
+  React.useEffect(() => {
+    if (filtersMenuOpen && filtersPanelRef.current) {
+      if (window.lenisFiltersRef) {
+        window.lenisFiltersRef.destroy();
+        window.lenisFiltersRef = null;
+      }
+      window.lenisFiltersRef = new Lenis({
+        wrapper: filtersPanelRef.current,
+        duration: 0.8,
+        wheelMultiplier: 1,
+        touchMultiplier: 2,
+        normalizeWheel: true,
+        infinite: false,
+        showScrollbar: true,
+      });
+      function raf(time) {
+        window.lenisFiltersRef?.raf(time);
+        if (filtersMenuOpen) requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+      return () => {
+        if (window.lenisFiltersRef) {
+          window.lenisFiltersRef.destroy();
+          window.lenisFiltersRef = null;
+        }
+      };
+    } else {
+      if (window.lenisFiltersRef) {
+        window.lenisFiltersRef.destroy();
+        window.lenisFiltersRef = null;
+      }
+    }
+  }, [filtersMenuOpen]);
+  
+  // Получаем актуальные состояния фильтров
+  const currentFilterStates = filtersMenuOpen ? {
+    genders: tempSelectedGenders,
+    brands: tempSelectedBrands,
+    ageGroups: tempSelectedAgeGroups,
+    priceRange: tempPriceRange
+  } : {
+    genders: selectedGenders,
+    brands: selectedBrands,
+    ageGroups: selectedAgeGroups,
+    priceRange: priceRange
+  };
   
   // Функция поиска
   const handleSearch = () => {
@@ -5307,7 +5328,7 @@ function AppContent({
   // Инициализация голосового поиска
   React.useEffect(() => {
     if (!isSpeechRecognitionSupported()) {
-      console.log('Speech recognition not supported');
+
       return;
     }
     
@@ -5316,7 +5337,7 @@ function AppContent({
       try {
         recognitionRef.current.stop();
       } catch (error) {
-        console.log('Error stopping previous recognition:', error);
+
       }
       recognitionRef.current = null;
     }
@@ -5332,7 +5353,7 @@ function AppContent({
 
         recognitionRef.current.onstart = () => {
           setIsListening(true);
-          console.log('Speech recognition started with language:', recognitionRef.current.lang);
+
         };
 
         recognitionRef.current.onresult = (event) => {
@@ -5372,6 +5393,25 @@ function AppContent({
       }
     }
   }, [i18n.language]); // Переинициализируем только при смене языка
+
+  // Обработчик клика вне панели фильтров
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filtersMenuOpen) {
+        const filterButton = event.target.closest('[data-filter-button]');
+        const filtersPanel = event.target.closest('[data-filters-panel]');
+        
+        if (!filterButton && !filtersPanel) {
+          setFiltersMenuOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [filtersMenuOpen]);
 
   // Функции для голосового поиска
   const handleMicClick = () => {
@@ -5589,23 +5629,242 @@ function AppContent({
              </form>
 
              {/* Кнопка фильтров для десктопа */}
-             <IconButton
-               data-filter-button
-               onClick={() => setFiltersMenuOpen(!filtersMenuOpen)}
-               sx={{
-                 color: '#FF9800',
-                 backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.1)' : 'white',
-                 border: '1px solid #FF9800',
-                 borderRadius: 2,
-                 width: 48,
-                 height: 40,
-                 '&:hover': {
-                   backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.15)' : 'rgba(255, 152, 0, 0.04)',
-                 },
-               }}
-             >
-               <FilterList />
-             </IconButton>
+             {shouldShowDesktopFilters && (
+               <IconButton
+                 data-filter-button
+                 onClick={() => setFiltersMenuOpen(!filtersMenuOpen)}
+                 sx={{
+                   color: '#FF9800',
+                   backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.1)' : 'white',
+                   border: '1px solid #FF9800',
+                   borderRadius: 2,
+                   width: 48,
+                   height: 40,
+                   '&:hover': {
+                     backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.15)' : 'rgba(255, 152, 0, 0.04)',
+                   },
+                 }}
+               >
+                 <FilterList />
+               </IconButton>
+             )}
+
+             {/* Панель фильтров для десктопа */}
+             {shouldShowDesktopFilters && filtersMenuOpen && (
+               <Paper
+                 ref={filtersPanelRef}
+                 data-filters-panel
+                 
+                 sx={{
+                   position: 'absolute',
+                   top: '100%',
+                   right: 0,
+                   width: 250,
+                   zIndex: '999999 !important',
+                   m: 0,
+                   p: 2,
+                   borderRadius: 2,
+                   boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                   background: '#fff',
+                   maxHeight: 520,
+                   overflowY: 'auto',
+                   border: '1px solid #e0e0e0',
+                   mt: 1,
+                 }}
+               >
+                 {/* Цена */}
+                 <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+                   Цена
+                 </Typography>
+                 <Box sx={{ px: 1, mb: 3 }}>
+                   <Slider
+                     value={tempPriceRange}
+                     onChange={(event, newValue) => setTempPriceRange(newValue)}
+                     valueLabelDisplay="auto"
+                     min={priceLimits[0]}
+                     max={priceLimits[1]}
+                     step={1}
+                     sx={{
+                       '& .MuiSlider-thumb': {
+                         backgroundColor: '#FF9800',
+                       },
+                       '& .MuiSlider-track': {
+                         backgroundColor: '#FF9800',
+                       },
+                       '& .MuiSlider-rail': {
+                         backgroundColor: '#e0e0e0',
+                       },
+                     }}
+                   />
+                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                     <Typography variant="body2" color="text.secondary">
+                       ₪{tempPriceRange[0]}
+                     </Typography>
+                     <Typography variant="body2" color="text.secondary">
+                       ₪{tempPriceRange[1]}
+                     </Typography>
+                   </Box>
+                 </Box>
+
+                 {/* Возраст */}
+                 <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+                   Возраст
+                 </Typography>
+                 <Box sx={{ mb: 3 }}>
+                   {ageGroups.map((age) => (
+                     <FormControlLabel
+                       key={age}
+                       control={
+                         <Checkbox
+                           checked={tempSelectedAgeGroups.includes(age)}
+                           onChange={(e) => {
+                             if (e.target.checked) {
+                               setTempSelectedAgeGroups([...tempSelectedAgeGroups, age]);
+                             } else {
+                               setTempSelectedAgeGroups(tempSelectedAgeGroups.filter(g => g !== age));
+                             }
+                           }}
+                           sx={{
+                             color: '#FF9800',
+                             '&.Mui-checked': {
+                               color: '#FF9800',
+                             },
+                           }}
+                         />
+                       }
+                       label={age}
+                       sx={{ display: 'block', mb: 1 }}
+                     />
+                   ))}
+                 </Box>
+
+                 {/* Пол */}
+                 <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+                   Пол
+                 </Typography>
+                 <Box sx={{ mb: 3 }}>
+                   {['Мальчики', 'Девочки', 'Унисекс'].map((gender) => (
+                     <FormControlLabel
+                       key={gender}
+                       control={
+                         <Checkbox
+                           checked={tempSelectedGenders.includes(gender)}
+                           onChange={(e) => {
+                             if (e.target.checked) {
+                               setTempSelectedGenders([...tempSelectedGenders, gender]);
+                             } else {
+                               setTempSelectedGenders(tempSelectedGenders.filter(g => g !== gender));
+                             }
+                           }}
+                           sx={{
+                             color: '#FF9800',
+                             '&.Mui-checked': {
+                               color: '#FF9800',
+                             },
+                           }}
+                         />
+                       }
+                       label={gender}
+                       sx={{ display: 'block', mb: 1 }}
+                     />
+                   ))}
+                 </Box>
+
+                 {/* Бренды */}
+                 <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
+                   Бренды
+                 </Typography>
+                 <Box sx={{ mb: 2 }}>
+                   {Array.from(new Set(products.map(p => p.brand))).filter(Boolean).slice(0, 10).map((brand) => (
+                     <FormControlLabel
+                       key={brand}
+                       control={
+                         <Checkbox
+                           checked={tempSelectedBrands.includes(brand)}
+                           onChange={(e) => {
+                             if (e.target.checked) {
+                               setTempSelectedBrands([...tempSelectedBrands, brand]);
+                             } else {
+                               setTempSelectedBrands(tempSelectedBrands.filter(b => b !== brand));
+                             }
+                           }}
+                           sx={{
+                             color: '#FF9800',
+                             '&.Mui-checked': {
+                               color: '#FF9800',
+                             },
+                           }}
+                         />
+                       }
+                       label={brand}
+                       sx={{ display: 'block', mb: 1 }}
+                     />
+                   ))}
+                 </Box>
+
+                 {/* Кнопки сброса и применения */}
+                 <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                 <Button
+                     fullWidth
+                     variant="contained"
+                   onClick={() => {
+                       setTempSelectedGenders([]);
+                       setTempSelectedBrands([]);
+                       setTempSelectedAgeGroups([]);
+                       setTempPriceRange(priceLimits);
+                   }}
+                   sx={{
+                       background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
+                       color: '#fff',
+                       borderRadius: 2,
+                       fontWeight: 600,
+                       fontSize: 15,
+                       py: 1.5,
+                       height: 44,
+                       boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
+                       textTransform: 'none',
+                     '&:hover': {
+                         background: 'linear-gradient(135deg, #ef5350 0%, #f44336 100%)',
+                         boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                         transform: 'translateY(-1px)'
+                     },
+                   }}
+                 >
+                     Сбросить
+                 </Button>
+                   <Button
+                     fullWidth
+                     variant="contained"
+                     onClick={() => {
+
+                       onGendersChange(tempSelectedGenders);
+                       setSelectedBrands(tempSelectedBrands);
+                       setSelectedAgeGroups(tempSelectedAgeGroups);
+                       setPriceRange(tempPriceRange);
+                       setFiltersMenuOpen(false);
+                     }}
+                     sx={{
+                       background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+                       color: '#fff',
+                       borderRadius: 2,
+                       fontWeight: 600,
+                       fontSize: 15,
+                       py: 1.5,
+                       height: 44,
+                       boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                       textTransform: 'none',
+                       '&:hover': {
+                         background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                         boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                         transform: 'translateY(-1px)'
+                       },
+                     }}
+                   >
+                     Применить
+                   </Button>
+                 </Box>
+               </Paper>
+             )}
            </Box>
          )}
 
@@ -5761,7 +6020,7 @@ function AppContent({
         <Container maxWidth="lg" sx={{ py: 6 }}>
           <Grid container spacing={4}>
             {/* Информация о компании */}
-            <Grid item xs={12} md={i18n.language === 'he' ? 4 : 3} sx={{ ml: { md: -5 } }}>
+            <Grid size={{ xs: 12, md: i18n.language === 'he' ? 4 : 3 }} sx={{ ml: { md: -5 } }}>
               <Typography variant="h5" sx={{ 
                 fontWeight: 700, 
                 mb: 2, 
@@ -5822,7 +6081,7 @@ function AppContent({
             </Grid>
 
             {/* Быстрые ссылки */}
-            <Grid item xs={12} sm={6} md={2}>
+            <Grid size={{ xs: 12, sm: 6, md: 2 }}>
               <Typography variant="h6" sx={{ 
                 fontWeight: 600, 
                 mb: 3, 
@@ -5876,7 +6135,7 @@ function AppContent({
             </Grid>
 
             {/* Часы работы */}
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Typography variant="h6" sx={{ 
                 fontWeight: 600, 
                 mb: 3, 
@@ -5899,7 +6158,7 @@ function AppContent({
             </Grid>
 
             {/* Контактная информация */}
-            <Grid item xs={12} sm={6} md={i18n.language === 'he' ? 3 : 4}>
+            <Grid size={{ xs: 12, sm: 6, md: i18n.language === 'he' ? 3 : 4 }}>
               <Typography variant="h6" sx={{ 
                 fontWeight: 600, 
                 mb: 3, 
@@ -7822,24 +8081,21 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
 
 // Глобальная функция getCategoryIcon
 const getCategoryIcon = (category) => {
-  console.log('getCategoryIcon called with:', category);
-  
   if (!category) {
-    console.log('No category provided, returning default');
     return `${API_BASE_URL}/public/toys.png?t=${Date.now()}`;
   }
   
   // Если есть загруженное изображение, используем его
   if (category.image && /^175\d+/.test(category.image)) {
     const url = `${API_BASE_URL}/uploads/${category.image}?t=${Date.now()}`;
-    console.log('Returning uploads URL:', url);
+
     return url;
   }
   
   // Если есть изображение, но это не загруженный файл, используем его
   if (category.image) {
     const url = `${API_BASE_URL}/public/${category.image}?t=${Date.now()}`;
-    console.log('Returning public URL:', url);
+
     return url;
   }
   
@@ -7858,11 +8114,11 @@ const getCategoryIcon = (category) => {
   };
   
   const fallbackIcon = fallbackIcons[category.name] || '/toys.png';
-  console.log(`No image for category "${category.name}", using fallback: ${fallbackIcon}`);
+
   return `${API_BASE_URL}/public${fallbackIcon}?t=${Date.now()}`;
 };
 function CMSCategories({ loadCategoriesFromAPI }) {
-  console.log('CMSCategories RENDER - Component is loading');
+
   
   const [categories, setCategories] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -8266,7 +8522,7 @@ function CMSCategories({ loadCategoriesFromAPI }) {
             }}
           />
         </span>
-        {cat.sub.length > 0 && (
+        {cat.sub && cat.sub.length > 0 && (
           <IconButton onClick={e => { e.stopPropagation(); handleExpand(cat.id); }} data-no-drag>
             {expanded.includes(cat.id) ? <ExpandMore /> : <ChevronRight />}
           </IconButton>
@@ -9664,7 +9920,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
         
         // Убеждаемся, что язык установлен правильно перед запуском
         recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
-        console.log('CategoryPage: Setting speech recognition language to:', recognitionRef.current.lang);
+
         recognitionRef.current.start();
         setIsListening(true);
       } catch (error) {
@@ -9718,7 +9974,12 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
           <Typography variant="h4" color="error">{t('category.notFound')}</Typography>
           <Button 
             variant="contained" 
-            onClick={() => navigate('/catalog')}
+            onClick={() => {
+              navigate('/catalog');
+              if (window.location.pathname === '/checkout') {
+                setTimeout(() => window.location.reload(), 100);
+              }
+            }}
             sx={{ mt: 2 }}
           >
             {t('category.backToCatalog')}
@@ -10067,7 +10328,12 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
                 <Box
                   key={subcat.id}
                   className="category-tile"
-                  onClick={() => navigate(`/subcategory/${subcat.id}`)}
+                  onClick={() => {
+                    navigate(`/subcategory/${subcat.id}`);
+                    if (window.location.pathname === '/checkout') {
+                      setTimeout(() => window.location.reload(), 100);
+                    }
+                  }}
                   sx={{
                     position: 'relative',
                     height: 180,
@@ -10275,7 +10541,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
         
         // Убеждаемся, что язык установлен правильно перед запуском
         recognitionRef.current.lang = getSpeechRecognitionLanguage(i18n.language);
-        console.log('SubcategoryPage: Setting speech recognition language to:', recognitionRef.current.lang);
+
         recognitionRef.current.start();
         setIsListening(true);
       } catch (error) {
@@ -10330,7 +10596,12 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
           <Typography variant="h4" color="error">{t('subcategory.notFound')}</Typography>
           <Button 
             variant="contained" 
-            onClick={() => navigate('/catalog')}
+            onClick={() => {
+              navigate('/catalog');
+              if (window.location.pathname === '/checkout') {
+                setTimeout(() => window.location.reload(), 100);
+              }
+            }}
             sx={{ mt: 2 }}
           >
             {t('subcategory.backToCatalog')}
@@ -11316,7 +11587,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
     setDeleteProfileDialogOpen(false);
   };
 
-  // Функция для создания красивого заголовка
+  // Создание красивого заголовка
   const createHeader = (title) => (
     <Typography variant="h5" sx={{ 
       fontWeight: 800, 

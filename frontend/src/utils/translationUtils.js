@@ -94,7 +94,7 @@ export const checkTranslationsAvailable = () => {
   try {
     const currentLanguage = i18n.language || 'ru';
     const hasResources = i18n.hasResourceBundle(currentLanguage, 'translation');
-    console.log(`🔍 Translations check - Language: ${currentLanguage}, Available: ${hasResources}`);
+
     return hasResources;
   } catch (error) {
     console.error('Error checking translations:', error);

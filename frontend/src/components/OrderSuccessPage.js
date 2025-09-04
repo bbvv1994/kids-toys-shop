@@ -161,12 +161,12 @@ export default function OrderSuccessPage() {
           {i18n.language === 'he' ? (
             // Для иврита: цена слева, "סה"כ" справа
             <>
-              <Grid item xs={4} sx={{ textAlign: 'left' }}>
+              <Grid size={{ xs: 4 }} sx={{ textAlign: 'left' }}>
                 <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
                   ₪{total}
                 </Typography>
               </Grid>
-              <Grid item xs={8} sx={{ textAlign: 'right' }}>
+              <Grid size={{ xs: 8 }} sx={{ textAlign: 'right' }}>
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                   {t('checkout.totalAmount')}
                 </Typography>
@@ -175,12 +175,12 @@ export default function OrderSuccessPage() {
           ) : (
             // Для русского: "Итого" слева, цена справа
             <>
-              <Grid item xs={8}>
+              <Grid size={{ xs: 8 }}>
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                   {t('checkout.totalAmount')}
                 </Typography>
               </Grid>
-              <Grid item xs={4} sx={{ textAlign: 'right' }}>
+              <Grid size={{ xs: 4 }} sx={{ textAlign: 'right' }}>
                 <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
                   ₪{total}
                 </Typography>
@@ -191,7 +191,7 @@ export default function OrderSuccessPage() {
       </Paper>
       <Box sx={{ textAlign: 'center', mt: 3 }}>
         <Grid container spacing={2} justifyContent="center">
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Button 
               variant="contained" 
               fullWidth
@@ -218,7 +218,7 @@ export default function OrderSuccessPage() {
             </Button>
           </Grid>
           {!isGuest && (
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Button 
                 variant="contained" 
                 fullWidth
@@ -248,7 +248,7 @@ export default function OrderSuccessPage() {
               </Button>
             </Grid>
           )}
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Button 
               variant="contained" 
               fullWidth

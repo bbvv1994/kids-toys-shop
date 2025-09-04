@@ -7,7 +7,6 @@ import {
   Paper,
   Rating,
   Grid,
-  Chip,
   CircularProgress,
   Alert,
   Button,
@@ -20,9 +19,10 @@ import {
   ListItem,
   ListItemText,
   ListItemSecondaryAction,
-  IconButton
+  IconButton,
+  Container
 } from '@mui/material';
-import { Star, ShoppingBag, ThumbUp, ThumbDown, CheckCircle, Cancel, Visibility, VisibilityOff, Delete } from '@mui/icons-material';
+import { Star, ShoppingBag, ThumbUp, ThumbDown, Visibility, VisibilityOff, Delete } from '@mui/icons-material';
 
 const AdminProductReviews = () => {
   // const { t } = useTranslation(); // Убираем переводы для CMS
@@ -196,37 +196,30 @@ const AdminProductReviews = () => {
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'pending': return <CircularProgress size={16} />;
-      case 'published': return <CheckCircle />;
-      case 'rejected': return <Cancel />;
-      case 'hidden': return <VisibilityOff />;
-      default: return null;
-    }
-  };
+
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress size={60} />
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+          <CircularProgress />
+        </Box>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <Box sx={{ p: 4, maxWidth: 800, mx: 'auto', mt: 4 }}>
-        <Alert severity="error" sx={{ borderRadius: 2 }}>
-          {error}
-        </Alert>
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
+        <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+        <Button onClick={loadReviews} variant="contained">Повторить</Button>
+      </Container>
     );
   }
 
   return (
-    <Box sx={{ p: 4, width: 1250, mx: 'auto', mt: 4 }}>
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+    <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2, minHeight: 'calc(100vh - 200px)' }}>
         {/* Заголовок */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
           <ShoppingBag color="primary" sx={{ fontSize: 40 }} />
@@ -246,7 +239,7 @@ const AdminProductReviews = () => {
             Статистика отзывов
           </Typography>
           <Grid container spacing={4}>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status !== 'archived').length}
@@ -256,7 +249,7 @@ const AdminProductReviews = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status === 'pending').length}
@@ -266,7 +259,7 @@ const AdminProductReviews = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status === 'published').length}
@@ -276,7 +269,7 @@ const AdminProductReviews = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="error.main" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status === 'rejected').length}
@@ -286,7 +279,7 @@ const AdminProductReviews = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="default" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status === 'hidden').length}
@@ -535,24 +528,82 @@ const AdminProductReviews = () => {
           <Button 
             onClick={() => setModerationDialog(false)}
             disabled={moderating}
+            sx={{
+              background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 14,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              minWidth: 100,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
+                boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: '#ccc',
+                color: '#666'
+              }
+            }}
           >
             Отмена
           </Button>
           <Button
             variant="contained"
-            color="success"
             onClick={() => handleModerate(selectedReview.id, 'published')}
             disabled={moderating}
             startIcon={<ThumbUp />}
+            sx={{
+              background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 14,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              minWidth: 120,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: '#ccc',
+                color: '#666'
+              }
+            }}
           >
             {moderating ? 'Одобрение...' : 'Одобрить'}
           </Button>
           <Button
             variant="contained"
-            color="error"
             onClick={() => handleModerate(selectedReview.id, 'rejected')}
             disabled={moderating}
             startIcon={<ThumbDown />}
+            sx={{
+              background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 14,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              minWidth: 120,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+                boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: '#ccc',
+                color: '#666'
+              }
+            }}
           >
             {moderating ? 'Отклонение...' : 'Отклонить'}
           </Button>
@@ -594,21 +645,60 @@ const AdminProductReviews = () => {
           <Button 
             onClick={closeDeleteDialog}
             disabled={moderating}
+            sx={{
+              background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 14,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              minWidth: 100,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
+                boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: '#ccc',
+                color: '#666'
+              }
+            }}
           >
             Отмена
           </Button>
           <Button
             variant="contained"
-            color="error"
             onClick={() => handleDelete(reviewToDelete?.id)}
             disabled={moderating}
             startIcon={<Delete />}
+            sx={{
+              background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 14,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              minWidth: 120,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+                boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: '#ccc',
+                color: '#666'
+              }
+            }}
           >
             {moderating ? 'Удаление...' : 'Удалить'}
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </Container>
   );
 };
 

@@ -117,39 +117,33 @@ const CustomerReviews = () => {
                         maxWidth: '1200px'
                       }}
                     >
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                            <Typography variant="h6" component="h3">
-                              {review.user?.name || t('reviews.customerReviews.anonymousUser')}
-                            </Typography>
-                          </Box>
-                        }
-                        secondary={
-                          <Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                              <Rating
-                                value={review.rating}
-                                readOnly
-                                icon={<Star fontSize="inherit" sx={{ color: '#FFD700' }} />}
-                                emptyIcon={<Star fontSize="inherit" sx={{ color: '#ccc' }} />}
-                                sx={{ mr: 1 }}
-                              />
-                              <Typography variant="body2">
-                                {review.rating}/5
-                              </Typography>
-                            </Box>
-                            {review.text && (
-                              <Typography variant="body1" sx={{ mb: 1, lineHeight: 1.6 }}>
-                                "{review.text}"
-                              </Typography>
-                            )}
-                            <Typography variant="caption" color="textSecondary">
-                              {formatDate(review.createdAt)}
-                            </Typography>
-                          </Box>
-                        }
-                      />
+                      <Box sx={{ width: '100%' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                          <Typography variant="h6" component="h3">
+                            {review.user?.name || t('reviews.customerReviews.anonymousUser')}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <Rating
+                            value={review.rating}
+                            readOnly
+                            icon={<Star fontSize="inherit" sx={{ color: '#FFD700' }} />}
+                            emptyIcon={<Star fontSize="inherit" sx={{ color: '#ccc' }} />}
+                            sx={{ mr: 1 }}
+                          />
+                          <Typography variant="body2">
+                            {review.rating}/5
+                          </Typography>
+                        </Box>
+                        {review.text && (
+                          <Typography variant="body1" sx={{ mb: 1, lineHeight: 1.6 }}>
+                            "{review.text}"
+                          </Typography>
+                        )}
+                        <Typography variant="caption" color="textSecondary">
+                          {formatDate(review.createdAt)}
+                        </Typography>
+                      </Box>
                     </ListItem>
                   ))}
                 </List>

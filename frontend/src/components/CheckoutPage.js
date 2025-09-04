@@ -4,13 +4,26 @@ import {
   Radio, RadioGroup, FormControlLabel, FormControl, 
   FormLabel, FormHelperText, Divider, Paper, Grid, Alert, CircularProgress
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { API_BASE_URL, getImageUrl } from '../config';
 import { useTranslation } from 'react-i18next';
 import { getTranslatedName } from '../utils/translationUtils';
 
 export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearCart }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Принудительно очищаем состояние при попытке навигации
+  const handleNavigation = (path) => {
+    // Очищаем состояние формы
+    setValidationErrors({});
+    setError('');
+    setLoading(false);
+    // Принудительная навигация с заменой истории
+    navigate(path, { replace: true });
+    // Принудительный перерендер
+    window.location.reload();
+  };
   const { t, i18n } = useTranslation();
   
 
@@ -115,7 +128,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
          setValidationErrors(errors);
        }
      }
-   }, [i18n.language, formData, pickupStore, validationErrors]);
+   }, [i18n.language, formData, pickupStore]);
 
    // Обновляем общее сообщение об ошибке при смене языка
    useEffect(() => {
@@ -128,10 +141,30 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
      }
    }, [i18n.language, error]);
 
+   // Сбрасываем состояние при размонтировании компонента
+   useEffect(() => {
+     return () => {
+       // Очищаем состояние при размонтировании компонента
+       setValidationErrors({});
+       setError('');
+       setLoading(false);
+     };
+   }, []);
+
+
+
    
 
      const handleInputChange = (e) => {
      let value = e.target.value;
+     
+     // Очищаем ошибку валидации для этого поля при изменении
+     if (validationErrors[e.target.name]) {
+       setValidationErrors(prev => ({
+         ...prev,
+         [e.target.name]: ''
+       }));
+     }
      
      // Специальная обработка для поля телефона
      if (e.target.name === 'phone') {
@@ -380,7 +413,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
     return (
       <Container maxWidth="md" sx={{ mt: 4 }}>
         <Alert severity="info">
-          {t('checkout.emptyCart')} <Button onClick={() => navigate('/catalog')}>{t('checkout.goToProducts')}</Button>
+          {t('checkout.emptyCart')} <Button onClick={() => handleNavigation('/catalog')}>{t('checkout.goToProducts')}</Button>
         </Alert>
       </Container>
     );
@@ -414,7 +447,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
               </Alert>
             )}
             <Grid container spacing={2} key={i18n.language}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                                                                   <TextField
                    fullWidth
                    label={t('checkout.firstName')}
@@ -427,7 +460,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
                     sx={{ mb: 2 }}
                   />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                                  <TextField
                    fullWidth
                    label={t('checkout.lastName')}
@@ -440,7 +473,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
                    sx={{ mb: 2 }}
                  />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                                  <TextField
                    fullWidth
                    label={t('checkout.email')}
@@ -454,7 +487,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
                    sx={{ mb: 2 }}
                  />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                                  <TextField
                    fullWidth
                    label={t('checkout.phone')}
@@ -477,7 +510,7 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
                    sx={{ mb: 2 }}
                  />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                                  <FormControl fullWidth error={!!validationErrors.pickupStore} sx={{ mb: 2 }}>
                    <FormLabel error={!!validationErrors.pickupStore}>{t('checkout.pickupStore')}</FormLabel>
                    <RadioGroup

@@ -122,7 +122,7 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
             <CardContent>
               <Grid container spacing={2} alignItems="center">
                 {productImage && (
-                  <Grid item>
+                  <Grid>
                     <CardMedia
                       component="img"
                       image={productImage.startsWith('http') ? productImage : `${API_BASE_URL}${productImage}`}
@@ -134,7 +134,7 @@ const ReviewForm = ({ open, onClose, productId = null, productName = null, produ
                     />
                   </Grid>
                 )}
-                <Grid item xs>
+                <Grid size={{ xs: true }}>
                   <Typography variant="h6" component="h2">
                     {productName}
                   </Typography>

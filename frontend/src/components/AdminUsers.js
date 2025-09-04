@@ -22,7 +22,8 @@ import {
   Button,
   Grid,
   Chip,
-  Divider
+  Divider,
+  Container
 } from '@mui/material';
 import {
   Edit,
@@ -189,24 +190,25 @@ const AdminUsers = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress size={60} />
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+          <CircularProgress />
+        </Box>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <Box sx={{ p: 4, maxWidth: 800, mx: 'auto', mt: 4 }}>
-        <Alert severity="error" sx={{ borderRadius: 2 }}>
-          {error}
-        </Alert>
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
+        <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+        <Button onClick={fetchUsers} variant="contained">Повторить</Button>
+      </Container>
     );
   }
 
   return (
-    <Box sx={{ p: 4, width: 1250, mx: 'auto', mt: 4, minHeight: '100vh' }}>
+    <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2, minHeight: 'calc(100vh - 200px)' }}>
         {/* Заголовок */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
@@ -227,7 +229,7 @@ const AdminUsers = () => {
             Статистика пользователей
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
                   {users.length}
@@ -237,7 +239,7 @@ const AdminUsers = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="error.main" sx={{ fontWeight: 'bold' }}>
                   {users.filter(u => u.role === 'admin').length}
@@ -247,7 +249,7 @@ const AdminUsers = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
                   {users.filter(u => u.role === 'user').length}
@@ -257,7 +259,7 @@ const AdminUsers = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="info.main" sx={{ fontWeight: 'bold' }}>
                   {users.filter(u => u.email).length}
@@ -548,7 +550,7 @@ const AdminUsers = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </Container>
   );
 };
 

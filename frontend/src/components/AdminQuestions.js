@@ -208,7 +208,7 @@ export default function AdminQuestions() {
             Статистика вопросов
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
                   {questions.length}
@@ -218,7 +218,7 @@ export default function AdminQuestions() {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
                   {questions.filter(q => q.status === 'pending').length}
@@ -228,7 +228,7 @@ export default function AdminQuestions() {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
                   {questions.filter(q => q.status === 'published').length}
@@ -238,7 +238,7 @@ export default function AdminQuestions() {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="error.main" sx={{ fontWeight: 'bold' }}>
                   {questions.filter(q => q.status === 'rejected').length}
@@ -248,7 +248,7 @@ export default function AdminQuestions() {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="default" sx={{ fontWeight: 'bold' }}>
                   {questions.filter(q => q.answer && q.status === 'published').length}

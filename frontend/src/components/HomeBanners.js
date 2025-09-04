@@ -14,15 +14,13 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
   const isRTL = i18n.language === 'he';
   
   // Отладочная информация для размеров экрана
-  console.log('HomeBanners: isMobile:', isMobile);
-  console.log('HomeBanners: isTablet:', isTablet);
-  console.log('HomeBanners: drawerWidth:', drawerWidth);
+
   
   // Данные баннеров (можно вынести в отдельный файл или получать с сервера)
   const banners = [
     {
       id: 1,
-      image: '/banners/glav.png',
+      image: '/banners/glav.webp',
       title: t('banners.welcome.title'),
       subtitle: t('banners.welcome.subtitle'),
       link: '/catalog',
@@ -30,7 +28,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
     },
     {
       id: 2,
-      image: '/banners/sale1.png',
+      image: '/banners/sale1.webp',
       title: t('banners.specialOffers.title'),
       subtitle: t('banners.specialOffers.subtitle'),
       link: '/category/384',
@@ -38,7 +36,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
     },
     {
       id: 3,
-      image: '/banners/malysham.png',
+      image: '/banners/malysham.webp',
       title: t('banners.forLittleOnes.title'),
       subtitle: t('banners.forLittleOnes.subtitle'),
       link: '/category/401',
@@ -46,7 +44,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
     },
     {
       id: 4,
-      image: '/banners/plyazhniy.png',
+      image: '/banners/plyazhniy.webp',
       title: t('banners.waterRecreation.title'),
       subtitle: t('banners.waterRecreation.subtitle'),
       link: '/category/380',
@@ -54,7 +52,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
     },
     {
       id: 5,
-      image: '/banners/vshkolu.png',
+      image: '/banners/vshkolu.webp',
       title: t('banners.toSchool.title'),
       subtitle: t('banners.toSchool.subtitle'),
       link: '/category/381',
@@ -62,7 +60,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
     },
     {
       id: 6,
-      image: '/banners/mal.png',
+      image: '/banners/mal.webp',
       title: t('catalog.pages.boysToys.title'),
       subtitle: t('catalog.pages.boysToys.subtitle'),
       link: '/boys-toys',
@@ -70,7 +68,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
     },
     {
       id: 7,
-      image: '/banners/dev.png',
+      image: '/banners/dev.webp',
       title: t('catalog.pages.girlsToys.title'),
       subtitle: t('catalog.pages.girlsToys.subtitle'),
       link: '/girls-toys',
@@ -79,9 +77,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
   ];
 
   // Отладочная информация
-  console.log('HomeBanners: Компонент загружен');
-  console.log('HomeBanners: Количество баннеров:', banners.length);
-  console.log('HomeBanners: Первый баннер:', banners[0]);
+
 
   const [currentBanner, setCurrentBanner] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -141,11 +137,11 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
   const handleMouseLeave = () => setIsAutoPlaying(true);
 
   const nextBanner = () => {
-    setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length);
+    setCurrentBanner((prev) => (prev + 1) % banners.length);
   };
 
   const prevBanner = () => {
-    setCurrentBanner((prev) => (prev + 1) % banners.length);
+    setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length);
   };
 
   const goToBanner = (index) => {
@@ -266,15 +262,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
   const bannerStyles = getBannerStyles();
 
   // Отладочная информация для рендера
-  console.log('HomeBanners: Рендеринг компонента');
-  console.log('HomeBanners: Текущий баннер:', currentBanner);
-  console.log('HomeBanners: Стили баннера:', bannerStyles);
-  console.log('HomeBanners: Размеры экрана - ширина:', windowSize.width);
-  console.log('HomeBanners: Размеры экрана - высота:', windowSize.height);
-  console.log('HomeBanners: Применяемые размеры - мобильный:', isMobile, 'планшет:', isTablet);
-  console.log('HomeBanners: marginTop для десктопа:', isMobile ? 'не применяется' : isTablet ? 'не применяется' : bannerStyles.marginTop);
-  console.log('HomeBanners: Состояние свайпа:', isSwiping);
-  console.log('HomeBanners: Автопереключение:', isAutoPlaying);
+
   
   return (
     <Box

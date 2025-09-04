@@ -37,10 +37,8 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
   
   // Эффект для завершения переходов
   useEffect(() => {
-    console.log('ProductCarousel: currentIndex изменился на:', currentIndex);
     const timer = setTimeout(() => {
       setIsTransitioning(false);
-      console.log('ProductCarousel: isTransitioning сброшен в false');
     }, 300);
     return () => clearTimeout(timer);
   }, [currentIndex]);
@@ -93,16 +91,7 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
   const currentPage = Math.floor(currentIndex / visibleCount) + 1;
 
   // Отладочная информация для свайпов
-  console.log('ProductCarousel: Состояние свайпа:', { 
-    isSwiping, 
-    touchStart, 
-    touchEnd, 
-    currentIndex, 
-    visibleCount, 
-    totalProducts: products.length,
-    canGoNext: currentIndex < products.length - 1,
-    canGoPrev: currentIndex > 0
-  });
+
 
   // Функции для обработки свайпов
   const onTouchStart = useCallback((e) => {
@@ -130,27 +119,27 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
     
     if (distance > minSwipeDistance) {
       // Свайп влево - следующий слайд
-      console.log('ProductCarousel: Свайп влево, расстояние:', distance, 'текущий индекс:', currentIndex, 'всего продуктов:', products.length);
+
       // Проверяем, что можем двигаться дальше
       if (currentIndex < products.length - 1) {
         const newIndex = currentIndex + 1;
-        console.log('ProductCarousel: Переходим к следующему слайду с', currentIndex, 'на', newIndex);
+
         setIsTransitioning(true);
         setCurrentIndex(newIndex);
       } else {
-        console.log('ProductCarousel: Достигнут конец карусели, текущий индекс:', currentIndex);
+
       }
     } else if (distance < -minSwipeDistance) {
       // Свайп вправо - предыдущий слайд
-      console.log('ProductCarousel: Свайп вправо, расстояние:', distance, 'текущий индекс:', currentIndex, 'всего продуктов:', products.length);
+
       // Проверяем, что можем двигаться назад
       if (currentIndex > 0) {
         const newIndex = currentIndex - 1;
-        console.log('ProductCarousel: Переходим к предыдущему слайду с', currentIndex, 'на', newIndex);
+
         setIsTransitioning(true);
         setCurrentIndex(newIndex);
       } else {
-        console.log('ProductCarousel: Достигнуто начало карусели, текущий индекс:', currentIndex);
+
       }
     }
     

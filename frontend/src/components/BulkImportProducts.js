@@ -510,7 +510,7 @@ const BulkImportProducts = ({ categories = [] }) => {
                       </Typography>
                       
                       <Grid container spacing={3} sx={{ mb: 3 }}>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <FormControl fullWidth sx={{ mt: 1 }}>
                             <InputLabel id="nameHe-label">Название товара (иврит)</InputLabel>
                             <Select
@@ -525,7 +525,7 @@ const BulkImportProducts = ({ categories = [] }) => {
                             </Select>
                           </FormControl>
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <FormControl fullWidth sx={{ mt: 1 }}>
                             <InputLabel id="name-label">Название товара (русский)</InputLabel>
                             <Select
@@ -540,7 +540,7 @@ const BulkImportProducts = ({ categories = [] }) => {
                             </Select>
                           </FormControl>
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <FormControl fullWidth sx={{ mt: 1 }}>
                             <InputLabel id="article-label">Артикул (баркод)</InputLabel>
                             <Select
@@ -556,7 +556,7 @@ const BulkImportProducts = ({ categories = [] }) => {
                             </Select>
                           </FormControl>
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <FormControl fullWidth sx={{ mt: 1 }}>
                             <InputLabel id="quantity-label">Количество</InputLabel>
                             <Select
@@ -572,7 +572,7 @@ const BulkImportProducts = ({ categories = [] }) => {
                             </Select>
                           </FormControl>
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <FormControl fullWidth sx={{ mt: 1 }}>
                             <InputLabel id="price-label">Цена</InputLabel>
                             <Select

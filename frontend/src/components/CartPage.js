@@ -14,8 +14,7 @@ import {
 } from '@mui/material';
 import { 
   Delete,
-  Payment as PaymentIcon,
-  EmojiEvents as TrophyIcon
+  Payment as PaymentIcon
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -129,15 +128,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
     navigate('/checkout');
   };
 
-  const getDiscount = () => {
-    if (total >= 500) return 15;
-    if (total >= 300) return 10;
-    if (total >= 150) return 5;
-    return 0;
-  };
 
-  const discount = getDiscount();
-  const finalTotal = total - (total * discount / 100);
 
   // Рендеринг элемента корзины
   const renderCartItem = (item) => {
@@ -441,22 +432,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
             </Typography>
           </Box>
           
-          {discount > 0 && (
-            <Paper sx={{ 
-              p: { xs: 1.5, md: 2 }, 
-              mb: { xs: 2, md: 3 }, 
-              background: 'linear-gradient(45deg, #4CAF50, #81C784)',
-              color: 'white',
-              borderRadius: { xs: 2, md: 3 }
-            }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                <TrophyIcon sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }} />
-                <Typography variant={isMobile ? "body1" : "h6"}>
-                  {t('cart.discountMessage', { percent: discount, saved: Math.round(total * discount / 100) })}
-                </Typography>
-              </Box>
-            </Paper>
-          )}
+
         </Box>
       </motion.div>
 
@@ -587,16 +563,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                    </>
                  )}
                </Box>
-              {discount > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography sx={{ color: '#4CAF50', fontSize: { xs: '0.9rem', md: '1rem' } }}>
-                    {t('cart.discount', { percent: discount })}
-                  </Typography>
-                  <Typography sx={{ color: '#4CAF50', fontWeight: 700, fontSize: { xs: '0.9rem', md: '1rem' } }}>
-                    -₪{Math.round(total * discount / 100)}
-                  </Typography>
-                </Box>
-              )}
+
               <Divider sx={{ my: { xs: 1.5, md: 2 } }} />
                                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: { xs: 1.5, md: 2 } }}>
                  {t('cart.toPay').includes('К оплате') ? (
@@ -619,7 +586,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                          fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' }
                        }}
                      >
-                       ₪{finalTotal.toFixed(2)}
+                       ₪{total.toFixed(2)}
                      </Typography>
                    </>
                                    ) : (
@@ -633,7 +600,7 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                            fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' }
                          }}
                        >
-                         ₪{finalTotal.toFixed(2)}
+                         ₪{total.toFixed(2)}
                        </Typography>
                        <Typography 
                          variant={isMobile ? "body1" : "h6"} 

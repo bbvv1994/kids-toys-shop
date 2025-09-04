@@ -188,10 +188,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   // Функция для принудительного обновления данных товара
   const refreshProductData = async () => {
     try {
-      console.log('ProductPage: Forcing refresh of product data...');
       const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
       const data = await response.json();
-      console.log('ProductPage: Refreshed product data:', data);
       setProduct(data);
     } catch (error) {
       console.error('ProductPage: Error refreshing product data:', error);
@@ -322,9 +320,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       try {
         const response = await fetch(`${API_BASE_URL}/api/products/${id}`);
         const data = await response.json();
-        console.log('ProductPage: Loaded product data:', data);
-        console.log('ProductPage: Product category:', data.category);
-        console.log('ProductPage: Product subcategory:', data.subcategory);
+
         setProduct(data);
         setGalleryIndex(0); // Сбрасываем индекс галереи при загрузке нового товара
         setLoading(false);
@@ -351,7 +347,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   // Отладочная информация для отслеживания изменений galleryIndex
   useEffect(() => {
-    console.log('ProductPage Gallery: Индекс изображения изменился на:', galleryIndex);
+
     // Сбрасываем zoom при смене изображения
     resetZoom();
     // Сбрасываем экранную лупу при смене изображения
@@ -443,7 +439,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         
         // Если updatedAt изменился, обновляем данные
         if (latestProduct.updatedAt !== product.updatedAt) {
-          console.log('ProductPage: Product updated detected, refreshing...');
+
           setProduct(latestProduct);
         }
       } catch (error) {
@@ -460,14 +456,12 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
 
   useEffect(() => {
-    console.log('ProductPage: Загружаем отзывы для товара ID:', id);
+
     fetch(`${API_BASE_URL}/api/reviews/product/${id}`)
       .then(res => {
-        console.log('ProductPage: Ответ API отзывов:', res.status);
         return res.json();
       })
       .then(data => {
-        console.log('ProductPage: Полученные отзывы:', data);
         setReviews(data);
       })
       .catch(error => {
@@ -476,18 +470,15 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   }, [id, reviewSuccess]);
 
   useEffect(() => {
-    console.log('ProductPage: Загружаем вопросы для товара ID:', id);
+
     const loadQuestions = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/products/${id}/questions`);
-        console.log('ProductPage: Ответ API вопросов:', response.status);
-        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('ProductPage: Полученные вопросы:', data);
         setQuestions(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('ProductPage: Ошибка загрузки вопросов:', error);
@@ -505,7 +496,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       
       // Проверяем, что пользователь авторизован
       if (!user || !user.token) {
-        console.log('ProductPage: Пользователь не авторизован');
+
         return;
       }
       
@@ -516,7 +507,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         });
         
         if (!res.ok) {
-          console.log('ProductPage: Ошибка получения заказов');
+
           return;
         }
         
@@ -526,7 +517,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         );
         
         if (!bought) {
-          console.log('ProductPage: Пользователь не покупал этот товар');
+
           return;
         }
         
@@ -534,7 +525,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         const reviewRes = await fetch(`${API_BASE_URL}/api/products/${id}/reviews`);
         
         if (!reviewRes.ok) {
-          console.log('ProductPage: Ошибка получения отзывов');
+
           return;
         }
         
@@ -542,12 +533,12 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         const userReview = allReviews.find(r => r.user && r.user.id === user.id);
         
         if (userReview) {
-          console.log('ProductPage: Пользователь уже оставил отзыв');
+
           setAlreadyReviewed(true);
           return;
         }
         
-        console.log('ProductPage: Пользователь может оставить отзыв');
+
         setCanReview(true);
       } catch (error) {
         console.error('ProductPage: Ошибка проверки возможности отзыва:', error);
@@ -942,6 +933,17 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     }
   };
 
+  // Регистрируем обработчик wheel с passive: false для предотвращения ошибки preventDefault
+  useEffect(() => {
+    const mainImageElement = document.querySelector('.main-product-image');
+    if (mainImageElement) {
+      mainImageElement.addEventListener('wheel', handleMainImageWheel, { passive: false });
+      return () => {
+        mainImageElement.removeEventListener('wheel', handleMainImageWheel);
+      };
+    }
+  }, [mainImageScale, mainImageTranslateX, mainImageTranslateY]);
+
   // Функция для обработки колесика в модальном окне
   const handleModalWheel = (e) => {
     if (window.innerWidth < 768) return; // Только для десктопа
@@ -982,7 +984,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         setIsZooming(false);
         setTouchStart(e.targetTouches[0].clientX);
         setTouchStartY(e.targetTouches[0].clientY);
-        console.log('ProductPage Gallery: Начало pan при zoom');
+
       } else {
         // Один палец - свайп (только если изображение не увеличено)
         setTouchEnd(null);
@@ -991,7 +993,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         setIsZooming(false);
         // Сбрасываем смещение при начале нового свайпа
         setSwipeOffset(0);
-        console.log('ProductPage Gallery: Начало свайпа:', e.targetTouches[0].clientX);
+
       }
     } else if (e.targetTouches.length === 2) {
       // Два пальца - zoom
@@ -1003,7 +1005,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       );
       setInitialDistance(distance);
       setInitialScale(modalScale);
-      console.log('ProductPage Gallery: Начало zoom, расстояние:', distance);
+
     }
   };
 
@@ -1041,7 +1043,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         const minScale = 1; // Минимальный масштаб - по ширине экрана
         const newScale = Math.max(minScale, Math.min(maxScale, (currentDistance / initialDistance) * initialScale));
         setModalScale(newScale);
-        console.log('ProductPage Gallery: Zoom, масштаб:', newScale, 'максимум:', maxScale);
+
       }
     } else if (modalScale > 1 && e.targetTouches.length === 1) {
       // Обработка pan (перемещения) при zoom
@@ -1080,7 +1082,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const onGalleryTouchEnd = () => {
     // Если изображение увеличено, не обрабатываем свайп
     if (modalScale > 1) {
-      console.log('ProductPage Gallery: Pan завершен при zoom');
+
       // Сбрасываем только состояния pan
       setTouchStart(null);
       setTouchEnd(null);
@@ -1093,23 +1095,18 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       const minSwipeDistance = 50; // Минимальное расстояние для свайпа
       const realImages = getRealImages();
 
-      console.log('ProductPage Gallery: Свайп завершен:', { 
-        distance, 
-        minSwipeDistance, 
-        currentIndex: galleryIndex, 
-        totalImages: realImages.length 
-      });
+
 
       if (distance > minSwipeDistance) {
         // Свайп влево - следующее изображение
         if (realImages.length > 1) {
-          console.log('ProductPage Gallery: Переходим к следующему изображению');
+
           animateSwipeTransition('next');
         }
       } else if (distance < -minSwipeDistance) {
         // Свайп вправо - предыдущее изображение
         if (realImages.length > 1) {
-          console.log('ProductPage Gallery: Переходим к предыдущему изображению');
+
           animateSwipeTransition('prev');
         }
       } else {
@@ -1208,7 +1205,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     setModalScale(1);
     setModalTranslateX(0);
     setModalTranslateY(0);
-    console.log('ProductPage Gallery: Открываем с адаптивным масштабом (1x) - изображение подстраивается по ширине');
+
   };
 
   // Функция для сброса zoom (общая, для обратной совместимости)
@@ -1541,7 +1538,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     const imageSrc = getImageUrl(realImages[galleryIndex]);
                     
                     return (
-                                             <Box sx={{ 
+                                             <Box 
+                         className="main-product-image"
+                         sx={{ 
                          width: '100%', 
                          height: { xs: 280, sm: 320, md: 400 }, // Адаптивная высота для мобильных
                          maxWidth: 550,
@@ -1561,7 +1560,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                        onTouchStart={handleMainImageTouchStart}
                        onTouchMove={handleMainImageTouchMove}
                        onTouchEnd={handleMainImageTouchEnd}
-                       onWheel={handleMainImageWheel}
+
                        onMouseMove={(e) => {
                          handleMainImageMouseMove(e);
                          handleDesktopZoomMouseMove(e);
@@ -1652,9 +1651,10 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 }
                 
                 // Если нет изображений или только заглушки, показываем нашу заглушку
-                console.log('Showing placeholder - no real images found');
+
                 return (
                   <div 
+                    className="main-product-image"
                     style={{ 
                       width: '100%', 
                       height: window.innerWidth < 768 ? 280 : 400, // Адаптивная высота для мобильных
@@ -1679,7 +1679,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     onTouchStart={handleMainImageTouchStart}
                     onTouchMove={handleMainImageTouchMove}
                     onTouchEnd={handleMainImageTouchEnd}
-                    onWheel={handleMainImageWheel}
+
                     onMouseMove={(e) => {
                       handleMainImageMouseMove(e);
                       handleDesktopZoomMouseMove(e);
@@ -2462,7 +2462,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           </Box>
         )}
         {!user && (
-          <Typography sx={{ mt: 2, color: '#888' }}>{t('productPage.loginToReview')}</Typography>
+          <Typography sx={{ mt: 2, color: '#888' }}>{t('productPage.loginToAskQuestion')}</Typography>
         )}
       </Box>
 

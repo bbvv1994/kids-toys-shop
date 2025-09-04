@@ -7,7 +7,6 @@ import {
   Paper,
   Rating,
   Grid,
-  Chip,
   CircularProgress,
   Alert,
   Button,
@@ -18,11 +17,11 @@ import {
   Divider,
   List,
   ListItem,
-  ListItemText,
   ListItemSecondaryAction,
-  IconButton
+  IconButton,
+  Container
 } from '@mui/material';
-import { Star, Store, ThumbUp, ThumbDown, CheckCircle, Cancel, Visibility, VisibilityOff, Delete } from '@mui/icons-material';
+import { Star, Store, ThumbUp, ThumbDown, Visibility, VisibilityOff, Delete } from '@mui/icons-material';
 
 const AdminShopReviews = () => {
   // const { t } = useTranslation(); // Убираем переводы для CMS
@@ -129,6 +128,8 @@ const AdminShopReviews = () => {
   const handleDelete = async (reviewId) => {
     setModerating(true);
     try {
+      console.log('Attempting to delete shop review with ID:', reviewId);
+      
       const userData = localStorage.getItem('user');
       const token = userData ? JSON.parse(userData).token : null;
 
@@ -139,7 +140,10 @@ const AdminShopReviews = () => {
         }
       });
 
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
+        console.log('Delete successful');
         await loadReviews();
         setDeleteDialog(false);
         setReviewToDelete(null);
@@ -196,36 +200,29 @@ const AdminShopReviews = () => {
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'pending': return <CircularProgress size={16} />;
-      case 'published': return <CheckCircle />;
-      case 'rejected': return <Cancel />;
-      case 'hidden': return <VisibilityOff />;
-      default: return null;
-    }
-  };
+
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress size={60} />
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+          <CircularProgress />
+        </Box>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <Box sx={{ p: 4, maxWidth: 800, mx: 'auto', mt: 4 }}>
-        <Alert severity="error" sx={{ borderRadius: 2 }}>
-          {error}
-        </Alert>
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
+        <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+        <Button onClick={loadReviews} variant="contained">Повторить</Button>
+      </Container>
     );
   }
 
   return (
-    <Box sx={{ p: 4, width: 1250, mx: 'auto', mt: 4, minHeight: '100vh' }}>
+    <Container maxWidth="lg" sx={{ py: 4, pt: { xs: 8, md: 10 } }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2, minHeight: 'calc(100vh - 200px)' }}>
         {/* Заголовок */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
@@ -246,7 +243,7 @@ const AdminShopReviews = () => {
             Статистика отзывов
           </Typography>
           <Grid container spacing={4}>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status !== 'archived').length}
@@ -256,7 +253,7 @@ const AdminShopReviews = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="warning.main" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status === 'pending').length}
@@ -266,7 +263,7 @@ const AdminShopReviews = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status === 'published').length}
@@ -276,7 +273,7 @@ const AdminShopReviews = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="error.main" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status === 'rejected').length}
@@ -286,7 +283,7 @@ const AdminShopReviews = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid size={{ xs: 12, sm: 2 }}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" color="default" sx={{ fontWeight: 'bold' }}>
                   {reviews.filter(r => r.status === 'hidden').length}
@@ -324,52 +321,48 @@ const AdminShopReviews = () => {
                   opacity: review.status === 'hidden' ? 0.6 : 1
                 }}
               >
-                <ListItemText
-                  primary={
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                      <Typography variant="h6" component="h3" sx={{ 
+                <Box sx={{ width: '100%' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                    <Typography variant="h6" component="h3" sx={{ 
+                      color: review.status === 'hidden' ? '#999' : 'inherit'
+                    }}>
+                      {review.user?.name || 'Анонимный пользователь'}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ maxWidth: 'calc(100% - 150px)' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Rating
+                        value={review.rating}
+                        readOnly
+                        icon={<Star fontSize="inherit" sx={{ color: '#FFD700' }} />}
+                        emptyIcon={<Star fontSize="inherit" sx={{ color: '#ccc' }} />}
+                        sx={{ mr: 1 }}
+                      />
+                      <Typography variant="body2" sx={{ 
                         color: review.status === 'hidden' ? '#999' : 'inherit'
                       }}>
-                        {review.user?.name || 'Анонимный пользователь'}
+                        Рейтинг: {review.rating}
                       </Typography>
                     </Box>
-                  }
-                  secondary={
-                    <Box sx={{ maxWidth: 'calc(100% - 150px)' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <Rating
-                          value={review.rating}
-                          readOnly
-                          icon={<Star fontSize="inherit" sx={{ color: '#FFD700' }} />}
-                          emptyIcon={<Star fontSize="inherit" sx={{ color: '#ccc' }} />}
-                          sx={{ mr: 1 }}
-                        />
-                        <Typography variant="body2" sx={{ 
-                          color: review.status === 'hidden' ? '#999' : 'inherit'
-                        }}>
-                          Рейтинг: {review.rating}
-                        </Typography>
-                      </Box>
-                      {review.text && (
-                        <Typography variant="body1" sx={{ 
-                          mb: 1, 
-                          lineHeight: 1.6,
-                          color: review.status === 'hidden' ? '#999' : 'inherit',
-                          wordWrap: 'break-word',
-                          overflowWrap: 'break-word',
-                          whiteSpace: 'pre-wrap'
-                        }}>
-                          "{review.text}"
-                        </Typography>
-                      )}
-                      <Typography variant="caption" sx={{ 
-                        color: review.status === 'hidden' ? '#bbb' : 'textSecondary'
+                    {review.text && (
+                      <Typography variant="body1" sx={{ 
+                        mb: 1, 
+                        lineHeight: 1.6,
+                        color: review.status === 'hidden' ? '#999' : 'inherit',
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word',
+                        whiteSpace: 'pre-wrap'
                       }}>
-                        {formatDate(review.createdAt)}
+                        "{review.text}"
                       </Typography>
-                    </Box>
-                  }
-                />
+                    )}
+                    <Typography variant="caption" sx={{ 
+                      color: review.status === 'hidden' ? '#bbb' : 'textSecondary'
+                    }}>
+                      {formatDate(review.createdAt)}
+                    </Typography>
+                  </Box>
+                </Box>
                 <ListItemSecondaryAction>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end', height: '100%', justifyContent: 'space-between' }}>
                     {/* Статус вверху справа */}
@@ -585,21 +578,60 @@ const AdminShopReviews = () => {
           <Button 
             onClick={closeDeleteDialog}
             disabled={moderating}
+            sx={{
+              background: 'linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 14,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              minWidth: 100,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #42a5f5 0%, #2196f3 100%)',
+                boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: '#ccc',
+                color: '#666'
+              }
+            }}
           >
             Отмена
           </Button>
           <Button
             variant="contained"
-            color="error"
             onClick={() => handleDelete(reviewToDelete?.id)}
             disabled={moderating}
             startIcon={<Delete />}
+            sx={{
+              background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+              color: '#fff',
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: 14,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              minWidth: 120,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+                boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: '#ccc',
+                color: '#666'
+              }
+            }}
           >
             {moderating ? 'Удаление...' : 'Удалить'}
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </Container>
   );
 };
 
