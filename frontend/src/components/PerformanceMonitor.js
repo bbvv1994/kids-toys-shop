@@ -16,9 +16,10 @@ const PerformanceMonitor = () => {
     }
   }, []);
 
-  if (process.env.NODE_ENV === 'production') {
-    return null;
-  }
+  // Временно включено для диагностики на сервере
+  // if (process.env.NODE_ENV === 'production') {
+  //   return null;
+  // }
 
   return (
     <Box

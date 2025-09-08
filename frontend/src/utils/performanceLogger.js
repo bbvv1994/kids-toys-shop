@@ -4,7 +4,7 @@ import React from 'react';
 class PerformanceLogger {
   constructor() {
     this.logs = [];
-    this.isEnabled = process.env.NODE_ENV !== 'production';
+    this.isEnabled = true; // Временно включено для диагностики на сервере
     this.startTime = performance.now();
   }
 
