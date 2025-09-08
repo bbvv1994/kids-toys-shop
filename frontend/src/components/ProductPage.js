@@ -611,9 +611,13 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     if (!isInWishlist) {
       setWishlistAnimKey(prev => prev + 1);
       setWishlistAnimPlaying(true);
-      setTimeout(() => {
-        setWishlistAnimPlaying(false);
-      }, 800); // Уменьшили время анимации
+      // Используем requestAnimationFrame для лучшей производительности
+      const frameId = requestAnimationFrame(() => {
+        setTimeout(() => {
+          setWishlistAnimPlaying(false);
+        }, 800); // Уменьшили время анимации
+      });
+      return () => cancelAnimationFrame(frameId);
     }
     
     if (isInWishlist) {
@@ -737,9 +741,13 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     // Запускаем анимацию
     setCartAnimKey(prev => prev + 1);
     setCartAnimPlaying(true);
-    setTimeout(() => {
-      setCartAnimPlaying(false);
-    }, 800); // Уменьшили время анимации
+    // Используем requestAnimationFrame для лучшей производительности
+    const frameId = requestAnimationFrame(() => {
+      setTimeout(() => {
+        setCartAnimPlaying(false);
+      }, 800); // Уменьшили время анимации
+    });
+    return () => cancelAnimationFrame(frameId);
     
     const categoryName = typeof product.category === 'string' ? product.category : (product.category?.name || t('productPage.noCategory'));
     onAddToCart(product, categoryName, displayQuantity);
@@ -1137,25 +1145,32 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     setSwipeOffset(exitOffset);
     
     // Через 150ms меняем изображение и плавно возвращаем в центр
-    setTimeout(() => {
-      // Меняем изображение
-      if (direction === 'next') {
-        setGalleryIndex((galleryIndex + 1) % realImages.length);
-      } else {
-        setGalleryIndex((galleryIndex - 1 + realImages.length) % realImages.length);
-      }
-      
-      // Сбрасываем zoom для галереи - возвращаем к масштабу 1 (по ширине экрана)
-      resetModalZoom();
-      
-      // Плавно возвращаем в центр
-      setSwipeOffset(0);
-      
-      // Завершаем анимацию
+    // Используем requestAnimationFrame для лучшей производительности
+    const frameId = requestAnimationFrame(() => {
       setTimeout(() => {
-        setIsAnimating(false);
+        // Меняем изображение
+        if (direction === 'next') {
+          setGalleryIndex((galleryIndex + 1) % realImages.length);
+        } else {
+          setGalleryIndex((galleryIndex - 1 + realImages.length) % realImages.length);
+        }
+        
+        // Сбрасываем zoom для галереи - возвращаем к масштабу 1 (по ширине экрана)
+        resetModalZoom();
+        
+        // Плавно возвращаем в центр
+        setSwipeOffset(0);
+        
+        // Завершаем анимацию
+        const endFrameId = requestAnimationFrame(() => {
+          setTimeout(() => {
+            setIsAnimating(false);
+          }, 150);
+        });
+        return () => cancelAnimationFrame(endFrameId);
       }, 150);
-    }, 150);
+    });
+    return () => cancelAnimationFrame(frameId);
   };
 
   // Функция для анимации возврата при недостаточном свайпе
@@ -1165,9 +1180,13 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     // Просто и плавно возвращаем в центр
     setSwipeOffset(0);
     
-    setTimeout(() => {
-      setIsAnimating(false);
-    }, 200);
+    // Используем requestAnimationFrame для лучшей производительности
+    const frameId = requestAnimationFrame(() => {
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 200);
+    });
+    return () => cancelAnimationFrame(frameId);
   };
 
   // Функция для сброса zoom основного изображения

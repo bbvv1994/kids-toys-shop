@@ -28,7 +28,14 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Preload likely LCP banner image to improve LCP without changing UI -->
+    <link rel="preload" as="image" href="/banners/glav.webp" imagesrcset="/banners/glav.webp" imagesizes="100vw" type="image/webp" fetchpriority="high">
+    <!-- Preload additional hero candidates (safe, no UI change) -->
+    <link rel="preload" as="image" href="/banners/sale1.webp" imagesrcset="/banners/sale1.webp" imagesizes="100vw" type="image/webp">
+    <link rel="preload" as="image" href="/banners/malysham.webp" imagesrcset="/banners/malysham.webp" imagesizes="100vw" type="image/webp">
     <title>🎮 Мир Игрушек - Интернет-магазин детских игрушек</title>
     <style>
       body {

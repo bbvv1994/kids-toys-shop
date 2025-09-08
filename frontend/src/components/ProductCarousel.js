@@ -37,19 +37,27 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
   
   // Эффект для завершения переходов
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsTransitioning(false);
-    }, 300);
-    return () => clearTimeout(timer);
+    // Используем requestAnimationFrame для лучшей производительности
+    const frameId = requestAnimationFrame(() => {
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    });
+    return () => cancelAnimationFrame(frameId);
   }, [currentIndex]);
 
   // Эффект для сброса isResetting
   useEffect(() => {
     if (isResetting) {
-      const timer = setTimeout(() => {
-        setIsResetting(false);
-      }, 50);
-      return () => clearTimeout(timer);
+      // Используем requestAnimationFrame для лучшей производительности
+      const frameId = requestAnimationFrame(() => {
+        const timer = setTimeout(() => {
+          setIsResetting(false);
+        }, 50);
+        return () => clearTimeout(timer);
+      });
+      return () => cancelAnimationFrame(frameId);
     }
   }, [isResetting]);
 
@@ -147,7 +155,11 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
     setIsSwiping(false);
     
     // Возобновляем автопереключение через 2 секунды после свайпа
-    setTimeout(() => setIsPaused(false), 2000);
+    // Используем requestAnimationFrame для лучшей производительности
+    const frameId = requestAnimationFrame(() => {
+      setTimeout(() => setIsPaused(false), 2000);
+    });
+    return () => cancelAnimationFrame(frameId);
   }, [touchStart, touchEnd, currentIndex, products.length, isTransitioning]);
 
   const handlePageClick = useCallback((pageIndex) => {

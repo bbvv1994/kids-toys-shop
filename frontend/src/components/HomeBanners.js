@@ -89,6 +89,44 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
     height: window.innerHeight
   });
 
+  // Неблокирующая прогревка LCP-изображения (первая картинка баннера)
+  useEffect(() => {
+    if (banners && banners.length > 0) {
+      const img = new Image();
+      img.decoding = 'async';
+      img.loading = 'eager';
+      img.src = banners[0].image;
+    }
+    // не влияет на UI и не меняет поведение
+  }, []);
+
+  // Тихо прогреем ещё 1-2 баннера после первого кадра (без влияния на UI)
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      const nextImages = banners.slice(1, 3);
+      nextImages.forEach(b => {
+        const img = new Image();
+        img.decoding = 'async';
+        img.loading = 'lazy';
+        img.src = b.image;
+      });
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  // Добавляем text-shadow после загрузки для лучшего LCP
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const style = document.createElement('style');
+      style.textContent = `
+        .banner-title { text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important; }
+        .banner-subtitle { text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important; }
+      `;
+      document.head.appendChild(style);
+    }, 1000); // После LCP
+    return () => clearTimeout(timer);
+  }, []);
+
   // Автоматическое переключение банеров
   useEffect(() => {
     if (!isAutoPlaying) return;
@@ -289,10 +327,11 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
       <AnimatePresence mode="wait">
         <motion.div
           key={currentBanner}
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ duration: 0.6, ease: 'easeInOut' }}
+          // Минимальная анимация для LCP - только opacity
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
           style={{
             position: 'absolute',
             top: 0,
@@ -317,7 +356,12 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
               color: 'white',
               cursor: currentBanner === 0 ? 'default' : 'pointer',
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              // Критические оптимизации для LCP
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+              contain: 'layout style paint',
+              backfaceVisibility: 'hidden'
             }}
             onClick={() => {
               // Навигация по клику на банер (кроме первого баннера "Добро пожаловать")
@@ -346,15 +390,16 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
               }}
             >
               <motion.h2
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
+                className="banner-title"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
                 style={{
                   fontSize: isMobile ? '1.5rem' : isTablet ? '2.2rem' : '3rem',
                   fontWeight: 'bold',
                   margin: 0,
                   marginBottom: '0.5rem',
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                  // Убираем text-shadow для LCP, добавляем через CSS после загрузки
                   direction: isRTL ? 'rtl' : 'ltr'
                 }}
               >
@@ -363,14 +408,15 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
               
               {banners[currentBanner].subtitle && (
                 <motion.p
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4, duration: 0.5 }}
+                  className="banner-subtitle"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.9 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
                   style={{
                     fontSize: isMobile ? '1rem' : '1.4rem',
                     margin: 0,
                     opacity: 0.9,
-                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                    // Убираем text-shadow для LCP
                     direction: isRTL ? 'rtl' : 'ltr'
                   }}
                 >
