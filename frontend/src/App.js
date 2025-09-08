@@ -4102,9 +4102,12 @@ function App() {
       }
     };
     
-    // Запускаем инициализацию с небольшой задержкой для надежности
-    const timer = setTimeout(initializeTranslations, 100);
-    return () => clearTimeout(timer);
+    // Запускаем инициализацию с requestAnimationFrame для лучшей производительности
+    const frameId = requestAnimationFrame(() => {
+      const timer = setTimeout(initializeTranslations, 50); // Уменьшаем задержку
+      return () => clearTimeout(timer);
+    });
+    return () => cancelAnimationFrame(frameId);
   }, [i18n.language]);
   
   // Делаем setUser доступным глобально для ConfirmEmailPage

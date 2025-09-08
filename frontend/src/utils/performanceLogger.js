@@ -127,12 +127,17 @@ window.setTimeout = function(callback, delay, ...args) {
   return originalSetTimeout.call(this, callback, delay, ...args);
 };
 
-// Перехватываем message events
+// Перехватываем message events с debounce
+let messageHandlerTimeout;
 const originalAddEventListener = EventTarget.prototype.addEventListener;
 EventTarget.prototype.addEventListener = function(type, listener, options) {
   if (type === 'message') {
     const wrappedListener = function(event) {
-      performanceLogger.logMessageHandler(event.origin || 'unknown', event.data);
+      // Debounce message handlers для предотвращения спама
+      clearTimeout(messageHandlerTimeout);
+      messageHandlerTimeout = setTimeout(() => {
+        performanceLogger.logMessageHandler(event.origin || 'unknown', event.data);
+      }, 16); // ~60fps
       return listener.call(this, event);
     };
     return originalAddEventListener.call(this, type, wrappedListener, options);
@@ -140,18 +145,23 @@ EventTarget.prototype.addEventListener = function(type, listener, options) {
   return originalAddEventListener.call(this, type, listener, options);
 };
 
-// Мониторинг forced reflow
+// Мониторинг forced reflow с throttling
 let reflowObserver;
+let reflowTimeout;
 if (window.MutationObserver) {
   reflowObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'attributes') {
-        performanceLogger.logForcedReflow(
-          mutation.target, 
-          `attribute change: ${mutation.attributeName}`
-        );
-      }
-    });
+    // Throttle reflow detection для предотвращения спама
+    clearTimeout(reflowTimeout);
+    reflowTimeout = setTimeout(() => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes') {
+          performanceLogger.logForcedReflow(
+            mutation.target, 
+            `attribute change: ${mutation.attributeName}`
+          );
+        }
+      });
+    }, 16); // ~60fps
   });
 }
 

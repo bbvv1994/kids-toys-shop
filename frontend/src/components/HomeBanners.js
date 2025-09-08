@@ -117,15 +117,19 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
 
   // Добавляем text-shadow после загрузки для лучшего LCP
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const style = document.createElement('style');
-      style.textContent = `
-        .banner-title { text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important; }
-        .banner-subtitle { text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important; }
-      `;
-      document.head.appendChild(style);
-    }, 1000); // После LCP
-    return () => clearTimeout(timer);
+    // Используем requestAnimationFrame для более плавной работы
+    const frameId = requestAnimationFrame(() => {
+      const timer = setTimeout(() => {
+        const style = document.createElement('style');
+        style.textContent = `
+          .banner-title { text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important; }
+          .banner-subtitle { text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important; }
+        `;
+        document.head.appendChild(style);
+      }, 500); // Уменьшаем задержку с 1000ms до 500ms
+      return () => clearTimeout(timer);
+    });
+    return () => cancelAnimationFrame(frameId);
   }, []);
 
   // Автоматическое переключение банеров
