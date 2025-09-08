@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import performanceLogger from '../utils/performanceLogger';
 
 const HomeBanners = ({ drawerWidth = 280 }) => {
   const theme = useTheme();
@@ -175,11 +176,21 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
   const handleMouseLeave = () => setIsAutoPlaying(true);
 
   const nextBanner = () => {
+    const startTime = performance.now();
     setCurrentBanner((prev) => (prev + 1) % banners.length);
+    setTimeout(() => {
+      const duration = performance.now() - startTime;
+      console.warn(`[PERF] nextBanner took ${duration}ms`);
+    }, 0);
   };
 
   const prevBanner = () => {
+    const startTime = performance.now();
     setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length);
+    setTimeout(() => {
+      const duration = performance.now() - startTime;
+      console.warn(`[PERF] prevBanner took ${duration}ms`);
+    }, 0);
   };
 
   const goToBanner = (index) => {

@@ -5,6 +5,8 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import performanceLogger from './utils/performanceLogger';
+import PerformanceMonitor from './components/PerformanceMonitor';
 import ProductCard from './components/ProductCard';
 import AdminShopReviews from './components/AdminShopReviews';
 import AdminProductReviews from './components/AdminProductReviews';
@@ -1220,20 +1222,36 @@ const theme = createTheme({
 
   const handleSearch = (e) => {
     e.preventDefault();
+    const startTime = performance.now();
+    const currentPath = window.location.pathname;
+    
     if (searchValue.trim()) {
-      navigate(`/catalog?search=${encodeURIComponent(searchValue.trim())}`);
+      const targetPath = `/catalog?search=${encodeURIComponent(searchValue.trim())}`;
+      performanceLogger.logNavigation(currentPath, targetPath, 0);
+      navigate(targetPath);
       // setSearchValue(""); // Больше не очищаем поле после поиска
     } else {
-      navigate('/catalog');
+      const targetPath = '/catalog';
+      performanceLogger.logNavigation(currentPath, targetPath, 0);
+      navigate(targetPath);
     }
+    
+    // Логируем время выполнения
+    setTimeout(() => {
+      const duration = performance.now() - startTime;
+      console.warn(`[PERF] handleSearch took ${duration}ms`);
+    }, 0);
   };
 
   useEffect(() => {
     if (drawerOpen) {
+      const startTime = performance.now();
       setTimeout(() => {
         // Найти Drawer-пейпер
         const paper = document.querySelector('.MuiDrawer-paper');
         let scrollable = paper;
+        const duration = performance.now() - startTime;
+        console.warn(`[PERF] Drawer setTimeout took ${duration}ms`);
         if (paper) {
           // Найти первый вложенный элемент с overflowY: auto
           const descendants = paper.querySelectorAll('*');
@@ -2147,12 +2165,22 @@ const theme = createTheme({
                       setActiveSub(null);
                     } else {
                       // Клик по категории (не по стрелочке) - переходим к категории
+                      const startTime = performance.now();
+                      const currentPath = window.location.pathname;
+                      const targetPath = `/category/${cat.id}`;
+                      
                       setInstantClose(true);
-                      navigate(`/category/${cat.id}`);
+                      performanceLogger.logNavigation(currentPath, targetPath, 0);
+                      navigate(targetPath);
                       if (!isHome) setMenuOpen(false);
                       setTouchedCategory(null);
                       setActiveSub(null);
-                      setTimeout(() => setInstantClose(false), 0);
+                      
+                      setTimeout(() => {
+                        setInstantClose(false);
+                        const duration = performance.now() - startTime;
+                        console.warn(`[PERF] Category navigation took ${duration}ms`);
+                      }, 0);
                     }
                   }}
                   sx={{
@@ -14168,6 +14196,8 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
           {t('profile.toasts.passwordChanged')}
         </Alert>
       </Snackbar>
+      
+      <PerformanceMonitor />
     </>
   );
 }
