@@ -7,6 +7,10 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import performanceLogger from './utils/performanceLogger';
 import PerformanceMonitor from './components/PerformanceMonitor';
+import './utils/setTimeoutOptimizer'; // Инициализируем оптимизатор setTimeout
+import { initRippleOptimizer } from './utils/rippleOptimizer'; // Инициализируем оптимизатор Ripple
+import { initLenisOptimizer } from './utils/lenisOptimizer'; // Инициализируем оптимизатор Lenis
+import { initReflowOptimizer } from './utils/reflowOptimizer'; // Инициализируем оптимизатор Reflow
 import ProductCard from './components/ProductCard';
 import AdminShopReviews from './components/AdminShopReviews';
 import AdminProductReviews from './components/AdminProductReviews';
@@ -3346,6 +3350,27 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Инициализация оптимизаторов производительности
+  useEffect(() => {
+    const rippleCleanup = initRippleOptimizer();
+    const reflowCleanup = initReflowOptimizer();
+
+    // Инициализируем Lenis оптимизатор
+    initLenisOptimizer().catch(error => {
+      console.warn('[App] Failed to initialize Lenis optimizer:', error);
+    });
+
+    return () => {
+      if (rippleCleanup?.cleanup) {
+        rippleCleanup.cleanup();
+      }
+      if (reflowCleanup?.cleanup) {
+        reflowCleanup.cleanup();
+      }
+      // Lenis cleanup будет обработан автоматически
+    };
+  }, []);
   const handleScrollTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -5083,9 +5108,12 @@ function App() {
   
   useEffect(() => {
     const lenisInstance = new Lenis({
-      duration: 1.2,
+      duration: 0.6, // Уменьшаем с 0.8 до 0.6 для лучшей производительности
       smooth: true,
-      easing: (t) => 1 - Math.pow(1 - t, 3), // easeOutCubic
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Более быстрая easing функция
+      lerp: 0.15, // Увеличиваем lerp для более быстрого отклика
+      wheelMultiplier: 0.3, // Еще больше уменьшаем чувствительность колеса
+      mouseMultiplier: 0.3, // Еще больше уменьшаем чувствительность мыши
     });
     
     setLenis(lenisInstance);

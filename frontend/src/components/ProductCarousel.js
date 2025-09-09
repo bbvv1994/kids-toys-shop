@@ -37,15 +37,17 @@ function ProductCarousel({ title, products, onAddToCart, cart, user, onWishlistT
   
   // Эффект для завершения переходов
   useEffect(() => {
+    if (!isTransitioning) return;
+    
     // Используем requestAnimationFrame для лучшей производительности
     const frameId = requestAnimationFrame(() => {
       const timer = setTimeout(() => {
         setIsTransitioning(false);
-      }, 300);
+      }, 150); // Уменьшаем задержку с 300ms до 150ms
       return () => clearTimeout(timer);
     });
     return () => cancelAnimationFrame(frameId);
-  }, [currentIndex]);
+  }, [isTransitioning]); // Зависим от isTransitioning вместо currentIndex
 
   // Эффект для сброса isResetting
   useEffect(() => {
