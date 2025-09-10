@@ -248,7 +248,11 @@ const corsOptions = {
       'http://192.168.31.103',
       'https://kids-toys-shop.vercel.app',
       'https://kids-toys-shop-git-main-bbvv1994.vercel.app',
-      'https://kids-toys-shop-bbvv1994.vercel.app'
+      'https://kids-toys-shop-bbvv1994.vercel.app',
+      // Production server IP/domain
+      'http://91.99.85.48',
+      'http://91.99.85.48:80',
+      'https://91.99.85.48'
     ];
     
     // Проверяем точное совпадение
@@ -285,14 +289,11 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+// Handle CORS preflight for all routes to allow DELETE/PATCH from browsers
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Добавляем middleware для правильной обработки UTF-8
-app.use((req, res, next) => {
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  next();
-});
 app.use('/uploads', express.static(path.join(__dirname, '..', '..', 'uploads')));
 app.use('/uploads/hd', express.static(path.join(__dirname, '..', '..', 'uploads', 'hd')));
 app.use('/public', express.static(path.join(__dirname, '..', 'public')));
@@ -622,6 +623,7 @@ passport.use(new FacebookStrategy({
 
 app.post('/api/products', authMiddleware, upload.array('images', 7), 
   smartImageUploadMiddleware.processUploadedFiles.bind(smartImageUploadMiddleware), 
+  smartInvalidateCache,
   async (req, res) => {
   // Проверка роли admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
@@ -720,20 +722,46 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
 
 app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req, res) => {
   try {
-    const { category, subcategoryId, admin } = req.query;
+    const { category: categoryParam, subcategoryId, admin } = req.query;
+
+    // Определяем isAdmin по JWT, чтобы в админке видеть скрытые товары без специальных параметров
+    let isAdmin = false;
+    try {
+      const authHeader = req.headers.authorization || '';
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+        const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+        isAdmin = user?.role === 'admin';
+      }
+    } catch (e) {
+      // игнорируем ошибки валидации токена для публичного запроса
+    }
     
     let whereClause = {};
     
-    if (category) {
-      whereClause.categoryName = category;
+    if (categoryParam) {
+      let normalizedCategory = String(categoryParam).trim();
+      // Исправление "кракозябр" если пришла строка в latin1 (Ð, Ñ и т.п.)
+      if (/[ÐÑ]/.test(normalizedCategory)) {
+        try {
+          normalizedCategory = Buffer.from(normalizedCategory, 'latin1').toString('utf8').trim();
+        } catch (e) {
+          // игнорируем, используем исходную строку
+        }
+      }
+      whereClause.OR = [
+        { categoryName: { contains: normalizedCategory, mode: 'insensitive' } },
+        { category: { is: { name: { contains: normalizedCategory, mode: 'insensitive' } } } }
+      ];
     }
     
     if (subcategoryId) {
       whereClause.subcategoryId = parseInt(subcategoryId);
     }
     
-    // Если запрос не от админа, скрываем товары с isHidden = true
-    if (admin !== 'true') {
+    // Скрываем товары с isHidden для гостей; админу показываем все
+    if (!isAdmin && admin !== 'true') {
       whereClause.isHidden = false;
     }
     
@@ -1076,11 +1104,22 @@ app.put('/api/admin/questions/:id', authMiddleware, async (req, res) => {
 app.get('/api/products/:id', async (req, res) => {
   try {
     const { admin } = req.query;
+    // Определяем isAdmin по JWT
+    let isAdmin = false;
+    try {
+      const authHeader = req.headers.authorization || '';
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+        const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+        isAdmin = user?.role === 'admin';
+      }
+    } catch (e) {}
     
     let whereClause = { id: parseInt(req.params.id) };
     
     // Если запрос не от админа, скрываем товары с isHidden = true
-    if (admin !== 'true') {
+    if (!isAdmin && admin !== 'true') {
       whereClause.isHidden = false;
     }
     
@@ -1193,7 +1232,7 @@ app.get('/api/products/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/products/:id', authMiddleware, async (req, res) => {
+app.delete('/api/products/:id', authMiddleware, smartInvalidateCache, async (req, res) => {
   try {
     console.log('DELETE /api/products/:id - Starting deletion process');
     
@@ -2691,7 +2730,7 @@ setTimeout(() => {
 }, 5000); // Задержка 5 секунд для применения миграций
 
 // Эндпоинт для изменения только поля isHidden
-app.patch('/api/products/:id/hidden', authMiddleware, async (req, res) => {
+app.patch('/api/products/:id/hidden', authMiddleware, smartInvalidateCache, async (req, res) => {
   // Проверка роли admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
@@ -2714,6 +2753,7 @@ app.patch('/api/products/:id/hidden', authMiddleware, async (req, res) => {
 
 app.put('/api/products/:id', authMiddleware, upload.array('images', 7), 
   smartImageUploadMiddleware.processUploadedFiles.bind(smartImageUploadMiddleware), 
+  smartInvalidateCache,
   async (req, res) => {
   // Проверка роли admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
