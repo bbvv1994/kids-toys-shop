@@ -2737,10 +2737,23 @@ app.patch('/api/products/:id/hidden', authMiddleware, smartInvalidateCache, asyn
     return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
   }
   try {
-    const { isHidden } = req.body;
-    
+    const { isHidden } = req.body || {};
+    if (typeof isHidden === 'undefined') {
+      return res.status(400).json({ error: 'Параметр isHidden обязателен' });
+    }
+
+    const productId = parseInt(req.params.id);
+    if (Number.isNaN(productId)) {
+      return res.status(400).json({ error: 'Некорректный ID товара' });
+    }
+
+    const existing = await prisma.product.findUnique({ where: { id: productId } });
+    if (!existing) {
+      return res.status(404).json({ error: 'Товар не найден' });
+    }
+
     const updated = await prisma.product.update({
-      where: { id: parseInt(req.params.id) },
+      where: { id: productId },
       data: { isHidden: isHidden === 'true' || isHidden === true }
     });
     
