@@ -209,21 +209,65 @@ class CacheManager {
 
   // Инвалидация кэша по паттерну
   async invalidatePattern(pattern) {
-    if (!this.isConnected || !this.client) {
-      return false;
+    console.log(`🔍 invalidatePattern вызван с паттерном: ${pattern}`);
+    let deletedCount = 0;
+
+    // Инвалидируем in-memory кэш
+    if (this.memoryCache) {
+      console.log(`🔍 Проверяем in-memory кэш, размер: ${this.memoryCache.size}`);
+      const keysToDelete = [];
+      for (const key of this.memoryCache.keys()) {
+        console.log(`🔍 Проверяем ключ: ${key} против паттерна: ${pattern}`);
+        if (this.matchPattern(key, pattern)) {
+          console.log(`🔍 Ключ ${key} соответствует паттерну ${pattern}`);
+          keysToDelete.push(key);
+        }
+      }
+      console.log(`🔍 Найдено ${keysToDelete.length} ключей для удаления из in-memory кэша:`, keysToDelete);
+      keysToDelete.forEach(key => {
+        this.memoryCache.delete(key);
+        deletedCount++;
+        console.log(`🗑️ Удален ключ из in-memory кэша: ${key}`);
+      });
+    } else {
+      console.log(`🔍 In-memory кэш не инициализирован`);
     }
 
-    try {
-      const keys = await this.client.keys(pattern);
-      if (keys.length > 0) {
-        await this.client.del(keys);
-        console.log(`🗑️ Удалено ${keys.length} ключей кэша по паттерну: ${pattern}`);
+    // Инвалидируем Redis кэш
+    if (this.isConnected && this.client) {
+      console.log(`🔍 Проверяем Redis кэш`);
+      try {
+        const keys = await this.client.keys(pattern);
+        console.log(`🔍 Найдено ${keys.length} ключей в Redis по паттерну ${pattern}:`, keys);
+        if (keys.length > 0) {
+          await this.client.del(keys);
+          deletedCount += keys.length;
+          console.log(`🗑️ Удалено ${keys.length} ключей из Redis кэша`);
+        }
+      } catch (error) {
+        console.log('❌ Ошибка инвалидации Redis кэша:', error.message);
       }
-      return true;
-    } catch (error) {
-      console.log('❌ Ошибка инвалидации кэша:', error.message);
-      return false;
+    } else {
+      console.log(`🔍 Redis не подключен или клиент недоступен`);
     }
+
+    console.log(`🔍 Общее количество удаленных ключей: ${deletedCount}`);
+    if (deletedCount > 0) {
+      console.log(`🗑️ Удалено ${deletedCount} ключей кэша по паттерну: ${pattern}`);
+    } else {
+      console.log(`⚠️ Не найдено ключей для удаления по паттерну: ${pattern}`);
+    }
+    return true;
+  }
+
+  // Простая функция для сопоставления паттернов (поддерживает * в конце)
+  matchPattern(key, pattern) {
+    if (pattern === '*') return true;
+    if (pattern.endsWith('*')) {
+      const prefix = pattern.slice(0, -1);
+      return key.startsWith(prefix);
+    }
+    return key === pattern;
   }
 
   async disconnect() {

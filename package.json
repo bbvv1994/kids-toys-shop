@@ -15,8 +15,11 @@
     "@prisma/client": "^6.11.1",
     "@studio-freight/lenis": "^1.0.42",
     "axios": "^1.10.0",
+    "bcrypt": "^6.0.0",
     "concurrently": "^8.2.2",
+    "dotenv": "^17.2.2",
     "multer": "^2.0.1",
+    "node-fetch": "^3.3.2",
     "react-scroll": "^1.9.3",
     "swiper": "^11.2.10"
   }

@@ -4900,30 +4900,42 @@ function App() {
   // Функция для обновления всех состояний товаров
   const refreshAllProducts = async () => {
     try {
-      // Загружаем товары для основного каталога
-      const response = await fetch(`${API_BASE_URL}/api/products`);
+      console.log('🔄 refreshAllProducts: Starting refresh...');
+      
+      // Загружаем товары для основного каталога (только видимые)
+      const response = await fetch(`${API_BASE_URL}/api/products?_t=${Date.now()}`);
       if (response.ok) {
         const data = await response.json();
+        console.log('🔄 refreshAllProducts: Updated main catalog with', data.length, 'products');
         setProducts(data);
+      } else {
+        console.error('🔄 refreshAllProducts: Failed to load main catalog products');
       }
       
       // Если пользователь авторизован и является админом, обновляем CMS товары
-      if (user?.token && user?.role === 'admin') {
-        const cmsResponse = await fetch(`${API_BASE_URL}/api/products?admin=true`, {
-          headers: { 'Authorization': `Bearer ${user.token}` }
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      if (currentUser?.token && currentUser?.role === 'admin') {
+        console.log('🔄 refreshAllProducts: Updating CMS products for admin...');
+        const cmsResponse = await fetch(`${API_BASE_URL}/api/products?admin=true&_t=${Date.now()}`, {
+          headers: { 'Authorization': `Bearer ${currentUser.token}` }
         });
         if (cmsResponse.ok) {
           const cmsData = await cmsResponse.json();
+          console.log('🔄 refreshAllProducts: Updated CMS catalog with', cmsData.length, 'products');
           // Обновляем CMS товары, если они загружены
           if (window.cmsProductsSetter) {
             window.cmsProductsSetter(cmsData);
           }
+        } else {
+          console.error('🔄 refreshAllProducts: Failed to load CMS products');
         }
+      } else {
+        console.log('🔄 refreshAllProducts: User is not admin, skipping CMS update');
       }
 
-
+      console.log('🔄 refreshAllProducts: Refresh completed');
     } catch (error) {
-      console.error('Error refreshing all products:', error);
+      console.error('🔄 refreshAllProducts: Error refreshing all products:', error);
     }
   };
 
@@ -4977,57 +4989,62 @@ function App() {
   };
 
   // Функция для загрузки категорий из API
-  const loadCategoriesFromAPI = async () => {
+  const loadCategoriesFromAPI = async (forceRefresh = false) => {
     try {
+      console.log('🔄 loadCategoriesFromAPI: Starting load...', { forceRefresh });
+      
       const categoriesUrl = user?.role === 'admin' 
-        ? `${API_BASE_URL}/api/admin/categories`
-        : `${API_BASE_URL}/api/categories`;
+        ? `${API_BASE_URL}/api/admin/categories${forceRefresh ? `?_t=${Date.now()}` : ''}`
+        : `${API_BASE_URL}/api/categories${forceRefresh ? `?_t=${Date.now()}` : ''}`;
       
       const headers = user?.token ? { 'Authorization': `Bearer ${user.token}` } : {};
       
       const res = await fetch(categoriesUrl, { headers });
-          if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-          }
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       
-            const response = await res.json();
+      const response = await res.json();
       const data = response.value || response; // Поддерживаем оба формата
-
       
-          // Преобразуем серверные категории в нужный формат
-          // Обрабатываем все категории, а не только корневые
-          const transformedCategories = data.map(cat => {
-            // Улучшенная логика для определения пути к иконке
-            let iconPath;
-            if (cat.image) {
-              // Если изображение содержит временную метку (175...), это загруженный файл
-              if (cat.image.match(/^175\d+/)) {
-                iconPath = `${API_BASE_URL}/uploads/${cat.image}?t=${Date.now()}`;
-              } else {
-                // Если это старый файл из public папки
-                iconPath = `${API_BASE_URL}/public/${cat.image}?t=${Date.now()}`;
-              }
-            } else {
-              // Если нет изображения, используем fallback
-              iconPath = `${API_BASE_URL}/public${getCategoryIconForAPI(cat.name)}?t=${Date.now()}`;
-            }
-            
-            return {
-              id: cat.id,
-              label: cat.name,
-              name: cat.name,
-              icon: iconPath,
-              image: cat.image, // сохраняем оригинальное поле image
-              active: cat.active !== false, // по умолчанию true, если active не false
-              parentId: cat.parentId // сохраняем parentId для построения дерева
-            };
-          });
-          setDbCategories(transformedCategories);
+      console.log('🔄 loadCategoriesFromAPI: Categories loaded from API:', data.length, 'categories');
+      
+      // Преобразуем серверные категории в нужный формат
+      // Обрабатываем все категории, а не только корневые
+      const transformedCategories = data.map(cat => {
+        // Улучшенная логика для определения пути к иконке
+        let iconPath;
+        if (cat.image) {
+          // Если изображение содержит временную метку (175...), это загруженный файл
+          if (cat.image.match(/^175\d+/)) {
+            iconPath = `${API_BASE_URL}/uploads/${cat.image}?t=${Date.now()}`;
+          } else {
+            // Если это старый файл из public папки
+            iconPath = `${API_BASE_URL}/public/${cat.image}?t=${Date.now()}`;
+          }
+        } else {
+          // Если нет изображения, используем fallback
+          iconPath = `${API_BASE_URL}/public${getCategoryIconForAPI(cat.name)}?t=${Date.now()}`;
+        }
+        
+        return {
+          id: cat.id,
+          label: cat.name,
+          name: cat.name,
+          icon: iconPath,
+          image: cat.image, // сохраняем оригинальное поле image
+          active: cat.active !== false, // по умолчанию true, если active не false
+          parentId: cat.parentId // сохраняем parentId для построения дерева
+        };
+      });
+      
+      console.log('🔄 loadCategoriesFromAPI: Transformed categories:', transformedCategories.length);
+      setDbCategories(transformedCategories);
       
       return transformedCategories;
     } catch (error) {
-          console.error('Error loading categories:', error);
-          setDbCategories(categories);
+      console.error('❌ loadCategoriesFromAPI: Error loading categories:', error);
+      setDbCategories(categories);
       return categories;
     }
   };
@@ -6739,39 +6756,70 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
 
   // Функция загрузки товаров с сервера
   const fetchProducts = async () => {
+    console.log('📦 CMS: fetchProducts called', { timestamp: new Date().toISOString() });
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/products?admin=true`, {
-        headers: { 'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}` }
+      const user = JSON.parse(localStorage.getItem('user'));
+      console.log('📦 CMS: User for fetchProducts', {
+        userExists: !!user,
+        hasToken: !!user?.token,
+        userRole: user?.role
       });
+      
+      const response = await fetch(`${API_BASE_URL}/api/products?admin=true&_t=${Date.now()}`, {
+        headers: { 'Authorization': `Bearer ${user.token}` }
+      });
+      
+      console.log('📦 CMS: fetchProducts response', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('📦 CMS: Products loaded', {
+          count: data.length,
+          products: data.map(p => ({ id: p.id, name: p.name, isHidden: p.isHidden }))
+        });
         setProducts(data);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('❌ CMS: Error loading products:', errorData);
       }
     } catch (error) {
-      console.error('Ошибка загрузки товаров:', error);
+      console.error('❌ CMS: Exception loading products:', error);
     } finally {
       setLoading(false);
+      console.log('📦 CMS: fetchProducts completed');
     }
   };
 
   const handleDelete = async (id) => {
+    console.log('🗑️ CMS: handleDelete called', { productId: id, timestamp: new Date().toISOString() });
+    
     // Проверяем, есть ли токен
     const user = JSON.parse(localStorage.getItem('user'));
+    console.log('🗑️ CMS: User check', { 
+      userExists: !!user, 
+      hasToken: !!user?.token,
+      userRole: user?.role,
+      userEmail: user?.email
+    });
+    
     if (!user || !user.token) {
+      console.log('❌ CMS: No user or token found');
       alert('Ошибка авторизации. Пожалуйста, войдите в систему.');
       return;
     }
 
-    // Запрашиваем подтверждение удаления
-    // Убираем подтверждение удаления - удаляем сразу
-    // if (!window.confirm('Вы уверены, что хотите удалить этот товар? Это действие нельзя отменить.')) {
-    //   return;
-    // }
+    // Убираем подтверждение - делаем в один клик
+    console.log('🗑️ CMS: Starting deletion without confirmation');
 
     try {
-      // Сначала проверим, существует ли товар
-      const checkResponse = await fetch(`${API_BASE_URL}/api/products/${id}`, {
+      console.log('🗑️ CMS: Starting product existence check');
+      // Сначала проверим, существует ли товар (включая скрытые для админа)
+      const checkResponse = await fetch(`${API_BASE_URL}/api/products/${id}?admin=true`, {
         method: 'GET',
         headers: { 
           'Authorization': `Bearer ${user.token}`,
@@ -6779,11 +6827,19 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         }
       });
       
+      console.log('🗑️ CMS: Product check response', {
+        status: checkResponse.status,
+        statusText: checkResponse.statusText,
+        ok: checkResponse.ok
+      });
+      
       if (!checkResponse.ok) {
-        // Убираем alert - просто возвращаемся без уведомления
+        console.log('❌ CMS: Product not found or no access rights');
+        // Убираем alert - ошибки только в консоли
         return;
       }
       
+      console.log('🗑️ CMS: Product exists, proceeding with deletion');
       const response = await fetch(`${API_BASE_URL}/api/products/${id}`, {
         method: 'DELETE',
         headers: { 
@@ -6792,61 +6848,120 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         }
       });
 
-
+      console.log('🗑️ CMS: Delete response', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
 
       if (response.ok) {
-        // Убираем alert - товар удаляется без уведомления
+        console.log('✅ CMS: Product deleted successfully');
+        console.log('🗑️ CMS: Refreshing products list');
         fetchProducts();
         // Обновляем все состояния товаров в приложении
         if (window.refreshAllProducts) {
+          console.log('🗑️ CMS: Calling global refresh function');
           window.refreshAllProducts();
         }
       } else {
         let errorMessage = 'Неизвестная ошибка';
         try {
           const errorData = await response.json();
-          console.error('Ошибка сервера:', errorData);
+          console.error('❌ CMS: Server error response:', errorData);
           errorMessage = errorData.error || errorData.message || 'Неизвестная ошибка';
         } catch (parseError) {
-          console.error('Ошибка парсинга ответа сервера:', parseError);
+          console.error('❌ CMS: Error parsing server response:', parseError);
           errorMessage = `HTTP ${response.status}: ${response.statusText}`;
         }
-        // Оставляем alert только для ошибок
-        alert(`Ошибка удаления товара: ${errorMessage}`);
+        console.log('❌ CMS: Error occurred:', errorMessage);
+        // Убираем alert - ошибки только в консоли
       }
     } catch (error) {
-      console.error('Ошибка удаления товара:', error);
-      alert('Ошибка удаления товара. Проверьте подключение к серверу.');
+      console.error('❌ CMS: Exception during deletion:', error);
+      // Убираем alert - ошибки только в консоли
     }
   };
 
   const handleToggleHidden = async (product) => {
+    console.log('👁️ CMS: handleToggleHidden called', { 
+      productId: product.id, 
+      productName: product.name,
+      currentHidden: product.isHidden,
+      timestamp: new Date().toISOString()
+    });
+    
     try {
       const newHiddenValue = !product.isHidden;
+      const action = newHiddenValue ? 'скрыть' : 'показать';
+      
+      console.log('👁️ CMS: Toggle details', {
+        currentValue: product.isHidden,
+        newValue: newHiddenValue,
+        action: action
+      });
+      
+      // Убираем подтверждение - делаем в один клик
+      console.log('👁️ CMS: Changing visibility without confirmation');
+      
+      const user = JSON.parse(localStorage.getItem('user'));
+      console.log('👁️ CMS: User token check', {
+        userExists: !!user,
+        hasToken: !!user?.token,
+        userRole: user?.role
+      });
       
       const response = await fetch(`${API_BASE_URL}/api/products/${product.id}/hidden`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user')).token}`
+          'Authorization': `Bearer ${user.token}`
         },
         body: JSON.stringify({ isHidden: newHiddenValue })
       });
       
+      console.log('👁️ CMS: Toggle response', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
+      
       if (response.ok) {
+        console.log('✅ CMS: Product visibility changed successfully');
+        console.log('👁️ CMS: Refreshing products list');
+        
+        // Принудительно обновляем состояние товара в локальном списке
+        setProducts(prevProducts => 
+          prevProducts.map(p => 
+            p.id === product.id 
+              ? { ...p, isHidden: newHiddenValue }
+              : p
+          )
+        );
+        
+        // Также обновляем список с сервера
         fetchProducts();
+        
         // Обновляем все состояния товаров в приложении
         if (window.refreshAllProducts) {
+          console.log('👁️ CMS: Calling global refresh function');
           window.refreshAllProducts();
         }
       } else {
-        const errorData = await response.json();
-        console.error('Error response:', errorData);
-        alert(`Ошибка при изменении видимости товара: ${errorData.error || 'Неизвестная ошибка'}`);
+        let errorMessage = 'Неизвестная ошибка';
+        try {
+          const errorData = await response.json();
+          console.error('❌ CMS: Server error response:', errorData);
+          errorMessage = errorData.error || errorData.message || 'Неизвестная ошибка';
+        } catch (parseError) {
+          console.error('❌ CMS: Error parsing server response:', parseError);
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        console.log('❌ CMS: Error occurred:', errorMessage);
+        // Убираем alert - ошибки только в консоли
       }
     } catch (error) {
-      console.error('Error toggling product visibility:', error);
-      alert('Ошибка при изменении видимости товара');
+      console.error('❌ CMS: Exception during visibility toggle:', error);
+      // Убираем alert - ошибки только в консоли
     }
   };
 
@@ -8081,21 +8196,39 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
 
 // Глобальная функция getCategoryIcon
 const getCategoryIcon = (category) => {
+  console.log('🎨 getCategoryIcon called with:', {
+    category: category,
+    name: category?.name,
+    image: category?.image,
+    icon: category?.icon,
+    hasImage: !!category?.image,
+    hasIcon: !!category?.icon,
+    isUploadedImage: category?.image && /^175\d+/.test(category.image),
+    timestamp: new Date().toISOString()
+  });
+  
   if (!category) {
-    return `${API_BASE_URL}/public/toys.png?t=${Date.now()}`;
+    console.log('🎨 No category, returning default');
+    return `${API_BASE_URL}/public/toys.png`;
+  }
+  
+  // Если есть готовый путь к иконке (из handleEditSubmit), используем его
+  if (category.icon) {
+    console.log('🎨 Using pre-built icon path:', category.icon);
+    return category.icon;
   }
   
   // Если есть загруженное изображение, используем его
   if (category.image && /^175\d+/.test(category.image)) {
     const url = `${API_BASE_URL}/uploads/${category.image}?t=${Date.now()}`;
-
+    console.log('🎨 Using uploaded image:', url);
     return url;
   }
   
   // Если есть изображение, но это не загруженный файл, используем его
   if (category.image) {
-    const url = `${API_BASE_URL}/public/${category.image}?t=${Date.now()}`;
-
+    const url = `${API_BASE_URL}/public/${category.image}`;
+    console.log('🎨 Using public image:', url);
     return url;
   }
   
@@ -8114,12 +8247,28 @@ const getCategoryIcon = (category) => {
   };
   
   const fallbackIcon = fallbackIcons[category.name] || '/toys.png';
-
-  return `${API_BASE_URL}/public${fallbackIcon}?t=${Date.now()}`;
+  const finalUrl = `${API_BASE_URL}/public${fallbackIcon}`;
+  console.log('🎨 Using fallback icon:', finalUrl);
+  return finalUrl;
 };
 function CMSCategories({ loadCategoriesFromAPI }) {
+  // Функция для получения иконки по названию категории
+  const getCategoryIconForAPI = (categoryName) => {
+    const iconMap = {
+      'Игрушки': '/toys.png',
+      'Конструкторы': '/constructor.png',
+      'Пазлы': '/puzzle.png',
+      'Творчество': '/creativity.png',
+      'Канцтовары': '/stationery.png',
+      'Транспорт': '/bicycle.png',
+      'Отдых на воде': '/voda.png',
+      'Настольные игры': '/nastolka.png',
+      'Развивающие игры': '/edu_game.png',
+      'Акции': '/sale.png'
+    };
+    return iconMap[categoryName] || '/toys.png';
+  };
 
-  
   const [categories, setCategories] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [expanded, setExpanded] = React.useState([]); // id категорий с раскрытыми подкатегориями
@@ -8384,35 +8533,75 @@ function CMSCategories({ loadCategoriesFromAPI }) {
 
       const updatedCategory = await response.json();
       
+      console.log('✅ Категория обновлена:', updatedCategory);
+      
       // Обновляем состояние локально используя данные с сервера
       setCategories(prevCategories => {
-        return prevCategories.map(category => 
-          category.id === categoryId 
-            ? { 
-                ...category, 
-                name: updatedCategory.name, 
-                parentId: updatedCategory.parentId,
-                image: updatedCategory.image,
-                active: updatedCategory.active
+        const updatedCategories = prevCategories.map(category => {
+          if (category.id === categoryId) {
+            // Создаем новую иконку с временной меткой для обхода кэширования
+            let newIconPath;
+            if (updatedCategory.image) {
+              // Если изображение содержит временную метку (175...), это загруженный файл
+              if (updatedCategory.image.match(/^175\d+/)) {
+                newIconPath = `${API_BASE_URL}/uploads/${updatedCategory.image}?t=${Date.now()}`;
+              } else {
+                // Если это старый файл из public папки
+                newIconPath = `${API_BASE_URL}/public/${updatedCategory.image}?t=${Date.now()}`;
               }
-            : category
-        );
+            } else {
+              // Если нет изображения, используем fallback
+              newIconPath = `${API_BASE_URL}/public${getCategoryIconForAPI(updatedCategory.name)}?t=${Date.now()}`;
+            }
+            
+            console.log('🔄 Обновляем иконку категории:', {
+              id: categoryId,
+              oldImage: category.image,
+              newImage: updatedCategory.image,
+              newIconPath: newIconPath,
+              updatedCategory: updatedCategory,
+              timestamp: new Date().toISOString()
+            });
+            
+            return { 
+              ...category, 
+              name: updatedCategory.name, 
+              parentId: updatedCategory.parentId,
+              image: updatedCategory.image,
+              icon: newIconPath, // Обновляем иконку с новой временной меткой
+              active: updatedCategory.active,
+              _forceUpdate: Date.now() // Принудительное обновление для React
+            };
+          }
+          return category;
+        });
+        
+        console.log('🔄 Обновленное состояние категорий:', {
+          allCategories: updatedCategories.length,
+          timestamp: new Date().toISOString()
+        });
+        return updatedCategories;
       });
       
-      // Обновляем боковое меню асинхронно
-      if (loadCategoriesFromAPI) {
-        setTimeout(() => {
-          loadCategoriesFromAPI();
-        }, 100);
-      }
-      
       // Принудительно обновляем состояние для немедленного отображения изменений
-      setCategories(prevCategories => [...prevCategories]);
-      
-      // Добавляем задержку для гарантии обновления изображения
       setTimeout(() => {
-        setCategories(prevCategories => [...prevCategories]);
-      }, 500);
+        console.log('🔄 Принудительное обновление состояния категорий');
+        setCategories(prevCategories => {
+          const forceUpdate = prevCategories.map(category => ({
+            ...category,
+            _forceUpdate: Date.now() // Добавляем временную метку для принудительного обновления
+          }));
+          console.log('🔄 Force update applied:', {
+            categoriesCount: forceUpdate.length,
+            timestamp: new Date().toISOString()
+          });
+          return forceUpdate;
+        });
+      }, 100);
+      
+      // НЕ обновляем боковое меню, чтобы не потерять поле icon
+      // loadCategoriesFromAPI перезаписывает локальное состояние и теряет поле icon
+      console.log('🔄 Пропускаем обновление бокового меню, чтобы сохранить поле icon');
       
     } catch (error) {
       console.error('Ошибка обновления категории:', error);
@@ -8527,9 +8716,28 @@ function CMSCategories({ loadCategoriesFromAPI }) {
             {expanded.includes(cat.id) ? <ExpandMore /> : <ChevronRight />}
           </IconButton>
         )}
-        {cat.parentId == null && (
-          <img src={getCategoryIcon(cat)} alt="icon" style={{ width: 32, height: 32, marginLeft: '4px', marginRight: 12, borderRadius: 0, objectFit: 'cover' }} />
-        )}
+        {cat.parentId == null && (() => {
+          const iconUrl = getCategoryIcon(cat);
+          console.log('🖼️ CMS Icon render:', {
+            categoryId: cat.id,
+            categoryName: cat.name,
+            categoryImage: cat.image,
+            categoryIcon: cat.icon,
+            iconUrl: iconUrl,
+            forceUpdate: cat._forceUpdate,
+            timestamp: new Date().toISOString()
+          });
+          return (
+            <img 
+              key={`${cat.id}-${cat.image}-${cat._forceUpdate || ''}`}
+              src={iconUrl} 
+              alt="icon" 
+              style={{ width: 32, height: 32, marginLeft: '4px', marginRight: 12, borderRadius: 0, objectFit: 'cover' }} 
+              onLoad={() => console.log('✅ Image loaded successfully:', iconUrl)}
+              onError={(e) => console.log('❌ Image failed to load:', iconUrl, e)}
+            />
+          );
+        })()}
         <Typography sx={{ fontWeight: 500, flex: 1 }}>{cat.name}</Typography>
         <Switch
           checked={!!cat.active}

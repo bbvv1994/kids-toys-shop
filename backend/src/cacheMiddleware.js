@@ -19,30 +19,45 @@ const cacheMiddleware = (ttl = 3600, keyGenerator = null) => {
       cacheKey = cacheManager.generateKey(baseKey, params);
     }
 
+    console.log(`🔍 cacheMiddleware: Проверяем кэш для ключа: ${cacheKey}`);
+    
     try {
       // Пытаемся получить из кэша
       const cached = await cacheManager.get(cacheKey);
       
       if (cached !== null) {
         console.log(`📦 Кэш HIT: ${cacheKey}`);
+        console.log(`📦 Возвращаем кэшированные данные, размер: ${JSON.stringify(cached).length} символов`);
         
         // Добавляем заголовки кэширования для кэшированных ответов
+        // В HTTP заголовках разрешены только ASCII-символы, поэтому делаем безопасный ключ/etag
+        const crypto = require('crypto');
+        const safeEtag = crypto.createHash('md5').update(cacheKey, 'utf8').digest('hex');
+        const safeCacheKeyHeader = Buffer.from(cacheKey, 'utf8').toString('base64');
+
         res.setHeader('Cache-Control', 'public, max-age=300'); // 5 минут
         res.setHeader('X-Cache', 'HIT');
-        res.setHeader('X-Cache-Key', cacheKey);
-        res.setHeader('ETag', `"${cacheKey}"`);
+        res.setHeader('X-Cache-Key', safeCacheKeyHeader);
+        res.setHeader('ETag', `"${safeEtag}"`);
         
         return res.json(cached);
       }
+      
+      console.log(`📦 Кэш MISS: ${cacheKey}`);
 
       // Если нет в кэше, перехватываем res.json
       const originalJson = res.json;
       res.json = function(data) {
         // Добавляем заголовки кэширования для новых ответов
+        // В HTTP заголовках разрешены только ASCII-символы, поэтому делаем безопасный ключ/etag
+        const crypto = require('crypto');
+        const safeEtag = crypto.createHash('md5').update(cacheKey, 'utf8').digest('hex');
+        const safeCacheKeyHeader = Buffer.from(cacheKey, 'utf8').toString('base64');
+
         res.setHeader('Cache-Control', 'public, max-age=300'); // 5 минут
         res.setHeader('X-Cache', 'MISS');
-        res.setHeader('X-Cache-Key', cacheKey);
-        res.setHeader('ETag', `"${cacheKey}"`);
+        res.setHeader('X-Cache-Key', safeCacheKeyHeader);
+        res.setHeader('ETag', `"${safeEtag}"`);
         
         // Сохраняем в кэш
         cacheManager.set(cacheKey, data, ttl)

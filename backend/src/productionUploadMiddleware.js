@@ -40,7 +40,7 @@ class ProductionUploadMiddleware {
       const processedFiles = [];
 
       // Создаем папку uploads если её нет
-      const uploadsDir = path.join(__dirname, '..', 'uploads');
+      const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
       if (!fs.existsSync(uploadsDir)) {
         fs.mkdirSync(uploadsDir, { recursive: true });
       }
@@ -138,7 +138,7 @@ class ProductionUploadMiddleware {
 
       if (result.success) {
         // Сохраняем файл на диск
-        const uploadsDir = path.join(__dirname, '..', 'uploads');
+        const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
         if (!fs.existsSync(uploadsDir)) {
           fs.mkdirSync(uploadsDir, { recursive: true });
         }

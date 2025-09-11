@@ -1,0 +1,949 @@
+{
+  "common": {
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "cancel": "ביטול",
+    "clear": "נקה",
+    "save": "שמור",
+    "edit": "ערוך",
+    "delete": "מחק",
+    "add": "הוסף",
+    "search": "חיפוש",
+    "filter": "סינון",
+    "sort": "מיון",
+    "price": "מחיר",
+    "quantity": "כמות",
+    "total": "סה\"כ",
+    "back": "חזור",
+    "next": "הבא",
+    "previous": "קודם",
+    "close": "סגור",
+    "confirm": "אישור",
+    "yes": "כן",
+    "no": "לא",
+    "confirmDelete": "האם אתה בטוח שברצונך למחוק את הפריט הזה?",
+    "deleteError": "שגיאה במחיקת הפריט",
+    "loginRequired": "התחבר כדי להשתמש בתכונה זו!",
+    "selectAgeGroup": "בחר קבוצת גיל",
+    "selectGender": "בחר מגדר",
+    "validation": {
+      "required": "אנא מלא שדה זה",
+      "email": "אנא הזן כתובת אימייל תקינה",
+      "phone": "אנא הזן מספר טלפון תקין",
+      "minLength": "על השדה להכיל לפחות {{min}} תווים",
+      "maxLength": "על השדה להכיל לכל היותר {{max}} תווים"
+    },
+    "productNotFound": "המוצר לא נמצא",
+    "noViewedProducts": "עדיין לא צפית במוצרים",
+    "noWishlistItems": "אין לך מוצרים מועדפים",
+    "favorites": "מועדפים",
+    "details": "פרטים",
+    "noReviews": "עדיין אין לך ביקורות ושאלות",
+    "noNotifications": "אין הודעות חדשות"
+  },
+  "profile": {
+    "menu": {
+      "myProfile": "הפרופיל שלי",
+      "notifications": "התראות",
+      "orders": "ההזמנות שלי",
+      "wishlist": "רשימת מועדפים",
+      "viewed": "מוצרים שנצפו",
+      "personalData": "פרטים אישיים",
+      "reviews": "הביקורות והשאלות שלי",
+      "authSettings": "הגדרות התחברות",
+      "logout": "התנתק מהחשבון"
+    },
+    "header": {
+      "myProfile": "הפרופיל שלי",
+      "notifications": "התראות",
+      "orders": "ההזמנות שלי",
+      "reviews": "הביקורות והשאלות שלי",
+      "wishlist": "רשימת מועדפים",
+      "viewed": "מוצרים שנצפו",
+      "personalData": "פרטים אישיים",
+      "authSettings": "הגדרות התחברות"
+    },
+    "buttons": {
+      "edit": "ערוך",
+      "deleteProfile": "מחק פרופיל"
+    },
+    "sections": {
+      "personalInfo": "מידע אישי",
+      "stats": "סטטיסטיקה"
+    },
+    "personal": {
+      "loading": "טוען נתוני פרופיל...",
+      "hint": "שמור פרטים מעודכנים כדי לחסוך זמן בהזמנות חדשות"
+    },
+    "orders": {
+      "empty": "עדיין אין לך הזמנות",
+      "orderN": "הזמנה #{{id}}",
+      "removeFromList": "הסר הזמנה מהרשימה",
+      "total": "סך הכל:",
+      "status": {
+        "pending": "ממתין לאישור",
+        "confirmed": "אושר",
+        "ready": "מוכן לאיסוף",
+        "pickedup": "נאסף",
+        "cancelled": "בוטל"
+      }
+    },
+    "notifications": {
+      "deleteAll": "מחק הכל",
+      "reviewSubmitted": "✓ ביקורת נשלחה",
+      "completed": "✓ הושלם",
+      "deleteNotification": "מחק הודעה"
+    },
+    "auth": {
+      "changePassword": "שינוי סיסמה",
+      "oauthInfo": "💡 נרשמת באמצעות {{provider}}. כדי להגדיר סיסמה הזן סיסמה חדשה למטה.",
+      "currentPassword": "סיסמה נוכחית",
+      "newPassword": "סיסמה חדשה",
+      "confirmNewPassword": "אשר סיסמה חדשה",
+      "connectedAccounts": "חשבונות מחוברים",
+      "connected": "מחובר",
+      "notConnected": "לא מחובר",
+      "connect": "חבר",
+      "disconnect": "נתק"
+    },
+    "fields": {
+      "firstName": "שם",
+      "lastName": "שם משפחה",
+      "phone": "טלפון",
+      "address": "כתובת משלוח",
+      "registeredAt": "תאריך הרשמה"
+    },
+    "stats": {
+      "cartItems": "מוצרים בעגלה",
+      "wishlistItems": "מועדפים",
+      "viewedItems": "מוצרים שנצפו"
+    },
+    "value": {
+      "notSpecified": "לא צוין",
+      "notSpecifiedF": "לא צוינה"
+    },
+    "dialogs": {
+      "logout": {
+        "title": "להתנתק מהחשבון?",
+        "message": "האם אתה בטוח שברצונך להתנתק?",
+        "confirm": "התנתק"
+      },
+      "deleteProfile": {
+        "title": "למחוק פרופיל?",
+        "message": "האם אתה בטוח שברצונך למחוק את הפרופיל?",
+        "warning": "⚠️ פעולה זו אינה ניתנת לביטול. כל הנתונים יימחקו לצמיתות."
+      },
+      "clearWishlist": {
+        "title": "לנקות את רשימת המועדפים?",
+        "message": "האם אתה בטוח שברצונך לנקות את רשימת המועדפים?"
+      },
+      "clearViewed": {
+        "title": "לנקות את רשימת הנצפים?",
+        "message": "האם אתה בטוח שברצונך לנקות את רשימת המוצרים שנצפו?"
+      }
+    },
+    "toasts": {
+      "profileSaved": "הנתונים האישיים נשמרו",
+      "passwordChanged": "הסיסמה שונתה בהצלחה"
+    },
+    "wishlist": {
+      "clearButton": "נקה רשימת מועדפים"
+    },
+    "viewed": {
+      "clearButton": "נקה רשימת נצפים"
+    },
+    "noProducts": "לא נמצאו מוצרים",
+    "noProductsDescription": "נסה לשנות את המסננים או להוסיף מוצר חדש"
+  },
+  "navigation": {
+    "home": "דף הבית",
+    "catalog": "קטלוג",
+    "reviews": "ביקורות על החנות",
+    "about": "אודות",
+    "contacts": "צור קשר",
+    "profile": "פרופיל",
+    "cart": "עגלת קניות",
+    "wishlist": "רשימת מועדפים",
+    "account": "חשבון",
+    "login": "התחבר",
+    "register": "הרשמה",
+    "logout": "התנתק",
+    "admin": "פאנל מנהל",
+    "menu": "תפריט"
+  },
+  "header": {
+    "searchPlaceholder": "חיפוש מוצרים...",
+    "language": "שפה",
+    "currency": "מטבע",
+    "login": "כניסה"
+  },
+  "footer": {
+    "about": "אודות החברה",
+    "delivery": "משלוח",
+    "payment": "תשלום",
+    "returns": "החזרות",
+    "support": "תמיכה",
+    "privacy": "פרטיות",
+    "terms": "תנאי שימוש"
+  },
+  "home": {
+    "newArrivals": "חדשים",
+    "popular": "פופולריים"
+  },
+  "catalog": {
+    "title": "קטלוג מוצרים",
+    "foundProducts": "נמצאו מוצרים: {{count}}",
+    "sortBy": "מיין לפי",
+    "sortOptions": {
+      "popular": "לפי פופולריות",
+      "newest": "לפי חדשות",
+      "priceLow": "מזול ליקר",
+      "priceHigh": "מיקר לזול",
+      "nameAZ": "לפי שם א-ת",
+      "nameZA": "לפי שם ת-א"
+    },
+    "itemsPerPage": "הצג בעמוד",
+    "viewMode": {
+      "grid": "בתיבות",
+      "list": "ברשימה"
+    },
+    "noResults": {
+      "search": "לא נמצא כלום לחיפוש \"{{query}}\"",
+      "default": "לא נמצאו מוצרים",
+      "noItems": "אין מוצרים להצגה"
+    },
+    "pagination": {
+      "prev": "קודם",
+      "next": "הבא",
+      "page": "עמוד {{current}} מתוך {{total}}"
+    },
+    "scrollToTop": "למעלה",
+    "categoriesButton": "קטגוריות",
+    "filtersButton": "מסננים",
+    "categories": "קטגוריות",
+    "filters": "מסננים",
+    "gender": "מין",
+    "ageGroup": "קבוצת גיל",
+    "brands": "מותגים",
+    "clearFilters": "נקה",
+    "applyFilters": "החל",
+    "ageGroups": {
+      "0-1_year": "0-1 שנה",
+      "1-3_years": "1-3 שנים",
+      "3-5_years": "3-5 שנים",
+      "5-7_years": "5-7 שנים",
+      "7-10_years": "7-10 שנים",
+      "10-12_years": "10-12 שנים",
+      "12-14_years": "12-14 שנים",
+      "14-16_years": "14-16 שנים"
+    },
+    "genderOptions": {
+      "boy": "לבנים",
+      "girl": "לבנות",
+      "unisex": "אוניברסלי"
+    },
+    "pages": {
+      "boysToys": {
+        "title": "צעצועים לבנים",
+        "subtitle": "מכוניות, קונסטרוקטורים, נשק",
+        "loading": "טוען צעצועים לבנים...",
+        "noProducts": "לצערי, כרגע אין מוצרים זמינים",
+        "noProductsDescription": "אנחנו עובדים על הרחבת המבחר. נסו לחזור מאוחר יותר או לבדוק קטגוריות מוצרים אחרות.",
+        "backToHome": "חזור לדף הבית"
+      },
+      "girlsToys": {
+        "title": "צעצועים לבנות",
+        "subtitle": "בובות, יצירה, יופי",
+        "loading": "טוען צעצועים לבנות...",
+        "noProducts": "לצערי, כרגע אין מוצרים זמינים",
+        "noProductsDescription": "אנחנו עובדים על הרחבת המבחר. נסו לחזור מאוחר יותר או לבדוק קטגוריות מוצרים אחרות.",
+        "backToHome": "חזור לדף הבית"
+      }
+    }
+  },
+  "searchResults": {
+    "title": "תוצאות חיפוש",
+    "forQuery": ":לחיפוש",
+    "noResults": "לא נמצא כלום לחיפוש \"{{query}}\"",
+    "enterQuery": "הזן שאילתת חיפוש"
+  },
+  "banners": {
+    "welcome": {
+      "title": "ברוכים הבאים",
+      "subtitle": ""
+    },
+    "specialOffers": {
+      "title": "הצעות מיוחדות",
+      "subtitle": "מבצעים והנחות"
+    },
+    "forLittleOnes": {
+      "title": "קטנטנים",
+      "subtitle": "צעצועים בטוחים ומפתחים"
+    },
+    "waterRecreation": {
+      "title": "נופש במים",
+      "subtitle": "בילויים קיציים לילדים"
+    },
+    "toSchool": {
+      "title": "לבית הספר בשמחה",
+      "subtitle": "כלי כתיבה ומוצרים נלווים"
+    }
+  },
+  "filters": {
+    "title": "מסננים"
+  },
+  "breadcrumbs": {
+    "home": "דף הבית",
+    "catalog": "קטלוג",
+    "category": "קטגוריה",
+    "subcategory": "תת קטגוריה"
+  },
+  "footer": {
+    "title": "סימבה מלך הצעצועים",
+    "description": "השותף האמין שלכם בעולם הצעצועים האיכותיים לילדים בכל הגילאים",
+    "quickLinks": "קישורים מהירים",
+    "categories": "קטגוריות",
+    "about": "אודות",
+    "contacts": "צור קשר",
+    "reviews": "ביקורות",
+    "workingHours": "שעות פעילות",
+    "weekdays": "א'-ה': 10:00 - 20:00",
+    "friday": "ו': 9:00 - 14:00",
+    "saturday": "ש': יום מנוחה",
+    "contactInfo": "פרטי קשר",
+    "phone": "טלפון",
+    "email": "אימייל",
+    "address": "כתובת",
+    "socialMedia": "רשתות חברתיות",
+    "followUs": "עקבו אחרינו",
+    "newsletter": "הרשמה לעדכונים",
+    "newsletterDescription": "קבלו ראשונים מידע על מוצרים חדשים ומבצעים",
+    "subscribe": "הרשמה",
+    "emailPlaceholder": "האימייל שלכם",
+    "copyright": "כל הזכויות שמורות",
+    "privacyPolicy": "מדיניות פרטיות",
+    "termsOfService": "תנאי שימוש",
+    "sitemap": "מפת האתר",
+    "attribution": "בעלי זכויות"
+  },
+  "category": {
+    "title": "קטגוריות",
+    "backToCatalog": "חזור לקטלוג",
+    "foundSubcategories": "נמצאו תת קטגוריות: {{count}}",
+    "subcategoriesCount": "תת קטגוריות ({{count}}):",
+    "selectCategory": "בחר קטגוריה",
+    "selectCategoryDescription": "בחר קטגוריה מהרשימה השמאלית לצפייה במידע מפורט",
+    "notFound": "קטגוריה לא נמצאה",
+    "noSubcategories": "אין תת קטגוריות בקטגוריה זו",
+    "noProductsSearch": "לא נמצאו תוצאות עבור \"{{query}}\"",
+    "noProducts": "לא נמצאו מוצרים"
+  },
+  "subcategory": {
+    "notFound": "תת קטגוריה לא נמצאה",
+    "backToCatalog": "חזור לקטלוג",
+    "noProductsSearch": "לא נמצאו תוצאות עבור \"{{query}}\"",
+    "noProducts": "אין מוצרים להצגה"
+  },
+  "product": {
+    "addToCart": "הוסף לעגלה",
+    "addToWishlist": "הוסף למועדפים",
+    "removeFromWishlist": "הסר מהמועדפים",
+    "outOfStock": "אזל המלאי",
+    "inStock": "במלאי",
+    "description": "תיאור",
+    "characteristics": "מאפיינים",
+    "reviews": "ביקורות",
+    "questions": "שאלות ותשובות",
+    "relatedProducts": "מוצרים דומים",
+    "brand": "מותג",
+    "country": "מדינה",
+    "article": "מאמר",
+    "ageGroup": "קבוצת גיל",
+    "gender": "מגדר",
+    "dimensions": "מידות",
+    "height": "גובה",
+    "length": "אורך",
+    "width": "רוחב"
+  },
+  "cart": {
+    "title": "עגלת קניות",
+    "empty": "העגלה ריקה",
+    "emptyMessage": "הוסף מוצרים מהקטלוג כדי להתחיל בקניות!",
+    "goToShopping": "עבור לקניות",
+    "items": "פריטים",
+    "item": "פריט",
+    "items_2_4": "פריטים",
+    "items_5_20": "פריטים",
+    "subtotal": "סכום ביניים",
+    "shipping": "משלוח",
+    "tax": "מס",
+    "total": "סה\"כ",
+    "checkout": "השלם הזמנה",
+    "continueShopping": "המשך בקניות",
+    "removeItem": "הסר פריט",
+    "updateQuantity": "עדכן כמות",
+    "yourCart": "העגלה שלך",
+    "loadingCart": "טוען עגלה...",
+    "itemsInCart": "מוצרים בעגלה",
+    "yourOrder": "ההזמנה שלך",
+    "itemsCount": "מוצרים: ({{count}})",
+    "discount": "הנחה {{percent}}%:",
+    "discountMessage": "הנחה {{percent}}%! חיסכון ₪{{saved}}",
+    "toPay": ":לתשלום",
+    "removeFromCart": "הסר מהעגלה"
+  },
+  "checkout": {
+    "title": "השלמת הזמנה",
+    "personalInfo": "מידע אישי",
+    "deliveryInfo": "מידע משלוח",
+    "paymentInfo": "מידע תשלום",
+    "orderSummary": "סיכום הזמנה",
+    "firstName": "שם פרטי",
+    "lastName": "שם משפחה",
+    "email": "אימייל",
+    "phone": "טלפון",
+    "address": "כתובת",
+    "city": "עיר",
+    "postalCode": "מיקוד",
+    "country": "מדינה",
+    "notes": "הערות",
+    "placeOrder": "השלם הזמנה",
+    "orderInfo": "מידע על ההזמנה",
+    "guestCheckout": "אתה מבצע הזמנה כאורח. אנא מלא את כל השדות.",
+    "autoFilled": "הנתונים מולאו אוטומטית מהפרופיל שלך. אתה יכול לשנות אותם במידת הצורך.",
+    "pickupStore": "חנות לאיסוף עצמי",
+    "store1": "רוברט סולד 8 קריית ים",
+    "store2": "ויצמן 6 קריית מוצקין",
+    "orderTotals": "סיכום הזמנה",
+    "items": ":מוצרים",
+    "pickupFrom": "איסוף עצמי מ:",
+    "paymentMethod": "תשלום: במזומן או בכרטיס",
+    "totalAmount": ":סה\"כ",
+    "processing": "מעבד...",
+    "loadingUserData": "טוען נתוני משתמש...",
+    "loadingCart": "טוען עגלה...",
+    "emptyCart": "העגלה שלך ריקה.",
+    "goToProducts": "עבור למוצרים",
+    "loginRequired": "נדרש להתחבר למערכת",
+    "noItemsError": "אין מוצרים זמינים להזמנה בעגלה",
+    "orderError": "שגיאה בהשלמת ההזמנה. נסה שוב.",
+    "fillRequiredFields": "אנא מלא את כל השדות הנדרשים ובחר חנות לאיסוף עצמי"
+  },
+  "orderSuccess": {
+    "title": "!ההזמנה הושלמה בהצלחה",
+    "orderNumber": ":מספר הזמנה",
+    "pickupFrom": "איסוף עצמי מ:",
+    "thankYou": "תודה על ההזמנה שלך! נשלח לך אישור הזמנה לאימייל שלך",
+    "orderInfo": "📦 מידע על ההזמנה",
+    "status": "סטטוס",
+    "orderDate": "תאריך הזמנה",
+    "itemsInOrder": "מוצרים בהזמנה",
+    "quantity": "כמות:",
+    "continueShopping": "המשך בקניות",
+    "myOrders": "ההזמנות שלי",
+    "goHome": "לדף הבית",
+    "orderDataError": "שגיאה: נתוני ההזמנה לא נמצאו",
+    "backToHome": "חזור לדף הבית",
+    "statusLabels": {
+      "pending": "ממתין לאישור",
+      "confirmed": "אושר",
+      "ready": "מוכן לאיסוף",
+      "pickedup": "נאסף",
+      "cancelled": "בוטל",
+      "unknown": "סטטוס לא ידוע"
+    }
+  },
+  "auth": {
+    "login": "התחברות",
+    "register": "הרשמה",
+    "email": "אימייל",
+    "password": "סיסמה",
+    "confirmPassword": "אישור סיסמה",
+    "forgotPassword": "שכחת סיסמה?",
+    "rememberMe": "זכור אותי",
+    "loginButton": "התחבר",
+    "registerButton": "הירשם",
+    "alreadyHaveAccount": "כבר יש לך חשבון?",
+    "dontHaveAccount": "אין לך חשבון?",
+    "invalidCredentials": "אימייל או סיסמה שגויים",
+    "passwordMismatch": "הסיסמאות אינן תואמות",
+    "name": "שם",
+    "loginTitle": "התחברות",
+    "registerTitle": "הרשמה",
+    "loginLoading": "מתחבר...",
+    "registerLoading": "נרשם...",
+    "loginSuccess": "!התחברת בהצלחה",
+    "registerSuccess": "!ההרשמה הושלמה בהצלחה אנא אשר את האימייל שלך לפני ההתחברות.",
+    "or": "או",
+    "loginWithGoogle": "התחבר באמצעות Google",
+    "loginWithFacebook": "התחבר באמצעות Facebook",
+    "noAccountRegister": "אין לך חשבון? הירשם",
+    "haveAccountLogin": "כבר יש לך חשבון? התחבר",
+    "close": "סגור",
+    "error": "שגיאה",
+    "googleAccountError": "חשבון זה נרשם באמצעות Google. אנא השתמש בכפתור \"התחבר באמצעות Google\" להתחברות.",
+    "forgotPasswordTitle": "שחזור סיסמה",
+    "forgotPasswordDescription": "הזן את האימייל הקשור לחשבון שלך. נשלח לך הוראות לשחזור הסיסמה לכתובת זו.",
+    "forgotPasswordButton": "שחזר",
+    "forgotPasswordSuccess": "אם האימייל רשום, נשלח לך מכתב",
+    "forgotPasswordClose": "סגור"
+  },
+  "admin": {
+    "dashboard": "לוח בקרה",
+    "products": "מוצרים",
+    "categories": "קטגוריות",
+    "orders": "הזמנות",
+    "users": "משתמשים",
+    "reviews": "ביקורות",
+    "settings": "הגדרות",
+    "addProduct": "הוסף מוצר",
+    "editProduct": "ערוך מוצר",
+    "addCategory": "הוסף קטגוריה",
+    "editCategory": "ערוך קטגוריה"
+  },
+  "categories": {
+    "toys": "צעצועים",
+    "constructors": "לגו",
+    "puzzles": "פאזלים",
+    "creativity": "יצירה",
+    "stationery": "כלי כתיבה",
+    "transport": "תחבורה",
+    "water_recreation": "נופש במים",
+    "board_games": "משחקי קופסה",
+    "educational_games": "משחקים חינוכיים",
+    "sales": "מבצעים",
+    "subcategories": {
+      "toys": {
+        "for_babies": "צעצועים קטנטנים",
+        "dolls": "בובות",
+        "toy_weapons": "נשק צעצוע",
+        "tracks_parking_railway": "מסלולים, חניות ורכבות",
+        "soft_toys": "צעצועים רכים",
+        "antistress_squishy": "צעצועים נגד לחץ וסקווישי",
+        "active_games": "משחקים פעילים",
+        "thematic_sets": "ערכות משחק תמטיות",
+        "decorative_cosmetics": "קוסמטיקה דקורטיבית ותכשיטים",
+        "cars_transport": "מכוניות ותחבורה אחרת",
+        "robots_transformers": "רובוטים וטרנספורמרים",
+        "game_figures": "דמויות משחק",
+        "sandbox_toys": "צעצועים לארגז חול",
+        "balls": "כדורים",
+        "radio_controlled": "צעצועים בשלט רחוק"
+      },
+      "constructors": {
+        "lego_boys": "לגו לבנים",
+        "lego_girls": "לגו לבנות",
+        "metal_constructors": "קונסטרוקטורים מתכתיים",
+        "lego_large_blocks": "לגו בלוקים גדולים"
+      },
+      "puzzles": {
+        "for_adults": "פאזלים למבוגרים",
+        "for_children": "פאזלים לילדים",
+        "magnetic": "פאזלים מגנטיים",
+        "floor": "פאזלים לרצפה",
+        "for_babies": "פאזלים קטנטנים"
+      },
+      "creativity": {
+        "modeling_sets": "ערכות פיסול",
+        "stickers": "מדבקות",
+        "slimes": "סליים וסליימס",
+        "kinetic_sand": "חול קינטי",
+        "drawing": "ציור",
+        "creativity_sets": "ערכות יצירה",
+        "coloring": "ספרי צביעה"
+      },
+      "stationery": {
+        "school_bags": "תיקים לבית ספר",
+        "kindergarten_bags": "תיקים לגני ילדים",
+        "pencil_cases": "קלמרים",
+        "pens_pencils": "עטים ועפרונות",
+        "sharpeners": "מחדדים",
+        "markers": "טושים ומרקרים",
+        "paints": "צבעים",
+        "brushes_accessories": "מברשות ואביזרים",
+        "keychains": "מחזיקי מפתחות"
+      },
+      "transport": {
+        "scooters": "קורקינטים לילדים",
+        "bicycles": "אופניים",
+        "walkers": "הליכונים",
+        "balance_bikes": "אופני איזון"
+      },
+      "water_recreation": {
+        "pools": "בריכות",
+        "mattresses_floats": "מזרונים וגלשנים",
+        "inflatable_circles": "גלגל ים",
+        "armbands_vests": "שרוולים וגופיות",
+        "swimming_accessories": "אביזרי שחייה",
+        "rackets": "מחבטים",
+        "beach_balls": "כדורי חוף וצעצועי שחייה",
+        "pumps": "משאבות למזרנים"
+      },
+      "board_games": {
+        "board_games": "משחקי קופסה"
+      },
+      "educational_games": {
+        "educational_games": "משחקים חינוכיים"
+      },
+      "sales": {
+        "weekly_discounts": "הנחות השבוע",
+        "sale_items": "מוצרים במבצע"
+      }
+    }
+  },
+  "productCard": {
+    "addToCart": "הוסף לעגלה",
+    "inCart": "בעגלה",
+    "edit": "ערוך",
+    "sku": "מק״ט",
+    "brand": "מותג",
+    "country": "מדינה",
+    "dimensions": "מידות",
+    "noPhoto": "אין תמונה",
+    "units": {
+      "cm": "ס״מ",
+      "mm": "מ״מ",
+      "m": "מ׳",
+      "kg": "ק״ג",
+      "g": "גרם",
+      "l": "ליטר",
+      "ml": "מ״ל",
+      "pcs": "יח׳",
+      "set": "ערכה",
+      "box": "קופסה",
+      "pack": "חבילה"
+    },
+    "additionalInfo": "מידע נוסף",
+    "length": "אורך",
+    "width": "רוחב",
+    "height": "גובה",
+    "manufacturer": "יצרן",
+    "article": "מק״ט",
+    "category": "קטגוריה",
+    "subcategory": "תת קטגוריה",
+    "ageGroup": "קבוצת גיל",
+    "gender": "מגדר",
+    "material": "חומר",
+    "weight": "משקל",
+    "color": "צבע",
+    "package": "אריזה",
+    "warranty": "אחריות",
+    "delivery": "משלוח",
+    "payment": "תשלום",
+    "returns": "החזרות",
+    "specifications": "מפרט טכני",
+    "description": "תיאור",
+    "reviews": "ביקורות",
+    "questions": "שאלות",
+    "relatedProducts": "מוצרים דומים",
+    "status": {
+      "new": "חדש",
+      "sale": "מבצע",
+      "hit": "רב מכר",
+      "popular": "פופולרי",
+      "limited": "מהדורה מוגבלת",
+      "exclusive": "אקסקלוסיבי",
+      "discount": "הנחה",
+      "clearance": "ניקוי מלאי"
+    },
+    "availability": {
+      "inStock": "במלאי",
+      "outOfStock": "אזל המלאי",
+      "lowStock": "נשארו מעט",
+      "preOrder": "הזמנה מוקדמת",
+      "available": "זמין",
+      "unavailable": "לא זמין",
+      "expectedDelivery": "צפוי: {{date}}"
+    },
+    "gender": {
+      "boy": "לבנים",
+      "girl": "לבנות",
+      "unisex": "אוניברסלי"
+    }
+  },
+  "reviews": {
+    "shop": {
+      "title": "ביקורות על החנות שלנו",
+      "listTitle": "רשימת ביקורות",
+      "noReviews": "עדיין אין ביקורות",
+      "beFirst": "היה הראשון לכתוב ביקורת על החנות שלנו!",
+      "loadError": "שגיאה בטעינת ביקורות",
+      "networkError": "שגיאת רשת",
+      "anonymousUser": "משתמש אנונימי",
+      "rating": "{{rating}}/5",
+      "dateFormat": "{{date}}"
+    },
+    "product": {
+      "title": "ביקורות על המוצר",
+      "noReviews": "עדיין אין ביקורות על המוצר",
+      "beFirst": "היה הראשון לכתוב ביקורת על מוצר זה!"
+    },
+    "form": {
+      "shopReview": "ביקורת על החנות",
+      "productReview": "ביקורת על המוצר",
+      "back": "חזור",
+      "rating": "הדירוג שלך",
+      "ratingHint": "תן דירוג מ-1 עד 5 כוכבים",
+      "rating1": "גרוע",
+      "rating2": "לא טוב",
+      "rating3": "בסדר",
+      "rating4": "טוב",
+      "rating5": "מעולה!",
+      "reviewText": "הביקורת שלך",
+      "shopPlaceholder": "ספר לנו על החוויה שלך מהחנות. איכות השירות, המבחר, המשלוח?",
+      "productPlaceholder": "ספר לנו על החוויה שלך מהמוצר. מה אהבת, מה אפשר לשפר?",
+      "ratingRequired": "אנא תן דירוג",
+      "textRequired": "אנא כתוב ביקורת",
+      "submitError": "שגיאה בשליחת הביקורת",
+      "networkError": "שגיאת רשת בשליחת הביקורת",
+      "success": "הביקורת נשלחה בהצלחה! תודה על דעתך.",
+      "cancel": "ביטול",
+      "submit": "שלח ביקורת",
+      "submitting": "שולח...",
+      "productInfo": "מידע על המוצר",
+      "productReviewLabel": "ביקורת על המוצר",
+      "yourRating": "הדירוג שלך",
+      "productComment": "הביקורת שלך על המוצר",
+      "productPlaceholder": "כתוב מה אהבת או לא אהבת במוצר...",
+      "submit": "שלח ביקורת",
+      "submitting": "שולח...",
+      "success": "הביקורת נשלחה בהצלחה!",
+      "allReviewsSubmitted": "כל הביקורות נשלחו! 🎉",
+      "alreadySubmitted": "הביקורת על המוצר כבר נשלחה",
+      "pleaseWriteReview": "אנא כתוב ביקורת על המוצר",
+      "successfullySent": "הביקורת על המוצר נשלחה בהצלחה!",
+      "orderIdNotFound": "מזהה ההזמנה לא נמצא ב-URL",
+      "loadOrderError": "שגיאה בטעינת נתוני ההזמנה",
+      "loadOrderErrorWithStatus": "שגיאה בטעינת נתוני ההזמנה: {{status}}",
+      "shopReviewAlreadySubmitted": "הביקורת על החנות כבר נשלחה",
+      "pleaseWriteShopReview": "אנא כתוב ביקורת על החנות",
+      "shopReviewSubmitted": "הביקורת על החנות כבר נשלחה!",
+      "shopReviewStep": "ביקורת על החנות",
+      "productReviewsStep": "ביקורות על מוצרים",
+      "shopReviewLabel": "הביקורת שלך על החנות",
+      "submitShopReview": "שלח ביקורת על החנות",
+      "shopRatingLabel": "הדירוג שלך לחנות:",
+      "shopReviewPlaceholder": "שתף את דעתך על החנות, השירות, המשלוח...",
+      "back": "חזור",
+      "loadingOrderData": "טוען נתוני הזמנה...",
+      "pleaseWait": "אנא המתן",
+      "failedToLoadOrder": "לא ניתן לטעון נתוני הזמנה",
+      "linkExpiredOrOrderNotFound": "ייתכן שהקישור פג תוקף או שההזמנה לא נמצאה",
+      "returnToProfile": "חזור לפרופיל",
+      "allReviewsSuccessfullySent": "כל הביקורות נשלחו בהצלחה! תודה על דעתך!",
+      "yourRating": "הדירוג שלך"
+    },
+    "modal": {
+      "title": "כתוב ביקורת על הקנייה",
+      "rateShop": "דרג את החנות",
+      "shopComment": "הערה על החנות",
+      "submitShopReview": "שלח ביקורת על החנות",
+      "shopReviewSent": "הביקורת נשלחה",
+      "rateProducts": "דרג את המוצרים",
+      "productComment": "הערה על המוצר",
+      "leaveReview": "כתוב ביקורת",
+      "productReviewSent": "הביקורת נשלחה",
+      "close": "סגור"
+    },
+    "page": {
+      "title": "ביקורות על החנות",
+      "noReviews": "עדיין אין ביקורות.",
+      "user": "משתמש",
+      "leaveReviewForEach": "אנא כתוב ביקורת על כל מוצר מההזמנה שלך:"
+    },
+    "customerReviews": {
+      "title": "ביקורות על החנות שלנו",
+      "noReviews": "עדיין אין ביקורות",
+      "beFirst": "היה הראשון לכתוב ביקורת על החנות שלנו!",
+      "reviewsList": "רשימת ביקורות",
+      "anonymousUser": "משתמש אנונימי",
+      "loadError": "שגיאה בטעינת ביקורות",
+      "networkError": "שגיאת רשת"
+    },
+    "admin": {
+      "shopReviews": "ביקורות על החנות",
+      "productReviews": "ביקורות על מוצרים",
+      "loadError": "שגיאה בטעינת ביקורות",
+      "networkError": "שגיאת רשת",
+      "moderationError": "שגיאה במודרציה של הביקורת",
+      "deleteConfirm": "האם אתה בטוח שברצונך למחוק ביקורת זו?",
+      "deleteSuccess": "הביקורת נמחקה בהצלחה",
+      "deleteError": "שגיאה במחיקת הביקורת",
+      "visibilityToggle": "החלף נראות",
+      "moderate": "מודר",
+      "delete": "מחק",
+      "approve": "אשר",
+      "reject": "דחה",
+      "status": {
+        "pending": "בהמתנה למודרציה",
+        "approved": "אושר",
+        "rejected": "נדחה",
+        "hidden": "מוסתר"
+      },
+      "tryAgain": "נסה שוב"
+    },
+    "test": {
+      "title": "בדיקת ביקורות",
+      "testing": "בודק API...",
+      "shopReviews": "ביקורות על החנות ({{count}})",
+      "productReviews": "ביקורות על המוצר ({{count}})"
+    },
+    "progress": {
+      "shopReviewPending": "דירגת {{completedProducts}} מתוך {{totalProducts}} מוצרים. אל תשכח לכתוב ביקורת על החנות!",
+      "productsRemaining": "כתבת ביקורת על החנות. נותר לדרג {{remaining}} מתוך {{totalProducts}} מוצרים.",
+      "completed": "תודה! כתבת ביקורת על החנות וכל המוצרים."
+    },
+    "notification": {
+      "title": "כתוב ביקורת על הקנייה שלך",
+      "message": "אנא הקדש כמה דקות מזמנך, דרג את החנות והמוצרים. דעתך חשובה לנו ולקונים אחרים!",
+      "actionText": "כתוב ביקורת"
+    }
+  },
+  "productDetails": {
+    "technicalSpecs": "מפרט טכני",
+    "physicalSpecs": "מפרט פיזי",
+    "packageInfo": "מידע על אריזה",
+    "safetyInfo": "מידע על בטיחות",
+    "ageRecommendation": "גיל מומלץ",
+    "skillLevel": "רמת קושי",
+    "playTime": "זמן משחק",
+    "playersCount": "מספר שחקנים",
+    "batteryRequired": "נדרשות סוללות",
+    "assemblyRequired": "נדרשת הרכבה",
+    "washable": "ניתן לכביסה",
+    "ecoFriendly": "ידידותי לסביבה",
+    "madeIn": "מיוצר ב{{country}}",
+    "importedBy": "מיובא על ידי {{company}}"
+  },
+  "productPage": {
+    "category": "קטגוריה",
+    "reviews": "ביקורות על המוצר",
+    "noReviews": "עדיין אין ביקורות.",
+    "leaveReview": "כתוב ביקורת",
+    "reviewText": "הביקורת שלך",
+    "submitReview": "שלח ביקורת",
+    "reviewSent": "הביקורת שלך נשלחה למודרציה!",
+    "alreadyReviewed": "כבר כתבת ביקורת על מוצר זה.",
+    "onlyBuyersCanReview": "רק קונים יכולים לכתוב ביקורות על מוצר זה.",
+    "loginToReview": "התחבר כדי לכתוב ביקורת.",
+    "loginToAskQuestion": "התחבר כדי לשאול שאלה.",
+    "questions": "שאלות על המוצר",
+    "noQuestions": "עדיין אין שאלות על מוצר זה. היה הראשון לשאול שאלה!",
+    "askQuestion": "שאל שאלה",
+    "questionText": "השאלה שלך",
+    "submitQuestion": "שלח שאלה",
+    "questionSent": "השאלה שלך נשלחה! נענה עליה בקרוב.",
+    "answer": "תשובה:",
+    "answeredOn": "נענה ב:",
+    "quantity": ":כמות",
+    "user": "משתמש",
+    "noCategory": "ללא קטגוריה",
+    "noDescription": "אין תיאור",
+    "noPhoto": "אין תמונה"
+  },
+  "contacts": {
+    "title": "!צרו קשר איתנו — אנחנו תמיד זמינים",
+    "subtitle": "יש לכם שאלות על הצעצועים שלנו, משלוח או פשוט רוצים לשתף חוות דעת? נשמח לענות!",
+    "address": {
+      "title": "כתובות החנויות",
+      "store1": {
+        "name": "חנות קריית ים",
+        "location": "רוברט סולד 8 קריית ים"
+      },
+      "store2": {
+        "name": "חנות קריית מוצקין",
+        "location": "ויצמן 6 קריית מוצקין"
+      }
+    },
+    "phones": {
+      "title": "טלפונים",
+              "primary": "053-377-4509",
+        "secondary": "077-700-5171"
+    },
+    "whatsapp": {
+      "title": "WhatsApp",
+      "button": "כתוב ב-WhatsApp",
+      "message": "שלום! יש לי שאלה על המוצרים שלכם."
+    },
+    "workingHours": {
+      "title": "שעות פעילות",
+      "weekdays": "א'-ה': 10:00 - 20:00",
+      "friday": "ו': 9:00 - 14:00",
+      "saturday": "ש': יום מנוחה",
+      "sunday": ""
+    },
+    "contactForm": {
+      "title": "טופס יצירת קשר",
+      "name": "השם שלך",
+      "email": "אימייל",
+      "phone": "טלפון",
+      "message": "הודעה",
+      "submit": "שלח",
+      "submitting": "שולח...",
+      "success": "ההודעה נשלחה! נענה לך תוך יום עבודה אחד.",
+      "error": "שגיאה בשליחת ההודעה",
+      "errorTryAgain": "שגיאה בשליחת ההודעה. נסה שוב מאוחר יותר."
+    },
+    "info": {
+      "title": "!נענה לך תוך יום עבודה אחד",
+      "description": "!השאר לנו הודעה ונצור איתך קשר בהקדם. אנחנו תמיד שמחים לעזור בבחירת צעצועים, לענות על שאלות על משלוח או פשוט לשוחח עם הלקוחות שלנו",
+      "email": "simbakingoftoys@gmail.com :אימייל",
+              "phone": "053-377-4509 :טלפון",
+        "phone2": "077-700-5171 :טלפון"
+    },
+    "map": {
+      "title": "איך למצוא אותנו",
+      "placeholder": "כאן תהיה מפת Google Maps מוטמעת"
+    }
+  },
+  "about": {
+    "title": "סימבה מלך הצעצועים",
+    "subtitle": "!עולם של כיף וחיוכים",
+    "intro": "?מחפשים מתנה מושלמת ליום הולדת ?רוצים להפתיע את הילדים עם משחקים חדשים ומלהיבים",
+    "welcome": {
+      "title": "ברוכים הבאים לסימבה מלך הצעצועים",
+                "description": "חנות צעצועים שכל ילד חולם עליה וכל הורה היה שמח !לפתוח כאן תמצאו מבחר עצום של צעצועים איכותיים ומרגשים במחירים לכל כיס"
+    },
+    "story": {
+      "title": "סיפורו המיוחד של מיכאל",
+      "founder": "מיכאל - מלך הצעצועים",
+      "founderLabel": "מייסד החנות",
+      "part1": "אחרי 25 שנה כנהג משאית, החליט מיכאל להגשים חלום ישן ולפתוח חנות צעצועים שתביא שמחה לילדים ומשפחות. בתוך ימים ספורים בלבד, הוא הפך חזון למציאות – וכך נולדה \"סימבה מלך הצעצועים\"!",
+      "part2": "מה שהתחיל כרעיון קטן הפך לחנות צעצועים גדולה, צבעונית ומלאת הפתעות, בדיוק כמו שילדים אוהבים."
+    },
+    "advantages": {
+      "title": "למה לקוחות בוחרים בנו שוב ושוב",
+      "prices": {
+        "title": "מחירים ללא תחרות",
+        "description": "אצלנו תמצאו צעצועים מעולים במחיר מקסימלי של עד ₪250 בלבד!"
+      },
+      "safety": {
+        "title": "בטיחות מעל הכול",
+        "description": "כל הצעצועים שלנו מגיעים עם תו תקן ישראלי ואישור ממשרד הבריאות!"
+      },
+      "variety": {
+        "title": "מגוון ענק של צעצועים",
+        "description": "מחלקות מסודרות לכל הגילאים ולכל תחומי העניין!"
+      }
+    },
+    "cta": {
+      "title": "!בואו לבקר אותנו",
+      "description": "גלו עולם של צעצועים מדהימים במחירים שלא תמצאו בשום מקום אחר",
+      "quality": "איכות מעולה",
+      "fairPrices": "מחירים הוגנים",
+      "guaranteedSafety": "בטיחות מובטחת"
+    }
+  },
+  "attribution": {
+    "title": "בעלי זכויות",
+    "description": "תודות ליוצרי התמונות",
+    "intro": "אנחנו מודים ליוצרים ולפלטפורמות הבאות על התמונות שסיפקו, המשמשות באתר שלנו. כל התמונות משמשות בהתאם לרישיונות של הפלטפורמות המתאימות.",
+    "sources": "מקורות התמונות",
+    "image": "תמונה:",
+    "author": "יוצר:",
+    "platform": "פלטפורמה:",
+    "note": "הערה:",
+    "noteText": "כל התמונות משמשות בהתאם לרישיונות של הפלטפורמות המתאימות. אם אתה יוצר התמונה ורוצה לבצע שינויים באזכור, אנא צור איתנו קשר."
+  }
+} 

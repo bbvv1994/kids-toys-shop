@@ -732,6 +732,10 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
 });
 
 app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req, res) => {
+  console.log(`🔍 GET /api/products - Начало обработки запроса`);
+  console.log(`🔍 Query params:`, req.query);
+  console.log(`🔍 Authorization header:`, req.headers.authorization ? 'Present' : 'Missing');
+  
   try {
     const { category: categoryParam, subcategoryId, admin } = req.query;
 
@@ -744,8 +748,10 @@ app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req,
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
         const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
         isAdmin = user?.role === 'admin';
+        console.log(`🔍 User authentication:`, { userId: decoded.userId, role: user?.role, isAdmin });
       }
     } catch (e) {
+      console.log(`🔍 Token validation failed:`, e.message);
       // игнорируем ошибки валидации токена для публичного запроса
     }
     
@@ -774,7 +780,12 @@ app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req,
     // Скрываем товары с isHidden для гостей; админу показываем все
     if (!isAdmin && admin !== 'true') {
       whereClause.isHidden = false;
+      console.log(`🔍 Фильтруем скрытые товары для не-админа`);
+    } else {
+      console.log(`🔍 Показываем все товары (включая скрытые) для админа`);
     }
+    
+    console.log(`🔍 Where clause:`, whereClause);
     
     const selectFields = {
       id: true,
@@ -811,18 +822,19 @@ app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req,
       }
     };
     
+    console.log(`🔍 Выполняем запрос к базе данных...`);
     const products = await prisma.product.findMany({
       where: whereClause,
       select: selectFields,
       orderBy: { createdAt: 'desc' }
     });
 
-    console.log('🔧 API /products - First product sample:', products[0] ? {
-      id: products[0].id,
-      name: products[0].name,
-      hasNameHe: !!products[0].nameHe,
-      nameHe: products[0].nameHe
-    } : 'No products');
+    console.log(`🔍 Получено товаров из базы: ${products.length}`);
+    console.log(`🔍 Первые 3 товара:`, products.slice(0, 3).map(p => ({ 
+      id: p.id, 
+      name: p.name, 
+      isHidden: p.isHidden 
+    })));
 
     // Добавляем расчет рейтинга и количества отзывов для каждого товара
     const productsWithRating = products.map(product => {
@@ -837,6 +849,7 @@ app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req,
       };
     });
 
+    console.log(`🔍 Отправляем ${productsWithRating.length} товаров клиенту`);
     res.json(productsWithRating);
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -1245,12 +1258,30 @@ app.get('/api/products/:id', async (req, res) => {
 
 app.delete('/api/products/:id', authMiddleware, smartInvalidateCache, async (req, res) => {
   try {
-    console.log('DELETE /api/products/:id - Starting deletion process');
+    console.log('🗑️ DELETE /api/products/:id - Starting deletion process');
+    console.log('🗑️ Request details:', {
+      productId: req.params.id,
+      userId: req.user?.userId,
+      userEmail: req.user?.email,
+      timestamp: new Date().toISOString()
+    });
     
     // Проверяем права администратора
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    console.log('🗑️ User lookup result:', {
+      userFound: !!user,
+      userId: user?.id,
+      userRole: user?.role,
+      userEmail: user?.email
+    });
+    
     if (!user || user.role !== 'admin') {
-      console.log('DELETE /api/products/:id - Access denied: user is not admin');
+      console.log('🗑️ DELETE /api/products/:id - Access denied: user is not admin');
+      console.log('🗑️ Access denied details:', {
+        userExists: !!user,
+        userRole: user?.role,
+        requiredRole: 'admin'
+      });
       return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
     }
 
@@ -1268,119 +1299,275 @@ app.delete('/api/products/:id', authMiddleware, smartInvalidateCache, async (req
     }
 
     console.log('DELETE /api/products/:id - Product found, starting deletion of related data');
+    
+    // МАКСИМАЛЬНОЕ ЛОГИРОВАНИЕ: Проверяем все связи перед удалением
+    console.log('🔍 DELETE /api/products/:id - Проверяем все связи товара...');
+    
+    const relationCounts = await Promise.allSettled([
+      prisma.cartItem.count({ where: { productId: productId } }),
+      prisma.orderItem.count({ where: { productId: productId } }),
+      prisma.review.count({ where: { productId: productId } }),
+      prisma.wishlistItem.count({ where: { productId: productId } }),
+      prisma.productQuestion.count({ where: { productId: productId } }),
+      prisma.hiddenReview.count({ 
+        where: { 
+          review: { 
+            productId: productId 
+          } 
+        } 
+      })
+    ]);
+    
+    console.log('🔍 DELETE /api/products/:id - Найденные связи:', {
+      cartItems: relationCounts[0].status === 'fulfilled' ? relationCounts[0].value : 'error',
+      orderItems: relationCounts[1].status === 'fulfilled' ? relationCounts[1].value : 'error',
+      reviews: relationCounts[2].status === 'fulfilled' ? relationCounts[2].value : 'error',
+      wishlistItems: relationCounts[3].status === 'fulfilled' ? relationCounts[3].value : 'error',
+      productQuestions: relationCounts[4].status === 'fulfilled' ? relationCounts[4].value : 'error',
+      hiddenReviews: relationCounts[5].status === 'fulfilled' ? relationCounts[5].value : 'error'
+    });
 
     // Удаляем связанные данные (отзывы, элементы корзины, элементы заказов, избранное)
     try {
-      console.log('DELETE /api/products/:id - Deleting hidden reviews...');
+      console.log('🗑️ DELETE /api/products/:id - Deleting hidden reviews...');
       // Сначала удаляем скрытые отзывы
       const reviews = await prisma.review.findMany({
         where: { productId: productId },
         select: { id: true }
       });
       
+      console.log(`🗑️ DELETE /api/products/:id - Found ${reviews.length} reviews to check for hidden status`);
+      
       if (reviews.length > 0) {
         const reviewIds = reviews.map(review => review.id);
+        const hiddenCount = await prisma.hiddenReview.count({
+          where: { reviewId: { in: reviewIds } }
+        });
+        console.log(`🗑️ DELETE /api/products/:id - Found ${hiddenCount} hidden reviews to delete`);
+        
         await prisma.hiddenReview.deleteMany({
           where: { reviewId: { in: reviewIds } }
         });
-        console.log('DELETE /api/products/:id - Hidden reviews deleted successfully');
+        console.log('✅ DELETE /api/products/:id - Hidden reviews deleted successfully');
+      } else {
+        console.log('⏭️ DELETE /api/products/:id - No reviews found, skipping hidden review deletion');
       }
       
-      console.log('DELETE /api/products/:id - Deleting reviews...');
+      console.log('🗑️ DELETE /api/products/:id - Deleting reviews...');
+      const reviewCount = await prisma.review.count({ where: { productId: productId } });
+      console.log(`🗑️ DELETE /api/products/:id - Found ${reviewCount} reviews to delete`);
+      
       await prisma.review.deleteMany({
         where: { productId: productId }
       });
-      console.log('DELETE /api/products/:id - Reviews deleted successfully');
+      console.log('✅ DELETE /api/products/:id - Reviews deleted successfully');
     } catch (reviewError) {
-      console.error('DELETE /api/products/:id - Error deleting reviews:', reviewError);
+      console.error('❌ DELETE /api/products/:id - Error deleting reviews:', reviewError);
     }
 
     try {
-      console.log('DELETE /api/products/:id - Deleting cart items...');
+      console.log('🗑️ DELETE /api/products/:id - Deleting cart items...');
+      const cartCount = await prisma.cartItem.count({ where: { productId: productId } });
+      console.log(`🗑️ DELETE /api/products/:id - Found ${cartCount} cart items to delete`);
+      
       await prisma.cartItem.deleteMany({
         where: { productId: productId }
       });
-      console.log('DELETE /api/products/:id - Cart items deleted successfully');
+      console.log('✅ DELETE /api/products/:id - Cart items deleted successfully');
     } catch (cartError) {
-      console.error('DELETE /api/products/:id - Error deleting cart items:', cartError);
+      console.error('❌ DELETE /api/products/:id - Error deleting cart items:', cartError);
     }
 
     try {
-      console.log('DELETE /api/products/:id - Deleting order items...');
+      console.log('🗑️ DELETE /api/products/:id - Deleting order items...');
+      const orderCount = await prisma.orderItem.count({ where: { productId: productId } });
+      console.log(`🗑️ DELETE /api/products/:id - Found ${orderCount} order items to delete`);
+      
       await prisma.orderItem.deleteMany({
         where: { productId: productId }
       });
-      console.log('DELETE /api/products/:id - Order items deleted successfully');
+      console.log('✅ DELETE /api/products/:id - Order items deleted successfully');
     } catch (orderError) {
-      console.error('DELETE /api/products/:id - Error deleting order items:', orderError);
+      console.error('❌ DELETE /api/products/:id - Error deleting order items:', orderError);
     }
 
     try {
-      console.log('DELETE /api/products/:id - Deleting wishlist items...');
+      console.log('🗑️ DELETE /api/products/:id - Deleting wishlist items...');
+      const wishlistCount = await prisma.wishlistItem.count({ where: { productId: productId } });
+      console.log(`🗑️ DELETE /api/products/:id - Found ${wishlistCount} wishlist items to delete`);
+      
       await prisma.wishlistItem.deleteMany({
         where: { productId: productId }
       });
-      console.log('DELETE /api/products/:id - Wishlist items deleted successfully');
+      console.log('✅ DELETE /api/products/:id - Wishlist items deleted successfully');
     } catch (wishlistError) {
-      console.error('DELETE /api/products/:id - Error deleting wishlist items:', wishlistError);
+      console.error('❌ DELETE /api/products/:id - Error deleting wishlist items:', wishlistError);
     }
 
+    // Удаляем уведомления о доступности (если модель существует)
     try {
-      console.log('DELETE /api/products/:id - Deleting availability notifications...');
-      await prisma.availabilityNotification.deleteMany({
+      console.log('🗑️ DELETE /api/products/:id - Deleting availability notifications...');
+      // Проверяем, существует ли модель availabilityNotification
+      if (prisma.availabilityNotification) {
+        const notificationCount = await prisma.availabilityNotification.count({ where: { productId: productId } });
+        console.log(`🗑️ DELETE /api/products/:id - Found ${notificationCount} availability notifications to delete`);
+        
+        await prisma.availabilityNotification.deleteMany({
+          where: { productId: productId }
+        });
+        console.log('✅ DELETE /api/products/:id - Availability notifications deleted successfully');
+      } else {
+        console.log('⏭️ DELETE /api/products/:id - AvailabilityNotification model not found, skipping...');
+      }
+    } catch (notificationError) {
+      console.error('❌ DELETE /api/products/:id - Error deleting availability notifications:', notificationError);
+    }
+
+    // Удаляем вопросы о товаре
+    try {
+      console.log('🗑️ DELETE /api/products/:id - Deleting product questions...');
+      const questionCount = await prisma.productQuestion.count({ where: { productId: productId } });
+      console.log(`🗑️ DELETE /api/products/:id - Found ${questionCount} product questions to delete`);
+      
+      await prisma.productQuestion.deleteMany({
         where: { productId: productId }
       });
-      console.log('DELETE /api/products/:id - Availability notifications deleted successfully');
-    } catch (notificationError) {
-      console.error('DELETE /api/products/:id - Error deleting availability notifications:', notificationError);
+      console.log('✅ DELETE /api/products/:id - Product questions deleted successfully');
+    } catch (questionError) {
+      console.error('❌ DELETE /api/products/:id - Error deleting product questions:', questionError);
     }
 
     // Проверяем, есть ли заказы с этим товаром и удаляем скрытые заказы
     try {
-      console.log('DELETE /api/products/:id - Checking for hidden orders...');
+      console.log('🗑️ DELETE /api/products/:id - Checking for hidden orders...');
       const orderItems = await prisma.orderItem.findMany({
         where: { productId: productId },
         select: { orderId: true }
       });
       
+      console.log(`🗑️ DELETE /api/products/:id - Found ${orderItems.length} order items for hidden order check`);
+      
       if (orderItems.length > 0) {
         const orderIds = [...new Set(orderItems.map(item => item.orderId))];
+        console.log(`🗑️ DELETE /api/products/:id - Checking ${orderIds.length} unique orders for hidden status`);
+        
         await prisma.userHiddenOrder.deleteMany({
           where: { orderId: { in: orderIds } }
         });
-        console.log('DELETE /api/products/:id - Hidden orders deleted successfully');
+        console.log('✅ DELETE /api/products/:id - Hidden orders deleted successfully');
+      } else {
+        console.log('⏭️ DELETE /api/products/:id - No order items found, skipping hidden order deletion');
       }
     } catch (hiddenOrderError) {
-      console.error('DELETE /api/products/:id - Error deleting hidden orders:', hiddenOrderError);
+      console.error('❌ DELETE /api/products/:id - Error deleting hidden orders:', hiddenOrderError);
     }
 
-    // Теперь удаляем сам товар
-    console.log('DELETE /api/products/:id - Deleting product...');
-    const product = await prisma.product.delete({
-      where: { id: productId }
+    // ФИНАЛЬНАЯ ПРОВЕРКА: Убеждаемся, что все связи удалены
+    console.log('🔍 DELETE /api/products/:id - Финальная проверка связей...');
+    const finalRelationCounts = await Promise.allSettled([
+      prisma.cartItem.count({ where: { productId: productId } }),
+      prisma.orderItem.count({ where: { productId: productId } }),
+      prisma.review.count({ where: { productId: productId } }),
+      prisma.wishlistItem.count({ where: { productId: productId } }),
+      prisma.productQuestion.count({ where: { productId: productId } }),
+      prisma.hiddenReview.count({ 
+        where: { 
+          review: { 
+            productId: productId 
+          } 
+        } 
+      })
+    ]);
+    
+    console.log('🔍 DELETE /api/products/:id - Оставшиеся связи после удаления:', {
+      cartItems: finalRelationCounts[0].status === 'fulfilled' ? finalRelationCounts[0].value : 'error',
+      orderItems: finalRelationCounts[1].status === 'fulfilled' ? finalRelationCounts[1].value : 'error',
+      reviews: finalRelationCounts[2].status === 'fulfilled' ? finalRelationCounts[2].value : 'error',
+      wishlistItems: finalRelationCounts[3].status === 'fulfilled' ? finalRelationCounts[3].value : 'error',
+      productQuestions: finalRelationCounts[4].status === 'fulfilled' ? finalRelationCounts[4].value : 'error',
+      hiddenReviews: finalRelationCounts[5].status === 'fulfilled' ? finalRelationCounts[5].value : 'error'
     });
-    console.log('DELETE /api/products/:id - Product deleted successfully');
 
-    // Удаляем изображения с диска
-    if (product.imageUrls && Array.isArray(product.imageUrls)) {
-      console.log('DELETE /api/products/:id - Deleting image files...');
-      product.imageUrls.forEach(imageUrl => {
-        if (imageUrl && imageUrl.startsWith('/uploads/')) {
-          const imagePath = path.join(__dirname, '..', imageUrl);
-          if (fs.existsSync(imagePath)) {
-            try {
-              fs.unlinkSync(imagePath);
-              console.log('DELETE /api/products/:id - Image file deleted:', imagePath);
-            } catch (fsError) {
-              console.error('DELETE /api/products/:id - Error deleting image file:', fsError);
+    // Теперь удаляем сам товар
+    console.log('🗑️ DELETE /api/products/:id - Deleting product...');
+    try {
+      const product = await prisma.product.delete({
+        where: { id: productId }
+      });
+      console.log('✅ DELETE /api/products/:id - Product deleted successfully');
+      
+      // Удаляем изображения с диска
+      if (product.imageUrls && Array.isArray(product.imageUrls)) {
+        console.log('🗑️ DELETE /api/products/:id - Deleting image files...');
+        console.log(`🗑️ DELETE /api/products/:id - Found ${product.imageUrls.length} image files to delete`);
+        product.imageUrls.forEach(imageUrl => {
+          if (imageUrl && imageUrl.startsWith('/uploads/')) {
+            const filePath = path.join(__dirname, '..', '..', imageUrl);
+            if (fs.existsSync(filePath)) {
+              fs.unlinkSync(filePath);
+              console.log('✅ DELETE /api/products/:id - Deleted image file:', filePath);
+            } else {
+              console.log('⚠️ DELETE /api/products/:id - Image file not found:', filePath);
             }
           }
-        }
+        });
+      } else {
+        console.log('⏭️ DELETE /api/products/:id - No image files to delete');
+      }
+      
+      res.status(200).json({ message: 'Product deleted successfully' });
+    } catch (deleteError) {
+      console.error('❌ DELETE /api/products/:id - Error deleting product:', deleteError);
+      console.error('❌ DELETE /api/products/:id - Error details:', {
+        message: deleteError.message,
+        code: deleteError.code,
+        meta: deleteError.meta
       });
+      
+      // Если это ошибка внешнего ключа, попробуем найти оставшиеся связи
+      if (deleteError.code === 'P2003') {
+        console.log('🔍 DELETE /api/products/:id - Foreign key constraint error, checking for remaining relations...');
+        
+        // Проверяем все возможные связи
+        const relations = await Promise.allSettled([
+          prisma.cartItem.count({ where: { productId: productId } }),
+          prisma.orderItem.count({ where: { productId: productId } }),
+          prisma.review.count({ where: { productId: productId } }),
+          prisma.wishlistItem.count({ where: { productId: productId } }),
+          prisma.productQuestion.count({ where: { productId: productId } }),
+          prisma.hiddenReview.count({ 
+            where: { 
+              review: { 
+                productId: productId 
+              } 
+            } 
+          })
+        ]);
+        
+        console.log('🔍 DELETE /api/products/:id - Remaining relations causing constraint error:', {
+          cartItems: relations[0].status === 'fulfilled' ? relations[0].value : 'error',
+          orderItems: relations[1].status === 'fulfilled' ? relations[1].value : 'error',
+          reviews: relations[2].status === 'fulfilled' ? relations[2].value : 'error',
+          wishlistItems: relations[3].status === 'fulfilled' ? relations[3].value : 'error',
+          productQuestions: relations[4].status === 'fulfilled' ? relations[4].value : 'error',
+          hiddenReviews: relations[5].status === 'fulfilled' ? relations[5].value : 'error'
+        });
+      }
+      
+      res.status(500).json({ error: 'Failed to delete product', details: deleteError.message });
+    }
+
+
+    // Дополнительная инвалидация кэша для гарантии
+    try {
+      await cacheManager.invalidatePattern('products:*');
+      await cacheManager.invalidatePattern('search:*');
+      console.log(`🔄 Инвалидирован кэш после удаления товара ${productId}`);
+    } catch (cacheError) {
+      console.log('⚠️ Ошибка инвалидации кэша:', cacheError.message);
     }
 
     console.log('DELETE /api/products/:id - Deletion completed successfully');
-    res.json({ message: 'Product deleted successfully' });
   } catch (error) {
     console.error('DELETE /api/products/:id - Error deleting product:', error);
     console.error('DELETE /api/products/:id - Error details:', {
@@ -1631,26 +1818,59 @@ app.get('/api/auth/facebook/callback', passport.authenticate('facebook', { sessi
 
 // Middleware для проверки JWT
 function authMiddleware(req, res, next) {
-  console.log('Auth middleware: Starting authentication check');
+  console.log('🔐 Auth middleware: Starting authentication check');
+  console.log('🔐 Request details:', {
+    method: req.method,
+    url: req.url,
+    path: req.path,
+    timestamp: new Date().toISOString(),
+    userAgent: req.headers['user-agent'],
+    ip: req.ip || req.connection.remoteAddress
+  });
   
   const auth = req.headers.authorization;
-  console.log('Authorization header:', auth ? 'Present' : 'Missing');
+  console.log('🔐 Authorization header:', {
+    present: !!auth,
+    startsWithBearer: auth?.startsWith('Bearer '),
+    length: auth?.length || 0
+  });
   
   if (!auth || !auth.startsWith('Bearer ')) {
-    console.log('Auth middleware: No valid Bearer token');
+    console.log('❌ Auth middleware: No valid Bearer token');
+    console.log('❌ Auth failure details:', {
+      hasAuth: !!auth,
+      startsWithBearer: auth?.startsWith('Bearer '),
+      authValue: auth ? auth.substring(0, 20) + '...' : 'null'
+    });
     return res.status(401).json({ error: 'Нет токена' });
   }
   
   const token = auth.slice(7);
-  console.log('Token extracted, length:', token.length);
+  console.log('🔐 Token extracted:', {
+    length: token.length,
+    startsWith: token.substring(0, 20) + '...',
+    endsWith: '...' + token.substring(token.length - 10)
+  });
   
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
-    console.log('Token verified successfully, user ID:', payload.userId);
+    console.log('✅ Token verified successfully:', {
+      userId: payload.userId,
+      email: payload.email,
+      role: payload.role,
+      name: payload.name,
+      exp: payload.exp,
+      iat: payload.iat
+    });
     req.user = payload;
     next();
   } catch (error) {
-    console.error('Token verification failed:', error.message);
+    console.error('❌ Token verification failed:', {
+      error: error.message,
+      name: error.name,
+      tokenLength: token.length,
+      jwtSecret: process.env.JWT_SECRET ? 'Set' : 'Not set'
+    });
     return res.status(401).json({ error: 'Некорректный токен' });
   }
 }
@@ -2742,35 +2962,107 @@ setTimeout(() => {
 
 // Эндпоинт для изменения только поля isHidden
 app.patch('/api/products/:id/hidden', authMiddleware, smartInvalidateCache, async (req, res) => {
+  console.log(`👁️ PATCH /api/products/:id/hidden - Начало обработки запроса`);
+  console.log(`👁️ Request details:`, {
+    productId: req.params.id,
+    requestBody: req.body,
+    userId: req.user?.userId,
+    userEmail: req.user?.email,
+    timestamp: new Date().toISOString(),
+    headers: {
+      authorization: req.headers.authorization ? 'Present' : 'Missing',
+      contentType: req.headers['content-type']
+    }
+  });
+  
   // Проверка роли admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  console.log(`👁️ User lookup result:`, { 
+    userFound: !!user,
+    id: user?.id, 
+    role: user?.role,
+    email: user?.email,
+    emailVerified: user?.emailVerified
+  });
+  
   if (!user || user.role !== 'admin') {
+    console.log(`👁️ Access denied details:`, {
+      userExists: !!user,
+      userRole: user?.role,
+      requiredRole: 'admin',
+      userId: req.user?.userId
+    });
     return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
   }
+  
   try {
     const { isHidden } = req.body || {};
+    console.log(`🔍 isHidden parameter:`, { isHidden, type: typeof isHidden });
+    
     if (typeof isHidden === 'undefined') {
+      console.log(`❌ Параметр isHidden отсутствует`);
       return res.status(400).json({ error: 'Параметр isHidden обязателен' });
     }
 
     const productId = parseInt(req.params.id);
+    console.log(`🔍 Parsed product ID:`, productId);
+    
     if (Number.isNaN(productId)) {
+      console.log(`❌ Некорректный ID товара`);
       return res.status(400).json({ error: 'Некорректный ID товара' });
     }
 
+    console.log(`🔍 Ищем товар в базе данных...`);
     const existing = await prisma.product.findUnique({ where: { id: productId } });
+    console.log(`🔍 Товар найден:`, { id: existing?.id, name: existing?.name, isHidden: existing?.isHidden });
+    
     if (!existing) {
+      console.log(`❌ Товар не найден`);
       return res.status(404).json({ error: 'Товар не найден' });
     }
 
+    const newHiddenValue = isHidden === 'true' || isHidden === true;
+    console.log(`🔍 Обновляем товар:`, { 
+      id: productId, 
+      oldIsHidden: existing.isHidden, 
+      newIsHidden: newHiddenValue 
+    });
+
     const updated = await prisma.product.update({
       where: { id: productId },
-      data: { isHidden: isHidden === 'true' || isHidden === true }
+      data: { isHidden: newHiddenValue }
     });
     
+    console.log(`✅ Товар обновлен в базе данных:`, { 
+      id: updated.id, 
+      isHidden: updated.isHidden 
+    });
+    
+    // Дополнительная инвалидация кэша для гарантии
+    console.log(`🔄 Начинаем инвалидацию кэша...`);
+    try {
+      console.log(`🔄 Инвалидируем паттерн products:*`);
+      const productsResult = await cacheManager.invalidatePattern('products:*');
+      console.log(`🔄 Результат инвалидации products:*:`, productsResult);
+      
+      console.log(`🔄 Инвалидируем паттерн search:*`);
+      const searchResult = await cacheManager.invalidatePattern('search:*');
+      console.log(`🔄 Результат инвалидации search:*:`, searchResult);
+      
+      console.log(`✅ Кэш инвалидирован после изменения видимости товара ${productId}`);
+    } catch (cacheError) {
+      console.log('❌ Ошибка инвалидации кэша:', cacheError.message);
+      console.log('❌ Stack trace:', cacheError.stack);
+    }
+    
+    console.log(`✅ Отправляем ответ клиенту:`, { 
+      id: updated.id, 
+      isHidden: updated.isHidden 
+    });
     res.json(updated);
   } catch (error) {
-    console.error('Error updating product visibility:', error);
+    console.error('❌ Error updating product visibility:', error);
+    console.error('❌ Stack trace:', error.stack);
     res.status(500).json({ error: 'Failed to update product visibility' });
   }
 });
@@ -3492,8 +3784,21 @@ app.put('/api/categories/reorder', authMiddleware, async (req, res) => {
   }
 });
 
-app.put('/api/categories/:id', authMiddleware, upload.single('image'), productionUploadMiddleware.processSingleImage.bind(productionUploadMiddleware), async (req, res) => {
+app.put('/api/categories/:id', authMiddleware, upload.single('image'), productionUploadMiddleware.processSingleImage.bind(productionUploadMiddleware), smartInvalidateCache, async (req, res) => {
   try {
+    console.log('🔧 PUT /api/categories/:id - Начало обработки запроса');
+    console.log('🔧 PUT /api/categories/:id - req.params:', req.params);
+    console.log('🔧 PUT /api/categories/:id - req.body:', req.body);
+    console.log('🔧 PUT /api/categories/:id - req.file:', req.file ? {
+      fieldname: req.file.fieldname,
+      originalname: req.file.originalname,
+      filename: req.file.filename,
+      mimetype: req.file.mimetype,
+      size: req.file.size
+    } : 'null');
+    console.log('🔧 PUT /api/categories/:id - req.processedFile:', req.processedFile);
+    console.log('🔧 PUT /api/categories/:id - req.imageUrl:', req.imageUrl);
+    
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
       return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
@@ -3510,12 +3815,24 @@ app.put('/api/categories/:id', authMiddleware, upload.single('image'), productio
     // Если загружено новое изображение, добавляем его в данные
     if (req.file) {
       data.image = req.file.filename;
-      console.log('API: Обновление изображения категории:', req.file.filename);
+      console.log('🔧 PUT /api/categories/:id - Обновление изображения категории:', req.file.filename);
+    } else {
+      console.log('🔧 PUT /api/categories/:id - Нет файла для обновления');
     }
     
-    console.log('API: Обновление категории ID:', id, 'Данные:', data);
+    console.log('🔧 PUT /api/categories/:id - Обновление категории ID:', id, 'Данные:', data);
     const updated = await prisma.category.update({ where: { id }, data });
-    console.log('API: Категория обновлена:', updated);
+    console.log('🔧 PUT /api/categories/:id - Категория обновлена:', updated);
+    
+    // Дополнительная инвалидация кэша для категорий
+    console.log('🔄 Инвалидируем кэш категорий после обновления...');
+    try {
+      await cacheManager.invalidatePattern('categories:*');
+      console.log('✅ Кэш категорий инвалидирован');
+    } catch (cacheError) {
+      console.log('❌ Ошибка инвалидации кэша категорий:', cacheError.message);
+    }
+    
     res.json(updated);
   } catch (e) {
     console.error('API: Ошибка редактирования категории:', e);
@@ -4632,6 +4949,15 @@ app.post('/api/admin/fix-category-images', authMiddleware, async (req, res) => {
     // Маппинг категорий на правильные fallback изображения
     const categoryImageMapping = {
       'Настольные игры': 'nastolka.png',
+      'Развивающие игры': 'edu_game.png',
+      'Акции': 'sale.png',
+      'Игрушки': 'toys.png',
+      'Конструкторы': 'constructor.png',
+      'Пазлы': 'puzzle.png',
+      'Творчество': 'creativity.png',
+      'Канцтовары': 'stationery.png',
+      'Транспорт': 'bicycle.png',
+      'Отдых на воде': 'voda.png',
       'Рисование': 'creativity.png',
       'Наборы для творчества': 'creativity.png',
       'Раскраски': 'creativity.png',
@@ -4697,6 +5023,92 @@ app.post('/api/admin/fix-category-images', authMiddleware, async (req, res) => {
 
   } catch (error) {
     console.error('Error fixing category images:', error);
+    res.status(500).json({ error: 'Ошибка исправления изображений категорий' });
+  }
+});
+
+// === Временный API для исправления изображений категорий (без авторизации) ===
+app.post('/api/fix-category-icons-temp', async (req, res) => {
+  try {
+    console.log('🔧 Исправляем иконки категорий (временный эндпоинт)...');
+
+    // Маппинг категорий на правильные fallback изображения
+    const categoryImageMapping = {
+      'Настольные игры': 'nastolka.png',
+      'Развивающие игры': 'edu_game.png',
+      'Акции': 'sale.png',
+      'Игрушки': 'toys.png',
+      'Конструкторы': 'constructor.png',
+      'Пазлы': 'puzzle.png',
+      'Творчество': 'creativity.png',
+      'Канцтовары': 'stationery.png',
+      'Транспорт': 'bicycle.png',
+      'Отдых на воде': 'voda.png'
+    };
+
+    // Получаем все категории
+    const categories = await prisma.category.findMany({
+      select: {
+        id: true,
+        name: true,
+        image: true
+      }
+    });
+
+    let updatedCount = 0;
+    const updatedCategories = [];
+
+    // Проверяем каждую категорию
+    for (const category of categories) {
+      let needsUpdate = false;
+      let newImage = category.image;
+
+      // Если изображение начинается с цифр (загруженный файл), заменяем на fallback
+      if (category.image && /^\d+/.test(category.image)) {
+        needsUpdate = true;
+        newImage = categoryImageMapping[category.name] || 'toys.png';
+      }
+
+      // Если изображение не соответствует маппингу, исправляем
+      if (categoryImageMapping[category.name] && category.image !== categoryImageMapping[category.name]) {
+        needsUpdate = true;
+        newImage = categoryImageMapping[category.name];
+      }
+
+      // Обновляем категорию если нужно
+      if (needsUpdate) {
+        await prisma.category.update({
+          where: { id: category.id },
+          data: { image: newImage }
+        });
+        updatedCategories.push({
+          id: category.id,
+          name: category.name,
+          oldImage: category.image,
+          newImage: newImage
+        });
+        updatedCount++;
+        console.log(`✅ Исправлена категория "${category.name}": ${category.image} → ${newImage}`);
+      }
+    }
+
+    // Инвалидируем кэш
+    try {
+      await cacheManager.invalidatePattern('categories:*');
+      console.log('✅ Кэш категорий инвалидирован');
+    } catch (cacheError) {
+      console.log('❌ Ошибка инвалидации кэша:', cacheError.message);
+    }
+
+    res.json({
+      success: true,
+      message: `Исправлено ${updatedCount} категорий`,
+      updatedCount,
+      updatedCategories
+    });
+
+  } catch (error) {
+    console.error('Error fixing category icons:', error);
     res.status(500).json({ error: 'Ошибка исправления изображений категорий' });
   }
 });
