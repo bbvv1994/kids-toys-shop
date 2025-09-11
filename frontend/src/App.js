@@ -8289,15 +8289,26 @@ function CMSCategories({ loadCategoriesFromAPI }) {
     })
   );
 
-  // Загрузка категорий с сервера (только /api/categories)
+  // Загрузка категорий с сервера (используем admin endpoint для получения полной информации)
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/categories`, {
+      console.log('🔄 CMSCategories: Loading categories from admin endpoint...');
+      const res = await fetch(`${API_BASE_URL}/api/admin/categories`, {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
       const data = await res.json();
-      setCategories(data);
+      console.log('🔄 CMSCategories: Categories loaded:', data.length, 'categories');
+      console.log('🔄 CMSCategories: Sample category:', data[0]);
+      
+      // Убеждаемся, что поле active правильно обработано
+      const processedData = data.map(cat => ({
+        ...cat,
+        active: cat.active !== null ? cat.active : true // По умолчанию true, если null
+      }));
+      
+      console.log('🔄 CMSCategories: Processed categories with active field:', processedData[0]);
+      setCategories(processedData);
     } catch (e) {
       console.error('CMSCategories fetchCategories - error:', e);
       setCategories([]);
@@ -8407,6 +8418,13 @@ function CMSCategories({ loadCategoriesFromAPI }) {
   // Отключение категории
   const handleToggleActive = async (cat) => {
     try {
+      console.log('🔄 CMSCategories: Toggling category active state', {
+        categoryId: cat.id,
+        categoryName: cat.name,
+        currentActive: cat.active,
+        timestamp: new Date().toISOString()
+      });
+      
       const response = await fetch(`${API_BASE_URL}/api/categories/${cat.id}/toggle`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${user.token}` }
@@ -8414,6 +8432,11 @@ function CMSCategories({ loadCategoriesFromAPI }) {
       
       if (response.ok) {
         const updatedCategory = await response.json();
+        console.log('🔄 CMSCategories: Toggle response from server:', {
+          categoryId: updatedCategory.id,
+          newActive: updatedCategory.active,
+          serverResponse: updatedCategory
+        });
         
         // Обновляем состояние локально используя данные с сервера
         setCategories(prevCategories => 
@@ -8424,12 +8447,15 @@ function CMSCategories({ loadCategoriesFromAPI }) {
           )
         );
         
+        console.log('🔄 CMSCategories: Local state updated');
+        
         // Обновляем только боковое меню, если нужно
         if (loadCategoriesFromAPI) {
+          console.log('🔄 CMSCategories: Refreshing sidebar categories...');
           await loadCategoriesFromAPI();
         }
       } else {
-        console.error('Failed to toggle category');
+        console.error('Failed to toggle category:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error toggling category:', error);
@@ -8740,7 +8766,7 @@ function CMSCategories({ loadCategoriesFromAPI }) {
         })()}
         <Typography sx={{ fontWeight: 500, flex: 1 }}>{cat.name}</Typography>
         <Switch
-          checked={!!cat.active}
+          checked={cat.active === true}
           onClick={e => { e.stopPropagation(); }}
           onChange={() => handleToggleActive(cat)}
           color="success"

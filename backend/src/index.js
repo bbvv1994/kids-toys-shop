@@ -4369,13 +4369,68 @@ app.put('/api/admin/reviews/shop/:id', authMiddleware, async (req, res) => {
 // DELETE /api/admin/reviews/shop/:id — удаление отзыва о магазине
 app.delete('/api/admin/reviews/shop/:id', authMiddleware, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Нет доступа' });
-    await prisma.shopReview.delete({
-      where: { id: parseInt(req.params.id) }
+    console.log('🗑️ DELETE /api/admin/reviews/shop/:id - Starting deletion process');
+    console.log('🗑️ Request details:', {
+      reviewId: req.params.id,
+      userId: req.user?.userId,
+      userEmail: req.user?.email,
+      timestamp: new Date().toISOString()
     });
+
+    if (req.user.role !== 'admin') {
+      console.log('🗑️ DELETE /api/admin/reviews/shop/:id - Access denied: user is not admin');
+      return res.status(403).json({ error: 'Нет доступа' });
+    }
+
+    const reviewId = parseInt(req.params.id);
+    console.log('🗑️ DELETE /api/admin/reviews/shop/:id - Review ID:', reviewId);
+
+    // Проверяем, существует ли отзыв
+    const existingReview = await prisma.shopReview.findUnique({
+      where: { id: reviewId }
+    });
+
+    if (!existingReview) {
+      console.log('🗑️ DELETE /api/admin/reviews/shop/:id - Review not found');
+      return res.status(404).json({ error: 'Отзыв не найден' });
+    }
+
+    console.log('🗑️ DELETE /api/admin/reviews/shop/:id - Review found, checking for related data...');
+
+    // Проверяем связанные данные (hiddenShopReview)
+    try {
+      console.log('🔍 DELETE /api/admin/reviews/shop/:id - Checking for hidden shop reviews...');
+      const hiddenCount = await prisma.hiddenShopReview.count({
+        where: { shopReviewId: reviewId }
+      });
+      console.log(`🔍 DELETE /api/admin/reviews/shop/:id - Found ${hiddenCount} hidden shop reviews`);
+
+      if (hiddenCount > 0) {
+        console.log('🗑️ DELETE /api/admin/reviews/shop/:id - Deleting hidden shop reviews...');
+        await prisma.hiddenShopReview.deleteMany({
+          where: { shopReviewId: reviewId }
+        });
+        console.log('✅ DELETE /api/admin/reviews/shop/:id - Hidden shop reviews deleted successfully');
+      }
+    } catch (hiddenError) {
+      console.error('❌ DELETE /api/admin/reviews/shop/:id - Error deleting hidden shop reviews:', hiddenError);
+    }
+
+    // Удаляем сам отзыв
+    console.log('🗑️ DELETE /api/admin/reviews/shop/:id - Deleting shop review...');
+    await prisma.shopReview.delete({
+      where: { id: reviewId }
+    });
+    console.log('✅ DELETE /api/admin/reviews/shop/:id - Shop review deleted successfully');
+
     res.json({ message: 'Отзыв о магазине удален' });
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка удаления отзыва о магазине' });
+    console.error('❌ DELETE /api/admin/reviews/shop/:id - Error details:', {
+      message: error.message,
+      code: error.code,
+      meta: error.meta
+    });
+    res.status(500).json({ error: 'Ошибка удаления отзыва о магазине', details: error.message });
   }
 });
 
@@ -4513,13 +4568,68 @@ app.put('/api/admin/reviews/product/:id', authMiddleware, async (req, res) => {
 // DELETE /api/admin/reviews/product/:id — удаление отзыва о товаре
 app.delete('/api/admin/reviews/product/:id', authMiddleware, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Нет доступа' });
-    await prisma.review.delete({
-      where: { id: parseInt(req.params.id) }
+    console.log('🗑️ DELETE /api/admin/reviews/product/:id - Starting deletion process');
+    console.log('🗑️ Request details:', {
+      reviewId: req.params.id,
+      userId: req.user?.userId,
+      userEmail: req.user?.email,
+      timestamp: new Date().toISOString()
     });
+
+    if (req.user.role !== 'admin') {
+      console.log('🗑️ DELETE /api/admin/reviews/product/:id - Access denied: user is not admin');
+      return res.status(403).json({ error: 'Нет доступа' });
+    }
+
+    const reviewId = parseInt(req.params.id);
+    console.log('🗑️ DELETE /api/admin/reviews/product/:id - Review ID:', reviewId);
+
+    // Проверяем, существует ли отзыв
+    const existingReview = await prisma.review.findUnique({
+      where: { id: reviewId }
+    });
+
+    if (!existingReview) {
+      console.log('🗑️ DELETE /api/admin/reviews/product/:id - Review not found');
+      return res.status(404).json({ error: 'Отзыв не найден' });
+    }
+
+    console.log('🗑️ DELETE /api/admin/reviews/product/:id - Review found, checking for related data...');
+
+    // Проверяем связанные данные (hiddenReview)
+    try {
+      console.log('🔍 DELETE /api/admin/reviews/product/:id - Checking for hidden reviews...');
+      const hiddenCount = await prisma.hiddenReview.count({
+        where: { reviewId: reviewId }
+      });
+      console.log(`🔍 DELETE /api/admin/reviews/product/:id - Found ${hiddenCount} hidden reviews`);
+
+      if (hiddenCount > 0) {
+        console.log('🗑️ DELETE /api/admin/reviews/product/:id - Deleting hidden reviews...');
+        await prisma.hiddenReview.deleteMany({
+          where: { reviewId: reviewId }
+        });
+        console.log('✅ DELETE /api/admin/reviews/product/:id - Hidden reviews deleted successfully');
+      }
+    } catch (hiddenError) {
+      console.error('❌ DELETE /api/admin/reviews/product/:id - Error deleting hidden reviews:', hiddenError);
+    }
+
+    // Удаляем сам отзыв
+    console.log('🗑️ DELETE /api/admin/reviews/product/:id - Deleting product review...');
+    await prisma.review.delete({
+      where: { id: reviewId }
+    });
+    console.log('✅ DELETE /api/admin/reviews/product/:id - Product review deleted successfully');
+
     res.json({ message: 'Отзыв о товаре удален' });
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка удаления отзыва о товаре' });
+    console.error('❌ DELETE /api/admin/reviews/product/:id - Error details:', {
+      message: error.message,
+      code: error.code,
+      meta: error.meta
+    });
+    res.status(500).json({ error: 'Ошибка удаления отзыва о товаре', details: error.message });
   }
 });
 
