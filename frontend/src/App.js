@@ -145,7 +145,7 @@ import Grow from '@mui/material/Grow';
 import Collapse from '@mui/material/Collapse';
 import Pagination from '@mui/material/Pagination';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import ProductCarousel from './components/ProductCarousel';
+import ElegantProductCarousel from './components/ElegantProductCarousel';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import AboutPage from './components/AboutPage';
 import ReviewsPage from './components/ReviewsPage';
@@ -2919,7 +2919,7 @@ function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChang
     <Box sx={{ minHeight: '80vh', pt: 4, flexDirection: 'column' }}>
       {/* Баннеры главной страницы */}
       <BannerSlider />
-      <ProductCarousel
+      <ElegantProductCarousel
         title={t('home.newArrivals')}
         products={newProducts}
         onAddToCart={onAddToCart}
@@ -2931,7 +2931,7 @@ function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChang
         wishlist={wishlist}
         isAdmin={isAdmin}
       />
-      <ProductCarousel
+      <ElegantProductCarousel
         title={t('home.popular')}
         products={popularProducts}
         onAddToCart={onAddToCart}
@@ -2942,6 +2942,7 @@ function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChang
         onEditProduct={onEditProduct}
         wishlist={wishlist}
         isAdmin={isAdmin}
+        reducedMargin={true}
       />
       {/* Здесь может быть дополнительный контент главной страницы */}
     </Box>
