@@ -11,7 +11,7 @@ import AdminProductReviews from './components/AdminProductReviews';
 import CustomerReviews from './components/CustomerReviews';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import CustomSelect from './components/CustomSelect';
-import HomeBanners from './components/HomeBanners';
+import BannerSlider from './components/BannerSlider';
 import BoysToysPage from './components/BoysToysPage';
 import GirlsToysPage from './components/GirlsToysPage';
 import { useDeviceType } from './utils/deviceDetection';
@@ -2918,7 +2918,7 @@ function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChang
   return (
     <Box sx={{ minHeight: '80vh', pt: 4, flexDirection: 'column' }}>
       {/* Баннеры главной страницы */}
-      <HomeBanners />
+      <BannerSlider />
       <ProductCarousel
         title={t('home.newArrivals')}
         products={newProducts}
