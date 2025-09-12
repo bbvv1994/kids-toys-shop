@@ -9,6 +9,7 @@ import Lottie from 'lottie-react';
 import wishlistHeartAnim from '../lottie/wishlist-heart.json';
 import addToCartAnim from '../lottie/cart checkout - fast.json';
 import { useTranslation, useI18next } from 'react-i18next';
+import LazyImage from './LazyImage';
 
 const ageIcons = {
   '0-1 год': '/age-icons/0-1.png',
@@ -223,18 +224,28 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             );
             if (!imgSrc || imgError) {
               return (
-                <img src="/photography.jpg" alt={t('productCard.noPhoto')} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px 8px 0px 0px', opacity: 1, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
+                <LazyImage
+                  src="/photography.jpg"
+                  alt={t('productCard.noPhoto')}
+                  width="100%"
+                  height="100%"
+                  sx={{
+                    borderRadius: '8px 8px 0px 0px',
+                    minWidth: '100%',
+                    minHeight: '100%',
+                    maxWidth: '100%',
+                    maxHeight: '100%'
+                  }}
+                />
               );
             }
             return (
-              <img
+              <LazyImage
                 src={imgSrc}
                 alt={getTranslatedName(product)}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center',
+                width="100%"
+                height="100%"
+                sx={{
                   borderRadius: '8px 8px 0px 0px',
                   minWidth: '100%',
                   minHeight: '100%',
@@ -552,14 +563,34 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
             );
             if (!imgSrc || imgError) {
               return (
-                <img src="/photography.jpg" alt={t('productCard.noPhoto')} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 0, opacity: 1, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
+                <LazyImage
+                  src="/photography.jpg"
+                  alt={t('productCard.noPhoto')}
+                  width="100%"
+                  height="100%"
+                  sx={{
+                    borderRadius: 0,
+                    minWidth: '100%',
+                    minHeight: '100%',
+                    maxWidth: '100%',
+                    maxHeight: '100%'
+                  }}
+                />
               );
             }
             return (
-              <img
+              <LazyImage
                 src={imgSrc}
                 alt={getTranslatedName(product)}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', borderRadius: 0, padding: 0, margin: 0, display: 'block', pointerEvents: 'none' }}
+                width="100%"
+                height="100%"
+                sx={{
+                  borderRadius: 0,
+                  padding: 0,
+                  margin: 0,
+                  display: 'block',
+                  pointerEvents: 'none'
+                }}
                 onError={() => setImgError(true)}
               />
             );
@@ -1007,18 +1038,28 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           );
           if (!imgSrc || imgError) {
             return (
-                              <img src="/photography.jpg" alt={t('productCard.noPhoto')} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, opacity: 1, minWidth: '100%', minHeight: '100%', maxWidth: '100%', maxHeight: '100%' }} />
+              <LazyImage
+                src="/photography.jpg"
+                alt={t('productCard.noPhoto')}
+                width="100%"
+                height="100%"
+                sx={{
+                  borderRadius: 8,
+                  minWidth: '100%',
+                  minHeight: '100%',
+                  maxWidth: '100%',
+                  maxHeight: '100%'
+                }}
+              />
             );
           }
           return (
-            <img
+            <LazyImage
               src={imgSrc}
               alt={getTranslatedName(product)}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center',
+              width="100%"
+              height="100%"
+              sx={{
                 minWidth: '100%',
                 minHeight: '100%',
                 maxWidth: '100%',

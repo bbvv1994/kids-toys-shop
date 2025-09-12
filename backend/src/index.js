@@ -204,7 +204,28 @@ async function sendEmail(to, subject, htmlContent) {
 
 
 const app = express();
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'],
+});
+
+// Логирование инициализации Prisma
+console.log('🔧 Initializing Prisma Client...');
+console.log('📊 DATABASE_URL:', process.env.DATABASE_URL ? 'Present' : 'Missing');
+console.log('🔑 JWT_SECRET:', process.env.JWT_SECRET ? 'Present' : 'Missing');
+
+// Тестируем подключение к базе данных
+prisma.$connect()
+  .then(() => {
+    console.log('✅ Prisma connected to database successfully');
+  })
+  .catch((error) => {
+    console.error('❌ Prisma connection failed:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      code: error.code,
+      meta: error.meta
+    });
+  });
 
 prisma.$connect()
   .then(() => {})
@@ -235,8 +256,13 @@ if (!fs.existsSync('uploads')) {
 // CORS настройки
 const corsOptions = {
   origin: function (origin, callback) {
+    console.log('🌐 CORS check - Origin:', origin);
+    
     // Разрешаем запросы без origin (например, Postman)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log('✅ CORS allowed - No origin (Postman, etc.)');
+      return callback(null, true);
+    }
     
     const allowedOrigins = [
       'http://localhost:3000',
@@ -246,6 +272,9 @@ const corsOptions = {
       'http://192.168.31.103:3000',
       'http://192.168.31.103:3001',
       'http://192.168.31.103',
+      'http://91.99.85.48',
+      'http://91.99.85.48:80',
+      'http://91.99.85.48:3000',
       'https://kids-toys-shop.vercel.app',
       'https://kids-toys-shop-git-main-bbvv1994.vercel.app',
       'https://kids-toys-shop-bbvv1994.vercel.app'
@@ -277,6 +306,7 @@ const corsOptions = {
     }
     
     console.log('❌ CORS blocked origin:', origin);
+    console.log('❌ Allowed origins:', allowedOrigins);
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
@@ -285,13 +315,58 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Добавляем middleware для правильной обработки UTF-8
+// Настройка body-parser с правильной кодировкой
+const bodyParser = require('body-parser');
+app.use(bodyParser.json({ 
+  limit: '100mb'
+}));
+app.use(bodyParser.urlencoded({ 
+  extended: true, 
+  limit: '100mb'
+}));
+
+// Добавляем детальное логирование для всех запросов
 app.use((req, res, next) => {
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  console.log(`\n🔍 [${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('📋 Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('📊 Body size:', req.headers['content-length'] || 'unknown');
+  console.log('🌐 User-Agent:', req.headers['user-agent'] || 'unknown');
+  console.log('🔐 Content-Type:', req.headers['content-type'] || 'unknown');
+  console.log('🔑 Authorization:', req.headers['authorization'] ? 'Present' : 'Missing');
+  
+  // Логируем body для POST/PUT запросов
+  if (req.method === 'POST' || req.method === 'PUT') {
+    console.log('📝 Request body preview:', JSON.stringify(req.body, null, 2));
+  }
+  
   next();
+});
+
+// Middleware для правильной обработки UTF-8 только для JSON ответов
+app.use((req, res, next) => {
+  const originalJson = res.json;
+  res.json = function(obj) {
+    console.log(`📤 [${new Date().toISOString()}] Sending JSON response:`, JSON.stringify(obj, null, 2));
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return originalJson.call(this, obj);
+  };
+  next();
+});
+
+// Middleware для логирования ошибок
+app.use((err, req, res, next) => {
+  console.error(`\n❌ [${new Date().toISOString()}] ERROR in ${req.method} ${req.url}:`);
+  console.error('🚨 Error message:', err.message);
+  console.error('📊 Error stack:', err.stack);
+  console.error('🔍 Request body:', req.body);
+  console.error('📋 Request headers:', req.headers);
+  
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: err.message,
+    timestamp: new Date().toISOString()
+  });
 });
 app.use('/uploads', express.static(path.join(__dirname, '..', '..', 'uploads')));
 app.use('/uploads/hd', express.static(path.join(__dirname, '..', '..', 'uploads', 'hd')));
@@ -305,6 +380,48 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   const user = await prisma.user.findUnique({ where: { id } });
   done(null, user);
+});
+
+// Тестовый endpoint для проверки JSON парсинга
+app.post('/api/test-json', (req, res) => {
+  console.log('Test JSON endpoint called');
+  console.log('Request body:', req.body);
+  console.log('Request headers:', req.headers);
+  res.json({ 
+    message: 'JSON parsing works!', 
+    receivedData: req.body,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Тестовый endpoint для проверки raw данных
+app.post('/api/test-raw', (req, res) => {
+  let body = '';
+  req.on('data', chunk => {
+    body += chunk.toString();
+  });
+  req.on('end', () => {
+    console.log('Raw body:', body);
+    console.log('Body length:', body.length);
+    console.log('Body type:', typeof body);
+    res.json({ 
+      message: 'Raw data received!', 
+      rawData: body,
+      length: body.length,
+      timestamp: new Date().toISOString()
+    });
+  });
+});
+
+// Простой endpoint для тестирования без body-parser
+app.post('/api/test-simple', (req, res) => {
+  console.log('Test simple endpoint called');
+  console.log('Request body:', req.body);
+  console.log('Request headers:', req.headers);
+  res.json({ 
+    message: 'Simple test works!', 
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Health check endpoint
@@ -1581,26 +1698,34 @@ app.get('/api/auth/facebook/callback', passport.authenticate('facebook', { sessi
 
 // Middleware для проверки JWT
 function authMiddleware(req, res, next) {
-  console.log('Auth middleware: Starting authentication check');
+  console.log('\n🔐 Auth middleware: Starting authentication check');
+  console.log('🔍 Request URL:', req.url);
+  console.log('🔍 Request method:', req.method);
   
   const auth = req.headers.authorization;
-  console.log('Authorization header:', auth ? 'Present' : 'Missing');
+  console.log('🔑 Authorization header:', auth ? 'Present' : 'Missing');
+  console.log('🔑 Authorization value:', auth ? auth.substring(0, 20) + '...' : 'None');
   
   if (!auth || !auth.startsWith('Bearer ')) {
-    console.log('Auth middleware: No valid Bearer token');
+    console.log('❌ Auth middleware: No valid Bearer token');
     return res.status(401).json({ error: 'Нет токена' });
   }
   
   const token = auth.slice(7);
-  console.log('Token extracted, length:', token.length);
+  console.log('🎫 Token extracted, length:', token.length);
+  console.log('🎫 Token preview:', token.substring(0, 20) + '...');
   
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
-    console.log('Token verified successfully, user ID:', payload.userId);
+    console.log('✅ Token verified successfully');
+    console.log('👤 User ID:', payload.userId);
+    console.log('👤 User email:', payload.email);
+    console.log('👤 User role:', payload.role);
     req.user = payload;
     next();
   } catch (error) {
-    console.error('Token verification failed:', error.message);
+    console.error('❌ Token verification failed:', error.message);
+    console.error('❌ Error details:', error);
     return res.status(401).json({ error: 'Некорректный токен' });
   }
 }
@@ -2723,11 +2848,14 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7),
   try {
     console.log('📝 Обновление товара ID:', req.params.id);
     console.log('📥 Полученные данные:', JSON.stringify(req.body, null, 2));
+    console.log('📊 Размер запроса:', req.headers['content-length'] || 'unknown');
     console.log('🔍 Проверка полей переводов:');
     console.log('  - nameHe:', req.body.nameHe);
     console.log('  - descriptionHe:', req.body.descriptionHe);
     console.log('  - name:', req.body.name);
     console.log('  - description:', req.body.description);
+    console.log('📁 Файлы:', req.files ? req.files.length : 0);
+    console.log('🖼️ Изображения:', req.imageUrls ? req.imageUrls.length : 0);
     
     const { name, description, nameHe, descriptionHe, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, removedImages, currentExistingImages, mainImageIndex, inputLanguage = 'ru' } = req.body;
     
@@ -2913,10 +3041,21 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7),
       console.log('API: Subcategory check result:', subcategoryCheck);
     }
     
+    console.log('✅ Товар успешно обновлен:', updated.id);
     res.json(updated);
   } catch (error) {
-    console.error('Error updating product:', error);
-    res.status(500).json({ error: 'Failed to update product' });
+    console.error('❌ Ошибка обновления товара:', error);
+    console.error('❌ Детали ошибки:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+      meta: error.meta
+    });
+    res.status(500).json({ 
+      error: 'Failed to update product',
+      details: error.message,
+      code: error.code
+    });
   }
 });
 

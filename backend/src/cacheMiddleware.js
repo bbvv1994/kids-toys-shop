@@ -29,8 +29,10 @@ const cacheMiddleware = (ttl = 3600, keyGenerator = null) => {
         // Добавляем заголовки кэширования для кэшированных ответов
         res.setHeader('Cache-Control', 'public, max-age=300'); // 5 минут
         res.setHeader('X-Cache', 'HIT');
-        res.setHeader('X-Cache-Key', cacheKey);
-        res.setHeader('ETag', `"${cacheKey}"`);
+        // Очищаем cacheKey от недопустимых символов для HTTP заголовков
+        const cleanCacheKey = cacheKey.replace(/[^\x20-\x7E]/g, '_');
+        res.setHeader('X-Cache-Key', cleanCacheKey);
+        res.setHeader('ETag', `"${cleanCacheKey}"`);
         
         return res.json(cached);
       }
@@ -41,8 +43,10 @@ const cacheMiddleware = (ttl = 3600, keyGenerator = null) => {
         // Добавляем заголовки кэширования для новых ответов
         res.setHeader('Cache-Control', 'public, max-age=300'); // 5 минут
         res.setHeader('X-Cache', 'MISS');
-        res.setHeader('X-Cache-Key', cacheKey);
-        res.setHeader('ETag', `"${cacheKey}"`);
+        // Очищаем cacheKey от недопустимых символов для HTTP заголовков
+        const cleanCacheKey = cacheKey.replace(/[^\x20-\x7E]/g, '_');
+        res.setHeader('X-Cache-Key', cleanCacheKey);
+        res.setHeader('ETag', `"${cleanCacheKey}"`);
         
         // Сохраняем в кэш
         cacheManager.set(cacheKey, data, ttl)

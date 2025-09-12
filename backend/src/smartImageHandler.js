@@ -13,13 +13,22 @@ class SmartImageHandler {
     this.cloudinaryHandler = null;
     
     // Создаем Cloudinary handler только если есть настройки
+    console.log('🔍 Cloudinary настройки:');
+    console.log('  - CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME ? 'Present' : 'Missing');
+    console.log('  - CLOUDINARY_API_KEY:', process.env.CLOUDINARY_API_KEY ? 'Present' : 'Missing');
+    console.log('  - CLOUDINARY_API_SECRET:', process.env.CLOUDINARY_API_SECRET ? 'Present' : 'Missing');
+    console.log('  - NODE_ENV:', process.env.NODE_ENV);
+    
     if (process.env.CLOUDINARY_CLOUD_NAME) {
       try {
         this.cloudinaryHandler = new CloudinaryImageHandler();
         console.log('✅ Cloudinary handler инициализирован');
       } catch (error) {
         console.warn('⚠️ Cloudinary handler не удалось инициализировать:', error.message);
+        console.warn('⚠️ Error stack:', error.stack);
       }
+    } else {
+      console.log('⚠️ CLOUDINARY_CLOUD_NAME не найден, Cloudinary отключен');
     }
     
     console.log(`🔧 SmartImageHandler: ${this.isDevelopment ? 'LOCAL' : 'PRODUCTION'} режим`);
