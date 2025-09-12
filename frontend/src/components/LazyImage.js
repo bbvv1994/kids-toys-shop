@@ -23,7 +23,10 @@ const LazyImage = ({
           observer.disconnect();
         }
       },
-      { threshold: 0.1 }
+      { 
+        threshold: 0,
+        rootMargin: '200px' // Начинаем загрузку за 200px до появления
+      }
     );
 
     if (imgRef.current) {
