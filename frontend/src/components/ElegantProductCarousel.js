@@ -37,8 +37,8 @@ function ElegantProductCarousel({
   
   const [currentIndex, setCurrentIndex] = useState(0);
   
-  // Оптимизация: рендерим только видимые товары + буфер
-  const bufferSize = 2; // дополнительных товара с каждой стороны
+  // Упрощенная оптимизация: рендерим только видимые товары + небольшой буфер
+  const bufferSize = 1; // дополнительный товар с каждой стороны
   const totalVisible = visibleCount + bufferSize * 2;
   
   // Создаем оптимизированный список товаров
@@ -49,25 +49,13 @@ function ElegantProductCarousel({
     const startIndex = Math.max(0, currentIndex - bufferSize);
     const endIndex = Math.min(productCount, startIndex + totalVisible);
     
-    // Добавляем товары с учетом кольцевой структуры
+    // Добавляем товары
     for (let i = startIndex; i < endIndex; i++) {
       items.push({
         ...products[i],
         originalIndex: i,
         displayIndex: i - startIndex
       });
-    }
-    
-    // Если дошли до конца, добавляем товары с начала
-    if (endIndex === productCount && productCount > totalVisible) {
-      const remaining = totalVisible - (endIndex - startIndex);
-      for (let i = 0; i < remaining; i++) {
-        items.push({
-          ...products[i],
-          originalIndex: i,
-          displayIndex: items.length
-        });
-      }
     }
     
     return items;
