@@ -119,4 +119,13 @@ ngrok.yml
 !QUICK_DEPLOY.md
 !DEPLOYMENT_READY.md
 !HARDCODED_URLS_FIXED.md
-!DEPLOYMENT_WITH_DATA.md 
+!DEPLOYMENT_WITH_DATA.md
+
+# SSH and deployment configs
+ssh-config*
+ssh-fs-config.json
+temp_key.txt
+deploy-local-to-server.sh
+
+# Migration logs
+backend/migration-log.txt 
