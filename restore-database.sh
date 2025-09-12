@@ -180,3 +180,4 @@ echo ""
 log "🔧 Полезные команды для проверки:"
 echo "   ssh root@$SERVER_IP 'sudo -u kids-toys pm2 logs kids-toys-backend'"
 echo "   ssh root@$SERVER_IP 'sudo -u postgres psql kids_toys_db -c \"SELECT COUNT(*) FROM products;\"'"
+

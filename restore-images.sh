@@ -124,3 +124,4 @@ echo ""
 log "🔧 Полезные команды для проверки:"
 echo "   ssh root@$SERVER_IP '/home/kids-toys/monitor.sh'"
 echo "   ssh root@$SERVER_IP 'sudo -u kids-toys pm2 logs kids-toys-backend'"
+
