@@ -275,9 +275,6 @@ const corsOptions = {
       'http://91.99.85.48',
       'http://91.99.85.48:80',
       'http://91.99.85.48:3000',
-      'https://kids-toys-shop.vercel.app',
-      'https://kids-toys-shop-git-main-bbvv1994.vercel.app',
-      'https://kids-toys-shop-bbvv1994.vercel.app'
     ];
     
     // Проверяем точное совпадение
@@ -292,18 +289,12 @@ const corsOptions = {
       return callback(null, true);
     }
     
-    // В production разрешаем все Vercel и Render домены
-    if (process.env.NODE_ENV === 'production' && 
-        (origin.includes('vercel.app') || origin.includes('onrender.com'))) {
+    // В production разрешаем все домены
+    if (process.env.NODE_ENV === 'production') {
       console.log('✅ CORS allowed production origin:', origin);
       return callback(null, true);
     }
     
-    // Разрешаем все Vercel домены (для разработки и продакшена)
-    if (origin.includes('vercel.app')) {
-      console.log('✅ CORS allowed Vercel origin:', origin);
-      return callback(null, true);
-    }
     
     console.log('❌ CORS blocked origin:', origin);
     console.log('❌ Allowed origins:', allowedOrigins);

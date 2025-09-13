@@ -45,10 +45,10 @@ const getEnvironment = () => {
     return 'production';
   }
   
-  // Если запущено на Vercel или Netlify - production
-  if (typeof window !== 'undefined' && (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('netlify.app'))) {
+  // Если запущено на Netlify - production
+  if (typeof window !== 'undefined' && window.location.hostname.includes('netlify.app')) {
     if (process.env.NODE_ENV !== 'production') {
-      console.log('✅ Определено как production (Vercel/Netlify)');
+      console.log('✅ Определено как production (Netlify)');
     }
     return 'production';
   }
@@ -124,9 +124,7 @@ const isDevelopment = process.env.NODE_ENV === 'development' ||
 
 // Более надежное определение продакшена
 const isProduction = !isDevelopment || 
-                    window.location.hostname.includes('vercel.app') ||
                     window.location.hostname.includes('netlify.app') ||
-                    window.location.hostname.includes('render.com') ||
                     window.location.hostname.includes('herokuapp.com') ||
                     process.env.NODE_ENV === 'production';
 
