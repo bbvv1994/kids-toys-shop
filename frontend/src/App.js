@@ -27,6 +27,9 @@ import ConfirmEmailPage from './components/ConfirmEmailPage';
 import OAuthSuccessPage from './components/OAuthSuccessPage';
 import AppContent from './components/AppContent';
 import { useDeviceType } from './utils/deviceDetection';
+import { CartProvider } from './contexts/CartContext';
+import { UserProvider } from './contexts/UserContext';
+import { ProductsProvider } from './contexts/ProductsContext';
 import { getImageUrl, API_BASE_URL } from './config';
 import { getTranslatedName, forceLanguageUpdate, checkTranslationsAvailable } from './utils/translationUtils';
 import TranslationDebugger from './components/TranslationDebugger';
@@ -382,9 +385,6 @@ function App() {
   const { i18n } = useTranslation();
   
   // Локальные состояния для устранения ошибок no-undef
-  const [cart, setCart] = useState({ items: [] });
-  const [cartLoading, setCartLoading] = useState(true);
-  const [wishlist, setWishlist] = useState([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
@@ -393,8 +393,6 @@ function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const appBarRef = useRef(null);
-  const [user, setUser] = useState(null);
-  const [userLoading, setUserLoading] = useState(true);
   const [submenuTimeout, setSubmenuTimeout] = useState(null);
   
   // Поддержка RTL для иврита - только для текста, не для компоновки
@@ -435,13 +433,6 @@ function App() {
     return () => clearTimeout(timer);
   }, [i18n.language]);
   
-  // Делаем setUser доступным глобально для ConfirmEmailPage
-  useEffect(() => {
-    window.setUser = setUser;
-    return () => {
-      delete window.setUser;
-    };
-  }, []);
 
   // Отладчик переводов для production
   useEffect(() => {
@@ -488,375 +479,18 @@ function App() {
   // }, [addProductOpen]);
 
   // Загрузка пользователя из localStorage при инициализации
-  useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      try {
-        const userData = JSON.parse(savedUser);
-        
-        // Проверяем, что пользователь подтвердил email
-        if (userData.emailVerified === false) {
 
-          localStorage.removeItem('user');
-          setUserLoading(false);
-          return; // Не устанавливаем пользователя, если email не подтвержден
-        }
-        
-        // Ensure the user object includes the token
-        const userWithToken = {
-          ...userData,
-          token: userData.token || localStorage.getItem('token')
-        };
-        
-        setUser(userWithToken);
-      } catch (error) {
-        console.error('Ошибка при загрузке пользователя из localStorage:', error);
-        localStorage.removeItem('user');
-      }
-    }
-    
-    // Устанавливаем загрузку в false после попытки загрузки
-    setUserLoading(false);
-  }, []);
 
-  // Загрузка локальной корзины для гостей
-  useEffect(() => {
-    if (!user) {
-      // Если пользователь не авторизован, загружаем локальную корзину
-      const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');
-      setCart(localCart);
-    }
-  }, [user]);
 
-  // Обработка подтверждения email через URL
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    
-    if (token) {
-      // Подтверждаем email и автоматически входим в систему
-      fetch(`${API_BASE_URL}/api/auth/confirm?token=${token}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.token && data.user) {
-            // Автоматически входим в систему
-            const userData = {
-              ...data.user,
-              token: data.token
-            };
-            
-            // Сохраняем в localStorage
-            localStorage.setItem('user', JSON.stringify(userData));
-            localStorage.setItem('token', data.token);
-            
-            // Устанавливаем пользователя
-            setUser(userData);
-            
-            // Очищаем URL от токена
-            window.history.replaceState({}, document.title, window.location.pathname);
-            
 
-          }
-        })
-        .catch(error => {
-          console.error('Ошибка подтверждения email:', error);
-        });
-    }
-  }, []);
-
-  // Load cart when user is authenticated
-  useEffect(() => {
-    setCartLoading(true);
-    if (user && user.token) {
-      fetch(`${API_BASE_URL}/api/profile/cart`, {
-        headers: {
-          'Authorization': `Bearer ${user.token}`
-        }
-      })
-      .then(res => res.json())
-      .then(data => {
-        setCart(data);
-        setCartLoading(false);
-      })
-      .catch(error => {
-        console.error('Error loading cart:', error);
-        setCart({ items: [] });
-        setCartLoading(false);
-      });
-    } else {
-      // Для незарегистрированных пользователей загружаем локальную корзину
-      const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');
-      setCart(localCart);
-      setCartLoading(false);
-    }
-  }, [user]);
-
-  // Load wishlist when user is authenticated
-  useEffect(() => {
-    if (user && user.token) {
-      fetch(`${API_BASE_URL}/api/profile/wishlist`, {
-        headers: {
-          'Authorization': `Bearer ${user.token}`
-        }
-      })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then(data => {
-    
-        // The wishlist API returns { items: [{ productId: number, product: {...} }] }
-        const wishlistItems = data.items || [];
-        setWishlist(wishlistItems);
-      })
-      .catch(error => {
-        console.error('Error loading wishlist:', error);
-        setWishlist([]);
-      });
-    } else {
-      setWishlist([]);
-    }
-  }, [user]);
 
   // Функция для открытия бокового меню
   const onOpenSidebar = () => {
     setDrawerOpen(true);
   };
 
-  // Функции для работы с корзиной
-  const handleAddToCart = async (product, category, quantity = 1) => {
-    if (!user || !user.token) {
-      // Для незарегистрированных пользователей используем локальную корзину
-      const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');
-      
-      // Проверяем, есть ли уже такой товар в корзине
-      const existingItem = localCart.items.find(item => item.product.id === product.id);
-      
-      if (existingItem) {
-        existingItem.quantity += quantity;
-      } else {
-        localCart.items.push({
-          id: Date.now() + Math.random(), // Уникальный ID для локального элемента
-          product: product,
-          quantity: quantity
-        });
-      }
-      
-      localStorage.setItem('localCart', JSON.stringify(localCart));
-      setCart(localCart);
-      return;
-    }
-    
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/profile/cart/add`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
-        },
-        body: JSON.stringify({ productId: product.id, quantity: quantity })
-      });
-      
-      if (response.ok) {
-        const updatedCart = await response.json();
-        setCart(updatedCart);
-    
-      } else {
-        console.error('Failed to add product to cart');
-      }
-    } catch (error) {
-      console.error('Error adding product to cart:', error);
-    }
-  };
-
-  const handleChangeCartQuantity = async (productId, quantity) => {
-    if (!user || !user.token) {
-      // Для незарегистрированных пользователей обновляем локальную корзину
-      const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');
-      const itemIndex = localCart.items.findIndex(item => item.product.id === productId);
-      
-      if (itemIndex !== -1) {
-        if (quantity <= 0) {
-          localCart.items.splice(itemIndex, 1);
-        } else {
-          localCart.items[itemIndex].quantity = quantity;
-        }
-        
-        localStorage.setItem('localCart', JSON.stringify(localCart));
-        setCart(localCart);
-      }
-      return;
-    }
-    
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/profile/cart/update`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
-        },
-        body: JSON.stringify({ productId, quantity })
-      });
-      
-      if (response.ok) {
-        const updatedCart = await response.json();
-        setCart(updatedCart);
-      }
-    } catch (error) {
-      console.error('Error updating cart quantity:', error);
-    }
-  };
-
-  const handleRemoveFromCart = async (productId) => {
-    if (!user || !user.token) {
-      // Для незарегистрированных пользователей удаляем из локальной корзины
-      const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');
-      const itemIndex = localCart.items.findIndex(item => item.product.id === productId);
-      
-      if (itemIndex !== -1) {
-        localCart.items.splice(itemIndex, 1);
-        localStorage.setItem('localCart', JSON.stringify(localCart));
-        setCart(localCart);
-      }
-      return;
-    }
-    
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/profile/cart/remove`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
-        },
-        body: JSON.stringify({ productId })
-      });
-      
-      if (response.ok) {
-        const updatedCart = await response.json();
-        setCart(updatedCart);
-      }
-    } catch (error) {
-      console.error('Error removing from cart:', error);
-    }
-  };
-
-  // Функция для очистки корзины после успешного заказа
-  const handleClearCart = async () => {
-    if (!user || !user.token) {
-      // Для незарегистрированных пользователей очищаем локальную корзину
-      localStorage.removeItem('localCart');
-      setCart({ items: [] });
-
-      return;
-    }
-    
-    try {
-      // Очищаем корзину на фронтенде
-      setCart({ items: [] });
-      
-      // Обновляем корзину через API для синхронизации с сервером
-      const response = await fetch(`${API_BASE_URL}/api/profile/cart`, {
-        headers: {
-          'Authorization': `Bearer ${user.token}`
-        }
-      });
-      
-      if (response.ok) {
-        const updatedCart = await response.json();
-        setCart(updatedCart);
-      }
-      
-
-    } catch (error) {
-      console.error('Error clearing cart:', error);
-    }
-  };
-
-  // Функция для работы с избранным
-  const handleWishlistToggle = async (productId, isInWishlist) => {
-    setLottiePlayingMap(prev => {
-      const newMap = { ...prev, [Number(productId)]: true };
-      return newMap;
-    });
-    setTimeout(() => {
-      setLottiePlayingMap(prev => {
-        const newMap = { ...prev, [Number(productId)]: false };
-        return newMap;
-      });
-    }, 1200);
-    if (!user || !user.token) {
-      setAuthOpen(true);
-      return;
-    }
-    
-    try {
-      const endpoint = isInWishlist ? 'remove' : 'add';
-      const response = await fetch(`${API_BASE_URL}/api/profile/wishlist/${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
-        },
-        body: JSON.stringify({ productId: Number(productId) })
-      });
-      
-      if (response.ok) {
-        const updatedWishlist = await response.json();
-        setWishlist(updatedWishlist.items || []);
-      } else {
-        const errorData = await response.json();
-        console.error('Wishlist API error:', errorData);
-      }
-    } catch (error) {
-      console.error('Error toggling wishlist:', error);
-    }
-  };
 
   // Функции для аутентификации
-  const handleLogin = async (userData) => {
-    // Проверяем, что пользователь подтвердил email
-    if (userData && userData.emailVerified === false) {
-      return; // Не входим в систему, если email не подтвержден
-    }
-    
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
-  };
-
-  const handleRegister = async (userData) => {
-    // При регистрации пользователь не должен сразу входить в систему
-    // Показываем модальное окно с просьбой подтвердить email
-    
-    // Сохраняем данные для модального окна
-    setEmailConfirmData({
-      email: userData.email,
-      name: userData.name
-    });
-    
-    // Открываем модальное окно подтверждения
-    setEmailConfirmModalOpen(true);
-    
-    // Закрываем окно авторизации
-    setAuthOpen(false);
-  };
-
-  const handleLogout = () => {
-    // Логика выхода
-    setUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('submittedReviews');
-    localStorage.removeItem('completedNotifications');
-    localStorage.removeItem('notificationsCleared');
-    localStorage.removeItem('notificationsClearedAt');
-    localStorage.removeItem('notificationsCountAtClear');
-    localStorage.removeItem('clearNotificationsOnProfile');
-  };
-
-  const handleUserUpdate = (updatedUser) => {
-    setUser(updatedUser);
-  };
 
   const handleEditProduct = (product) => {
     setEditingProduct(product);
@@ -874,10 +508,7 @@ function App() {
   };
   // Сохранить изменения товара
   const handleSaveProduct = async (updatedProduct) => {
-    if (!user || !user.token) {
-      console.error('User not authenticated');
-      return;
-    }
+    // Аутентификация будет проверяться в AppContent через контексты
 
     try {
 
@@ -982,10 +613,7 @@ function App() {
 
   // Удалить товар
   const handleDeleteProduct = async (productId) => {
-    if (!user || !user.token) {
-      console.error('User not authenticated');
-      return;
-    }
+    // Аутентификация будет проверяться в AppContent через контексты
 
     try {
       const userData = localStorage.getItem('user');
@@ -1345,15 +973,11 @@ function App() {
   };
 
   // Функция для загрузки категорий из API
-  const loadCategoriesFromAPI = async (forceRefresh = false) => {
+  const loadCategoriesFromAPI = async (forceRefresh = false, headers = {}) => {
     try {
       console.log('🔄 loadCategoriesFromAPI: Starting load...', { forceRefresh });
       
-      const categoriesUrl = user?.role === 'admin' 
-        ? `${API_BASE_URL}/api/admin/categories${forceRefresh ? `?_t=${Date.now()}` : ''}`
-        : `${API_BASE_URL}/api/categories${forceRefresh ? `?_t=${Date.now()}` : ''}`;
-      
-      const headers = user?.token ? { 'Authorization': `Bearer ${user.token}` } : {};
+      const categoriesUrl = `${API_BASE_URL}/api/categories${forceRefresh ? `?_t=${Date.now()}` : ''}`;
       
       const res = await fetch(categoriesUrl, { headers });
       if (!res.ok) {
@@ -1410,7 +1034,7 @@ function App() {
     // Очищаем localStorage для принудительной загрузки категорий
     localStorage.removeItem('adminCategories');
     loadCategoriesFromAPI();
-  }, [user]);
+  }, []); // Зависимость user будет обрабатываться в AppContent через контексты
 
   // Делаем функцию loadCategoriesFromAPI доступной глобально
   useEffect(() => {
@@ -1486,63 +1110,59 @@ function App() {
         background: 'none',
       }}>
         <Router>
-          <AppContent 
-            cart={cart}
-            cartLoading={cartLoading}
-            user={user}
-            userLoading={userLoading}
-            handleLogout={handleLogout}
-            setAuthOpen={setAuthOpen}
-            profileLoading={profileLoading}
-            onOpenSidebar={onOpenSidebar}
-            mobileOpen={mobileOpen}
-            setMobileOpen={setMobileOpen}
-            appBarRef={appBarRef}
-            drawerOpen={drawerOpen}
-            setDrawerOpen={setDrawerOpen}
-
-            miniCartOpen={miniCartOpen}
-            setMiniCartOpen={setMiniCartOpen}
-            handleChangeCartQuantity={handleChangeCartQuantity}
-            handleRemoveFromCart={handleRemoveFromCart}
-            handleAddToCart={handleAddToCart}
-            handleEditProduct={handleEditProduct}
-            handleSaveProduct={handleSaveProduct}
-            handleDeleteProduct={handleDeleteProduct}
-            handleWishlistToggle={handleWishlistToggle}
-            handleClearCart={handleClearCart}
-            wishlist={wishlist}
-            products={products}
-            dbCategories={dbCategories}
-            authOpen={authOpen}
-            handleLogin={handleLogin}
-            handleRegister={handleRegister}
-            
-            editModalOpen={editModalOpen}
-            setEditModalOpen={setEditModalOpen}
-            editingProduct={editingProduct}
-            setEditingProduct={setEditingProduct}
-            loadCategoriesFromAPI={loadCategoriesFromAPI}
-            selectedGenders={selectedGenders}
-            onGendersChange={setSelectedGenders}
-            selectedBrands={selectedBrands}
-            selectedAgeGroups={selectedAgeGroups}
-            setSelectedBrands={setSelectedBrands}
-            setSelectedAgeGroups={setSelectedAgeGroups}
-            handleUserUpdate={handleUserUpdate}
-            handleOpenReviewForm={handleOpenReviewForm}
-            reviewFormOpen={reviewFormOpen}
-            setReviewFormOpen={setReviewFormOpen}
-            reviewFormData={reviewFormData}
-                      emailConfirmModalOpen={emailConfirmModalOpen}
-          setEmailConfirmModalOpen={setEmailConfirmModalOpen}
-          emailConfirmData={emailConfirmData}
-          priceRange={priceRange}
-          setPriceRange={setPriceRange}
-          filtersMenuOpen={filtersMenuOpen}
-          setFiltersMenuOpen={setFiltersMenuOpen}
-          desktopSearchBarRef={desktopSearchBarRef}
-        />
+          <UserProvider>
+            <ProductsProvider>
+              <CartProvider>
+                <AppContent 
+                  editModalOpen={editModalOpen}
+                  setEditModalOpen={setEditModalOpen}
+                  authOpen={authOpen}
+                  setAuthOpen={setAuthOpen}
+                  authLoading={authLoading}
+                  snackbar={snackbar}
+                  setSnackbar={setSnackbar}
+                  hoveredCategory={hoveredCategory}
+                  setHoveredCategory={setHoveredCategory}
+                  drawerOpen={drawerOpen}
+                  setDrawerOpen={setDrawerOpen}
+                  mobileOpen={mobileOpen}
+                  setMobileOpen={setMobileOpen}
+                  appBarRef={appBarRef}
+                  submenuTimeout={submenuTimeout}
+                  setSubmenuTimeout={setSubmenuTimeout}
+                  onOpenSidebar={onOpenSidebar}
+                  handleEditProduct={handleEditProduct}
+                  handleSaveProduct={handleSaveProduct}
+                  handleDeleteProduct={handleDeleteProduct}
+                  // TODO: Use UserContext for authentication
+                  // handleLogin and handleRegister are now in UserContext
+                  editingProduct={editingProduct}
+                  setEditingProduct={setEditingProduct}
+                  loadCategoriesFromAPI={loadCategoriesFromAPI}
+                  selectedGenders={selectedGenders}
+                  onGendersChange={setSelectedGenders}
+                  selectedBrands={selectedBrands}
+                  selectedAgeGroups={selectedAgeGroups}
+                  setSelectedBrands={setSelectedBrands}
+                  setSelectedAgeGroups={setSelectedAgeGroups}
+                  // TODO: Use UserContext for user updates
+                  // handleUserUpdate is now in UserContext
+                  handleOpenReviewForm={handleOpenReviewForm}
+                  reviewFormOpen={reviewFormOpen}
+                  setReviewFormOpen={setReviewFormOpen}
+                  reviewFormData={reviewFormData}
+                  emailConfirmModalOpen={emailConfirmModalOpen}
+                  setEmailConfirmModalOpen={setEmailConfirmModalOpen}
+                  emailConfirmData={emailConfirmData}
+                  priceRange={priceRange}
+                  setPriceRange={setPriceRange}
+                  filtersMenuOpen={filtersMenuOpen}
+                  setFiltersMenuOpen={setFiltersMenuOpen}
+                  desktopSearchBarRef={desktopSearchBarRef}
+                />
+              </CartProvider>
+            </ProductsProvider>
+          </UserProvider>
         </Router>
       </Box>
       {/* Кнопка возврата вверх на всех страницах */}

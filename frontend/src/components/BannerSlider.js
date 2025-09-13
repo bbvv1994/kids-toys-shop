@@ -88,27 +88,44 @@ const BannerSlider = ({ drawerWidth = 280 }) => {
     return () => clearInterval(timer);
   }, [isAutoPlaying, banners.length]);
 
+  // Обработка клавиатуры
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft') {
+        // Стрелка влево = переход к предыдущему баннеру
+        setIndex((prev) => (prev - 1 + banners.length) % banners.length);
+        setIsAutoPlaying(false);
+        setTimeout(() => setIsAutoPlaying(true), 3000);
+      } else if (e.key === 'ArrowRight') {
+        // Стрелка вправо = переход к следующему баннеру
+        setIndex((prev) => (prev + 1) % banners.length);
+        setIsAutoPlaying(false);
+        setTimeout(() => setIsAutoPlaying(true), 3000);
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        setIsAutoPlaying(!isAutoPlaying);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isAutoPlaying, banners.length]);
+
   // Остановка автопереключения при наведении
   const handleMouseEnter = () => setIsAutoPlaying(false);
   const handleMouseLeave = () => setIsAutoPlaying(true);
 
-  // Свайпы для мобилок (оптимизированные)
+  // Свайпы для мобилок (исправленная логика)
   const handlers = useSwipeable({
     onSwipedLeft: () => {
-      if (isRTL) {
-        setIndex((prev) => (prev - 1 + banners.length) % banners.length);
-      } else {
-        setIndex((prev) => (prev + 1) % banners.length);
-      }
+      // Свайп влево = переход к следующему баннеру
+      setIndex((prev) => (prev + 1) % banners.length);
       setIsAutoPlaying(false);
       setTimeout(() => setIsAutoPlaying(true), 3000);
     },
     onSwipedRight: () => {
-      if (isRTL) {
-        setIndex((prev) => (prev + 1) % banners.length);
-      } else {
-        setIndex((prev) => (prev - 1 + banners.length) % banners.length);
-      }
+      // Свайп вправо = переход к предыдущему баннеру
+      setIndex((prev) => (prev - 1 + banners.length) % banners.length);
       setIsAutoPlaying(false);
       setTimeout(() => setIsAutoPlaying(true), 3000);
     },

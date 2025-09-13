@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useUser } from '../contexts/UserContext';
+import { useCart } from '../contexts/CartContext';
+import { useProducts } from '../contexts/ProductsContext';
 import {
   Box,
   Container,
@@ -2748,13 +2751,15 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
 
 // Компонент для контента внутри Router
 function AppContent({ 
-    cart, cartLoading, user, userLoading, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, 
-    mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, 
-    miniCartOpen, setMiniCartOpen, handleChangeCartQuantity, 
-    handleRemoveFromCart, handleAddToCart, handleEditProduct, 
-    handleSaveProduct, handleDeleteProduct, handleWishlistToggle, handleClearCart, wishlist, products, dbCategories, 
-    authOpen, handleLogin, handleRegister,
-    editModalOpen, setEditModalOpen, editingProduct, setEditingProduct, loadCategoriesFromAPI, selectedGenders, onGendersChange, selectedBrands, selectedAgeGroups, setSelectedBrands, setSelectedAgeGroups, handleUserUpdate, handleOpenReviewForm, reviewFormOpen, setReviewFormOpen, reviewFormData, emailConfirmModalOpen, setEmailConfirmModalOpen, emailConfirmData, priceRange, setPriceRange, filtersMenuOpen, setFiltersMenuOpen, desktopSearchBarRef
+    editModalOpen, setEditModalOpen, authOpen, setAuthOpen, authLoading, snackbar, setSnackbar, 
+    hoveredCategory, setHoveredCategory, drawerOpen, setDrawerOpen, mobileOpen, setMobileOpen, 
+    appBarRef, submenuTimeout, setSubmenuTimeout, onOpenSidebar, handleEditProduct, 
+    handleSaveProduct, handleDeleteProduct, editingProduct, setEditingProduct, 
+    loadCategoriesFromAPI, selectedGenders, onGendersChange, selectedBrands, selectedAgeGroups, 
+    setSelectedBrands, setSelectedAgeGroups, handleOpenReviewForm, reviewFormOpen, 
+    setReviewFormOpen, reviewFormData, emailConfirmModalOpen, setEmailConfirmModalOpen, 
+    emailConfirmData, priceRange, setPriceRange, filtersMenuOpen, setFiltersMenuOpen, 
+    desktopSearchBarRef
   }) {
     const location = useLocation();
     const navigate = useNavigate();
@@ -2763,6 +2768,37 @@ function AppContent({
     const isNarrow = useMediaQuery(theme.breakpoints.down('lg')); // < 1200px
     const isDesktop = useMediaQuery(theme.breakpoints.up('lg')); // >= 1200px
     const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
+    
+    // Используем контексты
+    const { user, userLoading, handleLogout, handleLogin, handleRegister, handleUserUpdate } = useUser();
+    const { cart, cartLoading, handleAddToCart, handleChangeCartQuantity, handleRemoveFromCart, handleClearCart } = useCart();
+    const { products, dbCategories, wishlist, handleWishlistToggle } = useProducts();
+    
+    // Локальные состояния
+    const [profileLoading, setProfileLoading] = useState(false);
+    const [miniCartOpen, setMiniCartOpen] = useState(false);
+    
+    // Обертки для функций с проверкой аутентификации
+    const handleSaveProductWithAuth = async (updatedProduct) => {
+      if (!user || !user.token) {
+        console.error('User not authenticated');
+        return;
+      }
+      return handleSaveProduct(updatedProduct);
+    };
+    
+    const handleDeleteProductWithAuth = async (productId) => {
+      if (!user || !user.token) {
+        console.error('User not authenticated');
+        return;
+      }
+      return handleDeleteProduct(productId);
+    };
+    
+    const loadCategoriesFromAPIWithAuth = async (forceRefresh = false) => {
+      const headers = user?.token ? { 'Authorization': `Bearer ${user.token}` } : {};
+      return loadCategoriesFromAPI(forceRefresh, headers);
+    };
     
     // Проверка для отображения десктопной поисковой строки
     const isHome = location.pathname === '/';
@@ -3451,7 +3487,7 @@ function AppContent({
             <Route path="/order-success" element={<OrderSuccessPage />} />
             <Route path="/wishlist" element={<WishlistPage user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} />} />
             <Route path="/profile" element={<UserCabinetPage user={user} handleLogout={handleLogout} wishlist={wishlist} handleWishlistToggle={handleWishlistToggle} cart={cart} handleAddToCart={handleAddToCart} handleChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} handleUserUpdate={handleUserUpdate} handleOpenReviewForm={handleOpenReviewForm} />} />
-            <Route path="/cms" element={<CMSPage loadCategoriesFromAPI={loadCategoriesFromAPI} editModalOpen={editModalOpen} setEditModalOpen={setEditModalOpen} editingProduct={editingProduct} setEditingProduct={setEditingProduct} dbCategories={dbCategories} />} />
+            <Route path="/cms" element={<CMSPage loadCategoriesFromAPI={loadCategoriesFromAPIWithAuth} editModalOpen={editModalOpen} setEditModalOpen={setEditModalOpen} editingProduct={editingProduct} setEditingProduct={setEditingProduct} dbCategories={dbCategories} />} />
             <Route path="/attribution" element={<AttributionPage />} />
             <Route path="/search" element={<SearchResultsPage products={products} cart={cart} onChangeCartQuantity={handleChangeCartQuantity} />} />
             <Route path="/about" element={<AboutPage />} />
@@ -3480,8 +3516,8 @@ function AppContent({
           open={editModalOpen}
           product={editingProduct}
           onClose={() => { setEditModalOpen(false); setEditingProduct(null); }}
-          onSave={handleSaveProduct}
-          onDelete={handleDeleteProduct}
+          onSave={handleSaveProductWithAuth}
+          onDelete={handleDeleteProductWithAuth}
           categories={dbCategories}
         />
         

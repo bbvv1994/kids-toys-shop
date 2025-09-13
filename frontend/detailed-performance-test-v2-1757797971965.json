@@ -1,0 +1,50 @@
+{
+  "timestamp": "2025-09-13T21:12:51.824Z",
+  "testVersion": "v2 - After Context Integration",
+  "reactApp": {
+    "status": "success",
+    "duration": 29.3724,
+    "contentLength": 3120,
+    "memoryDelta": 536104
+  },
+  "bundlePerformance": [
+    {
+      "name": "Main JS Bundle",
+      "status": "success",
+      "duration": 18.6813,
+      "size": 10062192,
+      "sizeKB": 9826.36
+    },
+    {
+      "name": "Main CSS Bundle",
+      "status": "failed",
+      "error": "HTTP 404"
+    }
+  ],
+  "memoryUsage": {
+    "initial": {
+      "rss": 72687616,
+      "heapTotal": 55488512,
+      "heapUsed": 22394584,
+      "external": 4913010,
+      "arrayBuffers": 3206086
+    },
+    "final": {
+      "rss": 73179136,
+      "heapTotal": 55750656,
+      "heapUsed": 23253824,
+      "external": 4981410,
+      "arrayBuffers": 3274486
+    },
+    "increase": 859240,
+    "stable": true
+  },
+  "summary": {
+    "totalTests": 3,
+    "successfulTests": 2,
+    "averageDuration": 24,
+    "totalBundleSize": 10062192,
+    "totalBundleSizeKB": 9826,
+    "memoryStable": true
+  }
+}
