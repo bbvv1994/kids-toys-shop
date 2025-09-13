@@ -250,6 +250,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
           token: data.token
         };
         localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('token', data.token);
 
         onLogin && onLogin(userData);
         // Закрываем диалоговое окно после успешного входа

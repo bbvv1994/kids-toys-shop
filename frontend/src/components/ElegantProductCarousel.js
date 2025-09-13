@@ -16,7 +16,8 @@ function ElegantProductCarousel({
   onChangeCartQuantity,
   onEditProduct,
   isAdmin,
-  reducedMargin = false
+  reducedMargin = false,
+  reducedBottomMargin = false
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -25,57 +26,25 @@ function ElegantProductCarousel({
   const isLarge = useMediaQuery('(min-width: 1500px)');
 
   // Количество видимых товаров на разных экранах
-  const visibleCount = isMobile ? 1 : isTablet ? 2 : isLarge ? 4 : 3;
+  const visibleCount = isMobile ? 2 : isTablet ? 2 : isLarge ? 4 : 3;
   const items = products || [];
-  const totalPages = Math.max(1, items.length - visibleCount + 1);
+  const totalPages = Math.max(1, Math.ceil(items.length / visibleCount));
 
   // Адаптивные размеры контейнера
   const getContainerMaxWidth = () => {
-    if (isMobile) return '280px';
+    if (isMobile) return 'calc(2 * 167px + 4px)'; // 2 карточки по 167px + 4px отступ
     if (isTablet) return 'calc(2 * 280px + 16px)'; // 2 карточки + 1 отступ
     if (isLarge) return 'calc(4 * 280px + 3 * 16px)'; // 4 карточки + 3 отступа
     return 'calc(3 * 280px + 2 * 16px)'; // 3 карточки + 2 отступа (по умолчанию для средних экранов)
   };
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [direction, setDirection] = useState(1); // 1 = вперед, -1 = назад
 
   // Сброс позиции при изменении размера экрана
   useEffect(() => {
     setCurrentIndex(0);
   }, [visibleCount]);
 
-  // Автопрокрутка
-  useEffect(() => {
-    if (!isAutoPlaying || totalPages <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => {
-        if (direction === 1) {
-          // Движемся вперед
-          if (prev < totalPages - 1) {
-            return prev + 1;
-          } else {
-            // Достигли конца - меняем направление
-            setDirection(-1);
-            return prev - 1;
-          }
-        } else {
-          // Движемся назад
-          if (prev > 0) {
-            return prev - 1;
-          } else {
-            // Достигли начала - меняем направление
-            setDirection(1);
-            return prev + 1;
-          }
-        }
-      });
-    }, 4000); // 4 секунды
-
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, totalPages, direction]);
 
   // Обработка свайпов
   const handlers = useSwipeable({
@@ -92,34 +61,18 @@ function ElegantProductCarousel({
   const nextPage = () => {
     if (currentIndex < totalPages - 1) {
       setCurrentIndex(prev => prev + 1);
-      setDirection(1); // Устанавливаем направление вперед
-      setIsAutoPlaying(false);
-      setTimeout(() => {
-        setIsAutoPlaying(true);
-      }, 1000);
     }
   };
 
   const prevPage = () => {
     if (currentIndex > 0) {
       setCurrentIndex(prev => prev - 1);
-      setDirection(-1); // Устанавливаем направление назад
-      setIsAutoPlaying(false);
-      setTimeout(() => {
-        setIsAutoPlaying(true);
-      }, 1000);
     }
   };
 
   const handleDotClick = (pageIndex) => {
     if (pageIndex === currentIndex) return;
     setCurrentIndex(pageIndex);
-    // Определяем направление на основе позиции
-    setDirection(pageIndex > currentIndex ? 1 : -1);
-    setIsAutoPlaying(false);
-    setTimeout(() => {
-      setIsAutoPlaying(true);
-    }, 1000);
   };
 
   if (items.length === 0) return null;
@@ -128,11 +81,11 @@ function ElegantProductCarousel({
     <Box
       sx={{
         mt: reducedMargin ? { xs: 2, md: 4 } : { xs: 6, md: 10 },
-        mb: 6,
+        mb: reducedBottomMargin ? { xs: 2, md: 3 } : 6,
         ml: { xs: 0, lg: '260px' },
         width: { xs: '100%', lg: 'calc(100vw - 289px)' },
         position: 'relative',
-        px: { xs: 2, md: 4 } // Добавляем отступы по бокам
+        px: { xs: 1, md: 4 } // Минимальные отступы по бокам на мобильных
       }}
     >
       {/* Заголовок секции */}
@@ -152,8 +105,6 @@ function ElegantProductCarousel({
       {/* Контейнер карусели */}
       <Box
         {...handlers}
-        onMouseEnter={() => setIsAutoPlaying(false)}
-        onMouseLeave={() => setIsAutoPlaying(true)}
         sx={{
           position: 'relative',
           overflow: 'hidden',
@@ -166,17 +117,16 @@ function ElegantProductCarousel({
         <Box
           sx={{
             display: 'flex',
-            gap: 2, // 16px отступ между карточками
-            transform: `translateX(-${currentIndex * (280 + 16)}px)`, // 280px карточка + 16px отступ
-            transition: 'transform 0.5s ease-in-out',
+            gap: isMobile ? 0.5 : 2, // 4px отступ на мобильных, 16px на остальных
             width: 'max-content', // Ширина по содержимому
+            justifyContent: isMobile ? 'flex-start' : 'center', // Выравнивание по левому краю на мобильных
           }}
         >
-          {items.map((product, i) => (
+          {items.slice(currentIndex * visibleCount, (currentIndex + 1) * visibleCount).map((product, i) => (
             <Box
               key={product.id}
               sx={{
-                width: '280px',
+                width: isMobile ? '50%' : '280px',
                 flexShrink: 0,
                 display: 'flex',
                 justifyContent: 'center'
@@ -191,7 +141,7 @@ function ElegantProductCarousel({
                 cart={cart}
                 onChangeCartQuantity={onChangeCartQuantity}
                 onEditProduct={onEditProduct}
-                viewMode="carousel"
+                viewMode={isMobile ? "carousel-mobile" : "carousel"}
                 isAdmin={isAdmin}
               />
             </Box>
@@ -288,7 +238,7 @@ function ElegantProductCarousel({
           sx={{
             display: 'flex',
             justifyContent: 'center',
-            gap: 1.5,
+            gap: { xs: 1, md: 1.5 },
             mt: 3,
             alignItems: 'center'
           }}
@@ -299,7 +249,7 @@ function ElegantProductCarousel({
               size="small"
               onClick={() => handleDotClick(i)}
               sx={{
-                padding: '6px',
+                padding: { xs: '4px', md: '6px' },
                 '&:hover': {
                   backgroundColor: 'rgba(255, 102, 0, 0.1)'
                 }
@@ -309,7 +259,7 @@ function ElegantProductCarousel({
                 <CircleIcon
                   sx={{
                     color: '#ff6600',
-                    fontSize: 16,
+                    fontSize: { xs: 12, md: 16 },
                     transition: 'all 0.3s ease'
                   }}
                 />
@@ -317,7 +267,7 @@ function ElegantProductCarousel({
                 <CircleOutlinedIcon
                   sx={{
                     color: 'rgba(0,0,0,0.3)',
-                    fontSize: 16,
+                    fontSize: { xs: 12, md: 16 },
                     transition: 'all 0.3s ease',
                     '&:hover': {
                       color: 'rgba(255, 102, 0, 0.6)'

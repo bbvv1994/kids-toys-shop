@@ -83,6 +83,7 @@ import {
 import { API_BASE_URL, getImageUrl } from '../config';
 import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
 import { getSpeechRecognitionLanguage, getSpeechRecognitionErrorMessage, isSpeechRecognitionSupported } from '../utils/speechRecognitionUtils';
+import { useDeviceType } from '../utils/deviceDetection';
 import ProductCard from './ProductCard';
 import ElegantProductCarousel from './ElegantProductCarousel';
 import LazyImage from './LazyImage';
@@ -101,6 +102,8 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
     const [interimTranscript, setInterimTranscript] = useState('');
     const recognitionRef = useRef(null);
     const [categoryProducts, setCategoryProducts] = useState([]);
+    const deviceType = useDeviceType();
+    const isMobile = deviceType === 'mobile';
   
     // Функция для загрузки товаров категории
     const fetchCategoryData = async () => {
@@ -661,13 +664,18 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
           {/* Сетка товаров из этой категории */}
           <Box sx={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 280px))',
+            gridTemplateColumns: isMobile 
+              ? 'repeat(2, 1fr)' 
+              : 'repeat(auto-fit, minmax(280px, 280px))',
             justifyContent: 'center',
-            gap: '8px',
+            gap: isMobile ? '4px' : '8px',
             mb: 6,
             width: '100%',
-            maxWidth: { md: 'calc(5 * 280px + 4 * 8px)' },
+            maxWidth: isMobile 
+              ? '100%' 
+              : { md: 'calc(5 * 280px + 4 * 8px)' },
             mx: 'auto',
+            px: isMobile ? 1 : 0,
             // Центрирование для мобильных устройств
             '@media (max-width: 899px)': {
               justifyItems: 'center'
@@ -689,7 +697,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
                     cart={cart} 
                     onChangeCartQuantity={handleChangeCartQuantity} 
                     onEditProduct={onEditProduct}
-                    viewMode="grid"
+                    viewMode={isMobile ? "carousel-mobile" : "grid"}
                   />
                 </Box>
               ))

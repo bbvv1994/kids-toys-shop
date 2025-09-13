@@ -34,6 +34,8 @@ function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChang
           onEditProduct={onEditProduct}
           wishlist={wishlist}
           isAdmin={isAdmin}
+          reducedMargin={true}
+          reducedBottomMargin={true}
         />
         <ElegantProductCarousel
           title={t('home.popular')}

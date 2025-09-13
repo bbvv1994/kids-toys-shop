@@ -3133,7 +3133,7 @@ function AppContent({
           />
           
           {/* Мобильный поиск и фильтры под AppBar */}
-          {isNarrow && (
+          {isNarrow && !location.pathname.startsWith('/product/') && (
             <Box sx={{ 
               display: 'flex', 
               alignItems: 'center', 

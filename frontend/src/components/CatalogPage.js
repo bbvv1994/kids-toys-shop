@@ -15,7 +15,9 @@ import {
 import {
   ViewModule,
   ViewList,
-  KeyboardArrowUp as KeyboardArrowUpIcon
+  KeyboardArrowUp as KeyboardArrowUpIcon,
+  SwapVert as SortIcon,
+  FormatListNumbered as ItemsPerPageIcon
 } from '@mui/icons-material';
 import { useDeviceType } from '../utils/deviceDetection';
 import { getSpeechRecognitionLanguage, getSpeechRecognitionErrorMessage, isSpeechRecognitionSupported } from '../utils/speechRecognitionUtils';
@@ -514,7 +516,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
           </Box>
           
           {/* Отступ между карточками категорий и блоком сортировки */}
-          <Box sx={{ mb: 6 }} />
+          <Box sx={{ mb: 2 }} />
           
           {/* Строка поиска удалена по просьбе пользователя */}
 {searchQuery && !isListening && (
@@ -535,40 +537,44 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
             justifyContent: 'space-between',
             gap: { xs: 1, md: 3 },
             mb: 5,
-            mt: 3,
+            mt: 1,
             flexWrap: 'wrap',
             maxWidth: 1100,
             margin: '0 auto',
           }}>
             {/* Сортировка и количество — слева */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-              <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#222', mr: 1 }}>{t('catalog.sortBy')}:</Typography>
-              <CustomSelect
-                value={sortBy}
-                onChange={setSortBy}
-                width={180}
-                options={[
-                  { value: 'popular', label: t('catalog.sortOptions.popular') },
-                  { value: 'newest', label: t('catalog.sortOptions.newest') },
-                  { value: 'price-low', label: t('catalog.sortOptions.priceLow') },
-                  { value: 'price-high', label: t('catalog.sortOptions.priceHigh') },
-                  { value: 'name-az', label: t('catalog.sortOptions.nameAZ') },
-                  { value: 'name-za', label: t('catalog.sortOptions.nameZA') },
-                ]}
-                sx={{ minWidth: 160 }}
-              />
-              <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#222', ml: 3, mr: 1 }}>{t('catalog.itemsPerPage')}:</Typography>
-              <CustomSelect
-                value={pageSize}
-                onChange={v => setPageSize(Number(v))}
-                width={100}
-                options={[
-                  { value: 24, label: '24' },
-                  { value: 48, label: '48' },
-                  { value: 96, label: '96' },
-                ]}
-                sx={{ minWidth: 60 }}
-              />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <SortIcon sx={{ fontSize: 20, color: '#ff9800' }} />
+                <CustomSelect
+                  value={sortBy}
+                  onChange={setSortBy}
+                  width={180}
+                  options={[
+                    { value: 'popular', label: t('catalog.sortOptions.popular') },
+                    { value: 'newest', label: t('catalog.sortOptions.newest') },
+                    { value: 'price-low', label: t('catalog.sortOptions.priceLow') },
+                    { value: 'price-high', label: t('catalog.sortOptions.priceHigh') },
+                    { value: 'name-az', label: t('catalog.sortOptions.nameAZ') },
+                    { value: 'name-za', label: t('catalog.sortOptions.nameZA') },
+                  ]}
+                  sx={{ minWidth: 160 }}
+                />
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {!isMobile && <ItemsPerPageIcon sx={{ fontSize: 20, color: '#666' }} />}
+                <CustomSelect
+                  value={pageSize}
+                  onChange={v => setPageSize(Number(v))}
+                  width={100}
+                  options={[
+                    { value: 24, label: '24' },
+                    { value: 48, label: '48' },
+                    { value: 96, label: '96' },
+                  ]}
+                  sx={{ minWidth: 60 }}
+                />
+              </Box>
             </Box>
             {/* Переключатель вида — справа */}
             <Box sx={{ 
@@ -604,7 +610,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
             </Box>
           </Box>
           {/* Отступ между сортировкой и товарами через mb */}
-          <Box sx={{ mb: 5 }} />
+          <Box sx={{ mb: 0.5 }} />
         </Box>
       </Container>
 
@@ -615,14 +621,19 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
           {viewMode === 'grid' ? (
             <Box sx={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 280px))',
+              gridTemplateColumns: isMobile 
+                ? 'repeat(2, 1fr)' 
+                : 'repeat(auto-fit, minmax(280px, 280px))',
               justifyContent: 'center',
-              gap: '8px',
-              mt: 8,
+              gap: isMobile ? '4px' : '8px',
+              mt: 0.5,
               mb: 6,
               width: '100%',
-              maxWidth: { md: 'calc(5 * 280px + 4 * 8px)' },
-              mx: 'auto'
+              maxWidth: isMobile 
+                ? '100%' 
+                : { md: 'calc(5 * 280px + 4 * 8px)' },
+              mx: 'auto',
+              px: isMobile ? 1 : 0
             }}>
               {pagedProducts.length > 0 ? (
                 pagedProducts.map(product => (
@@ -638,7 +649,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                       cart={cart}
                       onChangeCartQuantity={handleChangeCartQuantity}
                       onEditProduct={onEditProduct}
-                      viewMode="grid"
+                      viewMode={isMobile ? "carousel-mobile" : "grid"}
                       isAdmin={user?.role === 'admin'}
                     />
                   </Box>

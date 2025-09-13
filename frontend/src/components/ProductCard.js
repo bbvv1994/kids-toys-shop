@@ -126,7 +126,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           maxWidth: viewMode === 'carousel' ? 320 : '260px',
           margin: viewMode === 'carousel' ? '0 auto' : undefined,
           display: 'flex',
-        flexDirection: 'column',
+          flexDirection: 'column',
           isolation: 'isolate',
           zIndex: isHovered ? 10 : 1,
           transform: isMobile ? 'none' : (isHovered ? 'translateY(-8px)' : 'translateY(0)'),
@@ -211,51 +211,19 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
           overflow: 'hidden', 
           borderRadius: isMobile ? '6px 6px 0px 0px' : '8px 8px 0px 0px',
           backgroundColor: '#f5f5f5',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          {(() => {
+          backgroundImage: `url(${(() => {
             const imgSrc = getImageUrl(
               (Array.isArray(product.imageUrls) && product.imageUrls.length > 0 && product.imageUrls[0]) ||
               (Array.isArray(product.images) && product.images.length > 0 && product.images[0]) ||
               product.image ||
               ''
             );
-            if (!imgSrc || imgError) {
-              return (
-                <LazyImage
-                  src="/photography.jpg"
-                  alt={t('productCard.noPhoto')}
-                  width="100%"
-                  height="100%"
-                  sx={{
-                    borderRadius: '8px 8px 0px 0px',
-                    minWidth: '100%',
-                    minHeight: '100%',
-                    maxWidth: '100%',
-                    maxHeight: '100%'
-                  }}
-                />
-              );
-            }
-            return (
-              <LazyImage
-                src={imgSrc}
-                alt={getTranslatedName(product)}
-                width="100%"
-                height="100%"
-                sx={{
-                  borderRadius: '8px 8px 0px 0px',
-                  minWidth: '100%',
-                  minHeight: '100%',
-                  maxWidth: '100%',
-                  maxHeight: '100%'
-                }}
-                onError={() => setImgError(true)}
-              />
-            );
-          })()}
+            return imgSrc && !imgError ? imgSrc : '/photography.jpg';
+          })()})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}>
         </Box>
         <div className="product-info" style={{ padding: isMobile ? '12px' : '16px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', height: '100%' }}>
           <h3 className="product-name" style={{
@@ -492,6 +460,282 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
               )}
             </div>
           </div>
+        </div>
+      </Box>
+    );
+  }
+
+  if (viewMode === 'carousel-mobile') {
+    return (
+      <Box
+        ref={cardRef}
+        sx={{
+          position: 'relative',
+          background: '#fff',
+          borderRadius: 2,
+          overflow: 'hidden',
+          cursor: 'pointer',
+          height: '100%',
+          width: '167px',
+          minWidth: '167px',
+          maxWidth: '167px',
+          display: 'flex',
+          flexDirection: 'column',
+          isolation: 'isolate',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
+          }
+        }}
+        onClick={onClick ? onClick : () => navigate(`/product/${product.id}`)}
+      >
+        
+        {/* Картинка */}
+        <Box sx={{ 
+          position: 'relative', 
+          width: '100%', 
+          height: 126, 
+          overflow: 'hidden', 
+          borderRadius: '6px 6px 0px 0px',
+          backgroundColor: '#f5f5f5',
+          backgroundImage: `url(${(() => {
+            const imgSrc = getImageUrl(
+              (Array.isArray(product.imageUrls) && product.imageUrls.length > 0 && product.imageUrls[0]) ||
+              (Array.isArray(product.images) && product.images.length > 0 && product.images[0]) ||
+              product.image ||
+              ''
+            );
+            return imgSrc && !imgError ? imgSrc : '/photography.jpg';
+          })()})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}>
+          {/* Кнопка избранного */}
+          {user && (
+            <Box sx={{ 
+              position: 'absolute', 
+              bottom: 8, 
+              right: 8, 
+              zIndex: 30,
+              width: 24,
+              height: 24
+            }}>
+              <IconButton
+                onClick={handleWishlistClick}
+                disabled={wishlistAnimPlaying}
+                sx={{
+                  color: inWishlist ? '#e53e3e' : '#666',
+                  zIndex: 40,
+                  width: 24,
+                  height: 24,
+                  p: 0,
+                  pointerEvents: wishlistAnimPlaying ? 'none' : 'auto',
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  borderRadius: '50%',
+                  '&:hover': {
+                    color: inWishlist ? '#c53030' : '#e53e3e',
+                  },
+                }}
+              >
+                {!wishlistAnimPlaying && (
+                  inWishlist
+                    ? <Favorite sx={{ fontSize: 16 }} />
+                    : <FavoriteBorder sx={{ fontSize: 16 }} />
+                )}
+              </IconButton>
+            </Box>
+          )}
+        </Box>
+        
+        <div className="product-info" style={{ padding: '8px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', height: '100%' }}>
+          {/* Название товара */}
+          <h3 style={{ 
+            margin: '-5px 0 6px 0',
+            fontSize: '0.8rem', 
+            fontWeight: 600, 
+            color: '#2d3748',
+            lineHeight: 1.2,
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            wordWrap: 'break-word',
+            wordBreak: 'break-word',
+            minHeight: '2.9rem',
+            maxHeight: '2.9rem'
+          }}>
+            {getTranslatedName(product)}
+          </h3>
+          
+          {/* Рейтинг */}
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 2, marginTop: 4 }}>
+            <Rating
+              value={product.rating || 0}
+              precision={0.1}
+              readOnly
+              size="small"
+              sx={{ color: '#FFD600', fontSize: '0.7rem' }}
+            />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+              <RateReview sx={{ color: '#666', fontSize: 10 }} />
+              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 10 }}>{product.reviewCount || 0}</Typography>
+            </Box>
+          </div>
+          
+          {/* Цена и наличие */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 1 }}>
+            <Typography variant="h6" sx={{ 
+              color: '#000', 
+              fontWeight: 700, 
+              fontSize: '0.9rem'
+            }}>
+              {formatPrice(product.price)}
+            </Typography>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {!isAdmin && (
+                <>
+                  {product.quantity > 0 ? (
+                    <Chip label="В наличии" color="success" size="small" sx={{ fontSize: '0.6rem', height: 16 }} />
+                  ) : (
+                    <Chip label="Нет в наличии" color="default" size="small" sx={{ fontSize: '0.6rem', height: 16 }} />
+                  )}
+                </>
+              )}
+              {isAdmin && (
+                <div style={{ fontSize: '0.6rem', color: '#666' }}>
+                  {product.quantity > 0 ? `${product.quantity} шт.` : 'Нет в наличии'}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Возраст и пол */}
+          <div className="product-meta" style={{ minHeight: 20, display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+            {product.ageGroup && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', marginBottom: '2px', marginRight: '4px' }}>
+                {ageIcons[product.ageGroup] && (
+                  <img src={ageIcons[product.ageGroup]} alt="" style={{ width: 16, height: 16, marginRight: 0, verticalAlign: 'middle' }} />
+                )}
+              </span>
+            )}
+            {product.gender && (
+              <span style={{
+                display: 'inline-block',
+                fontSize: '0.6rem',
+                color: '#666',
+                padding: '1px 4px',
+                borderRadius: '3px',
+                marginBottom: '2px'
+              }}>
+                {product.gender === 'Для мальчиков' ? t('productCard.gender.boy') : product.gender === 'Для девочек' ? t('productCard.gender.girl') : t('productCard.gender.unisex')}
+              </span>
+            )}
+          </div>
+          
+          {/* Количество и кнопка добавления */}
+          <Box sx={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            {isAdmin && (
+              <Typography variant="body2" sx={{ fontSize: '0.7rem', color: '#666' }}>
+                В наличии: {product.quantity || 0}
+              </Typography>
+            )}
+            
+            {/* Счетчик убран для очень маленьких экранов в мобильной карусели */}
+            
+            {isAdmin ? (
+              <Button
+                variant="contained"
+                startIcon={<Edit sx={{ fontSize: 14 }} />}
+                sx={{
+                  background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: 10,
+                  minWidth: 0,
+                  width: '100%',
+                  height: 24,
+                  borderRadius: 4,
+                  px: 1,
+                  lineHeight: '24px',
+                  whiteSpace: 'nowrap',
+                  textTransform: 'none',
+                  boxShadow: '0 2px 4px rgba(25, 118, 210, 0.2)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                    boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                  },
+                  cursor: 'pointer',
+                }}
+                onClick={e => {
+                  e.stopPropagation();
+                  if (onEditProduct) onEditProduct(product);
+                }}
+              >
+                Редактировать
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                startIcon={
+                  <Box sx={{ position: 'relative', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {cart?.items?.some(item => item.product.id === product.id) && !cartAnimPlaying ? (
+                      <Lottie
+                        animationData={addToCartAnim}
+                        autoplay={false}
+                        loop={false}
+                        style={{ width: 20, height: 20 }}
+                        rendererSettings={{ preserveAspectRatio: 'xMidYMid meet' }}
+                        initialSegment={[100, 100]}
+                      />
+                    ) : (
+                      <Lottie
+                        key={cartAnimKey}
+                        animationData={addToCartAnim}
+                        autoplay={cartAnimPlaying}
+                        loop={false}
+                        style={{ width: 20, height: 20 }}
+                        rendererSettings={{ preserveAspectRatio: 'xMidYMid meet' }}
+                      />
+                    )}
+                  </Box>
+                }
+                sx={{
+                  background: !product.quantity || product.quantity <= 0
+                    ? '#bdbdbd'
+                    : '#5cb95d',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: 10,
+                  minWidth: 0,
+                  width: '100%',
+                  height: 24,
+                  borderRadius: 4,
+                  px: 1,
+                  lineHeight: '24px',
+                  whiteSpace: 'nowrap',
+                  textTransform: 'none',
+                  boxShadow: '0 2px 4px rgba(72, 187, 120, 0.2)',
+                  '&:hover': {
+                    background: !product.quantity || product.quantity <= 0
+                      ? '#bdbdbd'
+                      : '#4ca94d',
+                    boxShadow: '0 4px 8px rgba(72, 187, 120, 0.3)',
+                  },
+                  opacity: (!product.quantity || product.quantity <= 0) ? 0.7 : 1,
+                  cursor: (!product.quantity || product.quantity <= 0) ? 'not-allowed' : 'pointer',
+                  '& .MuiButton-startIcon': { marginRight: 0 },
+                }}
+                onClick={handleAddToCartClick}
+                disabled={!product.quantity || product.quantity <= 0 || !cart}
+              >
+                {cart?.items?.some(item => item.product.id === product.id) ? t('productCard.inCart') : t('productCard.addToCart')}
+              </Button>
+            )}
+          </Box>
         </div>
       </Box>
     );
@@ -1024,41 +1268,20 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
         height: isMobile ? 160 : 200, 
         overflow: 'hidden', 
         borderRadius: isMobile ? '6px 6px 0 0' : '8px 8px 0 0',
-        backgroundColor: '#f5f5f5'
-      }}>
-        {(() => {
+        backgroundColor: '#f5f5f5',
+        backgroundImage: `url(${(() => {
           const imgSrc = getImageUrl(
             (Array.isArray(product.imageUrls) && product.imageUrls.length > 0 && product.imageUrls[0]) ||
             (Array.isArray(product.images) && product.images.length > 0 && product.images[0]) ||
             product.image ||
             ''
           );
-          if (!imgSrc || imgError) {
-            return (
-              <LazyImage
-                src="/photography.jpg"
-                alt={t('productCard.noPhoto')}
-                width="100%"
-                height="100%"
-                sx={{
-                  borderRadius: isMobile ? '6px 6px 0 0' : '8px 8px 0 0'
-                }}
-              />
-            );
-          }
-          return (
-            <LazyImage
-              src={imgSrc}
-              alt={getTranslatedName(product)}
-              width="100%"
-              height="100%"
-              sx={{
-                borderRadius: isMobile ? '6px 6px 0 0' : '8px 8px 0 0'
-              }}
-              onError={() => setImgError(true)}
-            />
-          );
-        })()}
+          return imgSrc && !imgError ? imgSrc : '/photography.jpg';
+        })()})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}>
       </Box>
 
       <div className="product-info" style={{ padding: isMobile ? '12px' : '16px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', height: '100%' }}>

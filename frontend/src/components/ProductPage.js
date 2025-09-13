@@ -1425,8 +1425,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       {/* Хлебные крошки */}
       <Box sx={{ 
         mb: 3, 
-        mt: -3.625,
-        ml: 12, // Отступ слева 12px
+        mt: { xs: 0.25, md: 0 }, // Очень маленький отступ сверху
+        width: '100%', // На всю ширину
         pt: { xs: 1, md: 0 } // Отступ сверху для мобильных
       }}>
         <Breadcrumbs 
@@ -1435,6 +1435,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           sx={{
             position: 'relative',
             zIndex: 15,
+            pl: { xs: 2, md: 3 }, // Отступ слева для хлебных крошек
             '& .MuiBreadcrumbs-separator': {
               color: '#4ECDC4'
             },

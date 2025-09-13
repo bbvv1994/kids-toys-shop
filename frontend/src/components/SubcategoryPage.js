@@ -83,6 +83,7 @@ import {
 import { API_BASE_URL, getImageUrl } from '../config';
 import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
 import { getSpeechRecognitionLanguage, getSpeechRecognitionErrorMessage, isSpeechRecognitionSupported } from '../utils/speechRecognitionUtils';
+import { useDeviceType } from '../utils/deviceDetection';
 import ProductCard from './ProductCard';
 import ElegantProductCarousel from './ElegantProductCarousel';
 import LazyImage from './LazyImage';
@@ -101,6 +102,8 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
     const [isListening, setIsListening] = useState(false);
     const [interimTranscript, setInterimTranscript] = useState('');
     const recognitionRef = useRef(null);
+    const deviceType = useDeviceType();
+    const isMobile = deviceType === 'mobile';
   
     // Загрузка подкатегории и товаров
     useEffect(() => {
@@ -507,15 +510,20 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
           {/* Сетка товаров */}
           <Box sx={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 280px))',
+            gridTemplateColumns: isMobile 
+              ? 'repeat(2, 1fr)' 
+              : 'repeat(auto-fit, minmax(280px, 280px))',
             justifyContent: 'center',
-            gap: '8px',
+            gap: isMobile ? '4px' : '8px',
             mb: 6,
             width: '100%',
-            maxWidth: { md: 'calc(4 * 280px + 3 * 8px)' },
+            maxWidth: isMobile 
+              ? '100%' 
+              : { md: 'calc(4 * 280px + 3 * 8px)' },
             mx: { xs: 'auto', md: 0 },
+            px: isMobile ? 1 : 0,
             // desktop alignment: center 3-cols region (≤1535px); 4-cols (≥1536px) left-align with indent
-            ml: { lg: 'calc(280px + (100% - 280px - 903px)/2)', xl: '280px' },
+            ml: isMobile ? 0 : { lg: 'calc(280px + (100% - 280px - 903px)/2)', xl: '280px' },
             // Центрирование для мобильных устройств
             '@media (max-width: 899px)': {
               justifyItems: 'center'
@@ -534,7 +542,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
                     cart={cart} 
                     onChangeCartQuantity={handleChangeCartQuantity} 
                     onEditProduct={onEditProduct}
-                    viewMode="grid"
+                    viewMode={isMobile ? "carousel-mobile" : "grid"}
                   />
                 </Box>
               ))

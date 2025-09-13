@@ -12,11 +12,14 @@ import {
 import { 
   Girl,
   ViewModule,
-  ViewList
+  ViewList,
+  SwapVert as SortIcon,
+  FormatListNumbered as ItemsPerPageIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
+import { useDeviceType } from '../utils/deviceDetection';
 import { API_BASE_URL } from '../config';
 import ProductCard from './ProductCard';
 import CustomSelect from './CustomSelect';
@@ -39,6 +42,8 @@ export default function GirlsToysPage({
   
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
 
      // Фильтрация продуктов: категория "Игрушки" И пол "для девочек"
    const girlsProducts = useMemo(() => {
@@ -251,33 +256,37 @@ export default function GirlsToysPage({
       }}>
         {/* Сортировка и количество — слева */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-          <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#222', mr: 1 }}>{t('catalog.sortBy')}:</Typography>
-          <CustomSelect
-            value={sortBy}
-            onChange={handleSortChange}
-            width={180}
-            options={[
-              { value: 'popular', label: t('catalog.sortOptions.popular') },
-              { value: 'newest', label: t('catalog.sortOptions.newest') },
-              { value: 'price-low', label: t('catalog.sortOptions.priceLow') },
-              { value: 'price-high', label: t('catalog.sortOptions.priceHigh') },
-              { value: 'name-az', label: t('catalog.sortOptions.nameAZ') },
-              { value: 'name-za', label: t('catalog.sortOptions.nameZA') },
-            ]}
-            sx={{ minWidth: 160 }}
-          />
-          <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#222', ml: 3, mr: 1 }}>{t('catalog.itemsPerPage')}:</Typography>
-          <CustomSelect
-            value={pageSize}
-            onChange={v => setPageSize(Number(v))}
-            width={100}
-            options={[
-              { value: 24, label: '24' },
-              { value: 48, label: '48' },
-              { value: 96, label: '96' },
-            ]}
-            sx={{ minWidth: 60 }}
-          />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <SortIcon sx={{ fontSize: 20, color: '#ff9800' }} />
+            <CustomSelect
+              value={sortBy}
+              onChange={handleSortChange}
+              width={180}
+              options={[
+                { value: 'popular', label: t('catalog.sortOptions.popular') },
+                { value: 'newest', label: t('catalog.sortOptions.newest') },
+                { value: 'price-low', label: t('catalog.sortOptions.priceLow') },
+                { value: 'price-high', label: t('catalog.sortOptions.priceHigh') },
+                { value: 'name-az', label: t('catalog.sortOptions.nameAZ') },
+                { value: 'name-za', label: t('catalog.sortOptions.nameZA') },
+              ]}
+              sx={{ minWidth: 160 }}
+            />
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {!isMobile && <ItemsPerPageIcon sx={{ fontSize: 20, color: '#666' }} />}
+            <CustomSelect
+              value={pageSize}
+              onChange={v => setPageSize(Number(v))}
+              width={100}
+              options={[
+                { value: 24, label: '24' },
+                { value: 48, label: '48' },
+                { value: 96, label: '96' },
+              ]}
+              sx={{ minWidth: 60 }}
+            />
+          </Box>
         </Box>
         {/* Переключатель вида — справа */}
         <Box sx={{ 
