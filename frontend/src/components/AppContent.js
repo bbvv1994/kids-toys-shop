@@ -3169,23 +3169,25 @@ function AppContent({
                 />
               </form>
   
-                                   {/* Кнопка фильтров */}
-                       <IconButton
-                         onClick={() => setMobileFiltersOpen(true)}
-                         sx={{
-                           color: '#FF9800',
-                           backgroundColor: 'white',
-                           border: '1px solid #FF9800',
-                           borderRadius: 2,
-                           width: 48,
-                           height: 40,
-                           '&:hover': {
-                             backgroundColor: 'rgba(255, 152, 0, 0.04)',
-                           },
-                         }}
-                       >
-                         <FilterList />
-                       </IconButton>
+              {/* Кнопка фильтров - только на странице каталога */}
+              {isCatalog && (
+                <IconButton
+                  onClick={() => setMobileFiltersOpen(true)}
+                  sx={{
+                    color: '#FF9800',
+                    backgroundColor: 'white',
+                    border: '1px solid #FF9800',
+                    borderRadius: 2,
+                    width: 48,
+                    height: 40,
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 152, 0, 0.04)',
+                    },
+                  }}
+                >
+                  <FilterList />
+                </IconButton>
+              )}
             </Box>
           )}
   
