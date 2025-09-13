@@ -1024,10 +1024,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
         height: isMobile ? 160 : 200, 
         overflow: 'hidden', 
         borderRadius: isMobile ? '6px 6px 0 0' : '8px 8px 0 0',
-        backgroundColor: '#f5f5f5',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
+        backgroundColor: '#f5f5f5'
       }}>
         {(() => {
           const imgSrc = getImageUrl(
@@ -1044,11 +1041,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
                 width="100%"
                 height="100%"
                 sx={{
-                  borderRadius: 8,
-                  minWidth: '100%',
-                  minHeight: '100%',
-                  maxWidth: '100%',
-                  maxHeight: '100%'
+                  borderRadius: isMobile ? '6px 6px 0 0' : '8px 8px 0 0'
                 }}
               />
             );
@@ -1060,10 +1053,7 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
               width="100%"
               height="100%"
               sx={{
-                minWidth: '100%',
-                minHeight: '100%',
-                maxWidth: '100%',
-                maxHeight: '100%'
+                borderRadius: isMobile ? '6px 6px 0 0' : '8px 8px 0 0'
               }}
               onError={() => setImgError(true)}
             />
