@@ -3,6 +3,7 @@ import { API_BASE_URL, getImageUrl, getHdImageUrl } from '../config';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
+import { useDeviceType } from '../utils/deviceDetection';
 import { Box, Button, Typography, Container, Modal, Rating, TextField, Chip, IconButton, Breadcrumbs } from '@mui/material';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import Favorite from '@mui/icons-material/Favorite';
@@ -181,9 +182,80 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     if (typeof subcategory === 'object' && subcategory?.name) return subcategory.name;
     return null;
   };
+
+  // Умный алгоритм подбора похожих товаров
+  const findSimilarProducts = (currentProduct, allProducts) => {
+    const currentCategory = getCategoryName(currentProduct.category);
+    const currentSubcategory = getSubcategoryName(currentProduct.subcategory);
+    const currentGender = currentProduct.gender;
+    const currentAgeGroup = currentProduct.ageGroup;
+    const currentBrand = currentProduct.brand;
+    
+    // Группируем товары по приоритету совпадения
+    const perfectMatch = []; // Все параметры совпадают
+    const highMatch = []; // Категория + подкатегория + пол + возраст
+    const mediumMatch = []; // Категория + подкатегория + (пол ИЛИ возраст)
+    const lowMatch = []; // Только категория + подкатегория
+    const categoryMatch = []; // Только категория
+    
+    allProducts.forEach(product => {
+      const productCategory = getCategoryName(product.category);
+      const productSubcategory = getSubcategoryName(product.subcategory);
+      const productGender = product.gender;
+      const productAgeGroup = product.ageGroup;
+      const productBrand = product.brand;
+      
+      // Подсчитываем совпадения
+      const matches = {
+        category: productCategory === currentCategory,
+        subcategory: productSubcategory === currentSubcategory,
+        gender: productGender === currentGender,
+        ageGroup: productAgeGroup === currentAgeGroup,
+        brand: productBrand === currentBrand
+      };
+      
+      const matchCount = Object.values(matches).filter(Boolean).length;
+      
+      // Классифицируем по приоритету
+      if (matches.category && matches.subcategory && matches.gender && matches.ageGroup && matches.brand) {
+        perfectMatch.push(product);
+      } else if (matches.category && matches.subcategory && matches.gender && matches.ageGroup) {
+        highMatch.push(product);
+      } else if (matches.category && matches.subcategory && (matches.gender || matches.ageGroup)) {
+        mediumMatch.push(product);
+      } else if (matches.category && matches.subcategory) {
+        lowMatch.push(product);
+      } else if (matches.category) {
+        categoryMatch.push(product);
+      }
+    });
+    
+    // Объединяем результаты в порядке приоритета
+    const result = [
+      ...perfectMatch,
+      ...highMatch,
+      ...mediumMatch,
+      ...lowMatch,
+      ...categoryMatch
+    ];
+    
+    // Если товаров мало, добавляем случайные из той же категории
+    if (result.length < 4) {
+      const remainingProducts = allProducts.filter(p => 
+        !result.some(r => r.id === p.id) && 
+        getCategoryName(p.category) === currentCategory
+      );
+      result.push(...remainingProducts);
+    }
+    
+    return result;
+  };
+
   const handleChangeCartQuantity = onChangeCartQuantity; // Переименовываем для совместимости
   const { id } = useParams();
   const navigate = useNavigate();
+  const deviceType = useDeviceType();
+  const isMobile = deviceType === 'mobile';
   
   // Функция для принудительного обновления данных товара
   const refreshProductData = async () => {
@@ -324,6 +396,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         setProduct(data);
         setGalleryIndex(0); // Сбрасываем индекс галереи при загрузке нового товара
         setLoading(false);
+        
+        // Прокручиваем к началу страницы при загрузке товара
+        window.scrollTo(0, 0);
       } catch (error) {
         console.error('ProductPage: Error loading product:', error);
         setLoading(false);
@@ -565,15 +640,33 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   }, [user, id]);
 
   useEffect(() => {
-          if (product && product.category) {
-        const categoryName = typeof product.category === 'string' ? product.category : (product.category?.name || t('productPage.noCategory'));
-        fetch(`${API_BASE_URL}/api/products?category=${encodeURIComponent(categoryName)}`)
+    if (product && product.category) {
+      const categoryName = typeof product.category === 'string' ? product.category : (product.category?.name || t('productPage.noCategory'));
+      
+      // Загружаем все товары для умного подбора
+      fetch(`${API_BASE_URL}/api/products`)
         .then(res => res.json())
         .then(data => {
-          // Исключаем текущий товар и перемешиваем
+          // Исключаем текущий товар
           const filtered = data.filter(p => p.id !== product.id);
-          const shuffled = filtered.sort(() => 0.5 - Math.random());
-          setSimilarProducts(shuffled.slice(0, 5));
+          
+          // Умный алгоритм подбора похожих товаров
+          const similarProducts = findSimilarProducts(product, filtered);
+          
+          // Дополнительная рандомизация с использованием времени для разнообразия
+          const timeSeed = Date.now() % 1000; // Используем время как seed
+          const shuffled = similarProducts.sort((a, b) => {
+            // Создаем псевдослучайное число на основе ID товара и времени
+            const randomA = ((a.id * 9301 + timeSeed) % 233280) / 233280;
+            const randomB = ((b.id * 9301 + timeSeed) % 233280) / 233280;
+            return randomA - randomB;
+          });
+          
+          setSimilarProducts(shuffled.slice(0, 4));
+        })
+        .catch(error => {
+          console.error('Error loading similar products:', error);
+          setSimilarProducts([]);
         });
     }
   }, [product]);
@@ -2669,11 +2762,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>Похожие товары</Typography>
           <Box sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
-            gap: 3,
+            gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+            gap: { xs: 2, sm: 3, md: 3, lg: 3 },
             pb: 1,
             width: '100%',
-            maxWidth: { xs: '285px', sm: 'calc(2 * 285px + 24px)', md: 'calc(3 * 285px + 48px)', lg: 'calc(4 * 285px + 72px)' },
+            maxWidth: { xs: 'calc(2 * 167px + 24px)', sm: 'calc(2 * 285px + 24px)', md: 'calc(3 * 285px + 48px)', lg: 'calc(4 * 285px + 72px)' },
             margin: '0 auto',
             justifyContent: 'center'
           }}>
@@ -2687,7 +2780,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   inWishlist={wishlist.includes(similar.id)}
                   onWishlistToggle={() => handleWishlistToggle(similar.id, wishlist.includes(similar.id))}
                   onClick={() => navigate(`/product/${similar.id}`)}
-                  viewMode="similar" // Добавляем специальный режим для похожих товаров
+                  viewMode={isMobile ? "carousel-mobile" : "similar"} // Используем carousel-mobile для мобильной версии
                   isAdmin={isAdmin}
                   onChangeCartQuantity={handleChangeCartQuantity}
                 />
