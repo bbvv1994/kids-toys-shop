@@ -58,9 +58,6 @@ const initializeI18n = async () => {
     }
     
     // Оптимизация: убираем console.log в продакшене для улучшения производительности
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('✅ i18n initialized successfully. Current language:', i18n.language);
-    }
   } catch (error) {
     console.error('❌ Error initializing i18n:', error);
     // Fallback инициализация

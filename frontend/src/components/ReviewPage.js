@@ -26,8 +26,6 @@ const ReviewPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Отладочная информация о текущем языке
-  console.log('ReviewPage - Current language:', i18n.language);
   const [currentStep, setCurrentStep] = useState(0);
   const [shopReview, setShopReview] = useState({ rating: 0, text: '' });
   const [productReviews, setProductReviews] = useState([]);

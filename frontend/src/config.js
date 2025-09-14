@@ -13,50 +13,27 @@ const config = {
 
 // Автоматическое определение среды
 const getEnvironment = () => {
-  // Оптимизация: убираем console.log в продакшене для улучшения производительности
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('🔧 Определение среды...');
-    console.log('NODE_ENV:', process.env.NODE_ENV);
-    console.log('REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
-    console.log('window.location.hostname:', typeof window !== 'undefined' ? window.location.hostname : 'undefined');
-  }
-  
   // Если есть переменная окружения NODE_ENV
   if (process.env.NODE_ENV) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('✅ Используем NODE_ENV:', process.env.NODE_ENV);
-    }
     return process.env.NODE_ENV;
   }
   
   // Если запущено на localhost - development
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('✅ Определено как development (localhost)');
-    }
     return 'development';
   }
   
   // Если есть переменные окружения для production
   if (process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_FRONTEND_URL) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('✅ Определено как production (есть env переменные)');
-    }
     return 'production';
   }
   
   // Если запущено на Netlify - production
   if (typeof window !== 'undefined' && window.location.hostname.includes('netlify.app')) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('✅ Определено как production (Netlify)');
-    }
     return 'production';
   }
   
   // По умолчанию - development
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('⚠️ По умолчанию используем development');
-  }
   return 'development';
 };
 

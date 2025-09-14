@@ -2406,10 +2406,6 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
               disableRestoreFocus: true,
             }}
             onClose={(event, reason) => {
-              console.log('🔍 [FILTERS] onClose вызван - reason:', reason, 'event:', event);
-              console.log('🔍 [FILTERS] Текущая позиция прокрутки:', window.scrollY);
-              console.log('🔍 [FILTERS] Сохраненная позиция:', savedScrollY);
-              
               // Предотвращаем встроенное поведение Drawer
               event?.preventDefault?.();
               event?.stopPropagation?.();
@@ -2420,29 +2416,21 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
               setShouldPreventGlobalScroll(true);
               setMobileFiltersOpen(false);
               
-              console.log('🔍 [FILTERS] Установлены флаги закрытия');
-              
               // Восстанавливаем позицию прокрутки с максимальной защитой
               setTimeout(() => {
-                console.log('🔍 [FILTERS] Первая попытка восстановления позиции:', savedScrollY);
                 window.scrollTo(0, savedScrollY);
                 // Дополнительная защита - повторяем несколько раз
                 setTimeout(() => {
-                  console.log('🔍 [FILTERS] Вторая попытка восстановления позиции:', savedScrollY);
                   window.scrollTo(0, savedScrollY);
                   setTimeout(() => {
-                    console.log('🔍 [FILTERS] Третья попытка восстановления позиции:', savedScrollY);
                     window.scrollTo(0, savedScrollY);
                     setTimeout(() => {
-                      console.log('🔍 [FILTERS] Четвертая попытка восстановления позиции:', savedScrollY);
                       window.scrollTo(0, savedScrollY);
-                      console.log('🔍 [FILTERS] Финальная позиция после восстановления:', window.scrollY);
                       // Увеличиваем задержку перед сбросом флагов
                       setTimeout(() => {
                         setIsClosingFilters(false);
                         setIsRestoringScroll(false);
                         setShouldPreventGlobalScroll(false);
-                        console.log('🔍 [FILTERS] Флаги сброшены');
                       }, 500); // Увеличиваем задержку до 500мс
                     }, 50);
                   }, 50);
@@ -2506,43 +2494,32 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                     {t('catalog.clearFilters')}
                   </Button>
                   <IconButton onClick={() => {
-                    console.log('🔍 [FILTERS] Кнопка X нажата');
-                    console.log('🔍 [FILTERS] Текущая позиция прокрутки:', window.scrollY);
-                    console.log('🔍 [FILTERS] Сохраненная позиция:', savedScrollY);
-                    
                     setIsClosingFilters(true);
                     setIsRestoringScroll(true);
                     setLastFilterCloseTime(Date.now());
                     setShouldPreventGlobalScroll(true);
                     setMobileFiltersOpen(false);
                     
-                    console.log('🔍 [FILTERS] Установлены флаги закрытия (кнопка X)');
-                    
                     // Восстанавливаем позицию прокрутки с максимальной защитой
                     setTimeout(() => {
-                      console.log('🔍 [FILTERS] Первая попытка восстановления (кнопка X):', savedScrollY);
                       window.scrollTo(0, savedScrollY);
                       // Дополнительная защита - повторяем несколько раз
                       setTimeout(() => {
-                        console.log('🔍 [FILTERS] Вторая попытка восстановления (кнопка X):', savedScrollY);
                         window.scrollTo(0, savedScrollY);
                         setTimeout(() => {
-                          console.log('🔍 [FILTERS] Третья попытка восстановления (кнопка X):', savedScrollY);
                           window.scrollTo(0, savedScrollY);
-                          console.log('🔍 [FILTERS] Финальная позиция после восстановления (кнопка X):', window.scrollY);
                           // Увеличиваем задержку перед сбросом флагов
                           setTimeout(() => {
                             setIsClosingFilters(false);
                             setIsRestoringScroll(false);
                             setShouldPreventGlobalScroll(false);
-                            console.log('🔍 [FILTERS] Флаги сброшены (кнопка X)');
                           }, 500); // Увеличиваем задержку до 500мс
                         }, 100);
                       }, 50);
                     }, 50);
                   }}>
-                    <CloseIcon />
-                  </IconButton>
+                  <CloseIcon />
+                </IconButton>
                 </Box>
               </Box>
               
@@ -2992,65 +2969,34 @@ function AppContent({
     const [lastFilterCloseTime, setLastFilterCloseTime] = React.useState(0);
     const [shouldPreventGlobalScroll, setShouldPreventGlobalScroll] = React.useState(false);
     
-    // Логирование изменений состояния
-    React.useEffect(() => {
-      console.log('🔍 [STATE] isClosingFilters изменился:', isClosingFilters);
-    }, [isClosingFilters]);
+    // Убрано избыточное логирование состояний
     
+    // Отслеживание позиции прокрутки для восстановления при закрытии фильтров
     React.useEffect(() => {
-      console.log('🔍 [STATE] isRestoringScroll изменился:', isRestoringScroll);
-    }, [isRestoringScroll]);
-    
-    React.useEffect(() => {
-      console.log('🔍 [STATE] savedScrollY изменился:', savedScrollY);
-    }, [savedScrollY]);
-    
-    React.useEffect(() => {
-      console.log('🔍 [STATE] location.pathname изменился:', location.pathname);
-    }, [location.pathname]);
-    
-    // Отслеживание всех событий прокрутки
-    React.useEffect(() => {
-      const logScroll = () => {
-        const currentScrollY = window.scrollY;
-        console.log('🔍 [SCROLL] Событие прокрутки - позиция:', currentScrollY);
-        // Сохраняем текущую позицию прокрутки для использования при закрытии фильтров
-        setSavedScrollY(currentScrollY);
+      let scrollTimeout;
+      
+      const updateScrollPosition = () => {
+        // Используем debounce для уменьшения частоты обновлений
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          setSavedScrollY(window.scrollY);
+        }, 100); // Обновляем только раз в 100мс
       };
       
-      // Логируем все вызовы window.scrollTo
-      const originalScrollTo = window.scrollTo;
-      window.scrollTo = function(...args) {
-        console.log('🔍 [SCROLL] window.scrollTo вызван с аргументами:', args);
-        console.trace('🔍 [SCROLL] Стек вызовов:');
-        return originalScrollTo.apply(this, args);
-      };
-      
-      window.addEventListener('scroll', logScroll);
+      window.addEventListener('scroll', updateScrollPosition, { passive: true });
       return () => {
-        window.removeEventListener('scroll', logScroll);
-        window.scrollTo = originalScrollTo;
+        clearTimeout(scrollTimeout);
+        window.removeEventListener('scroll', updateScrollPosition);
       };
     }, []);
     
     // Прокрутка к началу страницы при переходе между вкладками
     React.useEffect(() => {
-      console.log('🔍 [GLOBAL] useEffect location.pathname вызван');
-      console.log('🔍 [GLOBAL] location.pathname:', location.pathname);
-      console.log('🔍 [GLOBAL] isClosingFilters:', isClosingFilters);
-      console.log('🔍 [GLOBAL] isRestoringScroll:', isRestoringScroll);
-      console.log('🔍 [GLOBAL] lastFilterCloseTime:', lastFilterCloseTime);
-      console.log('🔍 [GLOBAL] Текущее время:', Date.now());
-      
       const timeSinceLastFilterClose = Date.now() - lastFilterCloseTime;
-      console.log('🔍 [GLOBAL] Время с последнего закрытия фильтра:', timeSinceLastFilterClose);
       
       // Не прокручиваем, если закрываем фильтры, восстанавливаем прокрутку, недавно закрыли фильтры или нужно предотвратить прокрутку
       if (!isClosingFilters && !isRestoringScroll && timeSinceLastFilterClose > 3000 && !shouldPreventGlobalScroll) {
-        console.log('🔍 [GLOBAL] Выполняем прокрутку к началу страницы');
-        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      } else {
-        console.log('🔍 [GLOBAL] Пропускаем прокрутку из-за флагов или недавнего закрытия фильтров');
+        // window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       }
     }, [location.pathname, isClosingFilters, isRestoringScroll, lastFilterCloseTime]);
 
@@ -3058,25 +3004,23 @@ function AppContent({
     React.useEffect(() => {
       const preventScroll = (e) => {
         if (isRestoringScroll) {
-          console.log('🔍 [SCROLL] Блокируем событие прокрутки:', e.type);
           e.preventDefault();
           e.stopPropagation();
           return false;
         }
       };
 
-      // Добавляем обработчики для всех возможных событий прокрутки
-      window.addEventListener('scroll', preventScroll, { passive: false });
-      window.addEventListener('wheel', preventScroll, { passive: false });
-      document.addEventListener('scroll', preventScroll, { passive: false });
-
-      console.log('🔍 [SCROLL] Обработчики прокрутки установлены, isRestoringScroll:', isRestoringScroll);
+      // Добавляем обработчики только если действительно восстанавливаем прокрутку
+      if (isRestoringScroll) {
+        window.addEventListener('scroll', preventScroll, { passive: false });
+        window.addEventListener('wheel', preventScroll, { passive: false });
+        document.addEventListener('scroll', preventScroll, { passive: false });
+      }
 
       return () => {
         window.removeEventListener('scroll', preventScroll);
         window.removeEventListener('wheel', preventScroll);
         document.removeEventListener('scroll', preventScroll);
-        console.log('🔍 [SCROLL] Обработчики прокрутки удалены');
       };
     }, [isRestoringScroll]);
     
@@ -3084,11 +3028,7 @@ function AppContent({
     const [hasError, setHasError] = React.useState(false);
     const [errorInfo, setErrorInfo] = React.useState(null);
     
-    // Временные состояния для фильтров (не применяются до нажатия кнопки)
-    const [tempSelectedGenders, setTempSelectedGenders] = React.useState([]);
-    const [tempSelectedBrands, setTempSelectedBrands] = React.useState([]);
-    const [tempSelectedAgeGroups, setTempSelectedAgeGroups] = React.useState([]);
-    const [tempPriceRange, setTempPriceRange] = React.useState([0, 10000]);
+    // Убраны временные состояния - фильтры применяются автоматически
     
     // Массив возрастных групп (как в форме редактирования)
     const ageGroups = [
@@ -3118,15 +3058,7 @@ function AppContent({
       return [minPrice, maxPrice];
     }, [products]);
     
-    // Инициализация временных состояний при открытии фильтров
-    React.useEffect(() => {
-      if (filtersMenuOpen) {
-        setTempSelectedGenders(selectedGenders);
-        setTempSelectedBrands(selectedBrands);
-        setTempSelectedAgeGroups(selectedAgeGroups);
-        setTempPriceRange(priceRange);
-      }
-    }, [filtersMenuOpen, selectedGenders, selectedBrands, selectedAgeGroups, priceRange]);
+    // Убрана инициализация временных состояний - фильтры применяются автоматически
     
     // Инициализация priceRange на основе реальных цен при загрузке товаров
     React.useEffect(() => {
@@ -3170,13 +3102,8 @@ function AppContent({
       }
     }, [filtersMenuOpen]);
     
-    // Получаем актуальные состояния фильтров
-    const currentFilterStates = filtersMenuOpen ? {
-      genders: tempSelectedGenders,
-      brands: tempSelectedBrands,
-      ageGroups: tempSelectedAgeGroups,
-      priceRange: tempPriceRange
-    } : {
+    // Получаем актуальные состояния фильтров (теперь всегда используются основные состояния)
+    const currentFilterStates = {
       genders: selectedGenders,
       brands: selectedBrands,
       ageGroups: selectedAgeGroups,
@@ -3444,10 +3371,6 @@ function AppContent({
               {isCatalog && (
                 <IconButton
                   onClick={() => {
-                    // Позиция уже сохранена в обработчике прокрутки
-                    const currentScrollY = window.scrollY;
-                    console.log('🔍 [FILTERS] Открытие фильтров - текущая позиция:', currentScrollY);
-                    console.log('🔍 [FILTERS] Открытие фильтров - сохраненная позиция:', savedScrollY);
                     setMobileFiltersOpen(true);
                   }}
                   sx={{
@@ -3562,8 +3485,16 @@ function AppContent({
                    </Typography>
                    <Box sx={{ px: 1, mb: 3 }}>
                      <Slider
-                       value={tempPriceRange}
-                       onChange={(event, newValue) => setTempPriceRange(newValue)}
+                       value={priceRange}
+                       onChange={(event, newValue) => {
+                         setPriceRange(newValue);
+                         // Автоматическая прокрутка к продуктам после изменения фильтра
+                         setTimeout(() => {
+                           if (window.scrollToCatalogProducts) {
+                             window.scrollToCatalogProducts();
+                           }
+                         }, 100);
+                       }}
                        valueLabelDisplay="auto"
                        min={priceLimits[0]}
                        max={priceLimits[1]}
@@ -3582,10 +3513,10 @@ function AppContent({
                      />
                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                        <Typography variant="body2" color="text.secondary">
-                         ₪{tempPriceRange[0]}
+                         ₪{priceRange[0]}
                        </Typography>
                        <Typography variant="body2" color="text.secondary">
-                         ₪{tempPriceRange[1]}
+                         ₪{priceRange[1]}
                        </Typography>
                      </Box>
                    </Box>
@@ -3600,13 +3531,19 @@ function AppContent({
                          key={age}
                          control={
                            <Checkbox
-                             checked={tempSelectedAgeGroups.includes(age)}
+                             checked={selectedAgeGroups.includes(age)}
                              onChange={(e) => {
                                if (e.target.checked) {
-                                 setTempSelectedAgeGroups([...tempSelectedAgeGroups, age]);
+                                 setSelectedAgeGroups([...selectedAgeGroups, age]);
                                } else {
-                                 setTempSelectedAgeGroups(tempSelectedAgeGroups.filter(g => g !== age));
+                                 setSelectedAgeGroups(selectedAgeGroups.filter(g => g !== age));
                                }
+                               // Автоматическая прокрутка к продуктам после изменения фильтра
+                               setTimeout(() => {
+                                 if (window.scrollToCatalogProducts) {
+                                   window.scrollToCatalogProducts();
+                                 }
+                               }, 100);
                              }}
                              sx={{
                                color: '#FF9800',
@@ -3632,13 +3569,19 @@ function AppContent({
                          key={gender}
                          control={
                            <Checkbox
-                             checked={tempSelectedGenders.includes(gender)}
+                             checked={selectedGenders.includes(gender)}
                              onChange={(e) => {
                                if (e.target.checked) {
-                                 setTempSelectedGenders([...tempSelectedGenders, gender]);
+                                 onGendersChange([...selectedGenders, gender]);
                                } else {
-                                 setTempSelectedGenders(tempSelectedGenders.filter(g => g !== gender));
+                                 onGendersChange(selectedGenders.filter(g => g !== gender));
                                }
+                               // Автоматическая прокрутка к продуктам после изменения фильтра
+                               setTimeout(() => {
+                                 if (window.scrollToCatalogProducts) {
+                                   window.scrollToCatalogProducts();
+                                 }
+                               }, 100);
                              }}
                              sx={{
                                color: '#FF9800',
@@ -3664,13 +3607,19 @@ function AppContent({
                          key={brand}
                          control={
                            <Checkbox
-                             checked={tempSelectedBrands.includes(brand)}
+                             checked={selectedBrands.includes(brand)}
                              onChange={(e) => {
                                if (e.target.checked) {
-                                 setTempSelectedBrands([...tempSelectedBrands, brand]);
+                                 setSelectedBrands([...selectedBrands, brand]);
                                } else {
-                                 setTempSelectedBrands(tempSelectedBrands.filter(b => b !== brand));
+                                 setSelectedBrands(selectedBrands.filter(b => b !== brand));
                                }
+                               // Автоматическая прокрутка к продуктам после изменения фильтра
+                               setTimeout(() => {
+                                 if (window.scrollToCatalogProducts) {
+                                   window.scrollToCatalogProducts();
+                                 }
+                               }, 100);
                              }}
                              sx={{
                                color: '#FF9800',
@@ -3686,18 +3635,25 @@ function AppContent({
                      ))}
                    </Box>
   
-                   {/* Кнопки сброса и применения */}
+                   {/* Кнопка сброса */}
                    <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-                   <Button
+                     <Button
                        fullWidth
                        variant="contained"
-                     onClick={() => {
-                         setTempSelectedGenders([]);
-                         setTempSelectedBrands([]);
-                         setTempSelectedAgeGroups([]);
-                         setTempPriceRange(priceLimits);
-                     }}
-                     sx={{
+                       onClick={() => {
+                         onGendersChange([]);
+                         setSelectedBrands([]);
+                         setSelectedAgeGroups([]);
+                         setPriceRange(priceLimits);
+                         setFiltersMenuOpen(false);
+                         // Автоматическая прокрутка к продуктам после сброса фильтров
+                         setTimeout(() => {
+                           if (window.scrollToCatalogProducts) {
+                             window.scrollToCatalogProducts();
+                           }
+                         }, 100);
+                       }}
+                       sx={{
                          background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
                          color: '#fff',
                          borderRadius: 2,
@@ -3707,44 +3663,14 @@ function AppContent({
                          height: 44,
                          boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
                          textTransform: 'none',
-                       '&:hover': {
+                         '&:hover': {
                            background: 'linear-gradient(135deg, #ef5350 0%, #f44336 100%)',
                            boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
-                           transform: 'translateY(-1px)'
-                       },
-                     }}
-                   >
-                       Сбросить
-                   </Button>
-                     <Button
-                       fullWidth
-                       variant="contained"
-                       onClick={() => {
-  
-                         onGendersChange(tempSelectedGenders);
-                         setSelectedBrands(tempSelectedBrands);
-                         setSelectedAgeGroups(tempSelectedAgeGroups);
-                         setPriceRange(tempPriceRange);
-                         setFiltersMenuOpen(false);
-                       }}
-                       sx={{
-                         background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
-                         color: '#fff',
-                         borderRadius: 2,
-                         fontWeight: 600,
-                         fontSize: 15,
-                         py: 1.5,
-                         height: 44,
-                         boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
-                         textTransform: 'none',
-                         '&:hover': {
-                           background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
-                           boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
                            transform: 'translateY(-1px)'
                          },
                        }}
                      >
-                       Применить
+                       Сбросить фильтры
                      </Button>
                    </Box>
                  </Paper>

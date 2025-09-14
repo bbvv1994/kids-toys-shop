@@ -884,13 +884,11 @@ function App() {
   // Функция для обновления всех состояний товаров
   const refreshAllProducts = async () => {
     try {
-      console.log('🔄 refreshAllProducts: Starting refresh...');
       
       // Загружаем товары для основного каталога (только видимые)
       const response = await fetch(`${API_BASE_URL}/api/products?_t=${Date.now()}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('🔄 refreshAllProducts: Updated main catalog with', data.length, 'products');
         setProducts(data);
       } else {
         console.error('🔄 refreshAllProducts: Failed to load main catalog products');
@@ -899,13 +897,11 @@ function App() {
       // Если пользователь авторизован и является админом, обновляем CMS товары
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
       if (currentUser?.token && currentUser?.role === 'admin') {
-        console.log('🔄 refreshAllProducts: Updating CMS products for admin...');
         const cmsResponse = await fetch(`${API_BASE_URL}/api/products?admin=true&_t=${Date.now()}`, {
           headers: { 'Authorization': `Bearer ${currentUser.token}` }
         });
         if (cmsResponse.ok) {
           const cmsData = await cmsResponse.json();
-          console.log('🔄 refreshAllProducts: Updated CMS catalog with', cmsData.length, 'products');
           // Обновляем CMS товары, если они загружены
           if (window.cmsProductsSetter) {
             window.cmsProductsSetter(cmsData);
@@ -914,10 +910,8 @@ function App() {
           console.error('🔄 refreshAllProducts: Failed to load CMS products');
         }
       } else {
-        console.log('🔄 refreshAllProducts: User is not admin, skipping CMS update');
       }
 
-      console.log('🔄 refreshAllProducts: Refresh completed');
     } catch (error) {
       console.error('🔄 refreshAllProducts: Error refreshing all products:', error);
     }
@@ -975,7 +969,6 @@ function App() {
   // Функция для загрузки категорий из API
   const loadCategoriesFromAPI = async (forceRefresh = false, headers = {}) => {
     try {
-      console.log('🔄 loadCategoriesFromAPI: Starting load...', { forceRefresh });
       
       const categoriesUrl = `${API_BASE_URL}/api/categories${forceRefresh ? `?_t=${Date.now()}` : ''}`;
       
@@ -987,7 +980,6 @@ function App() {
       const response = await res.json();
       const data = response.value || response; // Поддерживаем оба формата
       
-      console.log('🔄 loadCategoriesFromAPI: Categories loaded from API:', data.length, 'categories');
       
       // Преобразуем серверные категории в нужный формат
       // Обрабатываем все категории, а не только корневые
@@ -1018,7 +1010,6 @@ function App() {
         };
       });
       
-      console.log('🔄 loadCategoriesFromAPI: Transformed categories:', transformedCategories.length);
       setDbCategories(transformedCategories);
       
       return transformedCategories;
