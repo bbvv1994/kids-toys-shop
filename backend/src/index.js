@@ -4,6 +4,13 @@ const { PrismaClient } = require('@prisma/client');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+
+// Логирование для диагностики
+console.log('🚀 Starting backend server...');
+console.log('🔍 DEBUG: __dirname:', __dirname);
+console.log('🔍 DEBUG: process.cwd():', process.cwd());
+console.log('🔍 DEBUG: Node.js version:', process.version);
+console.log('🔍 DEBUG: Platform:', process.platform);
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
@@ -359,8 +366,41 @@ app.use((err, req, res, next) => {
     timestamp: new Date().toISOString()
   });
 });
-app.use('/uploads', express.static(path.join(__dirname, '..', '..', 'uploads')));
-app.use('/uploads/hd', express.static(path.join(__dirname, '..', '..', 'uploads', 'hd')));
+// Логирование для диагностики статических файлов
+const uploadsPath = path.join(__dirname, '..', '..', '..', 'uploads');
+const hdUploadsPath = path.join(__dirname, '..', '..', '..', 'uploads', 'hd');
+
+console.log('🔍 DEBUG: Uploads path:', uploadsPath);
+console.log('🔍 DEBUG: HD uploads path:', hdUploadsPath);
+console.log('🔍 DEBUG: Uploads directory exists:', require('fs').existsSync(uploadsPath));
+console.log('🔍 DEBUG: HD uploads directory exists:', require('fs').existsSync(hdUploadsPath));
+
+// Middleware для логирования запросов к статическим файлам
+app.use('/uploads', (req, res, next) => {
+  const filePath = path.join(uploadsPath, req.path);
+  console.log('🔍 DEBUG: Static file request:', req.path);
+  console.log('🔍 DEBUG: Full file path:', filePath);
+  console.log('🔍 DEBUG: File exists:', require('fs').existsSync(filePath));
+  
+  if (require('fs').existsSync(filePath)) {
+    const stats = require('fs').statSync(filePath);
+    console.log('🔍 DEBUG: File size:', stats.size, 'bytes');
+    console.log('🔍 DEBUG: File permissions:', stats.mode.toString(8));
+  } else {
+    console.log('❌ DEBUG: File not found:', filePath);
+  }
+  
+  next();
+}, express.static(uploadsPath));
+
+app.use('/uploads/hd', (req, res, next) => {
+  const filePath = path.join(hdUploadsPath, req.path);
+  console.log('🔍 DEBUG: HD static file request:', req.path);
+  console.log('🔍 DEBUG: HD full file path:', filePath);
+  console.log('🔍 DEBUG: HD file exists:', require('fs').existsSync(filePath));
+  next();
+}, express.static(hdUploadsPath));
+
 app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
 app.use(passport.initialize());
@@ -5107,6 +5147,9 @@ app.listen(PORT, (err) => {
     process.exit(1);
   } else {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
+    console.log('🔍 DEBUG: Final uploads path check:', path.join(__dirname, '..', '..', '..', 'uploads'));
+    console.log('🔍 DEBUG: Final uploads directory exists:', fs.existsSync(path.join(__dirname, '..', '..', '..', 'uploads')));
+    console.log('🔍 DEBUG: Final uploads directory contents:', fs.readdirSync(path.join(__dirname, '..', '..', '..', 'uploads')).slice(0, 5));
     startSafeMigration();
   }
 });

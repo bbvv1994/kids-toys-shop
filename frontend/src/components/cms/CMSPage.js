@@ -24,6 +24,11 @@ import {
 import CMSProducts from './CMSProducts';
 import CMSCategories from './CMSCategories';
 import CMSOrders from './CMSOrders';
+import AdminUsers from '../AdminUsers';
+import AdminShopReviews from '../AdminShopReviews';
+import AdminProductReviews from '../AdminProductReviews';
+import AdminQuestions from '../AdminQuestions';
+import BulkImportProducts from '../BulkImportProducts';
 import { API_BASE_URL } from '../../config';
 
 function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editingProduct, setEditingProduct, dbCategories }) {
@@ -177,7 +182,7 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, p: 0 }}>
           {section === 'products' ? (
             productsSubsection === 'import' ? (
-              <div>BulkImportProducts - компонент будет добавлен позже</div>
+              <BulkImportProducts />
             ) : (
               <CMSProducts 
             mode={productsSubsection} 
@@ -191,12 +196,12 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
           ) :
            section === 'categories' ? <CMSCategories loadCategoriesFromAPI={loadCategoriesFromAPI} /> :
            section === 'orders' ? <CMSOrders /> :
-           section === 'users' ? <div>AdminUsers - компонент будет добавлен позже</div> :
+           section === 'users' ? <AdminUsers /> :
            section === 'reviews' ? (
-             reviewsSubsection === 'shop' ? <div>AdminShopReviews - компонент будет добавлен позже</div> :
-             reviewsSubsection === 'product' ? <div>AdminProductReviews - компонент будет добавлен позже</div> :
-             reviewsSubsection === 'questions' ? <div>AdminQuestions - компонент будет добавлен позже</div> :
-             <div>AdminShopReviews - компонент будет добавлен позже</div>
+             reviewsSubsection === 'shop' ? <AdminShopReviews /> :
+             reviewsSubsection === 'product' ? <AdminProductReviews /> :
+             reviewsSubsection === 'questions' ? <AdminQuestions /> :
+             <AdminShopReviews />
            ) : (
             <Box sx={{ p: 4 }}>
               {createHeader(sections.find(s=>s.key===section)?.label)}
