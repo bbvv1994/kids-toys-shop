@@ -134,7 +134,7 @@ import BoysToysPage from './BoysToysPage';
 import GirlsToysPage from './GirlsToysPage';
 import CustomerReviews from './CustomerReviews';
 // Компонент навигации
-function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups, mobileFiltersOpen, setMobileFiltersOpen, priceRange, setPriceRange, filtersMenuOpen, setFiltersMenuOpen, desktopSearchBarRef }) {
+function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups, mobileFiltersOpen, setMobileFiltersOpen, priceRange, setPriceRange, filtersMenuOpen, setFiltersMenuOpen, desktopSearchBarRef, isClosingFilters, setIsClosingFilters, savedScrollY, setSavedScrollY, isRestoringScroll, setIsRestoringScroll, lastFilterCloseTime, setLastFilterCloseTime, shouldPreventGlobalScroll, setShouldPreventGlobalScroll }) {
     const { t, i18n } = useTranslation();
     const theme = useTheme();
     const deviceType = useDeviceType();
@@ -187,14 +187,15 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
     const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
     
     // Автоматическая прокрутка наверх при изменении маршрута
-    useEffect(() => {
-      // Плавная прокрутка наверх при переходе на новую страницу
-      window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: 'smooth'
-      });
-    }, [location.pathname]);
+    // (закомментировано, так как дублируется в AppContent)
+    // useEffect(() => {
+    //   // Плавная прокрутка наверх при переходе на новую страницу
+    //   window.scrollTo({
+    //     top: 0,
+    //     left: 0,
+    //     behavior: 'smooth'
+    //   });
+    // }, [location.pathname]);
   
     // Определение сенсорного устройства
     useEffect(() => {
@@ -2397,7 +2398,57 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
           <Drawer
             anchor="right"
             open={mobileFiltersOpen}
-            onClose={() => setMobileFiltersOpen(false)}
+            disableScrollLock={true}
+            ModalProps={{
+              disableScrollLock: true,
+              disableEnforceFocus: true,
+              disableAutoFocus: true,
+              disableRestoreFocus: true,
+            }}
+            onClose={(event, reason) => {
+              console.log('🔍 [FILTERS] onClose вызван - reason:', reason, 'event:', event);
+              console.log('🔍 [FILTERS] Текущая позиция прокрутки:', window.scrollY);
+              console.log('🔍 [FILTERS] Сохраненная позиция:', savedScrollY);
+              
+              // Предотвращаем встроенное поведение Drawer
+              event?.preventDefault?.();
+              event?.stopPropagation?.();
+              
+              setIsClosingFilters(true);
+              setIsRestoringScroll(true);
+              setLastFilterCloseTime(Date.now());
+              setShouldPreventGlobalScroll(true);
+              setMobileFiltersOpen(false);
+              
+              console.log('🔍 [FILTERS] Установлены флаги закрытия');
+              
+              // Восстанавливаем позицию прокрутки с максимальной защитой
+              setTimeout(() => {
+                console.log('🔍 [FILTERS] Первая попытка восстановления позиции:', savedScrollY);
+                window.scrollTo(0, savedScrollY);
+                // Дополнительная защита - повторяем несколько раз
+                setTimeout(() => {
+                  console.log('🔍 [FILTERS] Вторая попытка восстановления позиции:', savedScrollY);
+                  window.scrollTo(0, savedScrollY);
+                  setTimeout(() => {
+                    console.log('🔍 [FILTERS] Третья попытка восстановления позиции:', savedScrollY);
+                    window.scrollTo(0, savedScrollY);
+                    setTimeout(() => {
+                      console.log('🔍 [FILTERS] Четвертая попытка восстановления позиции:', savedScrollY);
+                      window.scrollTo(0, savedScrollY);
+                      console.log('🔍 [FILTERS] Финальная позиция после восстановления:', window.scrollY);
+                      // Увеличиваем задержку перед сбросом флагов
+                      setTimeout(() => {
+                        setIsClosingFilters(false);
+                        setIsRestoringScroll(false);
+                        setShouldPreventGlobalScroll(false);
+                        console.log('🔍 [FILTERS] Флаги сброшены');
+                      }, 500); // Увеличиваем задержку до 500мс
+                    }, 50);
+                  }, 50);
+                }, 50);
+              }, 50);
+            }}
             sx={{
               '& .MuiDrawer-paper': {
                 width: '280px',
@@ -2417,9 +2468,82 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                 <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
                   {t('catalog.filters')}
                 </Typography>
-                <IconButton onClick={() => setMobileFiltersOpen(false)}>
-                  <CloseIcon />
-                </IconButton>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={() => {
+                      onGendersChange([]);
+                      setSelectedAgeGroups([]);
+                      setSelectedBrands([]);
+                      setPriceRange(priceLimits);
+                      // Автоматическая прокрутка к продуктам
+                      setTimeout(() => {
+                        if (window.scrollToCatalogProducts) {
+                          window.scrollToCatalogProducts();
+                        }
+                      }, 100);
+                    }}
+                    sx={{
+                      background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
+                      color: '#fff',
+                      borderRadius: 2,
+                      fontWeight: 600,
+                      fontSize: '12px',
+                      minWidth: 'auto',
+                      px: 1,
+                      py: 0.5,
+                      height: 32,
+                      boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
+                      textTransform: 'none',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #ef5350 0%, #f44336 100%)',
+                        boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                        transform: 'translateY(-1px)'
+                      },
+                    }}
+                  >
+                    {t('catalog.clearFilters')}
+                  </Button>
+                  <IconButton onClick={() => {
+                    console.log('🔍 [FILTERS] Кнопка X нажата');
+                    console.log('🔍 [FILTERS] Текущая позиция прокрутки:', window.scrollY);
+                    console.log('🔍 [FILTERS] Сохраненная позиция:', savedScrollY);
+                    
+                    setIsClosingFilters(true);
+                    setIsRestoringScroll(true);
+                    setLastFilterCloseTime(Date.now());
+                    setShouldPreventGlobalScroll(true);
+                    setMobileFiltersOpen(false);
+                    
+                    console.log('🔍 [FILTERS] Установлены флаги закрытия (кнопка X)');
+                    
+                    // Восстанавливаем позицию прокрутки с максимальной защитой
+                    setTimeout(() => {
+                      console.log('🔍 [FILTERS] Первая попытка восстановления (кнопка X):', savedScrollY);
+                      window.scrollTo(0, savedScrollY);
+                      // Дополнительная защита - повторяем несколько раз
+                      setTimeout(() => {
+                        console.log('🔍 [FILTERS] Вторая попытка восстановления (кнопка X):', savedScrollY);
+                        window.scrollTo(0, savedScrollY);
+                        setTimeout(() => {
+                          console.log('🔍 [FILTERS] Третья попытка восстановления (кнопка X):', savedScrollY);
+                          window.scrollTo(0, savedScrollY);
+                          console.log('🔍 [FILTERS] Финальная позиция после восстановления (кнопка X):', window.scrollY);
+                          // Увеличиваем задержку перед сбросом флагов
+                          setTimeout(() => {
+                            setIsClosingFilters(false);
+                            setIsRestoringScroll(false);
+                            setShouldPreventGlobalScroll(false);
+                            console.log('🔍 [FILTERS] Флаги сброшены (кнопка X)');
+                          }, 500); // Увеличиваем задержку до 500мс
+                        }, 100);
+                      }, 50);
+                    }, 50);
+                  }}>
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
               </Box>
               
               {/* Фильтр по полу */}
@@ -2439,6 +2563,12 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                           } else {
                             onGendersChange(selectedGenders.filter(g => g !== option.value));
                           }
+                          // Автоматическая прокрутка к продуктам
+                          setTimeout(() => {
+                            if (window.scrollToCatalogProducts) {
+                              window.scrollToCatalogProducts();
+                            }
+                          }, 100);
                         }}
                       />
                     }
@@ -2455,7 +2585,15 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                 </Typography>
                 <Slider
                   value={priceRange}
-                  onChange={(_, newValue) => setPriceRange(newValue)}
+                  onChange={(_, newValue) => {
+                    setPriceRange(newValue);
+                    // Автоматическая прокрутка к продуктам
+                    setTimeout(() => {
+                      if (window.scrollToCatalogProducts) {
+                        window.scrollToCatalogProducts();
+                      }
+                    }, 100);
+                  }}
                   valueLabelDisplay="auto"
                   min={priceLimits[0]}
                   max={priceLimits[1]}
@@ -2485,6 +2623,12 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                           } else {
                             setSelectedAgeGroups(selectedAgeGroups.filter(ag => ag !== ageGroup));
                           }
+                          // Автоматическая прокрутка к продуктам
+                          setTimeout(() => {
+                            if (window.scrollToCatalogProducts) {
+                              window.scrollToCatalogProducts();
+                            }
+                          }, 100);
                         }}
                       />
                     }
@@ -2512,6 +2656,12 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                             } else {
                               setSelectedBrands(selectedBrands.filter(b => b !== brand));
                             }
+                            // Автоматическая прокрутка к продуктам
+                            setTimeout(() => {
+                              if (window.scrollToCatalogProducts) {
+                                window.scrollToCatalogProducts();
+                              }
+                            }, 100);
                           }}
                         />
                       }
@@ -2522,60 +2672,6 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                 </Box>
               )}
               
-              {/* Кнопки сброса и применения */}
-              <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={() => {
-                    onGendersChange([]);
-                    setSelectedAgeGroups([]);
-                    setSelectedBrands([]);
-                    setPriceRange(priceLimits);
-                  }}
-                  sx={{
-                    background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
-                    color: '#fff',
-                    borderRadius: 2,
-                    fontWeight: 600,
-                    fontSize: 15,
-                    py: 1.5,
-                    height: 44,
-                    boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
-                    textTransform: 'none',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #ef5350 0%, #f44336 100%)',
-                      boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
-                      transform: 'translateY(-1px)'
-                    },
-                  }}
-                >
-                  {t('catalog.clearFilters')}
-                </Button>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={() => setMobileFiltersOpen(false)}
-                  sx={{
-                    background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
-                    color: '#fff',
-                    borderRadius: 2,
-                    fontWeight: 600,
-                    fontSize: 15,
-                    py: 1.5,
-                    height: 44,
-                    boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
-                    textTransform: 'none',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
-                      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
-                      transform: 'translateY(-1px)'
-                    },
-                  }}
-                >
-                  {t('catalog.applyFilters')}
-                </Button>
-              </Box>
             </Box>
           </Drawer>
           
@@ -2890,11 +2986,99 @@ function AppContent({
     const [interimTranscript, setInterimTranscript] = React.useState('');
     const recognitionRef = React.useRef(null);
     const filtersPanelRef = React.useRef(null);
+    const [isClosingFilters, setIsClosingFilters] = React.useState(false);
+    const [savedScrollY, setSavedScrollY] = React.useState(0);
+    const [isRestoringScroll, setIsRestoringScroll] = React.useState(false);
+    const [lastFilterCloseTime, setLastFilterCloseTime] = React.useState(0);
+    const [shouldPreventGlobalScroll, setShouldPreventGlobalScroll] = React.useState(false);
+    
+    // Логирование изменений состояния
+    React.useEffect(() => {
+      console.log('🔍 [STATE] isClosingFilters изменился:', isClosingFilters);
+    }, [isClosingFilters]);
+    
+    React.useEffect(() => {
+      console.log('🔍 [STATE] isRestoringScroll изменился:', isRestoringScroll);
+    }, [isRestoringScroll]);
+    
+    React.useEffect(() => {
+      console.log('🔍 [STATE] savedScrollY изменился:', savedScrollY);
+    }, [savedScrollY]);
+    
+    React.useEffect(() => {
+      console.log('🔍 [STATE] location.pathname изменился:', location.pathname);
+    }, [location.pathname]);
+    
+    // Отслеживание всех событий прокрутки
+    React.useEffect(() => {
+      const logScroll = () => {
+        const currentScrollY = window.scrollY;
+        console.log('🔍 [SCROLL] Событие прокрутки - позиция:', currentScrollY);
+        // Сохраняем текущую позицию прокрутки для использования при закрытии фильтров
+        setSavedScrollY(currentScrollY);
+      };
+      
+      // Логируем все вызовы window.scrollTo
+      const originalScrollTo = window.scrollTo;
+      window.scrollTo = function(...args) {
+        console.log('🔍 [SCROLL] window.scrollTo вызван с аргументами:', args);
+        console.trace('🔍 [SCROLL] Стек вызовов:');
+        return originalScrollTo.apply(this, args);
+      };
+      
+      window.addEventListener('scroll', logScroll);
+      return () => {
+        window.removeEventListener('scroll', logScroll);
+        window.scrollTo = originalScrollTo;
+      };
+    }, []);
     
     // Прокрутка к началу страницы при переходе между вкладками
     React.useEffect(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    }, [location.pathname]);
+      console.log('🔍 [GLOBAL] useEffect location.pathname вызван');
+      console.log('🔍 [GLOBAL] location.pathname:', location.pathname);
+      console.log('🔍 [GLOBAL] isClosingFilters:', isClosingFilters);
+      console.log('🔍 [GLOBAL] isRestoringScroll:', isRestoringScroll);
+      console.log('🔍 [GLOBAL] lastFilterCloseTime:', lastFilterCloseTime);
+      console.log('🔍 [GLOBAL] Текущее время:', Date.now());
+      
+      const timeSinceLastFilterClose = Date.now() - lastFilterCloseTime;
+      console.log('🔍 [GLOBAL] Время с последнего закрытия фильтра:', timeSinceLastFilterClose);
+      
+      // Не прокручиваем, если закрываем фильтры, восстанавливаем прокрутку, недавно закрыли фильтры или нужно предотвратить прокрутку
+      if (!isClosingFilters && !isRestoringScroll && timeSinceLastFilterClose > 3000 && !shouldPreventGlobalScroll) {
+        console.log('🔍 [GLOBAL] Выполняем прокрутку к началу страницы');
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      } else {
+        console.log('🔍 [GLOBAL] Пропускаем прокрутку из-за флагов или недавнего закрытия фильтров');
+      }
+    }, [location.pathname, isClosingFilters, isRestoringScroll, lastFilterCloseTime]);
+
+    // Глобальный обработчик для предотвращения нежелательной прокрутки
+    React.useEffect(() => {
+      const preventScroll = (e) => {
+        if (isRestoringScroll) {
+          console.log('🔍 [SCROLL] Блокируем событие прокрутки:', e.type);
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      };
+
+      // Добавляем обработчики для всех возможных событий прокрутки
+      window.addEventListener('scroll', preventScroll, { passive: false });
+      window.addEventListener('wheel', preventScroll, { passive: false });
+      document.addEventListener('scroll', preventScroll, { passive: false });
+
+      console.log('🔍 [SCROLL] Обработчики прокрутки установлены, isRestoringScroll:', isRestoringScroll);
+
+      return () => {
+        window.removeEventListener('scroll', preventScroll);
+        window.removeEventListener('wheel', preventScroll);
+        document.removeEventListener('scroll', preventScroll);
+        console.log('🔍 [SCROLL] Обработчики прокрутки удалены');
+      };
+    }, [isRestoringScroll]);
     
     // Обработка ошибок рендера
     const [hasError, setHasError] = React.useState(false);
@@ -3207,6 +3391,16 @@ function AppContent({
             filtersMenuOpen={filtersMenuOpen}
             setFiltersMenuOpen={setFiltersMenuOpen}
             desktopSearchBarRef={desktopSearchBarRef}
+            isClosingFilters={isClosingFilters}
+            setIsClosingFilters={setIsClosingFilters}
+            savedScrollY={savedScrollY}
+            setSavedScrollY={setSavedScrollY}
+            isRestoringScroll={isRestoringScroll}
+            setIsRestoringScroll={setIsRestoringScroll}
+            lastFilterCloseTime={lastFilterCloseTime}
+            setLastFilterCloseTime={setLastFilterCloseTime}
+            shouldPreventGlobalScroll={shouldPreventGlobalScroll}
+            setShouldPreventGlobalScroll={setShouldPreventGlobalScroll}
           />
           
           {/* Мобильный поиск и фильтры под AppBar */}
@@ -3249,7 +3443,13 @@ function AppContent({
               {/* Кнопка фильтров - только на странице каталога */}
               {isCatalog && (
                 <IconButton
-                  onClick={() => setMobileFiltersOpen(true)}
+                  onClick={() => {
+                    // Позиция уже сохранена в обработчике прокрутки
+                    const currentScrollY = window.scrollY;
+                    console.log('🔍 [FILTERS] Открытие фильтров - текущая позиция:', currentScrollY);
+                    console.log('🔍 [FILTERS] Открытие фильтров - сохраненная позиция:', savedScrollY);
+                    setMobileFiltersOpen(true);
+                  }}
                   sx={{
                     color: '#FF9800',
                     backgroundColor: 'white',

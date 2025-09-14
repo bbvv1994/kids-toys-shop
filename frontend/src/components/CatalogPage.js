@@ -40,6 +40,9 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   const [isListening, setIsListening] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
   const recognitionRef = useRef(null);
+  const productsGridRef = useRef(null);
+  const productsListRef = useRef(null);
+  const sortingBlockRef = useRef(null);
   const deviceType = useDeviceType();
   const isMobile = deviceType === 'mobile';
   const theme = useTheme();
@@ -58,6 +61,25 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
       setViewMode('grid');
     }
  }, [isNarrow, isMobile, viewMode]);
+
+  // Функция прокрутки к продуктам
+  const scrollToProducts = () => {
+    // Прокручиваем к блоку сортировки вместо карточек товаров
+    if (sortingBlockRef.current) {
+      sortingBlockRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
+  // Экспортируем функцию прокрутки через window для доступа из AppContent
+  useEffect(() => {
+    window.scrollToCatalogProducts = scrollToProducts;
+    return () => {
+      delete window.scrollToCatalogProducts;
+    };
+  }, []); // Функция не зависит от viewMode, так как всегда прокручиваем к блоку сортировки
   
   // Определяем валюту по товарам (если есть поле currency, иначе ILS)
   const currency = products && products.length > 0
@@ -531,7 +553,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
             </Typography>
           )}
           {/* Блок сортировки, количества и вида — как на скриншоте */}
-          <Box sx={{
+          <Box ref={sortingBlockRef} sx={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -619,7 +641,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
         <Box>
           {/* Сетка или список товаров каталога */}
           {viewMode === 'grid' ? (
-            <Box sx={{
+            <Box ref={productsGridRef} sx={{
               display: {
                 xs: 'flex',
                 md: 'grid'
@@ -665,7 +687,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
               )}
             </Box>
           ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 6, mb: 6, maxWidth: 1100, margin: '0 auto', alignItems: { xs: 'center', sm: 'stretch' } }}>
+            <Box ref={productsListRef} sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 6, mb: 6, maxWidth: 1100, margin: '0 auto', alignItems: { xs: 'center', sm: 'stretch' } }}>
               {pagedProducts.length > 0 ? (
                 pagedProducts.map(product => (
                   <ProductCard
