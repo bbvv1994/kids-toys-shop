@@ -190,22 +190,16 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     const currentGender = currentProduct.gender;
     const currentAgeGroup = currentProduct.ageGroup;
     const currentBrand = currentProduct.brand;
-    
-    // Группируем товары по приоритету совпадения
-    const perfectMatch = []; // Все параметры совпадают
-    const highMatch = []; // Категория + подкатегория + пол + возраст
-    const mediumMatch = []; // Категория + подкатегория + (пол ИЛИ возраст)
-    const lowMatch = []; // Только категория + подкатегория
-    const categoryMatch = []; // Только категория
-    
+
+    const similarProducts = [];
+
     allProducts.forEach(product => {
       const productCategory = getCategoryName(product.category);
       const productSubcategory = getSubcategoryName(product.subcategory);
       const productGender = product.gender;
       const productAgeGroup = product.ageGroup;
       const productBrand = product.brand;
-      
-      // Подсчитываем совпадения
+
       const matches = {
         category: productCategory === currentCategory,
         subcategory: productSubcategory === currentSubcategory,
@@ -213,42 +207,32 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         ageGroup: productAgeGroup === currentAgeGroup,
         brand: productBrand === currentBrand
       };
-      
-      const matchCount = Object.values(matches).filter(Boolean).length;
-      
-      // Классифицируем по приоритету
-      if (matches.category && matches.subcategory && matches.gender && matches.ageGroup && matches.brand) {
-        perfectMatch.push(product);
-      } else if (matches.category && matches.subcategory && matches.gender && matches.ageGroup) {
-        highMatch.push(product);
-      } else if (matches.category && matches.subcategory && (matches.gender || matches.ageGroup)) {
-        mediumMatch.push(product);
-      } else if (matches.category && matches.subcategory) {
-        lowMatch.push(product);
-      } else if (matches.category) {
-        categoryMatch.push(product);
+
+      // Показываем только товары с минимум 4 совпадениями
+      // Обязательные: категория, подкатегория, пол, возраст (4 совпадения)
+      if (matches.category && matches.subcategory && matches.gender && matches.ageGroup) {
+        const matchCount = Object.values(matches).filter(Boolean).length;
+        similarProducts.push({
+          product,
+          matchCount,
+          hasBrand: matches.brand // Дополнительное совпадение по бренду
+        });
       }
     });
-    
-    // Объединяем результаты в порядке приоритета
-    const result = [
-      ...perfectMatch,
-      ...highMatch,
-      ...mediumMatch,
-      ...lowMatch,
-      ...categoryMatch
-    ];
-    
-    // Если товаров мало, добавляем случайные из той же категории
-    if (result.length < 4) {
-      const remainingProducts = allProducts.filter(p => 
-        !result.some(r => r.id === p.id) && 
-        getCategoryName(p.category) === currentCategory
-      );
-      result.push(...remainingProducts);
-    }
-    
-    return result;
+
+    // Сортируем по количеству совпадений (сначала больше совпадений)
+    similarProducts.sort((a, b) => {
+      if (a.matchCount !== b.matchCount) {
+        return b.matchCount - a.matchCount;
+      }
+      // Если совпадений поровну, приоритет товарам с совпадением по бренду
+      if (a.hasBrand !== b.hasBrand) {
+        return b.hasBrand - a.hasBrand;
+      }
+      return 0;
+    });
+
+    return similarProducts.map(item => item.product);
   };
 
   const handleChangeCartQuantity = onChangeCartQuantity; // Переименовываем для совместимости
@@ -2763,7 +2747,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           <Box sx={{
             display: 'grid',
             gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
-            gap: { xs: 2, sm: 3, md: 3, lg: 3 },
+            gap: { xs: 1, sm: 2, md: 2, lg: 2 },
             pb: 1,
             width: '100%',
             maxWidth: { xs: 'calc(2 * 167px + 24px)', sm: 'calc(2 * 285px + 24px)', md: 'calc(3 * 285px + 48px)', lg: 'calc(4 * 285px + 72px)' },
