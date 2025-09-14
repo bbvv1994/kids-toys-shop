@@ -2746,12 +2746,16 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>Похожие товары</Typography>
           <Box sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+            gridTemplateColumns: { 
+              xs: 'repeat(2, 1fr)', 
+              sm: 'repeat(2, 1fr)', 
+              md: 'repeat(3, 1fr)', 
+              lg: 'repeat(4, 1fr)' 
+            },
             gap: { xs: 1, sm: 2, md: 2, lg: 2 },
             pb: 1,
             width: '100%',
-            maxWidth: { xs: 'calc(2 * 167px + 24px)', sm: 'calc(2 * 285px + 24px)', md: 'calc(3 * 285px + 48px)', lg: 'calc(4 * 285px + 72px)' },
-            margin: '0 auto',
+            px: { xs: 2, sm: 3, md: 4, lg: 4 },
             justifyContent: 'center'
           }}>
             {similarProducts.map(similar => (
