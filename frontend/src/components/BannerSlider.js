@@ -286,7 +286,7 @@ const BannerSlider = ({ drawerWidth = 280 }) => {
             transform: 'translateX(-50%)',
             display: 'flex',
             gap: 1,
-            zIndex: 3
+            zIndex: 10
           }}
         >
           {banners.map((_, i) => (

@@ -1380,8 +1380,85 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
             }}>
               {/* Левая секция: Логотип и кнопка меню */}
               <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mr: { xs: 0.5, sm: 1, md: 2 } }}>
-                  <img src="/lion-logo.png..png" alt="Логотип магазина" style={{ width: isDesktop ? 57 : (isNarrow ? 45 : 40), height: isDesktop ? 57 : (isNarrow ? 45 : 40) }} />
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    mr: { xs: 0.5, sm: 1, md: 2 },
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    outline: 'none !important',
+                    '&:focus': {
+                      outline: 'none !important',
+                      boxShadow: 'none !important'
+                    },
+                    '&:focus-visible': {
+                      outline: 'none !important',
+                      boxShadow: 'none !important'
+                    },
+                    '&:active': {
+                      outline: 'none !important',
+                      boxShadow: 'none !important'
+                    },
+                    '&:hover': {
+                      transform: 'scale(1.05)'
+                    }
+                  }}
+                  tabIndex={-1}
+                  onClick={() => navigate('/')}
+                >
+                  <Box
+                    sx={{
+                      width: isDesktop ? 57 : (isNarrow ? 45 : 40),
+                      height: isDesktop ? 57 : (isNarrow ? 45 : 40),
+                      backgroundImage: 'url("/lion-logo.png")',
+                      backgroundSize: 'contain',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                      filter: 'drop-shadow(0 0 0px rgba(255, 102, 0, 0))',
+                      transition: 'filter 0.3s ease',
+                      outline: 'none !important',
+                      WebkitTapHighlightColor: 'transparent',
+                      WebkitUserSelect: 'none',
+                      MozUserSelect: 'none',
+                      msUserSelect: 'none',
+                      userSelect: 'none',
+                      WebkitTouchCallout: 'none',
+                      WebkitAppearance: 'none',
+                      border: 'none',
+                      '&:focus': {
+                        outline: 'none !important',
+                        boxShadow: 'none !important'
+                      },
+                      '&:focus-visible': {
+                        outline: 'none !important',
+                        boxShadow: 'none !important'
+                      },
+                      '&:active': {
+                        outline: 'none !important',
+                        boxShadow: 'none !important'
+                      }
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.filter = 'drop-shadow(0 0 12px rgba(255, 102, 0, 0.9)) drop-shadow(0 0 24px rgba(255, 102, 0, 0.6)) drop-shadow(0 0 36px rgba(255, 102, 0, 0.3))';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.filter = 'drop-shadow(0 0 0px rgba(255, 102, 0, 0))';
+                    }}
+                    onMouseDown={(e) => {
+                      e.target.style.filter = 'drop-shadow(0 0 15px rgba(255, 102, 0, 1)) drop-shadow(0 0 30px rgba(255, 102, 0, 0.8)) drop-shadow(0 0 45px rgba(255, 102, 0, 0.6))';
+                    }}
+                    onMouseUp={(e) => {
+                      e.target.style.filter = 'drop-shadow(0 0 0px rgba(255, 102, 0, 0))';
+                    }}
+                    onTouchStart={(e) => {
+                      e.target.style.filter = 'drop-shadow(0 0 15px rgba(255, 102, 0, 1)) drop-shadow(0 0 30px rgba(255, 102, 0, 0.8)) drop-shadow(0 0 45px rgba(255, 102, 0, 0.6))';
+                    }}
+                    onTouchEnd={(e) => {
+                      e.target.style.filter = 'drop-shadow(0 0 0px rgba(255, 102, 0, 0))';
+                    }}
+                    tabIndex={-1}
+                  />
                 </Box>
                 {/* Кнопка меню при узком вьюпорте (и на мобильных) - справа от логотипа */}
                 {(isNarrow || isMobile) && (
@@ -1694,7 +1771,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
          }
        }}
      >
-       <img src="/pocket.png" alt="cart" style={{ width: 32, height: 32, display: 'block', filter: 'brightness(0) invert(1)', objectFit: 'contain', position: 'relative', top: '7px' }} />
+       <img src="/iconcart.png" alt="cart" style={{ width: 32, height: 32, display: 'block', filter: 'brightness(0) invert(1)', objectFit: 'contain', position: 'relative', top: '7px' }} />
      </Badge>
                   </IconButton>
                   <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#fff', mt: 0.5, textAlign: 'center', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -1769,7 +1846,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                         }
                       }}
                     >
-                      <img src="/pocket.png" alt="cart" style={{ width: 24, height: 24, display: 'block', filter: 'brightness(0) invert(1)', objectFit: 'contain' }} />
+                      <ShoppingCartIcon sx={{ fontSize: 24 }} />
                     </Badge>
                   </IconButton>
                   

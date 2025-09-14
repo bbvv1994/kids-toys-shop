@@ -382,7 +382,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
     };
   
     return (
-      <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 0 } }}>
+      <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
         <Box sx={{ mb: 4, pt: { xs: 0, md: 3.75 } }}>
           {/* Хлебные крошки */}
           <Box sx={{ 
@@ -509,25 +509,27 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
   
           {/* Сетка товаров */}
           <Box sx={{
-            display: 'grid',
-            gridTemplateColumns: isMobile 
-              ? 'repeat(2, 1fr)' 
-              : 'repeat(auto-fit, minmax(280px, 280px))',
-            justifyContent: 'center',
-            gap: isMobile ? '4px' : '8px',
+            display: {
+              xs: 'flex',
+              md: 'grid'
+            },
+            flexDirection: { xs: 'row', md: 'unset' },
+            flexWrap: { xs: 'wrap', md: 'unset' },
+            justifyContent: { xs: 'center', md: 'unset' },
+            gridTemplateColumns: {
+              md: 'repeat(auto-fit, minmax(280px, 280px))'
+            },
+            gap: '8px',
             mb: 6,
             width: '100%',
-            maxWidth: isMobile 
-              ? '100%' 
-              : { md: 'calc(4 * 280px + 3 * 8px)' },
-            mx: { xs: 'auto', md: 0 },
-            px: isMobile ? 1 : 0,
+            maxWidth: { 
+              xs: '100%', 
+              md: 'calc(4 * 280px + 3 * 8px)' 
+            },
+            mx: { xs: 0, md: 0 },
+            px: 0,
             // desktop alignment: center 3-cols region (≤1535px); 4-cols (≥1536px) left-align with indent
-            ml: isMobile ? 0 : { lg: 'calc(280px + (100% - 280px - 903px)/2)', xl: '280px' },
-            // Центрирование для мобильных устройств
-            '@media (max-width: 899px)': {
-              justifyItems: 'center'
-            }
+            ml: { xs: 0, lg: 'calc(280px + (100% - 280px - 903px)/2)', xl: '280px' }
           }}>
             {filteredProducts.length > 0 ? (
               filteredProducts.map(product => (

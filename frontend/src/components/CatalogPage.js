@@ -615,31 +615,35 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
       </Container>
 
       {/* Контейнер товаров без левого отступа 270 */}
-      <Container maxWidth={false} sx={{ px: { xs: 2, md: 4 } }}>
+      <Container maxWidth={false} sx={{ px: 0 }}>
         <Box>
           {/* Сетка или список товаров каталога */}
           {viewMode === 'grid' ? (
             <Box sx={{
-              display: 'grid',
-              gridTemplateColumns: isMobile 
-                ? 'repeat(2, 1fr)' 
-                : 'repeat(auto-fit, minmax(280px, 280px))',
-              justifyContent: 'center',
-              gap: isMobile ? '4px' : '8px',
+              display: {
+                xs: 'flex',
+                md: 'grid'
+              },
+              flexDirection: { xs: 'row', md: 'unset' },
+              flexWrap: { xs: 'wrap', md: 'unset' },
+              justifyContent: { xs: 'center', md: 'unset' },
+              gridTemplateColumns: {
+                md: 'repeat(auto-fit, minmax(280px, 280px))'
+              },
+              gap: '8px',
               mt: 0.5,
               mb: 6,
               width: '100%',
-              maxWidth: isMobile 
-                ? '100%' 
-                : { md: 'calc(5 * 280px + 4 * 8px)' },
+              maxWidth: {
+                xs: '100%',
+                md: 'calc(5 * 280px + 4 * 8px)'
+              },
               mx: 'auto',
-              px: isMobile ? 1 : 0
+              px: 0
             }}>
               {pagedProducts.length > 0 ? (
                 pagedProducts.map(product => (
-                  <Box key={product.id} sx={{ 
-                    display: 'flex'
-                  }}>
+                  <Box key={product.id}>
                     <ProductCard
                       product={product}
                       user={user}

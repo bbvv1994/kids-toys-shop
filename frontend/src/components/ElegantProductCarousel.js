@@ -55,7 +55,7 @@ function ElegantProductCarousel({
       prevPage();
     },
     preventDefaultTouchmoveEvent: true,
-    trackMouse: true
+    trackMouse: false
   });
 
   const nextPage = () => {
@@ -160,15 +160,19 @@ function ElegantProductCarousel({
                   left: { xs: 4, sm: 8 },
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  backgroundColor: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  zIndex: 2,
+                  zIndex: 10,
                   width: { xs: 32, sm: 40 },
                   height: { xs: 32, sm: 40 },
+                  opacity: 1,
+                  visibility: 'visible',
                   '&:hover': {
-                    backgroundColor: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 1)',
                     transform: 'translateY(-50%) scale(1.05)',
-                    boxShadow: '0 6px 16px rgba(0,0,0,0.2)'
+                    boxShadow: '0 6px 16px rgba(0,0,0,0.2)',
+                    opacity: 1,
+                    visibility: 'visible'
                   },
                   transition: 'all 0.3s ease'
                 }}
@@ -199,15 +203,19 @@ function ElegantProductCarousel({
                   right: { xs: 4, sm: 8 },
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  backgroundColor: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  zIndex: 2,
+                  zIndex: 10,
                   width: { xs: 32, sm: 40 },
                   height: { xs: 32, sm: 40 },
+                  opacity: 1,
+                  visibility: 'visible',
                   '&:hover': {
-                    backgroundColor: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 1)',
                     transform: 'translateY(-50%) scale(1.05)',
-                    boxShadow: '0 6px 16px rgba(0,0,0,0.2)'
+                    boxShadow: '0 6px 16px rgba(0,0,0,0.2)',
+                    opacity: 1,
+                    visibility: 'visible'
                   },
                   transition: 'all 0.3s ease'
                 }}

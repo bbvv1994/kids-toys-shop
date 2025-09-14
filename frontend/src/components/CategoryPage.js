@@ -462,7 +462,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
     };
   
     return (
-      <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 0 } }}>
+      <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
         <Box sx={{ mb: 4, pt: { xs: 0, md: 3.75 } }}>
                   {/* Хлебные крошки */}
           <Box sx={{ 
@@ -663,30 +663,29 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
   
           {/* Сетка товаров из этой категории */}
           <Box sx={{
-            display: 'grid',
-            gridTemplateColumns: isMobile 
-              ? 'repeat(2, 1fr)' 
-              : 'repeat(auto-fit, minmax(280px, 280px))',
-            justifyContent: 'center',
-            gap: isMobile ? '4px' : '8px',
+            display: {
+              xs: 'flex',
+              md: 'grid'
+            },
+            flexDirection: { xs: 'row', md: 'unset' },
+            flexWrap: { xs: 'wrap', md: 'unset' },
+            justifyContent: { xs: 'center', md: 'unset' },
+            gridTemplateColumns: {
+              md: 'repeat(auto-fit, minmax(280px, 280px))'
+            },
+            gap: '8px',
             mb: 6,
             width: '100%',
-            maxWidth: isMobile 
-              ? '100%' 
-              : { md: 'calc(5 * 280px + 4 * 8px)' },
+            maxWidth: { 
+              xs: '100%', 
+              md: 'calc(5 * 280px + 4 * 8px)' 
+            },
             mx: 'auto',
-            px: isMobile ? 1 : 0,
-            // Центрирование для мобильных устройств
-            '@media (max-width: 899px)': {
-              justifyItems: 'center'
-            }
+            px: 0
           }}>
             {filteredCategoryProducts.length > 0 ? (
               filteredCategoryProducts.map(product => (
-                <Box key={product.id} sx={{ 
-                  display: 'flex',
-                  justifyContent: 'center'
-                }}>
+                <Box key={product.id}>
                   <ProductCard 
                     product={product} 
                     user={user}

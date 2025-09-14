@@ -218,7 +218,7 @@ export default function GirlsToysPage({
   }
 
   return (
-    <Container maxWidth={false} sx={{ py: 4, minHeight: '80vh', px: { xs: 2, md: 4 } }}>
+      <Container maxWidth={false} sx={{ py: 0, minHeight: '80vh', px: 0 }}>
       {/* Заголовок страницы */}
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography 
@@ -339,20 +339,29 @@ export default function GirlsToysPage({
         <>
           {viewMode === 'grid' ? (
             <Box sx={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 280px))',
-              justifyContent: 'center',
+              display: {
+                xs: 'flex',
+                md: 'grid'
+              },
+              flexDirection: { xs: 'row', md: 'unset' },
+              flexWrap: { xs: 'wrap', md: 'unset' },
+              justifyContent: { xs: 'center', md: 'unset' },
+              gridTemplateColumns: {
+                md: 'repeat(auto-fit, minmax(280px, 280px))'
+              },
               gap: '8px',
               width: '100%',
-              maxWidth: { md: 'calc(5 * 280px + 4 * 8px)' },
+              maxWidth: { 
+                xs: '100%', 
+                md: 'calc(5 * 280px + 4 * 8px)' 
+              },
               mx: 'auto',
-              mt: 8,
-              mb: 6
+              mt: 2,
+              mb: 6,
+              px: 0
             }}>
               {pagedProducts.map((product) => (
-                <Box key={product.id} sx={{ 
-                  display: 'flex'
-                }}>
+                <Box key={product.id}>
                   <ProductCard
                     product={product}
                     user={user}
@@ -362,6 +371,7 @@ export default function GirlsToysPage({
                     cart={cart}
                     onChangeCartQuantity={handleQuantityChange}
                     onEditProduct={onEditProduct}
+                    viewMode={isMobile ? "carousel-mobile" : "grid"}
                   />
                 </Box>
               ))}

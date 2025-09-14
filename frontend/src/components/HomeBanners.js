@@ -456,7 +456,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
               transform: 'translateY(-50%)',
               backgroundColor: 'rgba(255,255,255,0.9)',
               color: 'primary.main',
-              zIndex: 3,
+              zIndex: 10,
               '&:hover': {
                 backgroundColor: 'rgba(255,255,255,1)',
                 transform: 'translateY(-50%) scale(1.1)'
@@ -477,7 +477,7 @@ const HomeBanners = ({ drawerWidth = 280 }) => {
               transform: 'translateY(-50%)',
               backgroundColor: 'rgba(255,255,255,0.9)',
               color: 'primary.main',
-              zIndex: 3,
+              zIndex: 10,
               '&:hover': {
                 backgroundColor: 'rgba(255,255,255,1)',
                 transform: 'translateY(-50%) scale(1.1)'
