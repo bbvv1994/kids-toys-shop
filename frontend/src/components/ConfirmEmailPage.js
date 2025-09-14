@@ -12,6 +12,7 @@ import {
   Error as ErrorIcon
 } from '@mui/icons-material';
 import { API_BASE_URL } from '../config';
+import { useUser } from '../contexts/UserContext';
 
 // === Страница подтверждения email ===
 function ConfirmEmailPage() {
@@ -19,6 +20,7 @@ function ConfirmEmailPage() {
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
+    const { handleLogin } = useUser();
   
     useEffect(() => {
       const params = new URLSearchParams(location.search);
@@ -42,18 +44,16 @@ function ConfirmEmailPage() {
             if (data.token && data.user) {
               // Сохраняем токен в localStorage
               localStorage.setItem('token', data.token);
-              localStorage.setItem('user', JSON.stringify(data.user));
               
-              // Обновляем состояние приложения (если есть доступ к setUser)
-              if (window.setUser) {
-                window.setUser(data.user);
-              }
+              // Создаем объект пользователя с токеном
+              const userData = { ...data.user, token: data.token };
+              
+              // Обновляем состояние приложения через UserContext
+              handleLogin(userData);
               
               // Перенаправляем на главную через 2 секунды
               setTimeout(() => {
                 navigate('/');
-                // Перезагружаем страницу для обновления состояния
-                window.location.reload();
               }, 2000);
             } else {
               // Если нет токена, просто перенаправляем

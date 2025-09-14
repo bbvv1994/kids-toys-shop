@@ -27,7 +27,9 @@ const cacheMiddleware = (ttl = 3600, keyGenerator = null) => {
         console.log(`📦 Кэш HIT: ${cacheKey}`);
         
         // Добавляем заголовки кэширования для кэшированных ответов
-        res.setHeader('Cache-Control', 'public, max-age=300'); // 5 минут
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // Не кэшируем API
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         res.setHeader('X-Cache', 'HIT');
         // Очищаем cacheKey от недопустимых символов для HTTP заголовков
         const cleanCacheKey = cacheKey.replace(/[^\x20-\x7E]/g, '_');
@@ -41,7 +43,9 @@ const cacheMiddleware = (ttl = 3600, keyGenerator = null) => {
       const originalJson = res.json;
       res.json = function(data) {
         // Добавляем заголовки кэширования для новых ответов
-        res.setHeader('Cache-Control', 'public, max-age=300'); // 5 минут
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // Не кэшируем API
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         res.setHeader('X-Cache', 'MISS');
         // Очищаем cacheKey от недопустимых символов для HTTP заголовков
         const cleanCacheKey = cacheKey.replace(/[^\x20-\x7E]/g, '_');

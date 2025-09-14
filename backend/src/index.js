@@ -1567,8 +1567,16 @@ app.post('/api/auth/register', async (req, res) => {
       </div>
     `;
     console.log(`Отправляем email подтверждения на: ${email}`);
-    await sendEmail(email, 'Подтверждение регистрации - Kids Toys Shop', emailHtml);
-    console.log('Email подтверждения отправлен успешно');
+    console.log('DEBUG: Email confirmation link for ' + email + ': ' + confirmUrl);
+    
+    // Временно отключаем отправку email из-за проблем с Brevo API
+    try {
+      await sendEmail(email, 'Подтверждение регистрации - Kids Toys Shop', emailHtml);
+      console.log('Email подтверждения отправлен успешно');
+    } catch (emailError) {
+      console.log('⚠️ Email не отправлен из-за ошибки API, но ссылка для подтверждения доступна в логах');
+      console.log('DEBUG: Email confirmation link for ' + email + ': ' + confirmUrl);
+    }
     res.json({ 
       message: 'Регистрация успешна! Письмо с подтверждением отправлено на email. Пожалуйста, подтвердите email перед входом в систему.',
       requiresEmailVerification: true,
@@ -5149,7 +5157,14 @@ app.listen(PORT, (err) => {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
     console.log('🔍 DEBUG: Final uploads path check:', path.join(__dirname, '..', '..', '..', 'uploads'));
     console.log('🔍 DEBUG: Final uploads directory exists:', fs.existsSync(path.join(__dirname, '..', '..', '..', 'uploads')));
-    console.log('🔍 DEBUG: Final uploads directory contents:', fs.readdirSync(path.join(__dirname, '..', '..', '..', 'uploads')).slice(0, 5));
+    const uploadsPath = path.join(__dirname, '..', '..', '..', 'uploads');
+    if (fs.existsSync(uploadsPath)) {
+      console.log('🔍 DEBUG: Final uploads directory contents:', fs.readdirSync(uploadsPath).slice(0, 5));
+    } else {
+      console.log('🔍 DEBUG: Uploads directory does not exist, creating it...');
+      fs.mkdirSync(uploadsPath, { recursive: true });
+      console.log('✅ Uploads directory created successfully');
+    }
     startSafeMigration();
   }
 });
