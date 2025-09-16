@@ -44,8 +44,8 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   const productsListRef = useRef(null);
   const sortingBlockRef = useRef(null);
   const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
   const isNarrow = useMediaQuery(theme.breakpoints.down('lg'));
   // Фильтры каталога
   const [filterAgeGroup, setFilterAgeGroup] = useState('all');
@@ -652,7 +652,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
               gridTemplateColumns: {
                 md: 'repeat(auto-fit, minmax(280px, 280px))'
               },
-              gap: '8px',
+              gap: '4px',
               mt: 0.5,
               mb: 6,
               width: '100%',

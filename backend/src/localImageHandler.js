@@ -8,8 +8,8 @@ class LocalImageHandler {
     this.supportedFormats = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
     
     // Папки для хранения изображений
-    this.uploadsDir = path.join(__dirname, '../../uploads');
-    this.hdDir = path.join(__dirname, '../../uploads/hd');
+    this.uploadsDir = path.join(__dirname, '..', 'uploads');
+    this.hdDir = path.join(__dirname, '..', 'uploads', 'hd');
     
     this.ensureDirectories();
   }
@@ -21,9 +21,8 @@ class LocalImageHandler {
     try {
       await fs.mkdir(this.uploadsDir, { recursive: true });
       await fs.mkdir(this.hdDir, { recursive: true });
-      console.log('✅ Папки для изображений созданы');
     } catch (error) {
-      console.error('❌ Ошибка создания папок:', error.message);
+      console.error('❌ LocalImageHandler: Ошибка создания папок:', error.message);
     }
   }
 

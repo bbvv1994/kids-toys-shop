@@ -32,7 +32,7 @@ const ageIcons = {
 };
 
 // Новый современный дизайн страницы товара
-export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuantity, onEditProduct, dbCategories, productId }) {
+export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuantity, onEditProduct, dbCategories, productId, wishlist, onWishlistToggle }) {
   const { t, i18n } = useTranslation();
   const isAdmin = user?.role === 'admin';
   
@@ -264,7 +264,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [reviewLoading, setReviewLoading] = useState(false);
   const [canReview, setCanReview] = useState(false);
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
-  const [wishlist, setWishlist] = useState([]);
+  // wishlist теперь передается как проп
   const [similarProducts, setSimilarProducts] = useState([]);
   const [quantity, setQuantity] = useState(1);
 
@@ -607,21 +607,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     checkCanReview();
   }, [id, user, reviewSuccess]);
 
-  useEffect(() => {
-    async function fetchWishlist() {
-      if (!user || !user.token) return setWishlist([]);
-      const res = await fetch(`${API_BASE_URL}/api/profile/wishlist`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      const data = await res.json();
-      if (res.ok && data && data.items) {
-        setWishlist(data.items.map(item => item.productId));
-      } else {
-        setWishlist([]);
-      }
-    }
-    fetchWishlist();
-  }, [user, id]);
+  // wishlist теперь управляется из AppContent через ProductsContext
 
   useEffect(() => {
     if (product && product.category) {
@@ -677,42 +663,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     localStorage.setItem('viewedProducts', JSON.stringify(limited));
   }, [product]);
 
-  const handleWishlistToggle = async (productId, isInWishlist) => {
-    if (!user || !user.token) {
-      alert('Войдите, чтобы использовать избранное!');
-      return;
-    }
-    if (wishlistAnimPlaying) return;
-    
-    // Запускаем анимацию только при добавлении в избранное
-    if (!isInWishlist) {
-      setWishlistAnimKey(prev => prev + 1);
-      setWishlistAnimPlaying(true);
-      // Используем requestAnimationFrame для лучшей производительности
-      const frameId = requestAnimationFrame(() => {
-        setTimeout(() => {
-          setWishlistAnimPlaying(false);
-        }, 800); // Уменьшили время анимации
-      });
-      return () => cancelAnimationFrame(frameId);
-    }
-    
-    if (isInWishlist) {
-      await fetch(`${API_BASE_URL}/api/profile/wishlist/remove`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
-        body: JSON.stringify({ productId })
-      });
-      setWishlist(wishlist.filter(id => id !== productId));
-    } else {
-      await fetch(`${API_BASE_URL}/api/profile/wishlist/add`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
-        body: JSON.stringify({ productId })
-      });
-      setWishlist([...wishlist, productId]);
-    }
-  };
+  // handleWishlistToggle теперь передается как проп из AppContent
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
@@ -2005,7 +1956,30 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   )}
                   <IconButton
                     size="medium"
-                    onClick={e => { e.stopPropagation(); handleWishlistToggle(product.id, wishlist.includes(product.id)); }}
+                    onClick={e => { 
+                      e.stopPropagation(); 
+                      console.log('🔍 ProductPage: Wishlist toggle clicked', {
+                        productId: product.id,
+                        isInWishlist: wishlist.includes(product.id),
+                        wishlist: wishlist
+                      });
+                      
+                      // Запускаем анимацию только при добавлении в избранное
+                      const isInWishlist = wishlist.includes(product.id);
+                      if (!isInWishlist) {
+                        setWishlistAnimKey(prev => prev + 1);
+                        setWishlistAnimPlaying(true);
+                        // Используем requestAnimationFrame для лучшей производительности
+                        const frameId = requestAnimationFrame(() => {
+                          setTimeout(() => {
+                            setWishlistAnimPlaying(false);
+                          }, 800); // Уменьшили время анимации
+                        });
+                        return () => cancelAnimationFrame(frameId);
+                      }
+                      
+                      onWishlistToggle(product.id, isInWishlist); 
+                    }}
                     disabled={wishlistAnimPlaying}
                     sx={{
                       p: 0.75,
@@ -2766,7 +2740,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   cart={cart}
                   onAddToCart={onAddToCart}
                   inWishlist={wishlist.includes(similar.id)}
-                  onWishlistToggle={() => handleWishlistToggle(similar.id, wishlist.includes(similar.id))}
+                  onWishlistToggle={() => onWishlistToggle(similar.id, wishlist.includes(similar.id))}
                   onClick={() => navigate(`/product/${similar.id}`)}
                   viewMode={isMobile ? "carousel-mobile" : "similar"} // Используем carousel-mobile для мобильной версии
                   isAdmin={isAdmin}

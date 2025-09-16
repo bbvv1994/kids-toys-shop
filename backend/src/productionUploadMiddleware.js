@@ -99,8 +99,6 @@ class ProductionUploadMiddleware {
         return next();
       }
 
-      console.log(`Processing single file: ${req.file.originalname}`);
-
       // Проверяем, есть ли buffer (production) или нужно читать с диска (development)
       let fileBuffer = req.file.buffer;
       if (!fileBuffer && req.file.path) {
@@ -138,7 +136,8 @@ class ProductionUploadMiddleware {
 
       if (result.success) {
         // Сохраняем файл на диск
-        const uploadsDir = path.join(__dirname, '..', 'uploads');
+        const uploadsDir = path.join(__dirname, '..', '..', 'backend', 'uploads');
+        
         if (!fs.existsSync(uploadsDir)) {
           fs.mkdirSync(uploadsDir, { recursive: true });
         }

@@ -893,17 +893,23 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
             // Упрощенная логика для определения пути к иконке
             let iconPath;
             
-            if (cat.image) {
+            const imagePath = cat.image || cat.icon;
+            console.log('🔍 AppContent: Processing category:', cat.name, 'imagePath:', imagePath, 'cat.icon:', cat.icon, 'cat.image:', cat.image);
+            
+            if (imagePath) {
               // Если изображение содержит временную метку (175...), это загруженный файл
-              if (cat.image.match(/^175\d+/)) {
-                iconPath = `${API_BASE_URL}/uploads/${cat.image}`;
+              if (imagePath.match(/^175\d+/)) {
+                iconPath = `${API_BASE_URL}/uploads/${imagePath}?t=${Date.now()}`;
+                console.log('✅ AppContent: Uploaded file detected:', iconPath);
               } else {
                 // Если это старый файл из public папки или fallback иконка
-                iconPath = `/${cat.image}`;
+                iconPath = `${API_BASE_URL}/public/${imagePath}?t=${Date.now()}`;
+                console.log('✅ AppContent: Static file detected:', iconPath);
               }
             } else {
               // Если нет изображения, используем fallback
               iconPath = getCategoryIcon(cat.name) || '/toys.png';
+              console.log('✅ AppContent: Fallback icon:', iconPath);
             }
             
             return {
@@ -934,13 +940,14 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
         // Упрощенная логика для определения пути к иконке
         let iconPath;
         
-        if (cat.image) {
+        const imagePath = cat.icon || cat.image;
+        if (imagePath) {
           // Если изображение содержит временную метку (175...), это загруженный файл
-          if (cat.image.match(/^175\d+/)) {
-            iconPath = `${API_BASE_URL}/uploads/${cat.image}`;
+          if (imagePath.match(/^175\d+/)) {
+            iconPath = `${API_BASE_URL}/uploads/${imagePath}`;
           } else {
             // Если это старый файл из public папки или fallback иконка
-            iconPath = `/${cat.image}`;
+            iconPath = `/${imagePath}`;
           }
         } else {
           // Если нет изображения, используем fallback
@@ -2930,6 +2937,7 @@ function AppContent({
     
     // Обертки для функций с проверкой аутентификации
     const handleSaveProductWithAuth = async (updatedProduct) => {
+      console.log('🚀 handleSaveProductWithAuth вызвана с товаром:', updatedProduct?.id, updatedProduct?.name);
       if (!user || !user.token) {
         console.error('User not authenticated');
         return;
@@ -3681,7 +3689,7 @@ function AppContent({
   
           <Routes>
             <Route path="/" element={<HomePage products={products} onAddToCart={handleAddToCart} cart={cart} user={user} onWishlistToggle={handleWishlistToggle} onChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} wishlist={wishlist} />} />
-            <Route path="/product/:id" element={<ProductPage onAddToCart={handleAddToCart} cart={cart} user={user} onChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} setAuthOpen={setAuthOpen} dbCategories={dbCategories} />} />
+            <Route path="/product/:id" element={<ProductPage onAddToCart={handleAddToCart} cart={cart} user={user} onChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} setAuthOpen={setAuthOpen} dbCategories={dbCategories} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} />} />
             <Route path="/catalog" element={<CatalogPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} dbCategories={dbCategories} selectedGenders={selectedGenders} selectedBrands={selectedBrands} selectedAgeGroups={selectedAgeGroups} priceRange={priceRange} />} />
             <Route path="/category/:id" element={<CategoryPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} />} />
             <Route path="/subcategory/:id" element={<SubcategoryPage products={products} onAddToCart={handleAddToCart} cart={cart} handleChangeCartQuantity={handleChangeCartQuantity} user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} onEditProduct={handleEditProduct} selectedGenders={selectedGenders} />} />

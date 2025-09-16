@@ -370,19 +370,32 @@ function CMSCategories({ loadCategoriesFromAPI }) {
         
         console.log('✅ Категория обновлена:', updatedCategory);
         
+        // Принудительно обновляем категории на главной странице
+        if (window.loadCategoriesFromAPI) {
+          console.log('🔄 Принудительно обновляем категории на главной странице...');
+          window.loadCategoriesFromAPI(true);
+        }
+        
+        // Также обновляем категории в ProductsContext
+        if (window.refreshProductsContextCategories) {
+          console.log('🔄 Принудительно обновляем категории в ProductsContext...');
+          window.refreshProductsContextCategories();
+        }
+        
         // Обновляем состояние локально используя данные с сервера
         setCategories(prevCategories => {
           const updatedCategories = prevCategories.map(category => {
             if (category.id === categoryId) {
               // Создаем новую иконку с временной меткой для обхода кэширования
               let newIconPath;
-              if (updatedCategory.image) {
+              const imagePath = updatedCategory.icon || updatedCategory.image;
+              if (imagePath) {
                 // Если изображение содержит временную метку (175...), это загруженный файл
-                if (updatedCategory.image.match(/^175\d+/)) {
-                  newIconPath = `${API_BASE_URL}/uploads/${updatedCategory.image}?t=${Date.now()}`;
+                if (imagePath.match(/^175\d+/)) {
+                  newIconPath = `${API_BASE_URL}/uploads/${imagePath}?t=${Date.now()}`;
                 } else {
                   // Если это старый файл из public папки
-                  newIconPath = `${API_BASE_URL}/public/${updatedCategory.image}?t=${Date.now()}`;
+                  newIconPath = `${API_BASE_URL}/public/${imagePath}?t=${Date.now()}`;
                 }
               } else {
                 // Если нет изображения, используем fallback

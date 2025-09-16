@@ -367,8 +367,8 @@ app.use((err, req, res, next) => {
   });
 });
 // Логирование для диагностики статических файлов
-const uploadsPath = path.join(__dirname, '..', '..', '..', 'uploads');
-const hdUploadsPath = path.join(__dirname, '..', '..', '..', 'uploads', 'hd');
+const uploadsPath = path.join(__dirname, '..', '..', 'backend', 'uploads');
+const hdUploadsPath = path.join(__dirname, '..', '..', 'backend', 'uploads', 'hd');
 
 console.log('🔍 DEBUG: Uploads path:', uploadsPath);
 console.log('🔍 DEBUG: HD uploads path:', hdUploadsPath);
@@ -391,7 +391,13 @@ app.use('/uploads', (req, res, next) => {
   }
   
   next();
-}, express.static(uploadsPath));
+}, express.static(uploadsPath, {
+  setHeaders: (res, path) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
+}));
 
 app.use('/uploads/hd', (req, res, next) => {
   const filePath = path.join(hdUploadsPath, req.path);
@@ -399,7 +405,13 @@ app.use('/uploads/hd', (req, res, next) => {
   console.log('🔍 DEBUG: HD full file path:', filePath);
   console.log('🔍 DEBUG: HD file exists:', require('fs').existsSync(filePath));
   next();
-}, express.static(hdUploadsPath));
+}, express.static(hdUploadsPath, {
+  setHeaders: (res, path) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
+}));
 
 app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
@@ -470,8 +482,8 @@ app.get('/api/test-static', (req, res) => {
   const fs = require('fs');
   const path = require('path');
   
-  const uploadsPath = path.join(__dirname, '..', '..', 'uploads');
-  const hdPath = path.join(__dirname, '..', '..', 'uploads', 'hd');
+  const uploadsPath = path.join(__dirname, '..', '..', 'backend', 'uploads');
+  const hdPath = path.join(__dirname, '..', '..', 'backend', 'uploads', 'hd');
   
   try {
     const uploadsExists = fs.existsSync(uploadsPath);
@@ -2879,28 +2891,18 @@ app.patch('/api/products/:id/hidden', authMiddleware, async (req, res) => {
 app.put('/api/products/:id', authMiddleware, upload.array('images', 7), 
   smartImageUploadMiddleware.processUploadedFiles.bind(smartImageUploadMiddleware), 
   async (req, res) => {
-  // Проверка роли admin
-  const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
-  }
   try {
     console.log('📝 Обновление товара ID:', req.params.id);
-    console.log('📥 Полученные данные:', JSON.stringify(req.body, null, 2));
-    console.log('📊 Размер запроса:', req.headers['content-length'] || 'unknown');
-    console.log('🔍 Проверка полей переводов:');
-    console.log('  - nameHe:', req.body.nameHe);
-    console.log('  - descriptionHe:', req.body.descriptionHe);
-    console.log('  - name:', req.body.name);
-    console.log('  - description:', req.body.description);
-    console.log('📁 Файлы:', req.files ? req.files.length : 0);
-    console.log('🖼️ Изображения:', req.imageUrls ? req.imageUrls.length : 0);
+    
+    // Проверка роли admin
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    }
     
     const { name, description, nameHe, descriptionHe, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, removedImages, currentExistingImages, mainImageIndex, inputLanguage = 'ru' } = req.body;
     
-    console.log('API: Received product update data:', {
-      name, description, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden
-    });
+    console.log('📝 Получены данные для обновления:', { name, price, ageGroup, gender, category, subcategory });
     
     // Получаем текущий товар для сохранения существующих изображений
     const currentProduct = await prisma.product.findUnique({
@@ -3046,6 +3048,8 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7),
       height: height ? parseFloat(height) : null
     };
 
+    console.log('📝 API: Обновляем товар в БД с данными:', productData);
+    
     const updated = await prisma.product.update({
       where: { id: parseInt(req.params.id) },
       data: productData,
@@ -3058,6 +3062,8 @@ app.put('/api/products/:id', authMiddleware, upload.array('images', 7),
         }
       }
     });
+    
+    console.log('✅ API: Товар успешно обновлен в БД:', updated);
     
     console.log('API: Product updated successfully:', updated.id);
     console.log('API: Updated product category:', updated.category);
@@ -3608,13 +3614,22 @@ app.put('/api/categories/reorder', authMiddleware, async (req, res) => {
 
 app.put('/api/categories/:id', authMiddleware, upload.single('image'), productionUploadMiddleware.processSingleImage.bind(productionUploadMiddleware), async (req, res) => {
   try {
+    console.log('🚀🚀🚀 PUT /api/categories/:id - Начало обработки запроса');
+    console.log('📥 req.body:', req.body);
+    console.log('📁 req.file:', req.file);
+    console.log('🖼️ req.processedFile:', req.processedFile);
+    console.log('🔗 req.imageUrl:', req.imageUrl);
+    
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
+      console.log('❌ Доступ запрещён: пользователь не админ');
       return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
     }
+    
     const id = Number(req.params.id);
     const { name, parentId } = req.body;
     const data = { name };
+    
     if (parentId !== undefined && parentId !== null && parentId !== '') {
       data.parentId = Number(parentId);
     } else {
@@ -3624,15 +3639,23 @@ app.put('/api/categories/:id', authMiddleware, upload.single('image'), productio
     // Если загружено новое изображение, добавляем его в данные
     if (req.file) {
       data.image = req.file.filename;
-      console.log('API: Обновление изображения категории:', req.file.filename);
+      console.log('✅ API: Обновление изображения категории:', req.file.filename);
+    } else {
+      console.log('⚠️ API: Нет нового изображения для обновления');
     }
     
-    console.log('API: Обновление категории ID:', id, 'Данные:', data);
+    console.log('📝 API: Обновление категории ID:', id, 'Данные:', data);
+    
     const updated = await prisma.category.update({ where: { id }, data });
-    console.log('API: Категория обновлена:', updated);
+    console.log('✅ API: Категория обновлена в БД:', updated);
+    
+    // Проверяем, что данные действительно сохранились
+    const verification = await prisma.category.findUnique({ where: { id } });
+    console.log('🔍 API: Проверка после обновления:', verification);
+    
     res.json(updated);
   } catch (e) {
-    console.error('API: Ошибка редактирования категории:', e);
+    console.error('❌ API: Ошибка редактирования категории:', e);
     res.status(500).json({ error: 'Ошибка редактирования категории' });
   }
 });
@@ -5157,7 +5180,7 @@ app.listen(PORT, (err) => {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
     console.log('🔍 DEBUG: Final uploads path check:', path.join(__dirname, '..', '..', '..', 'uploads'));
     console.log('🔍 DEBUG: Final uploads directory exists:', fs.existsSync(path.join(__dirname, '..', '..', '..', 'uploads')));
-    const uploadsPath = path.join(__dirname, '..', '..', '..', 'uploads');
+    const uploadsPath = path.join(__dirname, '..', '..', 'backend', 'uploads');
     if (fs.existsSync(uploadsPath)) {
       console.log('🔍 DEBUG: Final uploads directory contents:', fs.readdirSync(uploadsPath).slice(0, 5));
     } else {

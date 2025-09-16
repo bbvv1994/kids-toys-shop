@@ -68,14 +68,12 @@ export const getImageUrl = (imagePath) => {
   
   // Если это путь /uploads/...
   if (imagePath.startsWith('/uploads/')) {
-    const url = `${API_BASE_URL}${imagePath}`;
-    return url;
+    return `${API_BASE_URL}${imagePath}`;
   }
   
   // Если это загруженный файл (начинается с цифр)
   if (/^\d+/.test(imagePath)) {
-    const url = getUploadUrl(imagePath);
-    return url;
+    return getUploadUrl(imagePath);
   }
   
   // Если это статический файл из public папки (PNG, JPG, etc.)

@@ -46,13 +46,14 @@ export default function AboutPage() {
   return (
     <Container maxWidth="lg" sx={{ 
       py: { xs: 0, md: 0 }, 
-      mt: { xs: 0, md: -1 }, 
+      mt: { xs: 2, md: 4 }, 
       minHeight: '80vh' 
     }}>
       {/* Логотип */}
       <Box sx={{ 
         textAlign: 'center', 
-        mb: { xs: 0, md: 1 },
+        mb: { xs: 2, md: 3 },
+        mt: { xs: 1, md: 2 },
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center'

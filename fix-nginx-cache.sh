@@ -285,3 +285,4 @@ echo "2. Используйте Ctrl+F5 для принудительного о
 echo "3. При необходимости очистите кэш: sudo clear-nginx-cache"
 echo "4. Прочитайте инструкции: cat /root/nginx-cache-fix-instructions.md"
 echo ""
+

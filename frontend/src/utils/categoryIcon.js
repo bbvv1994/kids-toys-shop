@@ -1,20 +1,19 @@
 import { getImageUrl } from '../config.js';
 
 export function getCategoryIcon(category) {
-  // console.log('=== getCategoryIcon called ===');
-  // console.log('Category object:', category);
-  // console.log('Category name:', category?.name);
-  // console.log('Category image:', category?.image);
   
   if (!category) {
-    // console.log('No category provided, returning default');
     return '/toys.png';
+  }
+  
+  // Сначала проверяем готовый путь к иконке (из handleEditSubmit)
+  if (category.icon) {
+    return category.icon;
   }
   
   // Если есть изображение, используем функцию getImageUrl
   if (category.image) {
     const url = getImageUrl(category.image);
-    // console.log('Returning image URL:', url);
     return url;
   }
   

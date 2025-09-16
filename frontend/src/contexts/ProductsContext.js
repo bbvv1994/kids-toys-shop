@@ -28,7 +28,7 @@ export const ProductsProvider = ({ children }) => {
 
   // Load categories
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/categories`)
+    fetch(`${API_BASE_URL}/api/categories?_t=${Date.now()}`)
       .then(res => res.json())
       .then(data => {
         setDbCategories(data);
@@ -56,7 +56,8 @@ export const ProductsProvider = ({ children }) => {
       })
       .then(data => {
         const wishlistItems = data.items || [];
-        setWishlist(wishlistItems);
+        // Преобразуем в массив ID для удобства использования
+        setWishlist(wishlistItems.map(item => item.productId));
       })
       .catch(error => {
         console.error('Error loading wishlist:', error);
@@ -86,13 +87,57 @@ export const ProductsProvider = ({ children }) => {
       
       if (response.ok) {
         const updatedWishlist = await response.json();
-        setWishlist(updatedWishlist.items || []);
+        // Преобразуем в массив ID для удобства использования
+        setWishlist((updatedWishlist.items || []).map(item => item.productId));
+        console.log('✅ Wishlist updated successfully');
       } else {
         const errorData = await response.json();
         console.error('Wishlist API error:', errorData);
+        
+        // Если товар уже в избранном, обновляем локальное состояние
+        if (errorData.error === 'Товар уже в избранном' && !isInWishlist) {
+          setWishlist(prevWishlist => [...prevWishlist, productId]);
+          console.log('✅ Item already in wishlist, updated local state');
+        }
+        // Если товар не найден в избранном при попытке удаления, обновляем локальное состояние
+        else if (errorData.error && isInWishlist) {
+          setWishlist(prevWishlist => prevWishlist.filter(id => id !== productId));
+          console.log('✅ Item not in wishlist, updated local state');
+        }
       }
     } catch (error) {
       console.error('Error toggling wishlist:', error);
+    }
+  };
+
+  // Функция для принудительного обновления категорий
+  const refreshCategories = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/categories?_t=${Date.now()}`);
+      if (response.ok) {
+        const data = await response.json();
+        setDbCategories(data);
+        console.log('✅ Categories refreshed in ProductsContext');
+      }
+    } catch (error) {
+      console.error('Error refreshing categories:', error);
+    }
+  };
+
+  // Функция для принудительного обновления товаров
+  const refreshProducts = async () => {
+    try {
+      setProductsLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/products?_t=${Date.now()}`);
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data);
+        console.log('✅ Products refreshed in ProductsContext');
+      }
+    } catch (error) {
+      console.error('Error refreshing products:', error);
+    } finally {
+      setProductsLoading(false);
     }
   };
 
@@ -105,7 +150,9 @@ export const ProductsProvider = ({ children }) => {
     setWishlist,
     productsLoading,
     categoriesLoading,
-    handleWishlistToggle
+    handleWishlistToggle,
+    refreshCategories,
+    refreshProducts
   };
 
   return (

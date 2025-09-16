@@ -29,7 +29,7 @@ import AppContent from './components/AppContent';
 import { useDeviceType } from './utils/deviceDetection';
 import { CartProvider } from './contexts/CartContext';
 import { UserProvider } from './contexts/UserContext';
-import { ProductsProvider } from './contexts/ProductsContext';
+import { ProductsProvider, useProducts } from './contexts/ProductsContext';
 import { getImageUrl, API_BASE_URL } from './config';
 import { getTranslatedName, forceLanguageUpdate, checkTranslationsAvailable } from './utils/translationUtils';
 import TranslationDebugger from './components/TranslationDebugger';
@@ -380,9 +380,10 @@ const theme = createTheme({
   },
 });
 
-// Главный компонент приложения
-function App() {
+// Компонент с доступом к ProductsContext
+function AppWithProducts() {
   const { i18n } = useTranslation();
+  const { refreshCategories, setProducts: setContextProducts, refreshProducts } = useProducts();
   
   // Локальные состояния для устранения ошибок no-undef
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -493,6 +494,7 @@ function App() {
   // Функции для аутентификации
 
   const handleEditProduct = (product) => {
+    console.log('🚀 handleEditProduct вызвана с товаром:', product?.id, product?.name);
     setEditingProduct(product);
     setEditModalOpen(true);
   };
@@ -509,10 +511,8 @@ function App() {
   // Сохранить изменения товара
   const handleSaveProduct = async (updatedProduct) => {
     // Аутентификация будет проверяться в AppContent через контексты
-
+    console.log('🚀 handleSaveProduct вызвана с товаром:', updatedProduct?.id, updatedProduct?.name);
     try {
-
-      
       const formData = new FormData();
       formData.append('name', updatedProduct.name);
       formData.append('nameHe', updatedProduct.nameHe || '');
@@ -556,12 +556,15 @@ function App() {
       }
 
       // Добавляем язык ввода для автоматического перевода
-      
+      if (updatedProduct.inputLanguage) {
+        formData.append('inputLanguage', updatedProduct.inputLanguage);
+      }
 
       const userData = localStorage.getItem('user');
       const token = userData ? JSON.parse(userData).token : null;
-
-
+      
+      console.log('🚀 Отправляем запрос на сервер:', `${API_BASE_URL}/api/products/${updatedProduct.id}`);
+      console.log('🚀 Токен авторизации:', token ? 'есть' : 'нет');
       
       const response = await fetch(`${API_BASE_URL}/api/products/${updatedProduct.id}`, {
         method: 'PUT',
@@ -570,6 +573,8 @@ function App() {
         },
         body: formData
       });
+      
+      console.log('🚀 Получен ответ от сервера:', response.status, response.statusText);
       
       if (response.ok) {
         const savedProduct = await response.json();
@@ -582,24 +587,20 @@ function App() {
           prevProducts.map(p => p.id === updatedProduct.id ? savedProduct : p)
         );
         
-        // Принудительно обновляем данные товара на странице товара
-        // Это заставит ProductPage перезагрузить данные
-        const currentProduct = products.find(p => p.id === updatedProduct.id);
-        if (currentProduct) {
-          // Обновляем updatedAt, чтобы заставить useEffect в ProductPage перезагрузить данные
-          const updatedProductWithNewTimestamp = {
-            ...savedProduct,
-            updatedAt: new Date().toISOString()
-          };
-          setProducts(prevProducts => 
-            prevProducts.map(p => p.id === updatedProduct.id ? updatedProductWithNewTimestamp : p)
-          );
-        }
+        // Обновляем ProductsContext
+        setContextProducts(prevProducts => 
+          prevProducts.map(p => p.id === updatedProduct.id ? savedProduct : p)
+        );
+        
+        // Принудительно обновляем товары из сервера для синхронизации
+        await refreshProducts();
         
         // Вызываем callback для обновления списка товаров, если он передан
         if (updatedProduct.onSaveCallback) {
           updatedProduct.onSaveCallback();
         }
+        
+        console.log('✅ Товар успешно обновлен в локальном состоянии и контексте');
       } else {
         const error = await response.json();
         console.error('Error updating product:', error);
@@ -629,6 +630,12 @@ function App() {
       if (response.ok) {
         // Удаляем товар из локального состояния
         setProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
+        
+        // Удаляем товар из ProductsContext
+        setContextProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
+        
+        // Принудительно обновляем товары из сервера для синхронизации
+        await refreshProducts();
         
         setEditModalOpen(false);
         setEditingProduct(null);
@@ -970,7 +977,7 @@ function App() {
   const loadCategoriesFromAPI = async (forceRefresh = false, headers = {}) => {
     try {
       
-      const categoriesUrl = `${API_BASE_URL}/api/categories${forceRefresh ? `?_t=${Date.now()}` : ''}`;
+      const categoriesUrl = `${API_BASE_URL}/api/categories?_t=${Date.now()}`;
       
       const res = await fetch(categoriesUrl, { headers });
       if (!res.ok) {
@@ -986,13 +993,14 @@ function App() {
       const transformedCategories = data.map(cat => {
         // Улучшенная логика для определения пути к иконке
         let iconPath;
-        if (cat.image) {
+        const imagePath = cat.image || cat.icon;
+        if (imagePath) {
           // Если изображение содержит временную метку (175...), это загруженный файл
-          if (cat.image.match(/^175\d+/)) {
-            iconPath = `${API_BASE_URL}/uploads/${cat.image}?t=${Date.now()}`;
+          if (imagePath.match(/^175\d+/)) {
+            iconPath = `${API_BASE_URL}/uploads/${imagePath}?t=${Date.now()}`;
           } else {
             // Если это старый файл из public папки
-            iconPath = `${API_BASE_URL}/public/${cat.image}?t=${Date.now()}`;
+            iconPath = `${API_BASE_URL}/public/${imagePath}?t=${Date.now()}`;
           }
         } else {
           // Если нет изображения, используем fallback
@@ -1030,10 +1038,13 @@ function App() {
   // Делаем функцию loadCategoriesFromAPI доступной глобально
   useEffect(() => {
     window.loadCategoriesFromAPI = loadCategoriesFromAPI;
+    window.refreshProductsContextCategories = refreshCategories;
     return () => {
       delete window.loadCategoriesFromAPI;
+      delete window.refreshProductsContextCategories;
     };
-  }, [loadCategoriesFromAPI]);
+  }, [loadCategoriesFromAPI, refreshCategories]);
+
 
   // Инициализация Lenis для плавного скролла
   const [lenis, setLenis] = useState(null);
@@ -1092,6 +1103,64 @@ function App() {
 
 
   return (
+    <AppContent 
+      editModalOpen={editModalOpen}
+      setEditModalOpen={setEditModalOpen}
+      authOpen={authOpen}
+      setAuthOpen={setAuthOpen}
+      authLoading={authLoading}
+      snackbar={snackbar}
+      setSnackbar={setSnackbar}
+      hoveredCategory={hoveredCategory}
+      setHoveredCategory={setHoveredCategory}
+      drawerOpen={drawerOpen}
+      setDrawerOpen={setDrawerOpen}
+      mobileOpen={mobileOpen}
+      setMobileOpen={setMobileOpen}
+      appBarRef={appBarRef}
+      submenuTimeout={submenuTimeout}
+      setSubmenuTimeout={setSubmenuTimeout}
+      onOpenSidebar={onOpenSidebar}
+      handleEditProduct={handleEditProduct}
+      handleSaveProduct={handleSaveProduct}
+      handleDeleteProduct={handleDeleteProduct}
+      // TODO: Use UserContext for authentication
+      // handleLogin and handleRegister are now in UserContext
+      editingProduct={editingProduct}
+      setEditingProduct={setEditingProduct}
+      loadCategoriesFromAPI={loadCategoriesFromAPI}
+      selectedGenders={selectedGenders}
+      onGendersChange={setSelectedGenders}
+      selectedBrands={selectedBrands}
+      selectedAgeGroups={selectedAgeGroups}
+      setSelectedBrands={setSelectedBrands}
+      setSelectedAgeGroups={setSelectedAgeGroups}
+      // TODO: Use UserContext for user updates
+      // handleUserUpdate is now in UserContext
+      handleOpenReviewForm={handleOpenReviewForm}
+      reviewFormOpen={reviewFormOpen}
+      setReviewFormOpen={setReviewFormOpen}
+      reviewFormData={reviewFormData}
+      emailConfirmModalOpen={emailConfirmModalOpen}
+      setEmailConfirmModalOpen={setEmailConfirmModalOpen}
+      emailConfirmData={emailConfirmData}
+      priceRange={priceRange}
+      setPriceRange={setPriceRange}
+      filtersMenuOpen={filtersMenuOpen}
+      setFiltersMenuOpen={setFiltersMenuOpen}
+      desktopSearchBarRef={desktopSearchBarRef}
+    />
+  );
+}
+
+
+
+
+
+
+// Главный компонент приложения
+function App() {
+  return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{
@@ -1104,53 +1173,7 @@ function App() {
           <UserProvider>
             <ProductsProvider>
               <CartProvider>
-                <AppContent 
-                  editModalOpen={editModalOpen}
-                  setEditModalOpen={setEditModalOpen}
-                  authOpen={authOpen}
-                  setAuthOpen={setAuthOpen}
-                  authLoading={authLoading}
-                  snackbar={snackbar}
-                  setSnackbar={setSnackbar}
-                  hoveredCategory={hoveredCategory}
-                  setHoveredCategory={setHoveredCategory}
-                  drawerOpen={drawerOpen}
-                  setDrawerOpen={setDrawerOpen}
-                  mobileOpen={mobileOpen}
-                  setMobileOpen={setMobileOpen}
-                  appBarRef={appBarRef}
-                  submenuTimeout={submenuTimeout}
-                  setSubmenuTimeout={setSubmenuTimeout}
-                  onOpenSidebar={onOpenSidebar}
-                  handleEditProduct={handleEditProduct}
-                  handleSaveProduct={handleSaveProduct}
-                  handleDeleteProduct={handleDeleteProduct}
-                  // TODO: Use UserContext for authentication
-                  // handleLogin and handleRegister are now in UserContext
-                  editingProduct={editingProduct}
-                  setEditingProduct={setEditingProduct}
-                  loadCategoriesFromAPI={loadCategoriesFromAPI}
-                  selectedGenders={selectedGenders}
-                  onGendersChange={setSelectedGenders}
-                  selectedBrands={selectedBrands}
-                  selectedAgeGroups={selectedAgeGroups}
-                  setSelectedBrands={setSelectedBrands}
-                  setSelectedAgeGroups={setSelectedAgeGroups}
-                  // TODO: Use UserContext for user updates
-                  // handleUserUpdate is now in UserContext
-                  handleOpenReviewForm={handleOpenReviewForm}
-                  reviewFormOpen={reviewFormOpen}
-                  setReviewFormOpen={setReviewFormOpen}
-                  reviewFormData={reviewFormData}
-                  emailConfirmModalOpen={emailConfirmModalOpen}
-                  setEmailConfirmModalOpen={setEmailConfirmModalOpen}
-                  emailConfirmData={emailConfirmData}
-                  priceRange={priceRange}
-                  setPriceRange={setPriceRange}
-                  filtersMenuOpen={filtersMenuOpen}
-                  setFiltersMenuOpen={setFiltersMenuOpen}
-                  desktopSearchBarRef={desktopSearchBarRef}
-                />
+                <AppWithProducts />
               </CartProvider>
             </ProductsProvider>
           </UserProvider>
@@ -1161,10 +1184,5 @@ function App() {
     </ThemeProvider>
   );
 }
-
-
-
-
-
 
 export default App; 

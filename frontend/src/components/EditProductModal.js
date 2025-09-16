@@ -661,6 +661,7 @@ function EditProductModal(props) {
       };
 
       
+      console.log('🚀 EditProductModal: вызываем onSave с данными:', updatedProduct);
       await onSave(updatedProduct);
     } catch (err) {
       setError('Ошибка сохранения товара');
