@@ -7,16 +7,19 @@ import {
   Button,
   Alert,
   IconButton,
-  CircularProgress
+  CircularProgress,
+  Breadcrumbs
 } from '@mui/material';
 import { 
   Girl,
   ViewModule,
   ViewList,
   SwapVert as SortIcon,
-  FormatListNumbered as ItemsPerPageIcon
+  FormatListNumbered as ItemsPerPageIcon,
+  Home as HomeIcon,
+  NavigateNext as NavigateNextIcon
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
 import { useDeviceType } from '../utils/deviceDetection';
@@ -218,7 +221,78 @@ export default function GirlsToysPage({
   }
 
   return (
-      <Container maxWidth={false} sx={{ py: 0, minHeight: '80vh', px: 0 }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 4, md: 4 }, pt: { xs: 0, md: 7.5 }, minHeight: '80vh' }}>
+        {/* Хлебные крошки */}
+        <Box sx={{ 
+          mb: 3, 
+          mt: { xs: 0.25, md: 0 },
+          width: '100%',
+          pt: { xs: 1, md: 0 }
+        }}>
+          <Breadcrumbs 
+            separator={<NavigateNextIcon fontSize="small" />}
+            aria-label="breadcrumb"
+            sx={{
+              position: 'relative',
+              zIndex: 15,
+              pl: { xs: 2, md: 3 },
+              '& .MuiBreadcrumbs-separator': {
+                color: '#4ECDC4'
+              },
+              '& .MuiBreadcrumbs-ol': {
+                flexWrap: 'wrap'
+              }
+            }}
+          >
+            {/* Главная */}
+            <Link 
+              to="/" 
+              style={{ 
+                textDecoration: 'none', 
+                color: '#666',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                transition: 'color 0.2s',
+                fontSize: '14px',
+                fontWeight: 500
+              }}
+              onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
+              onMouseLeave={(e) => e.target.style.color = '#666'}
+            >
+              <HomeIcon sx={{ fontSize: 18 }} />
+              {t('breadcrumbs.home')}
+            </Link>
+            
+            {/* Каталог */}
+            <Link 
+              to="/catalog"
+              style={{ 
+                textDecoration: 'none', 
+                color: '#666',
+                transition: 'color 0.2s',
+                fontSize: '14px',
+                fontWeight: 500
+              }}
+              onMouseEnter={(e) => e.target.style.color = '#4ECDC4'}
+              onMouseLeave={(e) => e.target.style.color = '#666'}
+            >
+              {t('breadcrumbs.catalog')}
+            </Link>
+            
+            {/* Текущая страница */}
+            <Typography 
+              sx={{ 
+                color: '#ff6600',
+                fontSize: '14px',
+                fontWeight: 600
+              }}
+            >
+              {t('catalog.pages.girlsToys.title')}
+            </Typography>
+          </Breadcrumbs>
+        </Box>
+
       {/* Заголовок страницы */}
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography 
