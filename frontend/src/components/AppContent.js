@@ -2571,12 +2571,6 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                   value={priceRange}
                   onChange={(_, newValue) => {
                     setPriceRange(newValue);
-                    // Автоматическая прокрутка к продуктам
-                    setTimeout(() => {
-                      if (window.scrollToCatalogProducts) {
-                        window.scrollToCatalogProducts();
-                      }
-                    }, 100);
                   }}
                   valueLabelDisplay="auto"
                   min={priceLimits[0]}
@@ -2929,7 +2923,7 @@ function AppContent({
     // Используем контексты
     const { user, userLoading, handleLogout, handleLogin, handleRegister, handleUserUpdate } = useUser();
     const { cart, cartLoading, handleAddToCart, handleChangeCartQuantity, handleRemoveFromCart, handleClearCart } = useCart();
-    const { products, dbCategories, wishlist, handleWishlistToggle } = useProducts();
+    const { products, dbCategories, wishlist, handleWishlistToggle, refreshWishlist } = useProducts();
     
     // Локальные состояния
     const [profileLoading, setProfileLoading] = useState(false);
@@ -3496,12 +3490,6 @@ function AppContent({
                        value={priceRange}
                        onChange={(event, newValue) => {
                          setPriceRange(newValue);
-                         // Автоматическая прокрутка к продуктам после изменения фильтра
-                         setTimeout(() => {
-                           if (window.scrollToCatalogProducts) {
-                             window.scrollToCatalogProducts();
-                           }
-                         }, 100);
                        }}
                        valueLabelDisplay="auto"
                        min={priceLimits[0]}
@@ -3699,7 +3687,7 @@ function AppContent({
             <Route path="/checkout" element={<CheckoutPage cart={cart} cartLoading={cartLoading} user={user} onClearCart={handleClearCart} />} />
             <Route path="/order-success" element={<OrderSuccessPage />} />
             <Route path="/wishlist" element={<WishlistPage user={user} wishlist={wishlist} onWishlistToggle={handleWishlistToggle} />} />
-            <Route path="/profile" element={<UserCabinetPage user={user} handleLogout={handleLogout} wishlist={wishlist} handleWishlistToggle={handleWishlistToggle} cart={cart} handleAddToCart={handleAddToCart} handleChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} handleUserUpdate={handleUserUpdate} handleOpenReviewForm={handleOpenReviewForm} />} />
+            <Route path="/profile" element={<UserCabinetPage user={user} handleLogout={handleLogout} wishlist={wishlist} handleWishlistToggle={handleWishlistToggle} refreshWishlist={refreshWishlist} cart={cart} handleAddToCart={handleAddToCart} handleChangeCartQuantity={handleChangeCartQuantity} onEditProduct={handleEditProduct} handleUserUpdate={handleUserUpdate} handleOpenReviewForm={handleOpenReviewForm} />} />
             <Route path="/cms" element={<CMSPage loadCategoriesFromAPI={loadCategoriesFromAPIWithAuth} editModalOpen={editModalOpen} setEditModalOpen={setEditModalOpen} editingProduct={editingProduct} setEditingProduct={setEditingProduct} dbCategories={dbCategories} />} />
             <Route path="/attribution" element={<AttributionPage />} />
             <Route path="/search" element={<SearchResultsPage products={products} cart={cart} onChangeCartQuantity={handleChangeCartQuantity} />} />

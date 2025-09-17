@@ -538,7 +538,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
                     product={product} 
                     user={user}
                     isAdmin={user?.role === 'admin'}
-                    inWishlist={wishlist.some(item => item.productId === product.id)}
+                    inWishlist={wishlist.includes(product.id)}
                     onWishlistToggle={onWishlistToggle}
                     onAddToCart={onAddToCart} 
                     cart={cart} 

@@ -36,6 +36,30 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const { t, i18n } = useTranslation();
   const isAdmin = user?.role === 'admin';
   
+  // Функция для форматирования даты в зависимости от языка
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    if (i18n.language === 'he') {
+      // Для иврита используем цифровой формат
+      return date.toLocaleDateString('he-IL', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } else {
+      // Для русского используем текстовый формат
+      return date.toLocaleDateString('ru-RU', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+  };
+  
 
   
 
@@ -1958,14 +1982,10 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     size="medium"
                     onClick={e => { 
                       e.stopPropagation(); 
-                      console.log('🔍 ProductPage: Wishlist toggle clicked', {
-                        productId: product.id,
-                        isInWishlist: wishlist.includes(product.id),
-                        wishlist: wishlist
-                      });
                       
                       // Запускаем анимацию только при добавлении в избранное
-                      const isInWishlist = wishlist.includes(product.id);
+                      const isInWishlist = wishlist.includes(Number(product.id));
+                      
                       if (!isInWishlist) {
                         setWishlistAnimKey(prev => prev + 1);
                         setWishlistAnimPlaying(true);
@@ -1975,7 +1995,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                             setWishlistAnimPlaying(false);
                           }, 800); // Уменьшили время анимации
                         });
-                        return () => cancelAnimationFrame(frameId);
                       }
                       
                       onWishlistToggle(product.id, isInWishlist); 
@@ -1983,21 +2002,21 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     disabled={wishlistAnimPlaying}
                     sx={{
                       p: 0.75,
-                      color: wishlist.includes(product.id) ? '#e53e3e' : '#666',
+                      color: wishlist.includes(Number(product.id)) ? '#e53e3e' : '#666',
                       background: 'none',
                       borderRadius: '50%',
                       transition: 'color 0.2s, transform 0.2s',
                       '&:hover': {
-                        color: wishlist.includes(product.id) ? '#c53030' : '#e53e3e',
+                        color: wishlist.includes(Number(product.id)) ? '#c53030' : '#e53e3e',
                       },
                       '&:active': {
                         transform: 'scale(0.95)'
                       }
                     }}
-                    aria-label={wishlist.includes(product.id) ? 'Убрать из избранного' : 'Добавить в избранное'}
+                    aria-label={wishlist.includes(Number(product.id)) ? 'Убрать из избранного' : 'Добавить в избранное'}
                   >
                     {!wishlistAnimPlaying && (
-                      wishlist.includes(product.id)
+                      wishlist.includes(Number(product.id))
                         ? <Favorite fontSize="inherit" sx={{ fontSize: '1.89rem' }} />
                         : <FavoriteBorder fontSize="inherit" sx={{ fontSize: '1.89rem' }} />
                     )}
@@ -2305,7 +2324,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 {review.user?.name || t('productPage.user')}
               </Typography>
               <Typography sx={{ ml: 2, color: '#888', fontSize: '0.9rem' }}>
-                {new Date(review.createdAt).toLocaleDateString()}
+                {formatDate(review.createdAt)}
               </Typography>
             </Box>
             <Typography sx={{ 
@@ -2425,13 +2444,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   {question.user?.name || t('productPage.user')}
                 </Typography>
                 <Typography sx={{ ml: 2, color: '#888', fontSize: '0.9rem' }}>
-                  {new Date(question.createdAt).toLocaleDateString('ru-RU', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
+                  {formatDate(question.createdAt)}
                 </Typography>
               </Box>
               <Typography sx={{ 
@@ -2467,13 +2480,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                       mt: 1,
                       fontStyle: 'italic'
                     }}>
-                      Ответ дан: {new Date(question.updatedAt).toLocaleDateString('ru-RU', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                      {formatDate(question.updatedAt)}
                     </Typography>
                   )}
                 </Box>
@@ -2739,8 +2746,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   user={user}
                   cart={cart}
                   onAddToCart={onAddToCart}
-                  inWishlist={wishlist.includes(similar.id)}
-                  onWishlistToggle={() => onWishlistToggle(similar.id, wishlist.includes(similar.id))}
+                  inWishlist={wishlist.includes(Number(similar.id))}
+                  onWishlistToggle={() => onWishlistToggle(similar.id, wishlist.includes(Number(similar.id)))}
                   onClick={() => navigate(`/product/${similar.id}`)}
                   viewMode={isMobile ? "carousel-mobile" : "similar"} // Используем carousel-mobile для мобильной версии
                   isAdmin={isAdmin}

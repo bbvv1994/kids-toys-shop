@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box } from '@mui/material';
 import BannerSlider from './BannerSlider';
@@ -8,6 +8,29 @@ import ElegantProductCarousel from './ElegantProductCarousel';
 function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChangeCartQuantity, onEditProduct, wishlist }) {
     const { t } = useTranslation();
     const isAdmin = user?.role === 'admin';
+    
+    // Прокрутка в начало страницы при загрузке
+    useEffect(() => {
+      // Немедленная прокрутка
+      window.scrollTo(0, 0);
+      
+      // Агрессивные попытки прокрутки для надежности
+      const timers = [
+        setTimeout(() => window.scrollTo(0, 0), 10),
+        setTimeout(() => window.scrollTo(0, 0), 50),
+        setTimeout(() => window.scrollTo(0, 0), 100),
+        setTimeout(() => window.scrollTo(0, 0), 200),
+        setTimeout(() => window.scrollTo(0, 0), 300),
+        setTimeout(() => window.scrollTo(0, 0), 500),
+        setTimeout(() => window.scrollTo(0, 0), 750),
+        setTimeout(() => window.scrollTo(0, 0), 1000),
+        setTimeout(() => window.scrollTo(0, 0), 1500)
+      ];
+      
+      return () => {
+        timers.forEach(timer => clearTimeout(timer));
+      };
+    }, []);
     // Новинки — сортировка по дате создания (createdAt), самые новые первые
     const newProducts = React.useMemo(() =>
       [...(products || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 12),

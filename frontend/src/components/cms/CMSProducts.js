@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   Box, 
@@ -39,6 +39,9 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
     const [selectAll, setSelectAll] = React.useState(false);
     const [currentPage, setCurrentPage] = React.useState(1);
     const [productsPerPage] = React.useState(20);
+    
+    // Ссылка на форму для прокрутки
+    const formRef = useRef(null);
     
     // Функция для получения названия категории
     const getCategoryName = (categoryValue) => {
@@ -340,11 +343,13 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         
         if (response.ok) {
           const data = await response.json();
+          // Фильтруем undefined/null продукты
+          const validProducts = Array.isArray(data) ? data.filter(product => product && product.id) : [];
           console.log('📦 CMS: Products loaded', {
-            count: data.length,
-            products: data.map(p => ({ id: p.id, name: p.name, isHidden: p.isHidden }))
+            count: validProducts.length,
+            products: validProducts.map(p => ({ id: p.id, name: p.name, isHidden: p.isHidden }))
           });
-          setProducts(data);
+          setProducts(validProducts);
         } else {
           const errorData = await response.json().catch(() => ({}));
           console.error('❌ CMS: Error loading products:', errorData);
@@ -594,6 +599,15 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
             images: [], 
             mainImageIndex: undefined 
           });
+          
+          // Прокручиваем в начало формы
+          if (formRef.current) {
+            formRef.current.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start' 
+            });
+          }
+          
           // Перезагружаем товары с сервера
           fetchProducts();
           // Обновляем все состояния товаров в приложении
@@ -616,6 +630,14 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
         });
       }
       setForm({ name: '', nameHe: '', description: '', descriptionHe: '', price: '', category: '', subcategory: '', quantity: '', article: '', brand: '', country: '', length: '', width: '', height: '', images: [], mainImageIndex: undefined });
+      
+      // Прокручиваем в начало формы
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
     };
   
     // Функции для мультивыбора
@@ -931,13 +953,60 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
                 sx={{
                   '& .MuiPaginationItem-root': {
                     fontSize: '1rem',
-                    fontWeight: 500,
+                    fontWeight: 600,
+                    borderRadius: 2,
+                    minWidth: 40,
+                    height: 40,
+                    margin: '0 2px',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-1px)',
+                    },
+                  },
+                  '& .MuiPaginationItem-page': {
+                    background: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
+                    color: '#333',
+                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%)',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
+                    },
                   },
                   '& .Mui-selected': {
-                    backgroundColor: '#1976d2',
-                    color: '#fff',
+                    background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%) !important',
+                    color: '#fff !important',
+                    boxShadow: '0 2px 4px rgba(25, 118, 210, 0.2)',
                     '&:hover': {
-                      backgroundColor: '#1565c0',
+                      background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%) !important',
+                      boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                    },
+                  },
+                  '& .MuiPaginationItem-previousNext': {
+                    background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                    color: '#fff',
+                    boxShadow: '0 2px 4px rgba(25, 118, 210, 0.2)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                      boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                    },
+                    '&.Mui-disabled': {
+                      background: '#e0e0e0',
+                      color: '#999',
+                      boxShadow: 'none',
+                    },
+                  },
+                  '& .MuiPaginationItem-firstLast': {
+                    background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                    color: '#fff',
+                    boxShadow: '0 2px 4px rgba(25, 118, 210, 0.2)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                      boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                    },
+                    '&.Mui-disabled': {
+                      background: '#e0e0e0',
+                      color: '#999',
+                      boxShadow: 'none',
                     },
                   },
                 }}
@@ -964,7 +1033,7 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
           
   
           
-          <Box component="form" onSubmit={async (e) => { e.preventDefault(); await handleSave(); }}>
+          <Box component="form" ref={formRef} onSubmit={async (e) => { e.preventDefault(); await handleSave(); }}>
           
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField 

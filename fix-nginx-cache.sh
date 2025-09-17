@@ -286,3 +286,4 @@ echo "3. При необходимости очистите кэш: sudo clear-n
 echo "4. Прочитайте инструкции: cat /root/nginx-cache-fix-instructions.md"
 echo ""
 
+

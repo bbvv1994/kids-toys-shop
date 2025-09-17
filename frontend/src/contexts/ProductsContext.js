@@ -17,7 +17,9 @@ export const ProductsProvider = ({ children }) => {
     fetch(`${API_BASE_URL}/api/products`)
       .then(res => res.json())
       .then(data => {
-        setProducts(data);
+        // Фильтруем undefined/null продукты
+        const validProducts = Array.isArray(data) ? data.filter(product => product && product.id) : [];
+        setProducts(validProducts);
         setProductsLoading(false);
       })
       .catch(error => {
@@ -43,6 +45,7 @@ export const ProductsProvider = ({ children }) => {
   // Load wishlist when user is authenticated
   useEffect(() => {
     if (user && user.token) {
+      console.log('🔄 Loading wishlist for user:', user.email);
       fetch(`${API_BASE_URL}/api/profile/wishlist`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
@@ -55,12 +58,18 @@ export const ProductsProvider = ({ children }) => {
         return res.json();
       })
       .then(data => {
+        console.log('🔍 ProductsContext: Initial wishlist data from API:', data);
         const wishlistItems = data.items || [];
+        console.log('🔍 ProductsContext: Wishlist items:', wishlistItems);
         // Преобразуем в массив ID для удобства использования
-        setWishlist(wishlistItems.map(item => item.productId));
+        const wishlistIds = wishlistItems.map(item => item.productId);
+        console.log('🔍 ProductsContext: Initial extracted IDs:', wishlistIds);
+        console.log('🔍 ProductsContext: Initial ID types:', wishlistIds.map(id => typeof id));
+        setWishlist(wishlistIds);
+        console.log('✅ Wishlist loaded:', wishlistIds);
       })
       .catch(error => {
-        console.error('Error loading wishlist:', error);
+        console.error('❌ Error loading wishlist:', error);
         setWishlist([]);
       });
     } else {
@@ -69,13 +78,26 @@ export const ProductsProvider = ({ children }) => {
   }, [user]);
 
   const handleWishlistToggle = async (productId, isInWishlist) => {
+    console.log('🔄 handleWishlistToggle called:', { 
+      productId, 
+      productIdType: typeof productId,
+      isInWishlist, 
+      user: !!user, 
+      token: !!user?.token,
+      currentWishlist: wishlist,
+      currentWishlistLength: wishlist.length
+    });
+    
     if (!user || !user.token) {
+      console.log('❌ No user or token, showing auth modal');
       // TODO: Show auth modal
       return;
     }
     
     try {
       const endpoint = isInWishlist ? 'remove' : 'add';
+      console.log('📡 Making API request:', { endpoint, productId, url: `${API_BASE_URL}/api/profile/wishlist/${endpoint}` });
+      
       const response = await fetch(`${API_BASE_URL}/api/profile/wishlist/${endpoint}`, {
         method: 'POST',
         headers: {
@@ -85,19 +107,36 @@ export const ProductsProvider = ({ children }) => {
         body: JSON.stringify({ productId: Number(productId) })
       });
       
+      console.log('📡 API response:', { status: response.status, ok: response.ok });
+      
       if (response.ok) {
         const updatedWishlist = await response.json();
+        console.log('📦 Updated wishlist from API:', updatedWishlist);
         // Преобразуем в массив ID для удобства использования
-        setWishlist((updatedWishlist.items || []).map(item => item.productId));
-        console.log('✅ Wishlist updated successfully');
+        const wishlistIds = (updatedWishlist.items || []).map(item => item.productId);
+        console.log('🔍 ProductsContext: Raw wishlist from API:', updatedWishlist);
+        console.log('🔍 ProductsContext: Extracted IDs:', wishlistIds);
+        console.log('🔍 ProductsContext: ID types:', wishlistIds.map(id => typeof id));
+        setWishlist(wishlistIds);
+        console.log('✅ Wishlist updated successfully:', wishlistIds);
       } else {
         const errorData = await response.json();
-        console.error('Wishlist API error:', errorData);
+        console.error('❌ Wishlist API error:', errorData);
         
-        // Если товар уже в избранном, обновляем локальное состояние
+        // Если товар уже в избранном, обновляем локальное состояние и принудительно обновляем wishlist
         if (errorData.error === 'Товар уже в избранном' && !isInWishlist) {
-          setWishlist(prevWishlist => [...prevWishlist, productId]);
+          setWishlist(prevWishlist => {
+            if (!prevWishlist.includes(productId)) {
+              return [...prevWishlist, productId];
+            }
+            return prevWishlist;
+          });
           console.log('✅ Item already in wishlist, updated local state');
+          
+          // Принудительно обновляем wishlist с сервера для синхронизации
+          setTimeout(() => {
+            refreshWishlist();
+          }, 100);
         }
         // Если товар не найден в избранном при попытке удаления, обновляем локальное состояние
         else if (errorData.error && isInWishlist) {
@@ -106,7 +145,7 @@ export const ProductsProvider = ({ children }) => {
         }
       }
     } catch (error) {
-      console.error('Error toggling wishlist:', error);
+      console.error('❌ Error toggling wishlist:', error);
     }
   };
 
@@ -131,13 +170,47 @@ export const ProductsProvider = ({ children }) => {
       const response = await fetch(`${API_BASE_URL}/api/products?_t=${Date.now()}`);
       if (response.ok) {
         const data = await response.json();
-        setProducts(data);
+        // Фильтруем undefined/null продукты
+        const validProducts = Array.isArray(data) ? data.filter(product => product && product.id) : [];
+        setProducts(validProducts);
         console.log('✅ Products refreshed in ProductsContext');
       }
     } catch (error) {
       console.error('Error refreshing products:', error);
     } finally {
       setProductsLoading(false);
+    }
+  };
+
+  // Функция для принудительного обновления wishlist
+  const refreshWishlist = async () => {
+    if (!user || !user.token) {
+      console.log('❌ No user or token for wishlist refresh');
+      return;
+    }
+
+    try {
+      console.log('🔄 Refreshing wishlist...');
+      const response = await fetch(`${API_BASE_URL}/api/profile/wishlist?_t=${Date.now()}`, {
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const wishlistItems = data.items || [];
+        const wishlistIds = wishlistItems.map(item => item.productId);
+        console.log('📦 Raw wishlist data from server:', data);
+        console.log('📦 Wishlist items:', wishlistItems);
+        console.log('📦 Wishlist IDs:', wishlistIds);
+        setWishlist(wishlistIds);
+        console.log('✅ Wishlist refreshed and state updated');
+      } else {
+        console.error('❌ Error refreshing wishlist:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Error refreshing wishlist:', error);
     }
   };
 
@@ -152,7 +225,8 @@ export const ProductsProvider = ({ children }) => {
     categoriesLoading,
     handleWishlistToggle,
     refreshCategories,
-    refreshProducts
+    refreshProducts,
+    refreshWishlist
   };
 
   return (

@@ -148,22 +148,24 @@ function ProductList({ products, onProductDeleted, onRefresh, user, onProductCli
         </div>
       ) : (
         <div className={viewMode === 'grid' ? 'products-grid' : 'products-list'}>
-          {filteredProducts.map(product => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              user={user}
-              inWishlist={wishlist.includes(product.id)}
-              onWishlistToggle={handleWishlistToggle}
-              lottiePlaying={!!lottiePlayingMap[product.id]}
-              onAddToCart={() => {}}
-              cart={null}
-              onChangeCartQuantity={null}
-              onEditProduct={() => {}}
-              viewMode={viewMode}
-              isAdmin={user?.role === 'admin'}
-            />
-          ))}
+          {filteredProducts
+            .filter(product => product && product.id) // Фильтруем undefined/null продукты
+            .map(product => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                user={user}
+                inWishlist={wishlist.includes(product.id)}
+                onWishlistToggle={handleWishlistToggle}
+                lottiePlaying={!!lottiePlayingMap[product.id]}
+                onAddToCart={() => {}}
+                cart={null}
+                onChangeCartQuantity={null}
+                onEditProduct={() => {}}
+                viewMode={viewMode}
+                isAdmin={user?.role === 'admin'}
+              />
+            ))}
         </div>
       )}
     </div>

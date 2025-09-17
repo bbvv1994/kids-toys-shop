@@ -24,16 +24,17 @@ const ageIcons = {
 
 
 
-const ProductCard = React.memo(function ProductCard({ product, user, inWishlist, onWishlistToggle, onClick, isAdmin, onAddToCart, cart, onEditProduct, onChangeCartQuantity, viewMode }) {
-  const { t, i18n } = useTranslation();
-  const theme = useTheme();
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
-  const [localQuantity, setLocalQuantity] = React.useState(1);
-  const [isHovered, setIsHovered] = React.useState(false);
-  const cardRef = React.useRef();
-  const navigate = useNavigate();
-  const [imgError, setImgError] = React.useState(false);
+  const ProductCard = React.memo(function ProductCard({ product, user, inWishlist, onWishlistToggle, onClick, isAdmin, onAddToCart, cart, onEditProduct, onChangeCartQuantity, viewMode }) {
+    const { t, i18n } = useTranslation();
+    const theme = useTheme();
+    const deviceType = useDeviceType();
+    const isMobile = deviceType === 'mobile';
+    const [localQuantity, setLocalQuantity] = React.useState(1);
+    const [isHovered, setIsHovered] = React.useState(false);
+    const cardRef = React.useRef();
+    const navigate = useNavigate();
+    const [imgError, setImgError] = React.useState(false);
+
   
   // Упрощенная логика анимации как в ProductPage
   const [wishlistAnimPlaying, setWishlistAnimPlaying] = React.useState(false);
@@ -97,19 +98,26 @@ const ProductCard = React.memo(function ProductCard({ product, user, inWishlist,
       }, 800);
     }
     
-    if (onWishlistToggle) onWishlistToggle(product.id, inWishlist);
-  }, [wishlistAnimPlaying, inWishlist, onWishlistToggle, product.id]);
+    console.log('💖 ProductCard: Calling onWishlistToggle', { productId: product?.id, inWishlist, hasCallback: !!onWishlistToggle });
+    if (onWishlistToggle) onWishlistToggle(product?.id, inWishlist);
+  }, [wishlistAnimPlaying, inWishlist, onWishlistToggle, product?.id]);
 
   const handleAddToCartClick = React.useCallback((e) => {
     e.stopPropagation();
-    if (cart?.items?.some(item => item.product.id === product.id)) return;
+    if (cart?.items?.some(item => item.product.id === product?.id)) return;
     setCartAnimKey(prev => prev + 1);
     setCartAnimPlaying(true);
     setTimeout(() => {
       setCartAnimPlaying(false);
     }, 800);
-    if (onAddToCart) onAddToCart(product, product.category, localQuantity);
+    if (onAddToCart) onAddToCart(product, product?.category, localQuantity);
   }, [cart, product, onAddToCart, localQuantity]);
+
+  // Проверяем, что product существует ПОСЛЕ всех хуков
+  if (!product || !product.id) {
+    console.warn('ProductCard: product is undefined or missing id', product);
+    return null;
+  }
 
   if (viewMode === 'carousel') {
     return (

@@ -3856,6 +3856,30 @@ app.post('/api/profile/wishlist/remove', authMiddleware, async (req, res) => {
   }
 });
 
+// === Очистить весь список избранного ===
+app.post('/api/profile/wishlist/clear', authMiddleware, async (req, res) => {
+  try {
+    let wishlist = await prisma.wishlist.findUnique({ where: { userId: req.user.userId } });
+    if (!wishlist) {
+      // Если wishlist не существует, создаем пустой
+      wishlist = await prisma.wishlist.create({ data: { userId: req.user.userId } });
+    } else {
+      // Удаляем все товары из wishlist
+      await prisma.wishlistItem.deleteMany({ where: { wishlistId: wishlist.id } });
+    }
+    
+    // Возвращаем пустой wishlist
+    const updated = await prisma.wishlist.findUnique({ 
+      where: { id: wishlist.id }, 
+      include: { items: { include: { product: true } } } 
+    });
+    res.json(updated);
+  } catch (error) {
+    console.error('Wishlist clear error:', error);
+    res.status(500).json({ error: 'Ошибка очистки избранного' });
+  }
+});
+
 // === Смена пароля ===
 app.post('/api/auth/change-password', authMiddleware, async (req, res) => {
   try {
@@ -4498,6 +4522,29 @@ app.delete('/api/profile/reviews/shop/:id/hide', authMiddleware, async (req, res
     res.json({ message: 'Отзыв о магазине показан в списке' });
   } catch (error) {
     res.status(500).json({ error: 'Ошибка показа отзыва о магазине' });
+  }
+});
+
+// GET /api/profile/questions — получить все вопросы пользователя о товарах
+app.get('/api/profile/questions', authMiddleware, async (req, res) => {
+  try {
+    const questions = await prisma.productQuestion.findMany({
+      where: { 
+        userId: req.user.userId,
+        // Показываем только вопросы с ответами (опубликованные)
+        status: 'published',
+        answer: { not: null }
+      },
+      include: { 
+        product: { select: { id: true, name: true, imageUrls: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    res.json(questions);
+  } catch (error) {
+    console.error('Ошибка получения вопросов пользователя:', error);
+    res.status(500).json({ error: 'Ошибка получения вопросов' });
   }
 });
 

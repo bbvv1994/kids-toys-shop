@@ -66,9 +66,13 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   const scrollToProducts = () => {
     // Прокручиваем к блоку сортировки вместо карточек товаров
     if (sortingBlockRef.current) {
-      sortingBlockRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
+      const element = sortingBlockRef.current;
+      const elementPosition = element.offsetTop;
+      const offsetPosition = elementPosition + 70; // Прокручиваем на 70px ниже
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
       });
     }
   };
@@ -664,22 +668,24 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
               px: 0
             }}>
               {pagedProducts.length > 0 ? (
-                pagedProducts.map(product => (
-                  <Box key={product.id}>
-                    <ProductCard
-                      product={product}
-                      user={user}
-                      inWishlist={wishlist?.some ? wishlist.some(item => item.productId === product.id) : false}
-                      onWishlistToggle={onWishlistToggle}
-                      onAddToCart={onAddToCart}
-                      cart={cart}
-                      onChangeCartQuantity={handleChangeCartQuantity}
-                      onEditProduct={onEditProduct}
-                      viewMode={isMobile ? "carousel-mobile" : "grid"}
-                      isAdmin={user?.role === 'admin'}
-                    />
-                  </Box>
-                ))
+                pagedProducts
+                  .filter(product => product && product.id) // Фильтруем undefined/null продукты
+                  .map(product => (
+                    <Box key={product.id}>
+                      <ProductCard
+                        product={product}
+                        user={user}
+                        inWishlist={wishlist?.includes ? wishlist.includes(Number(product.id)) : false}
+                        onWishlistToggle={(productId, isInWishlist) => onWishlistToggle(productId, isInWishlist)}
+                        onAddToCart={onAddToCart}
+                        cart={cart}
+                        onChangeCartQuantity={handleChangeCartQuantity}
+                        onEditProduct={onEditProduct}
+                        viewMode={isMobile ? "carousel-mobile" : "grid"}
+                        isAdmin={user?.role === 'admin'}
+                      />
+                    </Box>
+                  ))
               ) : (
                 <Typography sx={{ gridColumn: '1/-1', textAlign: 'center', color: '#888', fontSize: 20 }}>
                   {searchQuery ? t('catalog.noResults.search', { query: searchQuery }) : t('catalog.noResults.default')}
@@ -694,8 +700,8 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                     key={product.id}
                     product={product}
                     user={user}
-                    inWishlist={wishlist?.some ? wishlist.some(item => item.productId === product.id) : false}
-                    onWishlistToggle={onWishlistToggle}
+                    inWishlist={wishlist?.includes ? wishlist.includes(Number(product.id)) : false}
+                    onWishlistToggle={(productId, isInWishlist) => onWishlistToggle(productId, isInWishlist)}
                     onAddToCart={onAddToCart}
                     cart={cart}
                     onChangeCartQuantity={handleChangeCartQuantity}
@@ -714,9 +720,55 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
           {/* Пагинация */}
           {totalPages > 1 && (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mb: 4 }}>
-              <Button variant="outlined" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>{t('catalog.pagination.prev')}</Button>
-              <Typography sx={{ fontWeight: 500, fontSize: 16 }}>{t('catalog.pagination.page', { current: page, total: totalPages })}</Typography>
-              <Button variant="outlined" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>{t('catalog.pagination.next')}</Button>
+              <Button 
+                variant="contained" 
+                onClick={() => setPage(p => Math.max(1, p - 1))} 
+                disabled={page === 1}
+                sx={{
+                  background: page === 1 ? '#e0e0e0' : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                  color: page === 1 ? '#999' : '#fff',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  px: 3,
+                  py: 1,
+                  minWidth: 100,
+                  boxShadow: page === 1 ? 'none' : '0 2px 4px rgba(25, 118, 210, 0.2)',
+                  '&:hover': page === 1 ? {} : {
+                    background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                    boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                    transform: 'translateY(-1px)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {t('catalog.pagination.prev')}
+              </Button>
+              <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#333' }}>
+                {t('catalog.pagination.page', { current: page, total: totalPages })}
+              </Typography>
+              <Button 
+                variant="contained" 
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+                disabled={page === totalPages}
+                sx={{
+                  background: page === totalPages ? '#e0e0e0' : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                  color: page === totalPages ? '#999' : '#fff',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  px: 3,
+                  py: 1,
+                  minWidth: 100,
+                  boxShadow: page === totalPages ? 'none' : '0 2px 4px rgba(25, 118, 210, 0.2)',
+                  '&:hover': page === totalPages ? {} : {
+                    background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                    boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                    transform: 'translateY(-1px)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {t('catalog.pagination.next')}
+              </Button>
             </Box>
           )}
         </Box>

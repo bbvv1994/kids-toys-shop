@@ -384,6 +384,7 @@ const theme = createTheme({
 function AppWithProducts() {
   const { i18n } = useTranslation();
   const { refreshCategories, setProducts: setContextProducts, refreshProducts } = useProducts();
+  const location = useLocation();
   
   // Локальные состояния для устранения ошибок no-undef
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -441,6 +442,54 @@ function AppWithProducts() {
       // Translation Debugger Active
     }
   }, [i18n.language]);
+
+  // Прокрутка в начало страницы при изменении маршрута
+  useEffect(() => {
+    // Немедленная прокрутка
+    window.scrollTo(0, 0);
+    
+    // Агрессивные попытки прокрутки для надежности
+    const timers = [
+      setTimeout(() => window.scrollTo(0, 0), 10),
+      setTimeout(() => window.scrollTo(0, 0), 50),
+      setTimeout(() => window.scrollTo(0, 0), 100),
+      setTimeout(() => window.scrollTo(0, 0), 200),
+      setTimeout(() => window.scrollTo(0, 0), 300),
+      setTimeout(() => window.scrollTo(0, 0), 500),
+      setTimeout(() => window.scrollTo(0, 0), 750),
+      setTimeout(() => window.scrollTo(0, 0), 1000),
+      setTimeout(() => window.scrollTo(0, 0), 1500)
+    ];
+    
+    return () => {
+      timers.forEach(timer => clearTimeout(timer));
+    };
+  }, [location.pathname]);
+
+  // Дополнительная прокрутка при загрузке приложения
+  useEffect(() => {
+    // Прокрутка при первой загрузке
+    window.scrollTo(0, 0);
+    
+    const timers = [
+      setTimeout(() => window.scrollTo(0, 0), 100),
+      setTimeout(() => window.scrollTo(0, 0), 500),
+      setTimeout(() => window.scrollTo(0, 0), 1000),
+      setTimeout(() => window.scrollTo(0, 0), 2000)
+    ];
+    
+    // Обработчик для прокрутки при обновлении страницы
+    const handleBeforeUnload = () => {
+      window.scrollTo(0, 0);
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      timers.forEach(timer => clearTimeout(timer));
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []); // Только при первой загрузке
 
   const [editingProduct, setEditingProduct] = useState(null);
   const [miniCartOpen, setMiniCartOpen] = useState(false);
@@ -944,8 +993,9 @@ function AppWithProducts() {
         return res.json();
       })
       .then(data => {
-    
-        setProducts(data);
+        // Фильтруем undefined/null продукты
+        const validProducts = Array.isArray(data) ? data.filter(product => product && product.id) : [];
+        setProducts(validProducts);
       })
       .catch(error => {
         console.error('Error loading products:', error);

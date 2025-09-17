@@ -135,7 +135,7 @@ function ElegantProductCarousel({
               <ProductCard
                 product={product}
                 user={user}
-                inWishlist={wishlist?.some ? wishlist.some((w) => w.productId === product.id) : false}
+                inWishlist={wishlist?.includes ? wishlist.includes(product.id) : false}
                 onWishlistToggle={onWishlistToggle}
                 onAddToCart={onAddToCart}
                 cart={cart}

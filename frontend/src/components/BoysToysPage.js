@@ -140,7 +140,7 @@ export default function BoysToysPage({
 
   const handleWishlistToggle = (productId) => {
     if (onWishlistToggle) {
-      const isInWishlist = wishlist.some(item => item.productId === productId);
+      const isInWishlist = wishlist.includes(productId);
       // Добавляем логирование для отладки
       console.log('handleWishlistToggle:', { productId, wishlist, isInWishlist, onWishlistToggle: !!onWishlistToggle });
       onWishlistToggle(productId, isInWishlist);
@@ -150,8 +150,8 @@ export default function BoysToysPage({
   const isInWishlist = (productId) => {
     if (!wishlist || !Array.isArray(wishlist)) return false;
     // Добавляем логирование для отладки
-    console.log('isInWishlist check:', { productId, wishlist, result: wishlist.some(item => item.productId === productId) });
-    return wishlist.some(item => item.productId === productId);
+    console.log('isInWishlist check:', { productId, wishlist, result: wishlist.includes(productId) });
+    return wishlist.includes(productId);
   };
 
   const getCartQuantity = (productId) => {
@@ -435,9 +435,31 @@ export default function BoysToysPage({
                 mb: 6,
                 px: 0
               }}>
-               {pagedProducts.map((product) => (
-                 <Box key={product.id}>
+               {pagedProducts
+                 .filter(product => product && product.id) // Фильтруем undefined/null продукты
+                 .map((product) => (
+                   <Box key={product.id}>
+                     <ProductCard
+                       product={product}
+                       user={user}
+                       inWishlist={isInWishlist(product.id)}
+                       onWishlistToggle={handleWishlistToggle}
+                       onAddToCart={handleAddToCart}
+                       cart={cart}
+                       onChangeCartQuantity={handleQuantityChange}
+                       onEditProduct={onEditProduct}
+                       viewMode={isMobile ? "carousel-mobile" : "grid"}
+                     />
+                   </Box>
+                 ))}
+             </Box>
+           ) : (
+             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 6, mb: 6, maxWidth: 1100, margin: '0 auto', alignItems: { xs: 'center', sm: 'stretch' } }}>
+               {pagedProducts
+                 .filter(product => product && product.id) // Фильтруем undefined/null продукты
+                 .map((product) => (
                    <ProductCard
+                     key={product.id}
                      product={product}
                      user={user}
                      inWishlist={isInWishlist(product.id)}
@@ -446,27 +468,9 @@ export default function BoysToysPage({
                      cart={cart}
                      onChangeCartQuantity={handleQuantityChange}
                      onEditProduct={onEditProduct}
-                     viewMode={isMobile ? "carousel-mobile" : "grid"}
+                     viewMode="list"
                    />
-                 </Box>
-               ))}
-             </Box>
-           ) : (
-             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 6, mb: 6, maxWidth: 1100, margin: '0 auto', alignItems: { xs: 'center', sm: 'stretch' } }}>
-               {pagedProducts.map((product) => (
-                 <ProductCard
-                   key={product.id}
-                   product={product}
-                   user={user}
-                   inWishlist={isInWishlist(product.id)}
-                   onWishlistToggle={handleWishlistToggle}
-                   onAddToCart={handleAddToCart}
-                   cart={cart}
-                   onChangeCartQuantity={handleQuantityChange}
-                   onEditProduct={onEditProduct}
-                   viewMode="list"
-                 />
-               ))}
+                 ))}
              </Box>
            )}
            
@@ -474,28 +478,70 @@ export default function BoysToysPage({
            {totalPages > 1 && (
              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, gap: 1 }}>
                <Button
-                 variant="outlined"
+                 variant="contained"
                  disabled={page === 1}
                  onClick={() => setPage(page - 1)}
-                 sx={{ minWidth: 40 }}
+                 sx={{
+                   background: page === 1 ? '#e0e0e0' : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                   color: page === 1 ? '#999' : '#fff',
+                   borderRadius: 2,
+                   fontWeight: 600,
+                   minWidth: 40,
+                   height: 40,
+                   boxShadow: page === 1 ? 'none' : '0 2px 4px rgba(25, 118, 210, 0.2)',
+                   '&:hover': page === 1 ? {} : {
+                     background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                     boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                     transform: 'translateY(-1px)'
+                   },
+                   transition: 'all 0.3s ease'
+                 }}
                >
                  ←
                </Button>
                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                  <Button
                    key={pageNum}
-                   variant={pageNum === page ? 'contained' : 'outlined'}
+                   variant="contained"
                    onClick={() => setPage(pageNum)}
-                   sx={{ minWidth: 40 }}
+                   sx={{
+                     background: pageNum === page ? 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)' : 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
+                     color: pageNum === page ? '#fff' : '#333',
+                     borderRadius: 2,
+                     fontWeight: 600,
+                     minWidth: 40,
+                     height: 40,
+                     boxShadow: pageNum === page ? '0 2px 4px rgba(25, 118, 210, 0.2)' : '0 1px 2px rgba(0, 0, 0, 0.1)',
+                     '&:hover': {
+                       background: pageNum === page ? 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)' : 'linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%)',
+                       boxShadow: pageNum === page ? '0 4px 8px rgba(25, 118, 210, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.15)',
+                       transform: 'translateY(-1px)'
+                     },
+                     transition: 'all 0.3s ease'
+                   }}
                  >
                    {pageNum}
                  </Button>
                ))}
                <Button
-                 variant="outlined"
+                 variant="contained"
                  disabled={page === totalPages}
                  onClick={() => setPage(page + 1)}
-                 sx={{ minWidth: 40 }}
+                 sx={{
+                   background: page === totalPages ? '#e0e0e0' : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                   color: page === totalPages ? '#999' : '#fff',
+                   borderRadius: 2,
+                   fontWeight: 600,
+                   minWidth: 40,
+                   height: 40,
+                   boxShadow: page === totalPages ? 'none' : '0 2px 4px rgba(25, 118, 210, 0.2)',
+                   '&:hover': page === totalPages ? {} : {
+                     background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                     boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                     transform: 'translateY(-1px)'
+                   },
+                   transition: 'all 0.3s ease'
+                 }}
                >
                  →
                </Button>

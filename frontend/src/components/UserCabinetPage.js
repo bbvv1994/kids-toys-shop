@@ -571,7 +571,7 @@ import ProductCard from './ProductCard';
 import ElegantProductCarousel from './ElegantProductCarousel';
 
 // Новый компонент личного кабинета
-function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, cart, handleAddToCart, handleChangeCartQuantity, onEditProduct, handleUserUpdate, handleOpenReviewForm }) {
+function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, refreshWishlist, cart, handleAddToCart, handleChangeCartQuantity, onEditProduct, handleUserUpdate, handleOpenReviewForm }) {
     const { t } = useTranslation();
     const [selectedSection, setSelectedSection] = useState('myprofile');
     
@@ -597,6 +597,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
       }
     }, [selectedSection]);
     const [localWishlist, setLocalWishlist] = useState(wishlist || []);
+    const [wishlistProducts, setWishlistProducts] = useState([]);
     const [clearDialogOpen, setClearDialogOpen] = useState(false);
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
     const [localViewed, setLocalViewed] = useState([]);
@@ -933,27 +934,72 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
       
       try {
         setReviewsLoading(true);
-        // Загружаем отзывы о товарах
-        const productReviewsRes = await fetch(`${API_BASE_URL}/api/profile/reviews/product`, {
-          headers: {
-            'Authorization': `Bearer ${user.token}`
-          }
-        });
-        const productReviews = await productReviewsRes.json();
+        console.log('📡 UserCabinetPage: Loading reviews and questions...');
         
-  
+        // Загружаем отзывы о товарах
+        let productReviews = [];
+        try {
+          const productReviewsRes = await fetch(`${API_BASE_URL}/api/profile/reviews/product`, {
+            headers: {
+              'Authorization': `Bearer ${user.token}`
+            }
+          });
+          
+          if (!productReviewsRes.ok) {
+            console.error('❌ UserCabinetPage: Product reviews API error:', productReviewsRes.status, productReviewsRes.statusText);
+            productReviews = [];
+          } else {
+            productReviews = await productReviewsRes.json();
+            console.log('📝 UserCabinetPage: Loaded product reviews:', productReviews.length);
+          }
+        } catch (error) {
+          console.error('❌ UserCabinetPage: Error loading product reviews:', error);
+          productReviews = [];
+        }
         
         // Загружаем отзывы о магазине
-        const shopReviewsRes = await fetch(`${API_BASE_URL}/api/profile/reviews/shop`, {
-          headers: {
-            'Authorization': `Bearer ${user.token}`
+        let shopReviews = [];
+        try {
+          const shopReviewsRes = await fetch(`${API_BASE_URL}/api/profile/reviews/shop`, {
+            headers: {
+              'Authorization': `Bearer ${user.token}`
+            }
+          });
+          
+          if (!shopReviewsRes.ok) {
+            console.error('❌ UserCabinetPage: Shop reviews API error:', shopReviewsRes.status, shopReviewsRes.statusText);
+            shopReviews = [];
+          } else {
+            shopReviews = await shopReviewsRes.json();
+            console.log('🏪 UserCabinetPage: Loaded shop reviews:', shopReviews.length);
           }
-        });
-        const shopReviews = await shopReviewsRes.json();
+        } catch (error) {
+          console.error('❌ UserCabinetPage: Error loading shop reviews:', error);
+          shopReviews = [];
+        }
         
-  
+        // Загружаем вопросы о товарах с ответами
+        let questions = [];
+        try {
+          const questionsRes = await fetch(`${API_BASE_URL}/api/profile/questions`, {
+            headers: {
+              'Authorization': `Bearer ${user.token}`
+            }
+          });
+          
+          if (!questionsRes.ok) {
+            console.error('❌ UserCabinetPage: Questions API error:', questionsRes.status, questionsRes.statusText);
+            questions = [];
+          } else {
+            questions = await questionsRes.json();
+            console.log('❓ UserCabinetPage: Loaded questions:', questions.length);
+          }
+        } catch (error) {
+          console.error('❌ UserCabinetPage: Error loading questions:', error);
+          questions = [];
+        }
         
-        // Объединяем отзывы
+        // Объединяем отзывы и вопросы
         const allReviews = [
           ...productReviews.map(review => ({
             ...review,
@@ -968,14 +1014,24 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             type: 'shop_review',
             productName: 'Магазин',
             productImage: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjRjBGMEYwIi8+CjxwYXRoIGQ9Ik0yNSAyNUMzMi4xODM0IDI1IDM4IDMxLjgxNjYgMzggMzlDMzggNDYuMTgzNCAzMi4xODM0IDUzIDI1IDUzQzE3LjgxNjYgNTMgMTIgNDYuMTgzNCAxMiAzOUMxMiAzMS44MTY2IDE3LjgxNjYgMjUgMjUgMjVaIiBmaWxsPSIjQ0NDIi8+CjxwYXRoIGQ9Ik0yNSAzMUMyNy43NjE0IDMxIDMwIDMzLjIzODYgMzAgMzZDMzAgMzguNzYxNCAyNy43NjE0IDQxIDI1IDQxQzIyLjIzODYgNDEgMjAgMzguNzYxNCAyMCAzNkMyMCAzMy4yMzg2IDIyLjIzODYgMzEgMjUgMzFaIiBmaWxsPSIjOTk5Ii8+Cjwvc3ZnPgo='
+          })),
+          ...questions.map(question => ({
+            ...question,
+            type: 'question',
+            productName: question.product?.name || 'Товар',
+            productImage: question.product?.imageUrls?.[0] ? 
+              getImageUrl(question.product.imageUrls[0]) : 
+              'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjRjBGMEYwIi8+CjxwYXRoIGQ9Ik0yNSAyNUMzMi4xODM0IDI1IDM4IDMxLjgxNjYgMzggMzlDMzggNDYuMTgzNCAzMi4xODM0IDUzIDI1IDUzQzE3LjgxNjYgNTMgMTIgNDYuMTgzNCAxMiAzOUMxMiAzMS44MTY2IDE3LjgxNjYgMjUgMjUgMjVaIiBmaWxsPSIjQ0NDIi8+CjxwYXRoIGQ9Ik0yNSAzMUMyNy43NjE0IDMxIDMwIDMzLjIzODYgMzAgMzZDMzAgMzguNzYxNCAyNy43NjE0IDQxIDI1IDQxQzIyLjIzODYgNDEgMjAgMzguNzYxNCAyMCAzNkMyMCAzMy4yMzg2IDIyLjIzODYgMzEgMjUgMzFaIiBmaWxsPSIjOTk5Ii8+Cjwvc3ZnPgo=',
+            // Для вопросов используем question как comment
+            comment: question.question,
+            answer: question.answer
           }))
         ];
         
-  
-        
+        console.log('✅ UserCabinetPage: Combined reviews and questions:', allReviews.length);
         setUserReviews(allReviews);
       } catch (error) {
-        console.error('Ошибка загрузки отзывов:', error);
+        console.error('Ошибка загрузки отзывов и вопросов:', error);
       } finally {
         setReviewsLoading(false);
       }
@@ -1149,8 +1205,41 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
     };
   
     useEffect(() => {
+      console.log('🔄 UserCabinetPage: Updating localWishlist', { wishlist, wishlistType: typeof wishlist, wishlistLength: wishlist?.length });
       setLocalWishlist(wishlist || []);
     }, [wishlist]);
+
+    // Загружаем продукты для wishlist
+    useEffect(() => {
+      const loadWishlistProducts = async () => {
+        if (!localWishlist || localWishlist.length === 0) {
+          setWishlistProducts([]);
+          return;
+        }
+
+        try {
+          console.log('📡 UserCabinetPage: Loading wishlist products for IDs:', localWishlist);
+          const productPromises = localWishlist.map(productId => 
+            fetch(`${API_BASE_URL}/api/products/${productId}`)
+              .then(res => res.json())
+              .catch(error => {
+                console.error(`❌ UserCabinetPage: Error loading product ${productId}:`, error);
+                return null;
+              })
+          );
+          
+          const products = await Promise.all(productPromises);
+          const validProducts = products.filter(product => product !== null);
+          console.log('✅ UserCabinetPage: Loaded wishlist products:', { total: products.length, valid: validProducts.length });
+          setWishlistProducts(validProducts);
+        } catch (error) {
+          console.error('❌ UserCabinetPage: Error loading wishlist products:', error);
+          setWishlistProducts([]);
+        }
+      };
+
+      loadWishlistProducts();
+    }, [localWishlist]);
   
     useEffect(() => {
       const viewed = JSON.parse(localStorage.getItem('viewedProducts') || '[]');
@@ -1173,6 +1262,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
         });
         setLocalWishlist([]);
+        // Обновляем глобальное состояние wishlist в ProductsContext
+        if (refreshWishlist) {
+          console.log('🔄 Refreshing global wishlist after clear...');
+          await refreshWishlist();
+        }
       } catch (e) {
         alert('Ошибка при очистке списка желаний');
       }
@@ -1624,7 +1718,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                             {t('profile.stats.wishlistItems')}
                           </Typography>
                           <Typography sx={{ color: '#333', fontSize: { xs: 20, sm: 22, md: 24 }, fontWeight: 700, mt: 0.5 }}>
-                            {localWishlist?.length || 0}
+                            {wishlistProducts?.length || 0}
                           </Typography>
                         </Box>
                       </Box>
@@ -2359,13 +2453,24 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
           );
         case 'reviews':
           // Используем отзывы, загруженные на уровне компонента
+          console.log('🎨 UserCabinetPage: Rendering reviews section', { 
+            userReviews, 
+            userReviewsLength: userReviews?.length, 
+            reviewsLoading 
+          });
   
           const getReviewTypeIcon = (type) => {
-            return type === 'review' ? '⭐' : '❓';
+            if (type === 'review') return '⭐';
+            if (type === 'shop_review') return '🏪';
+            if (type === 'question') return '❓';
+            return '📝';
           };
   
           const getReviewTypeColor = (type) => {
-            return type === 'review' ? '#ff9800' : '#2196f3';
+            if (type === 'review') return '#ff9800';
+            if (type === 'shop_review') return '#4caf50';
+            if (type === 'question') return '#2196f3';
+            return '#666';
           };
   
   
@@ -2503,25 +2608,27 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                             </Box>
                           </Box>
                           
-                          {/* Кнопка удаления */}
-                          <IconButton 
-                            onClick={() => {
-                              if (review.type === 'review') {
-                                handleHideProductReview(review.id);
-                              } else {
-                                handleHideShopReview(review.id);
-                              }
-                            }}
-                            size="small" 
-                            sx={{ 
-                              ml: { xs: 0, md: 1 }, 
-                              color: '#ff1744',
-                              alignSelf: { xs: 'flex-end', md: 'flex-start' }
-                            }} 
-                            title="Удалить из профиля"
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
+                          {/* Кнопка удаления (только для отзывов, не для вопросов) */}
+                          {review.type !== 'question' && (
+                            <IconButton 
+                              onClick={() => {
+                                if (review.type === 'review') {
+                                  handleHideProductReview(review.id);
+                                } else if (review.type === 'shop_review') {
+                                  handleHideShopReview(review.id);
+                                }
+                              }}
+                              size="small" 
+                              sx={{ 
+                                ml: { xs: 0, md: 1 }, 
+                                color: '#ff1744',
+                                alignSelf: { xs: 'flex-end', md: 'flex-start' }
+                              }} 
+                              title="Удалить из профиля"
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          )}
                         </Box>
   
                         {/* Содержание */}
@@ -2535,15 +2642,41 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                               {renderStars(review.rating)}
                             </Typography>
                           )}
-                          <Typography sx={{ 
-                            color: '#666', 
-                            fontSize: { xs: 12, sm: 13, md: 14 }, 
-                            lineHeight: 1.6,
-                            wordBreak: 'break-word',
-                            overflowWrap: 'break-word'
-                          }}>
-                            {review.comment || review.text || 'Комментарий отсутствует'}
-                          </Typography>
+                          
+                          {review.type === 'question' ? (
+                            <Box>
+                              <Typography sx={{ 
+                                color: '#333', 
+                                fontSize: { xs: 13, sm: 14, md: 15 }, 
+                                fontWeight: 600,
+                                mb: 1,
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word'
+                              }}>
+                                ❓ Вопрос:
+                              </Typography>
+                              <Typography sx={{ 
+                                color: '#666', 
+                                fontSize: { xs: 12, sm: 13, md: 14 }, 
+                                lineHeight: 1.6,
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word',
+                                mb: 2
+                              }}>
+                                {review.comment || review.question || 'Вопрос отсутствует'}
+                              </Typography>
+                            </Box>
+                          ) : (
+                            <Typography sx={{ 
+                              color: '#666', 
+                              fontSize: { xs: 12, sm: 13, md: 14 }, 
+                              lineHeight: 1.6,
+                              wordBreak: 'break-word',
+                              overflowWrap: 'break-word'
+                            }}>
+                              {review.comment || review.text || 'Комментарий отсутствует'}
+                            </Typography>
+                          )}
                         </Box>
   
                         {/* Ответ (если есть) */}
@@ -2551,17 +2684,17 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                           <Box sx={{ 
                             mt: 2, 
                             p: { xs: 1.5, md: 2 }, 
-                            backgroundColor: '#e3f2fd', 
+                            backgroundColor: review.type === 'question' ? '#e8f5e8' : '#e3f2fd', 
                             borderRadius: 2,
-                            border: '1px solid #2196f3'
+                            border: review.type === 'question' ? '1px solid #4caf50' : '1px solid #2196f3'
                           }}>
                             <Typography sx={{ 
                               fontWeight: 600, 
-                              color: '#1976d2', 
+                              color: review.type === 'question' ? '#2e7d32' : '#1976d2', 
                               fontSize: { xs: 12, sm: 13, md: 14 }, 
                               mb: 1 
                             }}>
-                              Ответ:
+                              {review.type === 'question' ? '✅ Ответ магазина:' : 'Ответ магазина:'}
                             </Typography>
                             <Typography sx={{ 
                               color: '#333', 
@@ -2582,10 +2715,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
             </Box>
           );
         case 'wishlist':
+          console.log('🎨 UserCabinetPage: Rendering wishlist section', { localWishlist, localWishlistLength: localWishlist?.length });
           return (
             <Box sx={{ mt: -10, minHeight: 400, py: 2, pt: 1, px: { xs: 0, md: 0 } }}>
-              {localWishlist && localWishlist.length === 0 ? (
-                                            <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>{t('common.noWishlistItems')}</Typography>
+              {!localWishlist || localWishlist.length === 0 ? (
+                <Typography sx={{ textAlign: 'center', color: '#888', fontSize: 20, mt: 6 }}>{t('common.noWishlistItems')}</Typography>
               ) : (
                 <Box sx={{
                   background: '#fff',
@@ -2618,7 +2752,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                   }}>
                 {createHeader(t('profile.header.wishlist'))}
                     
-                    {localWishlist && localWishlist.length > 0 && (
+                    {wishlistProducts && wishlistProducts.length > 0 && (
                       <Button
                         variant="contained"
                         color="error"
@@ -2657,21 +2791,23 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     maxWidth: '100%',
                     margin: 0,
                   }}>
-                    {localWishlist.map(item => (
-                      <ProductCard
-                        key={item.product?.id || item.id}
-                        product={item.product}
-                        user={user}
-                        inWishlist={true}
-                        onWishlistToggle={handleWishlistToggle}
-                        onAddToCart={handleAddToCart}
-                        cart={cart}
-                        onChangeCartQuantity={handleChangeCartQuantity}
-                        onEditProduct={onEditProduct}
-                        viewMode="grid"
-                      />
-                    ))}
-                    {Array.from({ length: Math.max(0, (window.innerWidth >= 1400 ? 4 : 3) - localWishlist.length) }).map((_, idx) => (
+                    {wishlistProducts
+                      .filter(product => product && product.id) // Фильтруем undefined/null продукты
+                      .map(product => (
+                        <ProductCard
+                          key={product.id}
+                          product={product}
+                          user={user}
+                          inWishlist={true}
+                          onWishlistToggle={handleWishlistToggle}
+                          onAddToCart={handleAddToCart}
+                          cart={cart}
+                          onChangeCartQuantity={handleChangeCartQuantity}
+                          onEditProduct={onEditProduct}
+                          viewMode="grid"
+                        />
+                      ))}
+                    {Array.from({ length: Math.max(0, (window.innerWidth >= 1400 ? 4 : 3) - wishlistProducts.length) }).map((_, idx) => (
                       <Box key={`empty-wishlist-${idx}`} />
                     ))}
                   </Box>
@@ -2756,20 +2892,22 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     maxWidth: '100%',
                     margin: 0,
                   }}>
-                    {localViewed.map(product => (
-                      <ProductCard
-                        key={product.id}
-                        product={product}
-                        user={user}
-                        isViewed={true}
-                        onRemoveViewed={() => handleRemoveViewed(product.id)}
-                        onAddToCart={handleAddToCart}
-                        cart={cart}
-                        onChangeCartQuantity={handleChangeCartQuantity}
-                        onEditProduct={onEditProduct}
-                        viewMode="grid"
-                      />
-                    ))}
+                    {localViewed
+                      .filter(product => product && product.id) // Фильтруем undefined/null продукты
+                      .map(product => (
+                        <ProductCard
+                          key={product.id}
+                          product={product}
+                          user={user}
+                          isViewed={true}
+                          onRemoveViewed={() => handleRemoveViewed(product.id)}
+                          onAddToCart={handleAddToCart}
+                          cart={cart}
+                          onChangeCartQuantity={handleChangeCartQuantity}
+                          onEditProduct={onEditProduct}
+                          viewMode="grid"
+                        />
+                      ))}
                   </Box>
                 </Box>
               )}
@@ -3223,14 +3361,15 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
               <Box sx={{ overflow: 'auto', pt: 2 }}>
                 <List>
                   <ListItem 
-                    button 
+                    component="button"
                     selected={selectedSection === 'myprofile'} 
                     onClick={() => setSelectedSection('myprofile')}
                     sx={selectedSection === 'myprofile' ? {
-                      backgroundColor: '#f5f5f5',
+                      backgroundColor: '#fff',
                       color: 'primary.main',
-                      borderRadius: 2,
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: 'primary.main' },
                       '&:hover': {
                         backgroundColor: '#f0f0f0',
@@ -3238,9 +3377,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         '& .MuiListItemIcon-root': { color: 'primary.main' }
                       }
                     } : {
-                      borderRadius: 2,
+                      backgroundColor: '#fff',
                       color: 'inherit',
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                       '&:hover': {
                         backgroundColor: '#f5f5f5',
@@ -3253,14 +3394,15 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <ListItemText primary={t('profile.menu.myProfile')} />
                   </ListItem>
                   <ListItem 
-                    button 
+                    component="button"
                     selected={selectedSection === 'notifications'} 
                     onClick={() => setSelectedSection('notifications')}
                     sx={selectedSection === 'notifications' ? {
-                      backgroundColor: '#f5f5f5',
+                      backgroundColor: '#fff',
                       color: 'primary.main',
-                      borderRadius: 2,
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: 'primary.main' },
                       '&:hover': {
                         backgroundColor: '#f0f0f0',
@@ -3268,9 +3410,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         '& .MuiListItemIcon-root': { color: 'primary.main' }
                       }
                     } : {
-                      borderRadius: 2,
+                      backgroundColor: '#fff',
                       color: 'inherit',
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                       '&:hover': {
                         backgroundColor: '#f5f5f5',
@@ -3283,14 +3427,15 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <ListItemText primary={t('profile.menu.notifications')} />
                   </ListItem>
                   <ListItem 
-                    button 
+                    component="button"
                     selected={selectedSection === 'orders'} 
                     onClick={() => setSelectedSection('orders')}
                     sx={selectedSection === 'orders' ? {
-                      backgroundColor: '#f5f5f5',
+                      backgroundColor: '#fff',
                       color: 'primary.main',
-                      borderRadius: 2,
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: 'primary.main' },
                       '&:hover': {
                         backgroundColor: '#f0f0f0',
@@ -3298,9 +3443,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         '& .MuiListItemIcon-root': { color: 'primary.main' }
                       }
                     } : {
-                      borderRadius: 2,
+                      backgroundColor: '#fff',
                       color: 'inherit',
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                       '&:hover': {
                         backgroundColor: '#f5f5f5',
@@ -3313,14 +3460,15 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <ListItemText primary={t('profile.menu.orders')} />
                   </ListItem>
                   <ListItem 
-                    button 
+                    component="button"
                     selected={selectedSection === 'wishlist'} 
                     onClick={() => setSelectedSection('wishlist')}
                     sx={selectedSection === 'wishlist' ? {
-                      backgroundColor: '#f5f5f5',
+                      backgroundColor: '#fff',
                       color: 'primary.main',
-                      borderRadius: 2,
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: 'primary.main' },
                       '&:hover': {
                         backgroundColor: '#f0f0f0',
@@ -3328,9 +3476,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         '& .MuiListItemIcon-root': { color: 'primary.main' }
                       }
                     } : {
-                      borderRadius: 2,
+                      backgroundColor: '#fff',
                       color: 'inherit',
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                       '&:hover': {
                         backgroundColor: '#f5f5f5',
@@ -3343,14 +3493,15 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <ListItemText primary={t('profile.menu.wishlist')} />
                   </ListItem>
                   <ListItem 
-                    button 
+                    component="button"
                     selected={selectedSection === 'viewed'} 
                     onClick={() => setSelectedSection('viewed')}
                     sx={selectedSection === 'viewed' ? {
-                      backgroundColor: '#f5f5f5',
+                      backgroundColor: '#fff',
                       color: 'primary.main',
-                      borderRadius: 2,
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: 'primary.main' },
                       '&:hover': {
                         backgroundColor: '#f0f0f0',
@@ -3358,9 +3509,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         '& .MuiListItemIcon-root': { color: 'primary.main' }
                       }
                     } : {
-                      borderRadius: 2,
+                      backgroundColor: '#fff',
                       color: 'inherit',
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                       '&:hover': {
                         backgroundColor: '#f5f5f5',
@@ -3373,14 +3526,15 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <ListItemText primary={t('profile.menu.viewed')} />
                   </ListItem>
                   <ListItem 
-                    button 
+                    component="button"
                     selected={selectedSection === 'profile'} 
                     onClick={() => setSelectedSection('profile')}
                     sx={selectedSection === 'profile' ? {
-                      backgroundColor: '#f5f5f5',
+                      backgroundColor: '#fff',
                       color: 'primary.main',
-                      borderRadius: 2,
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: 'primary.main' },
                       '&:hover': {
                         backgroundColor: '#f0f0f0',
@@ -3388,9 +3542,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         '& .MuiListItemIcon-root': { color: 'primary.main' }
                       }
                     } : {
-                      borderRadius: 2,
+                      backgroundColor: '#fff',
                       color: 'inherit',
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                       '&:hover': {
                         backgroundColor: '#f5f5f5',
@@ -3403,14 +3559,15 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <ListItemText primary={t('profile.menu.personalData')} />
                   </ListItem>
                   <ListItem 
-                    button 
+                    component="button"
                     selected={selectedSection === 'reviews'} 
                     onClick={() => setSelectedSection('reviews')}
                     sx={selectedSection === 'reviews' ? {
-                      backgroundColor: '#f5f5f5',
+                      backgroundColor: '#fff',
                       color: 'primary.main',
-                      borderRadius: 2,
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: 'primary.main' },
                       '&:hover': {
                         backgroundColor: '#f0f0f0',
@@ -3418,9 +3575,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         '& .MuiListItemIcon-root': { color: 'primary.main' }
                       }
                     } : {
-                      borderRadius: 2,
+                      backgroundColor: '#fff',
                       color: 'inherit',
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                       '&:hover': {
                         backgroundColor: '#f5f5f5',
@@ -3433,14 +3592,15 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <ListItemText primary={t('profile.menu.reviews')} />
                   </ListItem>
                   <ListItem 
-                    button 
+                    component="button"
                     selected={selectedSection === 'auth'} 
                     onClick={() => setSelectedSection('auth')}
                     sx={selectedSection === 'auth' ? {
-                      backgroundColor: '#f5f5f5',
+                      backgroundColor: '#fff',
                       color: 'primary.main',
-                      borderRadius: 2,
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: 'primary.main' },
                       '&:hover': {
                         backgroundColor: '#f0f0f0',
@@ -3448,9 +3608,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                         '& .MuiListItemIcon-root': { color: 'primary.main' }
                       }
                     } : {
-                      borderRadius: 2,
+                      backgroundColor: '#fff',
                       color: 'inherit',
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: '#bdbdbd' },
                       '&:hover': {
                         backgroundColor: '#f5f5f5',
@@ -3463,12 +3625,14 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, c
                     <ListItemText primary={t('profile.menu.authSettings')} />
                   </ListItem>
                   <ListItem 
-                    button 
+                    component="button"
                     onClick={() => setLogoutDialogOpen(true)}
                     sx={{
-                      borderRadius: 2,
+                      backgroundColor: '#fff',
                       color: '#f44336',
                       cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none',
                       '& .MuiListItemIcon-root': { color: '#f44336' },
                       '&:hover': {
                         backgroundColor: '#ffebee',
