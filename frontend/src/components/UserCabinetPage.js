@@ -573,6 +573,8 @@ import ElegantProductCarousel from './ElegantProductCarousel';
 // Новый компонент личного кабинета
 function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, refreshWishlist, cart, handleAddToCart, handleChangeCartQuantity, onEditProduct, handleUserUpdate, handleOpenReviewForm }) {
     const { t } = useTranslation();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
     const [selectedSection, setSelectedSection] = useState('myprofile');
     
       // Проверяем флаг для открытия вкладки уведомлений при загрузке
@@ -2782,14 +2784,33 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
                     )}
                   </Box>
                   <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' },
-                    gap: 2,
-                    justifyItems: 'center',
-                    alignItems: 'center',
-                    justifyContent: { xs: 'center', sm: 'start' },
-                    maxWidth: '100%',
-                    margin: 0,
+                    display: {
+                      xs: 'flex',
+                      md: 'grid'
+                    },
+                    flexDirection: { xs: 'row', md: 'unset' },
+                    flexWrap: { xs: 'wrap', md: 'unset' },
+                    justifyContent: { xs: 'center', md: 'center' },
+                    gridTemplateColumns: {
+                      xs: 'repeat(2, 1fr)',
+                      sm: 'repeat(2, 1fr)',
+                      md: 'repeat(3, 280px)',
+                      lg: 'repeat(4, 280px)'
+                    },
+                    '@media (min-width:1400px)': {
+                      gridTemplateColumns: 'repeat(5, 280px)',
+                      maxWidth: 'calc(5 * 280px + 4 * 16px)'
+                    },
+                    gap: { xs: 1, sm: 1.5, md: 2 },
+                    mb: 6,
+                    width: '100%',
+                    maxWidth: { 
+                      xs: '100%', 
+                      md: 'calc(3 * 280px + 2 * 16px)',
+                      lg: 'calc(4 * 280px + 3 * 16px)'
+                    },
+                    mx: 'auto',
+                    px: 0
                   }}>
                     {wishlistProducts
                       .filter(product => product && product.id) // Фильтруем undefined/null продукты
@@ -2804,10 +2825,10 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
                           cart={cart}
                           onChangeCartQuantity={handleChangeCartQuantity}
                           onEditProduct={onEditProduct}
-                          viewMode="grid"
+                          viewMode={isMobile ? "carousel-mobile" : "grid"}
                         />
                       ))}
-                    {Array.from({ length: Math.max(0, (window.innerWidth >= 1400 ? 4 : 3) - wishlistProducts.length) }).map((_, idx) => (
+                    {Array.from({ length: Math.max(0, (window.innerWidth >= 1400 ? 5 : window.innerWidth >= 1200 ? 4 : 3) - wishlistProducts.length) }).map((_, idx) => (
                       <Box key={`empty-wishlist-${idx}`} />
                     ))}
                   </Box>
@@ -2883,14 +2904,33 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
                   </Box>
                   
                                   <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(4, 1fr)' },
-                    gap: 2,
-                    justifyItems: 'center',
-                    alignItems: 'center',
-                    justifyContent: { xs: 'center', sm: 'start' },
-                    maxWidth: '100%',
-                    margin: 0,
+                    display: {
+                      xs: 'flex',
+                      md: 'grid'
+                    },
+                    flexDirection: { xs: 'row', md: 'unset' },
+                    flexWrap: { xs: 'wrap', md: 'unset' },
+                    justifyContent: { xs: 'center', md: 'center' },
+                    gridTemplateColumns: {
+                      xs: 'repeat(2, 1fr)',
+                      sm: 'repeat(2, 1fr)',
+                      md: 'repeat(3, 280px)',
+                      lg: 'repeat(4, 280px)'
+                    },
+                    '@media (min-width:1400px)': {
+                      gridTemplateColumns: 'repeat(5, 280px)',
+                      maxWidth: 'calc(5 * 280px + 4 * 16px)'
+                    },
+                    gap: { xs: 1, sm: 1.5, md: 2 },
+                    mb: 6,
+                    width: '100%',
+                    maxWidth: { 
+                      xs: '100%', 
+                      md: 'calc(3 * 280px + 2 * 16px)',
+                      lg: 'calc(4 * 280px + 3 * 16px)'
+                    },
+                    mx: 'auto',
+                    px: 0
                   }}>
                     {localViewed
                       .filter(product => product && product.id) // Фильтруем undefined/null продукты
@@ -2905,7 +2945,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
                           cart={cart}
                           onChangeCartQuantity={handleChangeCartQuantity}
                           onEditProduct={onEditProduct}
-                          viewMode="grid"
+                          viewMode={isMobile ? "carousel-mobile" : "grid"}
                         />
                       ))}
                   </Box>
