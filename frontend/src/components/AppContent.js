@@ -1987,6 +1987,23 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
   
             </>
           )}
+          {/* Затемнение фона при открытом меню */}
+          {isDesktop && menuOpen && !instantClose && !shouldHideCategories && !userLoading && (
+            <Box
+              sx={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                zIndex: 1399,
+                cursor: 'pointer'
+              }}
+              onClick={() => setMenuOpen(false)}
+            />
+          )}
+
           {/* Меню категорий с position: absolute */}
           {isDesktop && !instantClose && !shouldHideCategories && !userLoading && (
           <Box sx={{ position: 'relative' }}>
