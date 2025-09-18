@@ -30,7 +30,7 @@ const SafeMigration = require('../safe-migration');
 
 // Инициализация кэширования
 const cacheManager = require('./cache');
-const { cacheMiddleware, smartInvalidateCache } = require('./cacheMiddleware');
+const { cacheMiddleware, smartInvalidateCache, invalidateCache, CACHE_PATTERNS } = require('./cacheMiddleware');
 
 // Подключение к Redis
 cacheManager.connect().then(() => {
@@ -880,12 +880,16 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
 
 app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req, res) => {
   try {
-    const { category, subcategoryId, admin } = req.query;
+    const { category, categoryId, subcategoryId, admin } = req.query;
     
     let whereClause = {};
     
     if (category) {
       whereClause.categoryName = category;
+    }
+    
+    if (categoryId) {
+      whereClause.categoryId = parseInt(categoryId);
     }
     
     if (subcategoryId) {
@@ -2888,8 +2892,11 @@ app.patch('/api/products/:id/hidden', authMiddleware, async (req, res) => {
   }
 });
 
-app.put('/api/products/:id', authMiddleware, upload.array('images', 7), 
+app.put('/api/products/:id', 
+  authMiddleware, 
+  upload.array('images', 7), 
   smartImageUploadMiddleware.processUploadedFiles.bind(smartImageUploadMiddleware), 
+  invalidateCache([CACHE_PATTERNS.PRODUCTS, CACHE_PATTERNS.CATEGORIES, CACHE_PATTERNS.SEARCH]),
   async (req, res) => {
   try {
     console.log('📝 Обновление товара ID:', req.params.id);

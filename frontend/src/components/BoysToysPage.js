@@ -8,7 +8,9 @@ import {
   Alert,
   IconButton,
   CircularProgress,
-  Breadcrumbs
+  Breadcrumbs,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { 
   Boy,
@@ -45,8 +47,8 @@ export default function BoysToysPage({
   
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
 
      // Фильтрация продуктов: категория "Игрушки" И пол "для мальчиков"
    const boysProducts = useMemo(() => {
@@ -412,29 +414,37 @@ export default function BoysToysPage({
          </Box>
        ) : (
          <>
-           {viewMode === 'grid' ? (
-                           <Box sx={{
-                display: {
-                  xs: 'flex',
-                  md: 'grid'
-                },
-                flexDirection: { xs: 'row', md: 'unset' },
-                flexWrap: { xs: 'wrap', md: 'unset' },
-                justifyContent: { xs: 'center', md: 'unset' },
-                gridTemplateColumns: {
-                  md: 'repeat(auto-fit, minmax(280px, 280px))'
-                },
-                gap: '8px',
-                width: '100%',
-                maxWidth: { 
-                  xs: '100%', 
-                  md: 'calc(5 * 280px + 4 * 8px)' 
-                },
-                mx: 'auto',
-                mt: 2,
-                mb: 6,
-                px: 0
-              }}>
+         {viewMode === 'grid' ? (
+           <Box sx={{
+             display: {
+               xs: 'flex',
+               md: 'grid'
+             },
+             flexDirection: { xs: 'row', md: 'unset' },
+             flexWrap: { xs: 'wrap', md: 'unset' },
+             justifyContent: { xs: 'center', md: 'center' },
+             gridTemplateColumns: {
+               xs: 'repeat(2, 1fr)',
+               sm: 'repeat(2, 1fr)',
+               md: 'repeat(3, 280px)',
+               lg: 'repeat(4, 280px)'
+             },
+             '@media (min-width:1400px)': {
+               gridTemplateColumns: 'repeat(5, 280px)',
+               maxWidth: 'calc(5 * 280px + 4 * 16px)'
+             },
+             gap: { xs: 1, sm: 1.5, md: 2 },
+             width: '100%',
+             maxWidth: { 
+               xs: '100%', 
+               md: 'calc(3 * 280px + 2 * 16px)',
+               lg: 'calc(4 * 280px + 3 * 16px)'
+             },
+             mx: 'auto',
+             mt: 2,
+             mb: 6,
+             px: 0
+           }}>
                {pagedProducts
                  .filter(product => product && product.id) // Фильтруем undefined/null продукты
                  .map((product) => (

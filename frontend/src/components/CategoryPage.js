@@ -28,6 +28,8 @@ import {
   Divider,
   Paper,
   Tooltip,
+  useMediaQuery,
+  useTheme,
   Badge,
   Fab,
   Zoom,
@@ -103,7 +105,8 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
     const recognitionRef = useRef(null);
     const [categoryProducts, setCategoryProducts] = useState([]);
     const deviceType = useDeviceType();
-    const isMobile = deviceType === 'mobile';
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
   
     // Функция для загрузки товаров категории
     const fetchCategoryData = async () => {
@@ -563,96 +566,82 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
           {filteredSubcategories.length > 0 && (
             <Box sx={{
               display: 'grid',
-              // Match categories: fixed gaps, breakpoint-based columns and widths
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
-              gap: 3,
-              mb: 8,
-              width: '100%',
-              maxWidth: 'calc(4 * 285px + 3 * 24px)',
-              margin: '0 auto',
+              gridTemplateColumns: {
+                xs: 'repeat(2, 1fr)',
+                sm: 'repeat(3, 1fr)',
+                md: 'repeat(auto-fit, minmax(240px, 240px))'
+              },
+              gap: { xs: 1, sm: 1.5, md: 2 },
               justifyContent: 'center',
-              '@media (max-width: 599px)': {
-                maxWidth: '285px',
-                gridTemplateColumns: '1fr'
-              },
-              '@media (min-width: 600px) and (max-width: 899px)': {
-                maxWidth: 'calc(2 * 285px + 24px)',
-                gridTemplateColumns: 'repeat(2, 1fr)'
-              },
-              '@media (min-width: 900px) and (max-width: 1199px)': {
-                maxWidth: 'calc(3 * 285px + 2 * 24px)',
-                gridTemplateColumns: 'repeat(3, 1fr)'
-              },
-              '@media (min-width: 1200px) and (max-width: 1535px)': {
-                maxWidth: 'calc(3 * 285px + 2 * 24px)',
-                gridTemplateColumns: 'repeat(3, 1fr)'
-              },
-              '@media (min-width: 1536px)': {
-                maxWidth: 'calc(4 * 285px + 3 * 24px)',
-                gridTemplateColumns: 'repeat(4, 1fr)'
-              },
-              // desktop alignment: center 3-cols region (≤1535px); 4-cols (≥1536px) left-align with indent
-              mx: { xs: 'auto', sm: 'auto', md: 'auto', lg: 0, xl: 0 },
-              // keep no manual left offset on mobile/tablet so centering works
-              ml: { lg: 'calc(280px + (100% - 280px - 903px)/2)', xl: '280px' },
+              mx: { xs: 2, sm: 3, md: 4 },
             }}>
               {filteredSubcategories.map(subcat => {
                 const nameTrimmed = subcat.name && subcat.name.trim();
                 const fileName = getSubcategoryImageFileName(nameTrimmed);
                 const src = fileName ? `/${fileName}` : '/toys.png';
                 return (
-                  <Box
-                    key={subcat.id}
-                    className="category-tile"
-                    onClick={() => {
-                      navigate(`/subcategory/${subcat.id}`);
-                      if (window.location.pathname === '/checkout') {
-                        setTimeout(() => window.location.reload(), 100);
-                      }
-                    }}
-                    sx={{
+                  <Card key={subcat.id} sx={{
+                    borderRadius: 2,
+                    background: 'rgba(103, 126, 234, 0.05)',
+                    border: '1px solid rgba(103, 126, 234, 0.1)',
+                    cursor: 'pointer',
+                    height: { xs: '120px', sm: '140px', md: '160px' },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    '&:hover': {
+                      background: 'rgba(103, 126, 234, 0.1)',
+                      transform: 'translateY(-2px)',
+                      transition: 'all 0.2s'
+                    }
+                  }} onClick={() => {
+                    navigate(`/subcategory/${subcat.id}`);
+                    if (window.location.pathname === '/checkout') {
+                      setTimeout(() => window.location.reload(), 100);
+                    }
+                  }}>
+                    <CardContent sx={{ 
+                      p: 0, 
                       position: 'relative',
-                      height: 180,
-                      border: 'none',
-                      borderRadius: 3,
-                      cursor: 'pointer',
-                      overflow: 'hidden',
-                      transition: 'all 0.3s ease',
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-                      backgroundImage: `url(${src})`,
-                      '&:hover': {
-                        transform: 'translateY(-4px) scale(1.05)',
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-                      },
-                    }}
-                  >
-                    <Box sx={{
-                      position: 'absolute',
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: 'rgba(255,255,255,0.82)',
-                      py: 1,
-                      px: 2,
-                      textAlign: 'center',
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      flex: 1,
+                      '&:last-child': { pb: 0 }
                     }}>
-                      <Typography sx={{
-                        fontWeight: 700,
-                        fontSize: 18,
-                        color: '#222',
-                        textAlign: 'center',
-                        m: 0,
-                        p: 0,
+                      <Box sx={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: 2,
+                        backgroundImage: `url(${src})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                        position: 'relative',
+                        flex: 1
                       }}>
-                        {translateSubcategory(category.name, subcat.name)}
-                      </Typography>
-                    </Box>
-                  </Box>
+                        <Box sx={{
+                          position: 'absolute',
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'rgba(255,255,255,0.82)',
+                          py: 1,
+                          px: 2,
+                          textAlign: 'center'
+                        }}>
+                          <Typography sx={{
+                            fontWeight: 700,
+                            fontSize: { xs: 14, sm: 16, md: 18 },
+                            color: '#222',
+                            textAlign: 'center',
+                            m: 0,
+                            p: 0
+                          }}>
+                            {translateSubcategory(category.name, subcat.name)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
                 );
               })}
             </Box>
@@ -669,16 +658,24 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
             },
             flexDirection: { xs: 'row', md: 'unset' },
             flexWrap: { xs: 'wrap', md: 'unset' },
-            justifyContent: { xs: 'center', md: 'unset' },
+            justifyContent: { xs: 'center', md: 'center' },
             gridTemplateColumns: {
-              md: 'repeat(auto-fit, minmax(280px, 280px))'
+              xs: 'repeat(2, 1fr)',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 280px)',
+              lg: 'repeat(4, 280px)'
             },
-            gap: '8px',
+            '@media (min-width:1400px)': {
+              gridTemplateColumns: 'repeat(5, 280px)',
+              maxWidth: 'calc(5 * 280px + 4 * 16px)'
+            },
+            gap: { xs: 1, sm: 1.5, md: 2 },
             mb: 6,
             width: '100%',
             maxWidth: { 
               xs: '100%', 
-              md: 'calc(5 * 280px + 4 * 8px)' 
+              md: 'calc(3 * 280px + 2 * 16px)',
+              lg: 'calc(4 * 280px + 3 * 16px)'
             },
             mx: 'auto',
             px: 0

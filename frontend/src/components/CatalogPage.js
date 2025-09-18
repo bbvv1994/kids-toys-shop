@@ -434,9 +434,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
 
   return (
     <Box sx={{ position: 'relative' }}>
-      <Container maxWidth={false} sx={{ py: { xs: 2, md: 0.25 }, px: { xs: 2, md: 4 },
-        pl: { md: '270px' }
-      }}>
+      <Container maxWidth={false} sx={{ py: { xs: 2, md: 0.25 }, px: { xs: 2, md: 4 } }}>
         <Box sx={{ mb: 4, pt: { xs: 0, md: 0 } }}>
           <Typography variant="h2" sx={{ 
             textAlign: 'center', 
@@ -457,10 +455,15 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
           {/* Плитки категорий каталога */}
           <Box sx={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(285px, 285px))',
-            gap: 3,
+            gridTemplateColumns: {
+              xs: 'repeat(2, 1fr)', // 2 cards per row on mobile
+              sm: 'repeat(3, 1fr)', // 3 cards per row on small screens
+              md: 'repeat(5, 1fr)', // 5 cards per row on desktop
+              lg: 'repeat(5, 1fr)'  // 5 cards per row on large screens
+            },
+            gap: { xs: 1, sm: 1.5, md: 2 },
             justifyContent: 'center',
-            mx: 'auto',
+            mx: { xs: 2, sm: 3, md: 4 },
           }}>
             {catalogCategories.map((cat, index) => {
               return (
@@ -469,7 +472,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                   background: 'rgba(103, 126, 234, 0.05)',
                   border: '1px solid rgba(103, 126, 234, 0.1)',
                   cursor: 'pointer',
-                  height: '180px',
+                  height: { xs: '120px', sm: '140px', md: '160px' },
                   display: 'flex',
                   flexDirection: 'column',
                   '&:hover': {
@@ -525,7 +528,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                 }}>
                   <Typography sx={{
                     fontWeight: 700,
-                    fontSize: 18,
+                    fontSize: { xs: 14, sm: 16, md: 18 }, // smaller font on mobile
                     color: '#222',
                     textAlign: 'center',
                     m: 0,
@@ -652,17 +655,28 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
               },
               flexDirection: { xs: 'row', md: 'unset' },
               flexWrap: { xs: 'wrap', md: 'unset' },
-              justifyContent: { xs: 'center', md: 'unset' },
+              justifyContent: { xs: 'center', md: 'center' },
               gridTemplateColumns: {
-                md: 'repeat(auto-fit, minmax(280px, 280px))'
+                xs: 'repeat(2, 1fr)', // 2 cards per row on mobile
+                sm: 'repeat(2, 1fr)', // 2 cards per row on small screens (до 900px)
+                md: 'repeat(3, 280px)', // 3 standard columns on ≥900px
+                lg: 'repeat(4, 280px)' // 4 standard columns on ≥1200px
               },
-              gap: '4px',
+              '@media (min-width:1400px)': {
+                gridTemplateColumns: 'repeat(5, 280px)',
+                maxWidth: 'calc(5 * 280px + 4 * 16px)'
+              },
+              gap: { xs: 1, sm: 1.5, md: 2 },
               mt: 0.5,
               mb: 6,
               width: '100%',
               maxWidth: {
                 xs: '100%',
-                md: 'calc(5 * 280px + 4 * 8px)'
+                md: 'calc(3 * 280px + 2 * 16px)',
+                lg: 'calc(4 * 280px + 3 * 16px)'
+              },
+              '@media (min-width:1450px)': {
+                maxWidth: 'calc(5 * 280px + 4 * 16px)'
               },
               mx: 'auto',
               px: 0

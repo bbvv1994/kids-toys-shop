@@ -4,7 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
 import { useDeviceType } from '../utils/deviceDetection';
-import { Box, Button, Typography, Container, Modal, Rating, TextField, Chip, IconButton, Breadcrumbs } from '@mui/material';
+import { Box, Button, Typography, Container, Modal, Rating, TextField, Chip, IconButton, Breadcrumbs, useMediaQuery, useTheme } from '@mui/material';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import Favorite from '@mui/icons-material/Favorite';
 import ProductCard from './ProductCard';
@@ -35,6 +35,8 @@ const ageIcons = {
 export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuantity, onEditProduct, dbCategories, productId, wishlist, onWishlistToggle }) {
   const { t, i18n } = useTranslation();
   const isAdmin = user?.role === 'admin';
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md')); // до 900px
   
   // Функция для форматирования даты в зависимости от языка
   const formatDate = (dateString) => {
@@ -232,10 +234,13 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         brand: productBrand === currentBrand
       };
 
-      // Показываем только товары с минимум 4 совпадениями
-      // Обязательные: категория, подкатегория, пол, возраст (4 совпадения)
-      if (matches.category && matches.subcategory && matches.gender && matches.ageGroup) {
-        const matchCount = Object.values(matches).filter(Boolean).length;
+      // Базовое правило: совпадают категория и подкатегория + (пол ИЛИ возраст)
+      // Фоллбэк: если строгих совпадений мало, берём товары с >= 3 совпадениями
+      const matchCount = Object.values(matches).filter(Boolean).length;
+      if (
+        (matches.category && matches.subcategory && (matches.gender || matches.ageGroup)) ||
+        matchCount >= 3
+      ) {
         similarProducts.push({
           product,
           matchCount,
@@ -263,7 +268,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const { id } = useParams();
   const navigate = useNavigate();
   const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
   
   // Функция для принудительного обновления данных товара
   const refreshProductData = async () => {
@@ -419,7 +424,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   // Определяем размер экрана при загрузке
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsDesktop(window.innerWidth >= 768);
+      setIsDesktop(window.innerWidth >= 900); // Изменено с 768 на 900
     };
     
     checkScreenSize();
@@ -427,6 +432,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
+
+  // Синхронизируем isDesktop с isSmallScreen
+  useEffect(() => {
+    setIsDesktop(!isSmallScreen);
+  }, [isSmallScreen]);
 
   // Отладочная информация для отслеживания изменений galleryIndex
   useEffect(() => {
@@ -656,7 +666,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             return randomA - randomB;
           });
           
-          setSimilarProducts(shuffled.slice(0, 4));
+          setSimilarProducts(shuffled.slice(0, 8));
         })
         .catch(error => {
           console.error('Error loading similar products:', error);
@@ -1594,7 +1604,10 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           alignItems: { md: 'flex-start' }
         }}>
           {/* Галерея фото */}
-          <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ 
+            flex: 1, 
+            minWidth: 0
+          }}>
             <Box sx={{ position: 'relative', mb: { xs: 1, md: 2 } }}>
               {(() => {
                 // Проверяем, есть ли у товара изображения
@@ -1610,39 +1623,37 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     const imageSrc = getImageUrl(realImages[galleryIndex]);
                     
                     return (
-                                             <Box 
-                         className="main-product-image"
-                         sx={{ 
-                         width: '100%', 
-                         height: { xs: 280, sm: 320, md: 400 }, // Адаптивная высота для мобильных
-                         maxWidth: 550,
-                         background: { xs: 'white', md: '#f6f6f6' }, // Белый фон на мобильных, серый на десктопе
-                         overflow: scale > 1 ? 'visible' : 'hidden',
-                         cursor: 'pointer'
-                       }}
-                                             onClick={() => {
-                                               // На десктопе не открываем модальное окно вообще
-                                               if (isDesktop) {
-                                                 return;
-                                               }
-                                               // Открываем галерею с текущим выбранным изображением
-                                               openGalleryWithHd(galleryIndex);
-                                             }}
-                       onDoubleClick={handleMainImageDoubleClick}
-                       onTouchStart={handleMainImageTouchStart}
-                       onTouchMove={handleMainImageTouchMove}
-                       onTouchEnd={handleMainImageTouchEnd}
-
-                       onMouseMove={(e) => {
-                         handleMainImageMouseMove(e);
-                         handleDesktopZoomMouseMove(e);
-                       }}
-                       onMouseEnter={handleDesktopZoomMouseEnter}
-                       onMouseLeave={handleDesktopZoomMouseLeave}
-                       onMouseDown={handleMainImageMouseDown}
-                       onMouseUp={handleMainImageMouseUp}
-                       onKeyDown={handleGalleryKeyDown}
-                      tabIndex={0}
+                      <Box 
+                        className="main-product-image"
+                        sx={{ 
+                          width: '100%', 
+                          height: { xs: 280, sm: 320, md: 400 }, // Адаптивная высота для мобильных
+                          background: { xs: 'white', md: '#f6f6f6' }, // Белый фон на мобильных, серый на десктопе
+                          overflow: scale > 1 ? 'visible' : 'hidden',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => {
+                          // На десктопе не открываем модальное окно вообще
+                          if (isDesktop) {
+                            return;
+                          }
+                          // Открываем галерею с текущим выбранным изображением
+                          openGalleryWithHd(galleryIndex);
+                        }}
+                        onDoubleClick={handleMainImageDoubleClick}
+                        onTouchStart={handleMainImageTouchStart}
+                        onTouchMove={handleMainImageTouchMove}
+                        onTouchEnd={handleMainImageTouchEnd}
+                        onMouseMove={(e) => {
+                          handleMainImageMouseMove(e);
+                          handleDesktopZoomMouseMove(e);
+                        }}
+                        onMouseEnter={handleDesktopZoomMouseEnter}
+                        onMouseLeave={handleDesktopZoomMouseLeave}
+                        onMouseDown={handleMainImageMouseDown}
+                        onMouseUp={handleMainImageMouseUp}
+                        onKeyDown={handleGalleryKeyDown}
+                        tabIndex={0}
                       >
                         {/* Основное изображение товара - используем тот же принцип, что и в корзине */}
                         <Box sx={{
@@ -1866,7 +1877,14 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   const realImages = getRealImages();
                   if (realImages.length > 1) {
                     return (
-                      <Box sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        gap: 1, 
+                        mt: 2, 
+                        justifyContent: { xs: 'center', md: 'center' }, 
+                        flexWrap: 'wrap',
+                        alignItems: 'center'
+                      }}>
                         {realImages.map((url, idx) => (
                           <Box
                             key={idx}
@@ -2318,14 +2336,16 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
             }
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Rating value={review.rating} readOnly size="small" sx={{ color: '#FFD600' }} />
-              <Typography sx={{ ml: 2, fontWeight: 'bold', color: '#333' }}>
+            <Box sx={{ mb: 2 }}>
+              <Typography sx={{ fontWeight: 'bold', color: '#333', mb: 1 }}>
                 {review.user?.name || t('productPage.user')}
               </Typography>
-              <Typography sx={{ ml: 2, color: '#888', fontSize: '0.9rem' }}>
-                {formatDate(review.createdAt)}
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Rating value={review.rating} readOnly size="small" sx={{ color: '#FFD600' }} />
+                <Typography sx={{ color: '#888', fontSize: '0.9rem' }}>
+                  {formatDate(review.createdAt)}
+                </Typography>
+              </Box>
             </Box>
             <Typography sx={{ 
               color: '#555', 
@@ -2726,21 +2746,36 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         <Box sx={{ mt: 5 }}>
           <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>Похожие товары</Typography>
           <Box sx={{
-            display: 'grid',
-            gridTemplateColumns: { 
-              xs: 'repeat(2, 1fr)', 
-              sm: 'repeat(2, 1fr)', 
-              md: 'repeat(3, 1fr)', 
-              lg: 'repeat(4, 1fr)' 
+            display: {
+              xs: 'flex',
+              md: 'grid'
             },
-            gap: { xs: 1, sm: 2, md: 2, lg: 2 },
-            pb: 1,
+            flexDirection: { xs: 'row', md: 'unset' },
+            flexWrap: { xs: 'wrap', md: 'unset' },
+            justifyContent: { xs: 'center', md: 'center' },
+            gridTemplateColumns: {
+              xs: 'repeat(2, 1fr)',
+              sm: 'repeat(2, 1fr)', 
+              md: 'repeat(3, 280px)',
+              lg: 'repeat(4, 280px)'
+            },
+            '@media (min-width:1400px)': {
+              gridTemplateColumns: 'repeat(5, 280px)',
+              maxWidth: 'calc(5 * 280px + 4 * 16px)'
+            },
+            gap: { xs: 1, sm: 1.5, md: 2 },
+            mb: 6,
             width: '100%',
-            px: { xs: 2, sm: 3, md: 4, lg: 4 },
-            justifyContent: 'center'
+            maxWidth: { 
+              xs: '100%', 
+              md: 'calc(3 * 280px + 2 * 16px)',
+              lg: 'calc(4 * 280px + 3 * 16px)'
+            },
+            mx: 'auto',
+            px: 0
           }}>
             {similarProducts.map(similar => (
-              <Box key={similar.id} sx={{ width: '100%' }}>
+              <Box key={similar.id}>
                 <ProductCard
                   product={similar}
                   user={user}
@@ -2749,7 +2784,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   inWishlist={wishlist.includes(Number(similar.id))}
                   onWishlistToggle={() => onWishlistToggle(similar.id, wishlist.includes(Number(similar.id)))}
                   onClick={() => navigate(`/product/${similar.id}`)}
-                  viewMode={isMobile ? "carousel-mobile" : "similar"} // Используем carousel-mobile для мобильной версии
+                  viewMode={isMobile ? "carousel-mobile" : "grid"}
                   isAdmin={isAdmin}
                   onChangeCartQuantity={handleChangeCartQuantity}
                 />

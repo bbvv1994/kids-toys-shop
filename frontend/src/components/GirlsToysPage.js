@@ -8,7 +8,9 @@ import {
   Alert,
   IconButton,
   CircularProgress,
-  Breadcrumbs
+  Breadcrumbs,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { 
   Girl,
@@ -45,8 +47,8 @@ export default function GirlsToysPage({
   
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const deviceType = useDeviceType();
-  const isMobile = deviceType === 'mobile';
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
 
      // Фильтрация продуктов: категория "Игрушки" И пол "для девочек"
    const girlsProducts = useMemo(() => {
@@ -419,15 +421,23 @@ export default function GirlsToysPage({
               },
               flexDirection: { xs: 'row', md: 'unset' },
               flexWrap: { xs: 'wrap', md: 'unset' },
-              justifyContent: { xs: 'center', md: 'unset' },
+              justifyContent: { xs: 'center', md: 'center' },
               gridTemplateColumns: {
-                md: 'repeat(auto-fit, minmax(280px, 280px))'
+                xs: 'repeat(2, 1fr)',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 280px)',
+                lg: 'repeat(4, 280px)'
               },
-              gap: '8px',
+              '@media (min-width:1400px)': {
+                gridTemplateColumns: 'repeat(5, 280px)',
+                maxWidth: 'calc(5 * 280px + 4 * 16px)'
+              },
+              gap: { xs: 1, sm: 1.5, md: 2 },
               width: '100%',
               maxWidth: { 
                 xs: '100%', 
-                md: 'calc(5 * 280px + 4 * 8px)' 
+                md: 'calc(3 * 280px + 2 * 16px)',
+                lg: 'calc(4 * 280px + 3 * 16px)'
               },
               mx: 'auto',
               mt: 2,

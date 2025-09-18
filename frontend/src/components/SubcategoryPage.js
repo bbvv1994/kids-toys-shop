@@ -35,7 +35,9 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Breadcrumbs
+  Breadcrumbs,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { 
   Search as SearchIcon,
@@ -103,7 +105,8 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
     const [interimTranscript, setInterimTranscript] = useState('');
     const recognitionRef = useRef(null);
     const deviceType = useDeviceType();
-    const isMobile = deviceType === 'mobile';
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
   
     // Загрузка подкатегории и товаров
     useEffect(() => {
@@ -515,21 +518,27 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
             },
             flexDirection: { xs: 'row', md: 'unset' },
             flexWrap: { xs: 'wrap', md: 'unset' },
-            justifyContent: { xs: 'center', md: 'unset' },
+            justifyContent: { xs: 'center', md: 'center' },
             gridTemplateColumns: {
-              md: 'repeat(auto-fit, minmax(280px, 280px))'
+              xs: 'repeat(2, 1fr)',
+              sm: 'repeat(2, 1fr)', 
+              md: 'repeat(3, 280px)',
+              lg: 'repeat(4, 280px)'
             },
-            gap: '8px',
+            '@media (min-width:1400px)': {
+              gridTemplateColumns: 'repeat(5, 280px)',
+              maxWidth: 'calc(5 * 280px + 4 * 16px)'
+            },
+            gap: { xs: 1, sm: 1.5, md: 2 },
             mb: 6,
             width: '100%',
             maxWidth: { 
               xs: '100%', 
-              md: 'calc(4 * 280px + 3 * 8px)' 
+              md: 'calc(3 * 280px + 2 * 16px)',
+              lg: 'calc(4 * 280px + 3 * 16px)'
             },
-            mx: { xs: 0, md: 0 },
-            px: 0,
-            // desktop alignment: center 3-cols region (≤1535px); 4-cols (≥1536px) left-align with indent
-            ml: { xs: 0, lg: 'calc(280px + (100% - 280px - 903px)/2)', xl: '280px' }
+            mx: 'auto',
+            px: 0
           }}>
             {filteredProducts.length > 0 ? (
               filteredProducts.map(product => (
