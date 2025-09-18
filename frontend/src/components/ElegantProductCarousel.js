@@ -85,7 +85,7 @@ function ElegantProductCarousel({
         ml: { xs: 0, lg: '260px' },
         width: { xs: '100%', lg: 'calc(100vw - 289px)' },
         position: 'relative',
-        px: { xs: 1, md: 4 } // Минимальные отступы по бокам на мобильных
+        px: { xs: 2, sm: 3, md: 4 } // Равномерные отступы по бокам
       }}
     >
       {/* Заголовок секции */}
@@ -119,14 +119,14 @@ function ElegantProductCarousel({
             display: 'flex',
             gap: isMobile ? 0.5 : 2, // 4px отступ на мобильных, 16px на остальных
             width: 'max-content', // Ширина по содержимому
-            justifyContent: isMobile ? 'flex-start' : 'center', // Выравнивание по левому краю на мобильных
+            justifyContent: 'center', // Центрирование на всех устройствах
           }}
         >
           {items.slice(currentIndex * visibleCount, (currentIndex + 1) * visibleCount).map((product, i) => (
             <Box
               key={product.id}
               sx={{
-                width: isMobile ? '50%' : '280px',
+                width: isMobile ? '167px' : '280px',
                 flexShrink: 0,
                 display: 'flex',
                 justifyContent: 'center'
