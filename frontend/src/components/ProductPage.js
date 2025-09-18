@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL, getImageUrl, getHdImageUrl } from '../config';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -302,6 +302,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [wishlistAnimPlaying, setWishlistAnimPlaying] = useState(false);
   const [wishlistAnimKey, setWishlistAnimKey] = useState(0); // eslint-disable-line no-unused-vars
 
+  // Ref для галереи для правильной регистрации touch событий
+  const galleryRef = useRef(null);
+
   // Состояния для вопросов о товарах
   const [questions, setQuestions] = useState([]);
   const [questionText, setQuestionText] = useState('');
@@ -446,6 +449,37 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     // Сбрасываем экранную лупу при смене изображения
     setIsDesktopZoomActive(false);
   }, [galleryIndex]);
+
+  // Регистрация touch обработчиков для галереи с правильными опциями
+  useEffect(() => {
+    const galleryElement = galleryRef.current;
+    if (!galleryElement) return;
+
+    const handleTouchStart = (e) => {
+      e.preventDefault();
+      onGalleryTouchStart(e);
+    };
+
+    const handleTouchMove = (e) => {
+      e.preventDefault();
+      onGalleryTouchMove(e);
+    };
+
+    const handleTouchEnd = (e) => {
+      onGalleryTouchEnd(e);
+    };
+
+    // Регистрируем обработчики с passive: false
+    galleryElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+    galleryElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+    galleryElement.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      galleryElement.removeEventListener('touchstart', handleTouchStart);
+      galleryElement.removeEventListener('touchmove', handleTouchMove);
+      galleryElement.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [galleryOpen, isSwiping, modalScale, touchStart, touchStartY, initialDistance, initialScale]);
 
   // Блокировка скролла страницы при открытии галереи
   useEffect(() => {
@@ -644,8 +678,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   // wishlist теперь управляется из AppContent через ProductsContext
 
   useEffect(() => {
-    if (product && product.category) {
-      const categoryName = typeof product.category === 'string' ? product.category : (product.category?.name || t('productPage.noCategory'));
+          if (product && product.category) {
+        const categoryName = typeof product.category === 'string' ? product.category : (product.category?.name || t('productPage.noCategory'));
       
       // Загружаем все товары для умного подбора
       fetch(`${API_BASE_URL}/api/products`)
@@ -1623,37 +1657,37 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     const imageSrc = getImageUrl(realImages[galleryIndex]);
                     
                     return (
-                      <Box 
-                        className="main-product-image"
-                        sx={{ 
-                          width: '100%', 
-                          height: { xs: 280, sm: 320, md: 400 }, // Адаптивная высота для мобильных
-                          background: { xs: 'white', md: '#f6f6f6' }, // Белый фон на мобильных, серый на десктопе
-                          overflow: scale > 1 ? 'visible' : 'hidden',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => {
-                          // На десктопе не открываем модальное окно вообще
-                          if (isDesktop) {
-                            return;
-                          }
-                          // Открываем галерею с текущим выбранным изображением
-                          openGalleryWithHd(galleryIndex);
-                        }}
-                        onDoubleClick={handleMainImageDoubleClick}
-                        onTouchStart={handleMainImageTouchStart}
-                        onTouchMove={handleMainImageTouchMove}
-                        onTouchEnd={handleMainImageTouchEnd}
-                        onMouseMove={(e) => {
-                          handleMainImageMouseMove(e);
-                          handleDesktopZoomMouseMove(e);
-                        }}
-                        onMouseEnter={handleDesktopZoomMouseEnter}
-                        onMouseLeave={handleDesktopZoomMouseLeave}
-                        onMouseDown={handleMainImageMouseDown}
-                        onMouseUp={handleMainImageMouseUp}
-                        onKeyDown={handleGalleryKeyDown}
-                        tabIndex={0}
+                                             <Box 
+                         className="main-product-image"
+                         sx={{ 
+                         width: '100%', 
+                         height: { xs: 280, sm: 320, md: 400 }, // Адаптивная высота для мобильных
+                         background: { xs: 'white', md: '#f6f6f6' }, // Белый фон на мобильных, серый на десктопе
+                         overflow: scale > 1 ? 'visible' : 'hidden',
+                         cursor: 'pointer'
+                       }}
+                                             onClick={() => {
+                                               // На десктопе не открываем модальное окно вообще
+                                               if (isDesktop) {
+                                                 return;
+                                               }
+                                               // Открываем галерею с текущим выбранным изображением
+                                               openGalleryWithHd(galleryIndex);
+                                             }}
+                       onDoubleClick={handleMainImageDoubleClick}
+                       onTouchStart={handleMainImageTouchStart}
+                       onTouchMove={handleMainImageTouchMove}
+                       onTouchEnd={handleMainImageTouchEnd}
+                       onMouseMove={(e) => {
+                         handleMainImageMouseMove(e);
+                         handleDesktopZoomMouseMove(e);
+                       }}
+                       onMouseEnter={handleDesktopZoomMouseEnter}
+                       onMouseLeave={handleDesktopZoomMouseLeave}
+                       onMouseDown={handleMainImageMouseDown}
+                       onMouseUp={handleMainImageMouseUp}
+                       onKeyDown={handleGalleryKeyDown}
+                      tabIndex={0}
                       >
                         {/* Основное изображение товара - используем тот же принцип, что и в корзине */}
                         <Box sx={{
@@ -2344,7 +2378,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 <Rating value={review.rating} readOnly size="small" sx={{ color: '#FFD600' }} />
                 <Typography sx={{ color: '#888', fontSize: '0.9rem' }}>
                   {formatDate(review.createdAt)}
-                </Typography>
+              </Typography>
               </Box>
             </Box>
             <Typography sx={{ 
@@ -2605,9 +2639,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 handleCloseGallery();
               }
             }}
-            onTouchStart={onGalleryTouchStart}
-            onTouchMove={onGalleryTouchMove}
-            onTouchEnd={onGalleryTouchEnd}
+            ref={galleryRef}
           >
             {(() => {
               const realImages = getRealImages();
@@ -2648,9 +2680,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                         onMouseDown={handleMouseDown}
                         onMouseUp={handleMouseUp}
                         onWheel={handleWheel}
-                        onTouchStart={onGalleryTouchStart}
-                        onTouchMove={onGalleryTouchMove}
-                        onTouchEnd={onGalleryTouchEnd}
                       >
                         <Box sx={{
                           width: '100%',
