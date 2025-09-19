@@ -3279,17 +3279,17 @@ function AppContent({
             boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
           }}>
             <Typography variant="h4" sx={{ color: '#f44336', mb: 2 }}>
-              😵 Произошла ошибка
+              {t('common.errorOccurred')}
             </Typography>
             <Typography variant="body1" sx={{ mb: 3, color: '#666' }}>
-              Что-то пошло не так. Попробуйте обновить страницу.
+              {t('common.somethingWentWrong')}
             </Typography>
             <Button 
               variant="contained" 
               onClick={() => window.location.reload()}
               sx={{ background: '#4CAF50' }}
             >
-              רענן דף
+              {t('common.refreshPage')}
             </Button>
           </Box>
         </Box>

@@ -157,6 +157,16 @@ html::-webkit-scrollbar-thumb:hover {
   padding: 0 16px;
 }
 
+.products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0 16px;
+}
+
 
 
 

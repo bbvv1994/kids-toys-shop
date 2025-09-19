@@ -799,54 +799,22 @@ const ageIcons = {
           borderRadius: isMobile ? '6px 6px 0 0' : 0, 
           overflow: 'hidden', 
           background: '#f5f5f5', 
-          display: 'flex', 
-          alignItems: 'stretch', 
-          justifyContent: 'center', 
-          m: 0, 
-          p: 0, 
-          pointerEvents: 'none' 
-        }}>
-          {(() => {
+          backgroundImage: `url(${(() => {
             const imgSrc = getImageUrl(
               (Array.isArray(product.imageUrls) && product.imageUrls.length > 0 && product.imageUrls[0]) ||
               (Array.isArray(product.images) && product.images.length > 0 && product.images[0]) ||
               product.image ||
               ''
             );
-            if (!imgSrc || imgError) {
-              return (
-                <LazyImage
-                  src="/photography.jpg"
-                  alt={t('productCard.noPhoto')}
-                  width="100%"
-                  height="100%"
-                  sx={{
-                    borderRadius: 0,
-                    minWidth: '100%',
-                    minHeight: '100%',
-                    maxWidth: '100%',
-                    maxHeight: '100%'
-                  }}
-                />
-              );
-            }
-            return (
-              <LazyImage
-                src={imgSrc}
-                alt={getTranslatedName(product)}
-                width="100%"
-                height="100%"
-                sx={{
-                  borderRadius: 0,
-                  padding: 0,
-                  margin: 0,
-                  display: 'block',
-                  pointerEvents: 'none'
-                }}
-                onError={() => setImgError(true)}
-              />
-            );
-          })()}
+            return imgSrc && !imgError ? imgSrc : '/photography.jpg';
+          })()})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          m: 0, 
+          p: 0, 
+          pointerEvents: 'none' 
+        }}>
         </Box>
         {/* Значок избранного в правом верхнем углу всей карточки */}
         {(user && onWishlistToggle) && (

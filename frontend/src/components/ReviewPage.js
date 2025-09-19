@@ -205,7 +205,7 @@ const ReviewPage = () => {
         setError(errorData.error || t('reviews.form.submitError'));
       }
     } catch (err) {
-      setError('Произошла ошибка сети или сервера');
+      setError(t('common.somethingWentWrong'));
     } finally {
       setLoading(false);
     }
@@ -301,7 +301,7 @@ const ReviewPage = () => {
         setError(errorData.error || t('reviews.form.submitError'));
       }
     } catch (err) {
-      setError('Произошла ошибка сети или сервера');
+      setError(t('common.somethingWentWrong'));
     } finally {
       setLoading(false);
     }

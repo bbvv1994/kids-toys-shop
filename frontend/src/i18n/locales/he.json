@@ -27,6 +27,9 @@
     "loginRequired": "התחבר כדי להשתמש בתכונה זו!",
     "selectAgeGroup": "בחר קבוצת גיל",
     "selectGender": "בחר מגדר",
+    "errorOccurred": "😵 אירעה שגיאה",
+    "somethingWentWrong": "משהו השתבש. נסה לרענן את הדף.",
+    "refreshPage": "רענן דף",
     "validation": {
       "required": "אנא מלא שדה זה",
       "email": "אנא הזן כתובת אימייל תקינה",
