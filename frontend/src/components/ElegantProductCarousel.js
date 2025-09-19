@@ -26,14 +26,14 @@ function ElegantProductCarousel({
   const isLarge = useMediaQuery('(min-width: 1500px)');
 
   // Количество видимых товаров на разных экранах
-  const visibleCount = isMobile ? 2 : isTablet ? 2 : isLarge ? 4 : 3;
+  const visibleCount = isMobile ? 2 : isTablet ? 4 : isLarge ? 4 : 3;
   const items = products || [];
   const totalPages = Math.max(1, Math.ceil(items.length / visibleCount));
 
   // Адаптивные размеры контейнера
   const getContainerMaxWidth = () => {
     if (isMobile) return 'calc(2 * 167px + 4px)'; // 2 карточки по 167px + 4px отступ
-    if (isTablet) return 'calc(2 * 280px + 16px)'; // 2 карточки + 1 отступ
+    if (isTablet) return 'calc(4 * 167px + 12px)'; // 4 карточки по 167px + 12px отступы
     if (isLarge) return 'calc(4 * 280px + 3 * 16px)'; // 4 карточки + 3 отступа
     return 'calc(3 * 280px + 2 * 16px)'; // 3 карточки + 2 отступа (по умолчанию для средних экранов)
   };
@@ -126,7 +126,7 @@ function ElegantProductCarousel({
             <Box
               key={product.id}
               sx={{
-                width: isMobile ? '167px' : '280px',
+                width: (isMobile || isTablet) ? '167px' : '280px',
                 flexShrink: 0,
                 display: 'flex',
                 justifyContent: 'center'
@@ -141,7 +141,7 @@ function ElegantProductCarousel({
                 cart={cart}
                 onChangeCartQuantity={onChangeCartQuantity}
                 onEditProduct={onEditProduct}
-                viewMode={isMobile ? "carousel-mobile" : "carousel"}
+                viewMode={(isMobile || isTablet) ? "carousel-mobile" : "carousel"}
                 isAdmin={isAdmin}
               />
             </Box>
