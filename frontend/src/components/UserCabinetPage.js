@@ -2797,10 +2797,6 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
                       md: 'repeat(3, 280px)',
                       lg: 'repeat(4, 280px)'
                     },
-                    '@media (min-width:1400px)': {
-                      gridTemplateColumns: 'repeat(5, 280px)',
-                      maxWidth: 'calc(5 * 280px + 4 * 16px)'
-                    },
                     gap: { xs: 1, sm: 1.5, md: 2 },
                     mb: 6,
                     width: '100%',
@@ -2916,10 +2912,6 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
                       sm: 'repeat(2, 1fr)',
                       md: 'repeat(3, 280px)',
                       lg: 'repeat(4, 280px)'
-                    },
-                    '@media (min-width:1400px)': {
-                      gridTemplateColumns: 'repeat(5, 280px)',
-                      maxWidth: 'calc(5 * 280px + 4 * 16px)'
                     },
                     gap: { xs: 1, sm: 1.5, md: 2 },
                     mb: 6,

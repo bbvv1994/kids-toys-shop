@@ -282,6 +282,11 @@ const corsOptions = {
       'http://91.99.85.48',
       'http://91.99.85.48:80',
       'http://91.99.85.48:3000',
+      // Продакшен домен
+      'https://simba-tzatzuim.co.il',
+      'https://www.simba-tzatzuim.co.il',
+      'http://simba-tzatzuim.co.il',
+      'http://www.simba-tzatzuim.co.il',
     ];
     
     // Проверяем точное совпадение
@@ -365,6 +370,121 @@ app.use((err, req, res, next) => {
     message: err.message,
     timestamp: new Date().toISOString()
   });
+});
+
+// --- SEO: sitemap.xml ---
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    const baseUrl = 'https://simba-tzatzuim.co.il';
+
+    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+
+    // Add static pages
+    sitemap += `
+  <url>
+    <loc>${baseUrl}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/catalog</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/contacts</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/privacy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/terms</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/questions</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/reviews</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+
+    try {
+      // Add categories
+      const categories = await prisma.category.findMany({
+        where: { isActive: true },
+        select: { id: true, updatedAt: true }
+      });
+      categories.forEach(category => {
+        const lastMod = category.updatedAt ? new Date(category.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        sitemap += `
+  <url>
+    <loc>${baseUrl}/category/${category.id}</loc>
+    <lastmod>${lastMod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+      });
+
+      // Add subcategories
+      const subcategories = await prisma.subcategory.findMany({
+        where: { isActive: true },
+        select: { id: true, updatedAt: true }
+      });
+      subcategories.forEach(subcategory => {
+        const lastMod = subcategory.updatedAt ? new Date(subcategory.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        sitemap += `
+  <url>
+    <loc>${baseUrl}/subcategory/${subcategory.id}</loc>
+    <lastmod>${lastMod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+      });
+
+      // Add products
+      const products = await prisma.product.findMany({
+        where: { isActive: true },
+        select: { id: true, updatedAt: true }
+      });
+      products.forEach(product => {
+        const lastMod = product.updatedAt ? new Date(product.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        sitemap += `
+  <url>
+    <loc>${baseUrl}/product/${product.id}</loc>
+    <lastmod>${lastMod}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>`;
+      });
+    } catch (dbError) {
+      console.error('Database error in sitemap generation:', dbError);
+      // Continue with static sitemap if DB fails
+    }
+
+    sitemap += `
+</urlset>`;
+
+    res.send(sitemap);
+  } catch (e) {
+    console.error('sitemap.xml error:', e);
+    res.status(500).send('Error generating sitemap');
+  }
 });
 // Логирование для диагностики статических файлов
 const uploadsPath = path.join(__dirname, '..', '..', 'backend', 'uploads');
@@ -4889,60 +5009,6 @@ app.post('/api/admin/fix-category-images', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error fixing category images:', error);
     res.status(500).json({ error: 'Ошибка исправления изображений категорий' });
-  }
-});
-
-// === Получить избранное пользователя ===
-app.get('/api/profile/wishlist', authMiddleware, async (req, res) => {
-  try {
-    let wishlist = await prisma.wishlist.findUnique({
-      where: { userId: req.user.userId },
-      include: { items: { include: { product: true } } }
-    });
-    if (!wishlist) {
-      wishlist = await prisma.wishlist.create({ data: { userId: req.user.userId } });
-      wishlist.items = [];
-    }
-    res.json(wishlist);
-  } catch (error) {
-    console.error('Wishlist fetch error:', error);
-    res.status(500).json({ error: 'Ошибка получения избранного' });
-  }
-});
-
-// === Добавить товар в избранное ===
-app.post('/api/profile/wishlist/add', authMiddleware, async (req, res) => {
-  try {
-    const { productId } = req.body;
-    if (!productId) return res.status(400).json({ error: 'productId обязателен' });
-    let wishlist = await prisma.wishlist.findUnique({ where: { userId: req.user.userId } });
-    if (!wishlist) {
-      wishlist = await prisma.wishlist.create({ data: { userId: req.user.userId } });
-    }
-    const existing = await prisma.wishlistItem.findFirst({ where: { wishlistId: wishlist.id, productId } });
-    if (existing) return res.status(400).json({ error: 'Товар уже в избранном' });
-    await prisma.wishlistItem.create({ data: { wishlistId: wishlist.id, productId } });
-    const updated = await prisma.wishlist.findUnique({ where: { id: wishlist.id }, include: { items: { include: { product: true } } } });
-    res.json(updated);
-  } catch (error) {
-    console.error('Wishlist add error:', error);
-    res.status(500).json({ error: 'Ошибка добавления в избранное' });
-  }
-});
-
-// === Удалить товар из избранного ===
-app.post('/api/profile/wishlist/remove', authMiddleware, async (req, res) => {
-  try {
-    const { productId } = req.body;
-    if (!productId) return res.status(400).json({ error: 'productId обязателен' });
-    let wishlist = await prisma.wishlist.findUnique({ where: { userId: req.user.userId } });
-    if (!wishlist) return res.status(404).json({ error: 'Избранное не найдено' });
-    await prisma.wishlistItem.deleteMany({ where: { wishlistId: wishlist.id, productId } });
-    const updated = await prisma.wishlist.findUnique({ where: { id: wishlist.id }, include: { items: { include: { product: true } } } });
-    res.json(updated);
-  } catch (error) {
-    console.error('Wishlist remove error:', error);
-    res.status(500).json({ error: 'Ошибка удаления из избранного' });
   }
 });
 

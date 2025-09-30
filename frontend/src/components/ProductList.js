@@ -98,18 +98,25 @@ function ProductList({ products, onProductDeleted, onRefresh, user, onProductCli
     setTimeout(() => {
       setLottiePlayingMap(prev => ({ ...prev, [productId]: false }));
     }, 1200);
-    if (isInWishlist) {
-      await fetch(`${API_BASE_URL}/api/profile/wishlist/remove`, {
+    
+    try {
+      const endpoint = isInWishlist ? 'remove' : 'add';
+      const response = await fetch(`${API_BASE_URL}/api/profile/wishlist/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
         body: JSON.stringify({ productId })
       });
-    } else {
-      await fetch(`${API_BASE_URL}/api/profile/wishlist/add`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
-        body: JSON.stringify({ productId })
-      });
+      
+      // Если токен истек, выходим из системы
+      if (response.status === 401) {
+        console.log('🔐 Token expired, logging out');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.reload();
+        return;
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
     }
   };
 

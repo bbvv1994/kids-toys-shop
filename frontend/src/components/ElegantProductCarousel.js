@@ -32,10 +32,10 @@ function ElegantProductCarousel({
 
   // Адаптивные размеры контейнера
   const getContainerMaxWidth = () => {
-    if (isMobile) return 'calc(2 * 167px + 4px)'; // 2 карточки по 167px + 4px отступ
-    if (isTablet) return 'calc(4 * 167px + 12px)'; // 4 карточки по 167px + 12px отступы
-    if (isLarge) return 'calc(4 * 280px + 3 * 16px)'; // 4 карточки + 3 отступа
-    return 'calc(3 * 280px + 2 * 16px)'; // 3 карточки + 2 отступа (по умолчанию для средних экранов)
+    if (isMobile) return '100%'; // Полная ширина на мобильных (как в каталоге)
+    if (isTablet) return '100%'; // Полная ширина на планшетах
+    if (isLarge) return 'calc(2 * 280px + 16px)'; // 2 карточки по 280px + 16px отступ
+    return 'calc(2 * 280px + 16px)'; // 2 карточки по 280px + 16px отступ
   };
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -116,17 +116,24 @@ function ElegantProductCarousel({
         {/* Слайды */}
         <Box
           sx={{
-            display: 'flex',
-            gap: isMobile ? 0.5 : 2, // 4px отступ на мобильных, 16px на остальных
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: 'repeat(2, 1fr)', // 2 карточки на мобильных как в каталоге
+              sm: 'repeat(2, 1fr)', // 2 карточки на маленьких экранах
+              md: 'repeat(2, 280px)', // 2 карточки по 280px на средних и больших
+              lg: 'repeat(2, 280px)' // 2 карточки по 280px на больших
+            },
+            gap: { xs: 1, sm: 1.5, md: 2 }, // Точно как в каталоге: 8px, 12px, 16px
             width: 'max-content', // Ширина по содержимому
-            justifyContent: 'center', // Центрирование на всех устройствах
+            justifyContent: 'center', // Центрирование
+            mx: 'auto', // Автоматические отступы для центрирования
           }}
         >
           {items.slice(currentIndex * visibleCount, (currentIndex + 1) * visibleCount).map((product, i) => (
             <Box
               key={product.id}
               sx={{
-                width: (isMobile || isTablet) ? '167px' : '280px',
+                width: '100%', // Полная ширина в grid (как в каталоге)
                 flexShrink: 0,
                 display: 'flex',
                 justifyContent: 'center'

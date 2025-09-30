@@ -23,7 +23,7 @@ const initializeI18n = async () => {
       .use(initReactI18next)
       .init({
         resources,
-        fallbackLng: 'ru',
+        fallbackLng: 'he',
         debug: process.env.NODE_ENV === 'development',
         
         interpolation: {
@@ -54,7 +54,7 @@ const initializeI18n = async () => {
     
     // Принудительно устанавливаем язык если он не определен
     if (!i18n.language || !i18n.language.match(/^(ru|he)$/)) {
-      i18n.changeLanguage('ru');
+      i18n.changeLanguage('he');
     }
     
     // Оптимизация: убираем console.log в продакшене для улучшения производительности
@@ -63,8 +63,8 @@ const initializeI18n = async () => {
     // Fallback инициализация
     i18n.init({
       resources,
-      fallbackLng: 'ru',
-      lng: 'ru',
+      fallbackLng: 'he',
+      lng: 'he',
       debug: false,
       interpolation: { escapeValue: false },
     });

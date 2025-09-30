@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
@@ -82,7 +83,7 @@ import {
   NavigateNext,
   Home
 } from '@mui/icons-material';
-import { API_BASE_URL, getImageUrl } from '../config';
+import { API_BASE_URL, FRONTEND_URL, getImageUrl } from '../config';
 import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
 import { getSpeechRecognitionLanguage, getSpeechRecognitionErrorMessage, isSpeechRecognitionSupported } from '../utils/speechRecognitionUtils';
 import { useDeviceType } from '../utils/deviceDetection';
@@ -243,15 +244,73 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
       return true;
     });
   
-    if (loading) {
-      return (
-        <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
-          <Box sx={{ mb: 4, pt: { xs: 8, md: 10 }, textAlign: 'center' }}>
-            <Typography variant="h4">Загрузка...</Typography>
-          </Box>
-        </Container>
-      );
+  const canonicalUrl = `${FRONTEND_URL || ''}/subcategory/${id}`;
+  const subcategoryTitle = subcategory ? `${subcategory.name} – סימבה מלך הצעצועים` : 'סימבה מלך הצעצועים';
+  const subcategoryDescription = subcategory ? `${subcategory.name} – מבחר גדול בישראל` : 'חנות צעצועים לילדים בישראל – מגוון ענק במחירים נוחים';
+
+  const subcategoryJsonLd = subcategory ? {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: subcategory.name,
+    description: subcategoryDescription,
+    url: canonicalUrl,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: products.length,
+      itemListElement: products.slice(0, 10).map((product, index) => ({
+        '@type': 'Product',
+        position: index + 1,
+        name: product.nameHe || product.name,
+        url: `${FRONTEND_URL || ''}/product/${product.id}`,
+        image: getImageUrl(product.mainImage || product.image)
+      }))
     }
+  } : null;
+
+  const breadcrumbJsonLd = subcategory ? {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Главная',
+        item: `${FRONTEND_URL || ''}/`
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Каталог',
+        item: `${FRONTEND_URL || ''}/catalog`
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: subcategory.name,
+        item: canonicalUrl
+      }
+    ]
+  } : null;
+
+  if (loading) {
+    return (
+      <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
+        <Helmet>
+          <html lang="he" />
+          <title>{subcategoryTitle}</title>
+          <meta name="description" content={subcategoryDescription} />
+          <link rel="canonical" href={canonicalUrl} />
+          <meta property="og:locale" content="he_IL" />
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content={subcategoryTitle} />
+          <meta property="og:description" content={subcategoryDescription} />
+        </Helmet>
+        <Box sx={{ mb: 4, pt: { xs: 8, md: 10 }, textAlign: 'center' }}>
+          <Typography variant="h4">Загрузка...</Typography>
+        </Box>
+      </Container>
+    );
+  }
   
     if (!subcategory) {
       return (
@@ -386,6 +445,30 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
   
     return (
       <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
+        <Helmet>
+          <html lang="he" />
+          <title>{subcategoryTitle}</title>
+          <meta name="description" content={subcategoryDescription} />
+          <link rel="canonical" href={canonicalUrl} />
+          <meta property="og:locale" content="he_IL" />
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content={subcategoryTitle} />
+          <meta property="og:description" content={subcategoryDescription} />
+          <meta property="og:url" content={canonicalUrl} />
+          <meta name="twitter:card" content="summary" />
+          <meta name="twitter:title" content={subcategoryTitle} />
+          <meta name="twitter:description" content={subcategoryDescription} />
+          {subcategoryJsonLd && (
+            <script type="application/ld+json">
+              {JSON.stringify(subcategoryJsonLd)}
+            </script>
+          )}
+          {breadcrumbJsonLd && (
+            <script type="application/ld+json">
+              {JSON.stringify(breadcrumbJsonLd)}
+            </script>
+          )}
+        </Helmet>
         <Box sx={{ mb: 4, pt: { xs: 0, md: 3.75 } }}>
           {/* Хлебные крошки */}
           <Box sx={{ 

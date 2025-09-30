@@ -1,14 +1,20 @@
 #!/bin/bash
 
-# Скрипт для обновления конфигурации Nginx на сервере
+# Скрипт для обновления конфигурации Nginx на сервере для домена simba-tzatzuim.co.il
 
-echo "🔧 Обновление конфигурации Nginx (без /uploads/ - используется Cloudinary)..."
+echo "🔧 Обновление конфигурации Nginx для домена simba-tzatzuim.co.il..."
 
 # Создать бэкап текущей конфигурации
 sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.backup.$(date +%Y%m%d_%H%M%S)
 
-# Скопировать новую конфигурацию
-sudo cp nginx-config.conf /etc/nginx/sites-available/default
+# Скопировать новую конфигурацию для домена
+sudo cp nginx-config.conf /etc/nginx/sites-available/simba-tzatzuim
+
+# Создать символическую ссылку
+sudo ln -sf /etc/nginx/sites-available/simba-tzatzuim /etc/nginx/sites-enabled/
+
+# Удалить default конфигурацию если есть
+sudo rm -f /etc/nginx/sites-enabled/default
 
 # Проверить конфигурацию
 if sudo nginx -t; then

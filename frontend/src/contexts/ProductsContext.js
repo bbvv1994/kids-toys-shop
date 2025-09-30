@@ -123,6 +123,15 @@ export const ProductsProvider = ({ children }) => {
         const errorData = await response.json();
         console.error('❌ Wishlist API error:', errorData);
         
+        // Если токен истек, выходим из системы
+        if (response.status === 401) {
+          console.log('🔐 Token expired, logging out');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.reload();
+          return;
+        }
+        
         // Если товар уже в избранном, обновляем локальное состояние и принудительно обновляем wishlist
         if (errorData.error === 'Товар уже в избранном' && !isInWishlist) {
           setWishlist(prevWishlist => {

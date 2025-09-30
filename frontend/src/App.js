@@ -4,6 +4,7 @@
 
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import ProductCard from './components/ProductCard';
 import AdminShopReviews from './components/AdminShopReviews';
@@ -1213,6 +1214,56 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <Helmet>
+        <html lang="he" />
+        <title>סימבה מלך הצעצועים | חנות צעצועים לילדים בישראל</title>
+        <meta name="description" content="חנות צעצועים לילדים בישראל – צעצועים, משחקי קופסה, לגו, יצירה ועוד. משלוחים לכל הארץ ושירות לקוחות מעולה." />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <meta property="og:locale" content="he_IL" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="סימבה מלך הצעצועים" />
+        <meta property="og:description" content="חנות צעצועים לילדים בישראל – מגוון ענק במחירים נוחים" />
+        <meta property="og:image" content="/lion-logo.png" />
+        <meta property="og:image:alt" content="סימבה מלך הצעצועים" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="alternate" hrefLang="he" href="https://simba-tzatzuim.co.il/" />
+        <link rel="alternate" hrefLang="ru" href="https://simba-tzatzuim.co.il/" />
+        <link rel="alternate" hrefLang="x-default" href="https://simba-tzatzuim.co.il/" />
+        <link rel="canonical" href="https://simba-tzatzuim.co.il/" />
+        <script type="application/ld+json">{`
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "סימבה מלך הצעצועים",
+            "url": "https://simba-tzatzuim.co.il/",
+            "logo": "/lion-logo.png",
+            "sameAs": [
+              "https://www.facebook.com/simbakingoftoys",
+              "https://www.instagram.com/simbaking_oftoys"
+            ],
+            "contactPoint": [{
+              "@type": "ContactPoint",
+              "telephone": "+972-53-377-4509",
+              "contactType": "customer service",
+              "areaServed": "IL",
+              "availableLanguage": ["he", "ru"]
+            }]
+          }
+        `}</script>
+        <script type="application/ld+json">{`
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "סימבה מלך הצעצועים",
+            "url": "https://simba-tzatzuim.co.il/",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://simba-tzatzuim.co.il/search?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          }
+        `}</script>
+      </Helmet>
       <Box sx={{
         minHeight: '100vh',
         display: 'flex',

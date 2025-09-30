@@ -4,11 +4,11 @@ const config = {
     API_BASE_URL: process.env.REACT_APP_API_BASE_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? `http://${window.location.hostname}:5001` : 'http://localhost:5001'),
     FRONTEND_URL: process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3000'
   },
-  production: {
-    // В продакшене предпочитаем тот же origin, чтобы избежать CORS, env — как запасной вариант
-    API_BASE_URL: (typeof window !== 'undefined' && window.location.origin) || process.env.REACT_APP_API_BASE_URL || '',
-    FRONTEND_URL: (typeof window !== 'undefined' && window.location.origin) || process.env.REACT_APP_FRONTEND_URL || ''
-  }
+    production: {
+      // В продакшене используем реальный домен
+      API_BASE_URL: process.env.REACT_APP_API_BASE_URL || 'https://simba-tzatzuim.co.il',
+      FRONTEND_URL: process.env.REACT_APP_FRONTEND_URL || 'https://simba-tzatzuim.co.il'
+    }
 };
 
 // Автоматическое определение среды

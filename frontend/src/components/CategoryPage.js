@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
@@ -82,7 +83,7 @@ import {
   NavigateNext,
   Home
 } from '@mui/icons-material';
-import { API_BASE_URL, getImageUrl } from '../config';
+import { API_BASE_URL, FRONTEND_URL, getImageUrl } from '../config';
 import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
 import { getSpeechRecognitionLanguage, getSpeechRecognitionErrorMessage, isSpeechRecognitionSupported } from '../utils/speechRecognitionUtils';
 import { useDeviceType } from '../utils/deviceDetection';
@@ -236,9 +237,23 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
       return false;
     });
   
+    const canonicalUrl = `${FRONTEND_URL || ''}/category/${id}`;
+    const categoryTitle = category ? `${translateCategory(category.name)} – סימבה מלך הצעצועים` : 'סימבה מלך הצעצועים';
+    const categoryDescription = category ? `${translateCategory(category.name)} – מבחר גדול בישראל` : 'חנות צעצועים לילדים בישראל – מגוון ענק במחירים נוחים';
+
     if (loading) {
       return (
         <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
+          <Helmet>
+            <html lang="he" />
+            <title>{categoryTitle}</title>
+            <meta name="description" content={categoryDescription} />
+            <link rel="canonical" href={canonicalUrl} />
+            <meta property="og:locale" content="he_IL" />
+            <meta property="og:type" content="website" />
+            <meta property="og:title" content={categoryTitle} />
+            <meta property="og:description" content={categoryDescription} />
+          </Helmet>
           <Box sx={{ mb: 4, pt: { xs: 8, md: 10 }, textAlign: 'center' }}>
             <Typography variant="h4">Загрузка...</Typography>
           </Box>
@@ -249,6 +264,11 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
     if (!category) {
       return (
         <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
+          <Helmet>
+            <html lang="he" />
+            <title>לא נמצאה קטגוריה – סימבה מלך הצעצועים</title>
+            <meta name="robots" content="noindex, follow" />
+          </Helmet>
           <Box sx={{ mb: 4, pt: { xs: 8, md: 10 }, textAlign: 'center' }}>
             <Typography variant="h4" color="error">{t('category.notFound')}</Typography>
             <Button 
@@ -464,8 +484,74 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
       return subcategoryName;
     };
   
+    const categoryJsonLd = category ? {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: translateCategory(category.name),
+      description: categoryDescription,
+      url: canonicalUrl,
+      mainEntity: {
+        '@type': 'ItemList',
+        numberOfItems: products.length,
+        itemListElement: products.slice(0, 10).map((product, index) => ({
+          '@type': 'Product',
+          position: index + 1,
+          name: product.nameHe || product.name,
+          url: `${FRONTEND_URL || ''}/product/${product.id}`,
+          image: getImageUrl(product.mainImage || product.image)
+        }))
+      }
+    } : null;
+
+    const breadcrumbJsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Главная',
+          item: `${FRONTEND_URL || ''}/`
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Каталог',
+          item: `${FRONTEND_URL || ''}/catalog`
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: translateCategory(category.name),
+          item: canonicalUrl
+        }
+      ]
+    };
+
     return (
       <Container maxWidth={false} sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 4 } }}>
+        <Helmet>
+          <html lang="he" />
+          <title>{categoryTitle}</title>
+          <meta name="description" content={categoryDescription} />
+          <link rel="canonical" href={canonicalUrl} />
+          <meta property="og:locale" content="he_IL" />
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content={categoryTitle} />
+          <meta property="og:description" content={categoryDescription} />
+          <meta property="og:url" content={canonicalUrl} />
+          <meta name="twitter:card" content="summary" />
+          <meta name="twitter:title" content={categoryTitle} />
+          <meta name="twitter:description" content={categoryDescription} />
+          {categoryJsonLd && (
+            <script type="application/ld+json">
+              {JSON.stringify(categoryJsonLd)}
+            </script>
+          )}
+          <script type="application/ld+json">
+            {JSON.stringify(breadcrumbJsonLd)}
+          </script>
+        </Helmet>
         <Box sx={{ mb: 4, pt: { xs: 0, md: 3.75 } }}>
                   {/* Хлебные крошки */}
           <Box sx={{ 

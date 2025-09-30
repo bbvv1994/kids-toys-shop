@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { API_BASE_URL, getImageUrl, getHdImageUrl } from '../config';
+import { Helmet } from 'react-helmet-async';
+import { API_BASE_URL, FRONTEND_URL, getImageUrl, getHdImageUrl } from '../config';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
@@ -284,6 +285,36 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [loading, setLoading] = useState(true);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  
+  // SEO helpers
+  const buildProductTitle = (p) => {
+    if (!p) return 'סימבה מלך הצעצועים';
+    const name = getTranslatedName(p, i18n.language) || p.nameHe || p.name || '';
+    const brand = p.brand ? ` ${p.brand}` : '';
+    return `${name}${brand} – סימבה מלך הצעצועים`;
+  };
+
+  const buildProductDescription = (p) => {
+    if (!p) return 'חנות צעצועים לילדים בישראל – מגוון ענק במחירים נוחים';
+    const desc = getTranslatedDescription(p, i18n.language) || p.descriptionHe || p.description || '';
+    return (desc || 'חנות צעצועים לילדים בישראל – מגוון ענק במחירים נוחים').slice(0, 300);
+  };
+
+  const getFirstImage = (p) => {
+    if (!p || !p.imageUrls || p.imageUrls.length === 0) return '/lion-logo.png';
+    return p.imageUrls[0];
+  };
+
+  const toAbsolute = (url) => {
+    if (!url) return '/lion-logo.png';
+    if (url.startsWith('http')) return url;
+    return `${API_BASE_URL || ''}${url}`;
+  };
+  
+  // Dynamic Helmet on product load
+  const seoTitle = buildProductTitle(product);
+  const seoDescription = buildProductDescription(product);
+  const seoImage = toAbsolute(getFirstImage(product));
 
   const [reviews, setReviews] = useState([]);
   const [reviewText, setReviewText] = useState('');
@@ -298,6 +329,28 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [quantity, setQuantity] = useState(1);
 
   const [cartAnimPlaying, setCartAnimPlaying] = useState(false);
+
+  const canonicalUrl = `${FRONTEND_URL || ''}/product/${id}`;
+
+  const productJsonLd = (p) => {
+    if (!p) return null;
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: getTranslatedName(p, i18n.language) || p.nameHe || p.name,
+      description: getTranslatedDescription(p, i18n.language) || p.descriptionHe || p.description,
+      image: [toAbsolute(getFirstImage(p))],
+      sku: p.article || String(p.id),
+      brand: p.brand ? { '@type': 'Brand', name: p.brand } : undefined,
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'ILS',
+        price: Number(p.price || 0),
+        availability: (p.quantity || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        url: canonicalUrl
+      }
+    };
+  };
   const [cartAnimKey, setCartAnimKey] = useState(0);
   const [wishlistAnimPlaying, setWishlistAnimPlaying] = useState(false);
   const [wishlistAnimKey, setWishlistAnimKey] = useState(0); // eslint-disable-line no-unused-vars
@@ -1269,6 +1322,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     return () => cancelAnimationFrame(frameId);
   };
 
+  // --- SEO Helmet ---
+  const productLd = productJsonLd(product);
+
   // Функция для анимации возврата при недостаточном свайпе
   const animateSwipeReturn = () => {
     setIsAnimating(true);
@@ -1517,8 +1573,31 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 4 }, pt: { xs: 0, md: 7.5 } }}>
-      {/* Хлебные крошки */}
+    <>
+      <Helmet>
+        <html lang="he" />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:locale" content="he_IL" />
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content={seoImage} />
+        <meta property="og:image:alt" content={seoTitle} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={seoImage} />
+        {productLd && (
+          <script type="application/ld+json">
+            {JSON.stringify(productLd)}
+          </script>
+        )}
+      </Helmet>
+      <Container maxWidth="lg" sx={{ py: { xs: 4, md: 4 }, pt: { xs: 0, md: 7.5 } }}>
+        {/* Хлебные крошки */}
       <Box sx={{ 
         mb: 3, 
         mt: { xs: 0.25, md: 0 }, // Очень маленький отступ сверху
@@ -2822,6 +2901,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           </Box>
         </Box>
       )}
-    </Container>
+      </Container>
+    </>
   );
 }
