@@ -5,9 +5,9 @@ const config = {
     FRONTEND_URL: process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3000'
   },
     production: {
-      // В продакшене используем реальный домен
-      API_BASE_URL: process.env.REACT_APP_API_BASE_URL || 'https://simba-tzatzuim.co.il',
-      FRONTEND_URL: process.env.REACT_APP_FRONTEND_URL || 'https://simba-tzatzuim.co.il'
+      // В продакшене определяем URL динамически
+      API_BASE_URL: process.env.REACT_APP_API_BASE_URL || (typeof window !== 'undefined' && /^\d+\.\d+\.\d+\.\d+$/.test(window.location.hostname) ? `http://${window.location.hostname}` : 'https://simba-tzatzuim.co.il'),
+      FRONTEND_URL: process.env.REACT_APP_FRONTEND_URL || (typeof window !== 'undefined' && /^\d+\.\d+\.\d+\.\d+$/.test(window.location.hostname) ? `http://${window.location.hostname}` : 'https://simba-tzatzuim.co.il')
     }
 };
 
@@ -21,6 +21,16 @@ const getEnvironment = () => {
   // Если запущено на localhost - development
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
     return 'development';
+  }
+  
+  // Если запущено на IP адресе - production
+  if (typeof window !== 'undefined' && /^\d+\.\d+\.\d+\.\d+$/.test(window.location.hostname)) {
+    return 'production';
+  }
+  
+  // Если запущено на домене simba-tzatzuim.co.il - production
+  if (typeof window !== 'undefined' && window.location.hostname.includes('simba-tzatzuim.co.il')) {
+    return 'production';
   }
   
   // Если есть переменные окружения для production
@@ -238,4 +248,16 @@ export const ENV_INFO = {
   FRONTEND_URL,
   isDevelopment,
   isProduction
-}; 
+};
+
+// Добавляем отладочную информацию в консоль
+if (typeof window !== 'undefined') {
+  console.log('🔧 Environment Debug Info:', {
+    hostname: window.location.hostname,
+    environment,
+    API_BASE_URL,
+    FRONTEND_URL,
+    isDevelopment,
+    isProduction
+  });
+} 

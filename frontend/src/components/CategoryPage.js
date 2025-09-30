@@ -108,6 +108,25 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
     const deviceType = useDeviceType();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
+
+    // Функция для перевода категорий
+    const translateCategory = (categoryName) => {
+      const categoryMap = {
+        'Игрушки': 'toys',
+        'Конструкторы': 'constructors', 
+        'Пазлы': 'puzzles',
+        'Творчество': 'creativity',
+        'Канцтовары': 'stationery',
+        'Транспорт': 'transport',
+        'Отдых на воде': 'water_recreation',
+        'Настольные игры': 'board_games',
+        'Развивающие игры': 'educational_games',
+        'Акции': 'sales'
+      };
+      
+      const categoryKey = categoryMap[categoryName];
+      return categoryKey ? t(`categories.${categoryKey}`) : categoryName;
+    };
   
     // Функция для загрузки товаров категории
     const fetchCategoryData = async () => {
@@ -374,25 +393,6 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
       // Если изображения нет в маппинге, возвращаем заглушку
       return 'toys.png';
     }
-  
-    // Функция для перевода категорий
-    const translateCategory = (categoryName) => {
-      const categoryMap = {
-        'Игрушки': 'toys',
-        'Конструкторы': 'constructors', 
-        'Пазлы': 'puzzles',
-        'Творчество': 'creativity',
-        'Канцтовары': 'stationery',
-        'Транспорт': 'transport',
-        'Отдых на воде': 'water_recreation',
-        'Настольные игры': 'board_games',
-        'Развивающие игры': 'educational_games',
-        'Акции': 'sales'
-      };
-      
-      const categoryKey = categoryMap[categoryName];
-      return categoryKey ? t(`categories.${categoryKey}`) : categoryName;
-    };
   
     // Функция для перевода подкатегорий
     const translateSubcategory = (parentCategory, subcategoryName) => {

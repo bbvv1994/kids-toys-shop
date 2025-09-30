@@ -26,7 +26,7 @@ function ElegantProductCarousel({
   const isLarge = useMediaQuery('(min-width: 1500px)');
 
   // Количество видимых товаров на разных экранах
-  const visibleCount = isMobile ? 2 : isTablet ? 4 : isLarge ? 4 : 3;
+  const visibleCount = isMobile ? 2 : isTablet ? 3 : isLarge ? 4 : 3;
   const items = products || [];
   const totalPages = Math.max(1, Math.ceil(items.length / visibleCount));
 
@@ -34,8 +34,8 @@ function ElegantProductCarousel({
   const getContainerMaxWidth = () => {
     if (isMobile) return '100%'; // Полная ширина на мобильных (как в каталоге)
     if (isTablet) return '100%'; // Полная ширина на планшетах
-    if (isLarge) return 'calc(2 * 280px + 16px)'; // 2 карточки по 280px + 16px отступ
-    return 'calc(2 * 280px + 16px)'; // 2 карточки по 280px + 16px отступ
+    if (isLarge) return 'calc(4 * 280px + 3 * 16px)'; // 4 карточки по 280px + 3 отступа по 16px
+    return 'calc(3 * 280px + 2 * 16px)'; // 3 карточки по 280px + 2 отступа по 16px
   };
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -119,9 +119,9 @@ function ElegantProductCarousel({
             display: 'grid',
             gridTemplateColumns: {
               xs: 'repeat(2, 1fr)', // 2 карточки на мобильных как в каталоге
-              sm: 'repeat(2, 1fr)', // 2 карточки на маленьких экранах
-              md: 'repeat(2, 280px)', // 2 карточки по 280px на средних и больших
-              lg: 'repeat(2, 280px)' // 2 карточки по 280px на больших
+              sm: 'repeat(3, 1fr)', // 3 карточки на маленьких экранах
+              md: 'repeat(3, 280px)', // 3 карточки по 280px на средних
+              lg: 'repeat(4, 280px)' // 4 карточки по 280px на больших
             },
             gap: { xs: 1, sm: 1.5, md: 2 }, // Точно как в каталоге: 8px, 12px, 16px
             width: 'max-content', // Ширина по содержимому

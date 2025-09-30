@@ -54,6 +54,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   const [pageSize, setPageSize] = useState(24);
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState('grid');
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
   // Автоматически переключаем на grid view на мобильных устройствах
   useEffect(() => {
@@ -68,7 +69,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
     if (sortingBlockRef.current) {
       const element = sortingBlockRef.current;
       const elementPosition = element.offsetTop;
-      const offsetPosition = elementPosition + 70; // Прокручиваем на 70px ниже
+      const offsetPosition = elementPosition - 100; // Прокручиваем на 100px выше элемента
       
       window.scrollTo({
         top: offsetPosition,
@@ -418,7 +419,19 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   // Пагинация
   const totalPages = Math.ceil(sortedProducts.length / pageSize) || 1;
   const pagedProducts = sortedProducts.slice((page - 1) * pageSize, page * pageSize);
-  useEffect(() => { setPage(1); }, [sortBy, pageSize, filteredProducts]);
+  // Сброс страницы при изменении параметров сортировки и фильтров
+  useEffect(() => { 
+    setPage(1); 
+  }, [sortBy, pageSize, selectedGenders, selectedBrands, selectedAgeGroups, priceRange, searchQuery]);
+  
+  // Прокрутка к товарам при изменении страницы (только если не первая загрузка)
+  useEffect(() => {
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+    } else {
+      scrollToProducts();
+    }
+  }, [page, isInitialLoad]);
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   useEffect(() => {

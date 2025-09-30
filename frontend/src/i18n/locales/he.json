@@ -267,8 +267,8 @@
   },
   "searchResults": {
     "title": "תוצאות חיפוש",
-    "forQuery": ":לחיפוש",
-    "noResults": "לא נמצא כלום לחיפוש \"{{query}}\"",
+    "forQuery": "לחיפוש",
+    "noResults": "לא נמצא דבר לחיפוש: {{query}}",
     "enterQuery": "הזן שאילתת חיפוש"
   },
   "banners": {

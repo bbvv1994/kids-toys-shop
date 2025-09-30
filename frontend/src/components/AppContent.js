@@ -3427,53 +3427,58 @@ function AppContent({
                 zIndex: 1
               }}
             >
-                    {/* Поисковое поле с отступом слева 255px */}
-                    <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} style={{
-                      flex: 1,
-                      marginLeft: '255px',
-                      maxWidth: 'calc(100% - 255px)'
+                    {/* Поисковое поле и фильтры по центру */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1, 
+                      maxWidth: '700px', 
+                      margin: '0 auto',
+                      width: '100%'
                     }}>
-                 <TextField
-                   size="small"
-                   placeholder={t('header.searchPlaceholder')}
-                   value={isListening && interimTranscript ? interimTranscript : searchQuery}
-                   onChange={(e) => setSearchQuery(e.target.value)}
-                   InputProps={{
-                     endAdornment: (
-                       <InputAdornment position="end">
-                         <IconButton onClick={handleMicClick} size="small" color={isListening ? 'primary' : 'default'} title="Голосовой ввод">
-                           <MicIcon />
-                         </IconButton>
-                         <IconButton type="submit" size="small">
-                           <SearchIcon />
-                         </IconButton>
-                       </InputAdornment>
-                     )
-                   }}
-                   sx={{ background: 'white', borderRadius: 2, width: '100%' }}
-                 />
-               </form>
-  
-               {/* Кнопка фильтров для десктопа */}
-               {shouldShowDesktopFilters && (
-                 <IconButton
-                   data-filter-button
-                   onClick={() => setFiltersMenuOpen(!filtersMenuOpen)}
-                   sx={{
-                     color: '#FF9800',
-                     backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.1)' : 'white',
-                     border: '1px solid #FF9800',
-                     borderRadius: 2,
-                     width: 48,
-                     height: 40,
-                     '&:hover': {
-                       backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.15)' : 'rgba(255, 152, 0, 0.04)',
-                     },
-                   }}
-                 >
-                   <FilterList />
-                 </IconButton>
-               )}
+                      <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} style={{ flex: 1 }}>
+                        <TextField
+                          size="small"
+                          placeholder={t('header.searchPlaceholder')}
+                          value={isListening && interimTranscript ? interimTranscript : searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton onClick={handleMicClick} size="small" color={isListening ? 'primary' : 'default'} title="Голосовой ввод">
+                                  <MicIcon />
+                                </IconButton>
+                                <IconButton type="submit" size="small">
+                                  <SearchIcon />
+                                </IconButton>
+                              </InputAdornment>
+                            )
+                          }}
+                          sx={{ background: 'white', borderRadius: 2, width: '100%' }}
+                        />
+                      </form>
+                      
+                      {/* Кнопка фильтров для десктопа */}
+                      {shouldShowDesktopFilters && (
+                        <IconButton
+                          data-filter-button
+                          onClick={() => setFiltersMenuOpen(!filtersMenuOpen)}
+                          sx={{
+                            color: '#FF9800',
+                            backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.1)' : 'white',
+                            border: '1px solid #FF9800',
+                            borderRadius: 2,
+                            width: 48,
+                            height: 40,
+                            '&:hover': {
+                              backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.15)' : 'rgba(255, 152, 0, 0.04)',
+                            },
+                          }}
+                        >
+                          <FilterList />
+                        </IconButton>
+                      )}
+                    </Box>
   
                {/* Панель фильтров для десктопа */}
                {shouldShowDesktopFilters && filtersMenuOpen && (
@@ -3483,7 +3488,7 @@ function AppContent({
                    
                    sx={{
                      position: 'absolute',
-                     top: '100%',
+                     top: 'calc(100% - 75px)',
                      right: 0,
                      width: 250,
                      zIndex: '999999 !important',
