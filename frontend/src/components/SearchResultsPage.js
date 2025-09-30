@@ -41,7 +41,7 @@ export default function SearchResultsPage({ products, cart, onChangeCartQuantity
             {t('searchResults.title')}
           </Typography>
           <Typography sx={{ textAlign: 'center', mb: 2, color: '#666' }} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
-            {t('searchResults.forQuery')}{i18n.language === 'he' ? ':' : ''} <b>{i18n.language === 'he' ? query : `"${query}"`}</b>
+            {t('searchResults.forQuery')}{i18n.language === 'he' ? ':' : ''} <b>{query}</b>
           </Typography>
         </Box>
       </Container>
@@ -92,7 +92,7 @@ export default function SearchResultsPage({ products, cart, onChangeCartQuantity
             <Typography sx={{ gridColumn: '1/-1', textAlign: 'center', color: '#888', fontSize: 20 }} dir={i18n.language === 'he' ? 'rtl' : 'ltr'}>
               {query ? (i18n.language === 'he' ? 
                 <span dangerouslySetInnerHTML={{ __html: `לא נמצא דבר לחיפוש: <b>${query}</b>` }} /> : 
-                t('searchResults.noResults', { query: `"${query}"` })) : t('searchResults.enterQuery')}
+                t('searchResults.noResults', { query: query })) : t('searchResults.enterQuery')}
             </Typography>
           )}
         </Box>
