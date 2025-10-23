@@ -334,7 +334,14 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   const productJsonLd = (p) => {
     if (!p) return null;
-    return {
+    
+    // Вычисляем средний рейтинг из отзывов
+    const validReviews = (reviews || []).filter(r => r.rating && r.rating > 0);
+    const avgRating = validReviews.length > 0 
+      ? (validReviews.reduce((sum, r) => sum + r.rating, 0) / validReviews.length).toFixed(1)
+      : null;
+    
+    const schema = {
       '@context': 'https://schema.org',
       '@type': 'Product',
       name: getTranslatedName(p, i18n.language) || p.nameHe || p.name,
@@ -342,14 +349,33 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       image: [toAbsolute(getFirstImage(p))],
       sku: p.article || String(p.id),
       brand: p.brand ? { '@type': 'Brand', name: p.brand } : undefined,
+      category: p.category || 'Toys',
       offers: {
         '@type': 'Offer',
         priceCurrency: 'ILS',
         price: Number(p.price || 0),
         availability: (p.quantity || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-        url: canonicalUrl
+        url: canonicalUrl,
+        seller: {
+          '@type': 'Organization',
+          name: 'סימבה מלך הצעצועים',
+          url: 'https://simba-tzatzuim.co.il'
+        }
       }
     };
+    
+    // Добавляем aggregateRating только если есть отзывы
+    if (avgRating && validReviews.length > 0) {
+      schema.aggregateRating = {
+        '@type': 'AggregateRating',
+        ratingValue: avgRating,
+        reviewCount: validReviews.length,
+        bestRating: '5',
+        worstRating: '1'
+      };
+    }
+    
+    return schema;
   };
   const [cartAnimKey, setCartAnimKey] = useState(0);
   const [wishlistAnimPlaying, setWishlistAnimPlaying] = useState(false);
@@ -1322,6 +1348,77 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   // --- SEO Helmet ---
   const productLd = productJsonLd(product);
+  
+  // FAQ Schema.org для вопросов о товаре
+  const faqLd = () => {
+    if (!questions || questions.length === 0) return null;
+    
+    // Фильтруем только вопросы с ответами
+    const answeredQuestions = questions.filter(q => q.answer && q.answer.trim() !== '');
+    
+    if (answeredQuestions.length === 0) return null;
+    
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: answeredQuestions.map(q => ({
+        '@type': 'Question',
+        name: q.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: q.answer
+        }
+      }))
+    };
+  };
+  
+  // Breadcrumb Schema.org
+  const breadcrumbLd = () => {
+    if (!product) return null;
+    
+    const items = [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Главная',
+        item: 'https://simba-tzatzuim.co.il/'
+      }
+    ];
+    
+    // Добавляем категорию если есть
+    if (product.category) {
+      items.push({
+        '@type': 'ListItem',
+        position: 2,
+        name: product.category.name || product.category,
+        item: `https://simba-tzatzuim.co.il/category/${product.categoryId || product.category.id}`
+      });
+    }
+    
+    // Добавляем подкатегорию если есть
+    if (product.subcategory) {
+      items.push({
+        '@type': 'ListItem',
+        position: items.length + 1,
+        name: product.subcategory.name || product.subcategory,
+        item: `https://simba-tzatzuim.co.il/subcategory/${product.subcategoryId || product.subcategory.id}`
+      });
+    }
+    
+    // Добавляем текущий товар
+    items.push({
+      '@type': 'ListItem',
+      position: items.length + 1,
+      name: getTranslatedName(product, i18n.language) || product.nameHe || product.name,
+      item: canonicalUrl
+    });
+    
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: items
+    };
+  };
 
   // Функция для анимации возврата при недостаточном свайпе
   const animateSwipeReturn = () => {
@@ -1578,6 +1675,16 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         {productLd && (
           <script type="application/ld+json">
             {JSON.stringify(productLd)}
+          </script>
+        )}
+        {breadcrumbLd() && (
+          <script type="application/ld+json">
+            {JSON.stringify(breadcrumbLd())}
+          </script>
+        )}
+        {faqLd() && (
+          <script type="application/ld+json">
+            {JSON.stringify(faqLd())}
           </script>
         )}
       </Helmet>
@@ -2031,7 +2138,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, minHeight: '4.5rem' }}>
               <Typography 
-                variant="h6" 
+                variant="h1" 
+                component="h1"
                 sx={{ 
                   fontWeight: 700, 
                   fontSize: '1.3rem',
@@ -2154,7 +2262,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   marginBottom: 2 
                 }}>
                   {ageIcons[product.ageGroup] && (
-                    <img src={ageIcons[product.ageGroup]} alt="" style={{ width: 28, height: 28, marginRight: 0, verticalAlign: 'middle' }} />
+                    <img src={ageIcons[product.ageGroup]} alt={`${product.ageGroup} - ${getTranslatedName(product)}`} style={{ width: 28, height: 28, marginRight: 0, verticalAlign: 'middle' }} />
                   )}
                 </span>
               )}
@@ -2175,7 +2283,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             {product.category && (
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1, mb: 2, width: 'auto', maxWidth: 'max-content' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '0.9rem', color: '#1976d2', padding: '2px 8px', borderRadius: '4px', fontWeight: 500, marginBottom: 2 }}>
-                  <img src={getCategoryIcon(typeof product.category === 'object' ? product.category : { name: product.category })} alt="cat" style={{ width: 20, height: 20, marginRight: 6, verticalAlign: 'middle' }} />
+                  <img src={getCategoryIcon(typeof product.category === 'object' ? product.category : { name: product.category })} alt={`${typeof product.category === 'object' ? translateCategory(product.category.label || product.category?.name) : translateCategory(product.category)} - категория`} style={{ width: 20, height: 20, marginRight: 6, verticalAlign: 'middle' }} />
                   {typeof product.category === 'object' ? translateCategory(product.category.label || product.category?.name) : translateCategory(product.category)}
                 </span>
               </Box>
