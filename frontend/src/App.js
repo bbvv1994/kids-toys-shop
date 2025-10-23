@@ -1235,6 +1235,7 @@ function App() {
             "@context": "https://schema.org",
             "@type": "Organization",
             "name": "סימבה מלך הצעצועים",
+            "description": "חנות צעצועים לילדים בישראל – צעצועים איכותיים במחירים נוחים",
             "url": "https://simba-tzatzuim.co.il/",
             "logo": "/lion-logo.png",
             "sameAs": [
