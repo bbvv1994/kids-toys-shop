@@ -95,6 +95,9 @@ export-*.js
 import-*.js
 process-*.js
 batch-*.js
+add-admin.js
+set-admin-password.js
+set-password.js
 
 # Backup files
 *.backup
