@@ -1597,6 +1597,16 @@ app.delete('/api/products/:id', authMiddleware, async (req, res) => {
       console.error('DELETE /api/products/:id - Error deleting wishlist items:', wishlistError);
     }
 
+    try {
+      console.log('DELETE /api/products/:id - Deleting product questions...');
+      await prisma.productQuestion.deleteMany({
+        where: { productId: productId }
+      });
+      console.log('DELETE /api/products/:id - Product questions deleted successfully');
+    } catch (questionError) {
+      console.error('DELETE /api/products/:id - Error deleting product questions:', questionError);
+    }
+
     // Проверяем, есть ли заказы с этим товаром и удаляем скрытые заказы
     try {
       console.log('DELETE /api/products/:id - Checking for hidden orders...');
