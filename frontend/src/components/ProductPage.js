@@ -381,9 +381,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [touchStartY, setTouchStartY] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [isSwiping, setIsSwiping] = useState(false);
-  
-  // Состояния для отслеживания двойного тапа
-  const [lastTapTime, setLastTapTime] = useState(0);
 
   // Состояния для масштабирования и перемещения изображений
   const [scale, setScale] = useState(1);
@@ -1253,36 +1250,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   };
 
   const onGalleryTouchEnd = (e) => {
-    const currentTime = new Date().getTime();
-    const tapLength = currentTime - lastTapTime;
-    
-    // Проверяем двойной тап (менее 300мс между тапами и не было сильного движения)
-    const isDoubleTap = tapLength < 300 && tapLength > 0;
-    const hasMovement = touchEnd && touchStart && Math.abs(touchStart - touchEnd) > 10;
-    
-    if (isDoubleTap && !hasMovement && !isZooming) {
-      // Это двойной тап - переключаем zoom
-      if (modalScale > 1) {
-        resetModalZoom(); // Уменьшаем
-      } else {
-        setModalScale(isDesktop ? 2 : 3); // Увеличиваем
-      }
-      setLastTapTime(0); // Сбрасываем
-      
-      // Сбрасываем состояния
-      setIsSwiping(false);
-      setIsZooming(false);
-      setInitialDistance(null);
-      setInitialScale(1);
-      setTouchStart(null);
-      setTouchStartY(null);
-      setTouchEnd(null);
-      return;
-    }
-    
-    // Обновляем время последнего тапа
-    setLastTapTime(currentTime);
-    
     // Если изображение увеличено, не обрабатываем свайп
     if (modalScale > 1) {
       // Сбрасываем только состояния pan
@@ -1294,7 +1261,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     if (isSwiping && touchStart && touchEnd) {
       // Обработка завершения свайпа (только если изображение не увеличено)
       const distance = touchStart - touchEnd;
-      const minSwipeDistance = 30; // Минимальное расстояние для свайпа (как в нативной галерее)
+      const minSwipeDistance = 15; // Очень чувствительные свайпы!
       const realImages = getRealImages();
 
       if (distance > minSwipeDistance) {
@@ -1426,19 +1393,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       resetModalZoom();
     } else {
       resetMainImageZoom();
-    }
-  };
-
-  // Функция для двойного клика в модальном окне (переключение zoom)
-  const onGalleryDoubleClick = () => {
-    if (modalScale > 1) {
-      resetModalZoom(); // Возвращаем к масштабу 1 (по ширине экрана)
-    } else {
-      if (!isDesktop) {
-        setModalScale(3); // Для мобильных увеличиваем до 3x
-      } else {
-        setModalScale(2); // Для десктопа увеличиваем до 2x
-      }
     }
   };
 
@@ -2790,7 +2744,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                           justifyContent: 'center'
                         }}
                         onClick={toggleZoom}
-                        onDoubleClick={onGalleryDoubleClick}
                         onMouseMove={handleGalleryMouseMove}
                         onMouseDown={handleMouseDown}
                         onMouseUp={handleMouseUp}
