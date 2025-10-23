@@ -2688,7 +2688,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
           sx={{
             zIndex: 99999,
             '& .MuiBackdrop-root': {
-              backgroundColor: '#000000'
+              backgroundColor: '#ffffff'
             }
           }}
         >
@@ -2697,7 +2697,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               position: 'fixed', 
               top: 0, 
               left: 0, 
-              bgcolor: '#000000', 
+              bgcolor: '#ffffff', 
               p: 0, 
               borderRadius: 0, 
               outline: 'none', 
@@ -2708,16 +2708,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               overflow: 'hidden',
               zIndex: 99999,
               border: 'none',
-              touchAction: 'none',
+              touchAction: 'pan-x pan-y',
               userSelect: 'none',
               WebkitUserSelect: 'none',
               overscrollBehavior: 'none',
               WebkitOverflowScrolling: 'touch'
-            }}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                handleCloseGallery();
-              }
             }}
             ref={galleryRef}
           >
@@ -2747,7 +2742,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                           left: 0,
                           right: 0,
                           cursor: modalScale > 1 ? 'zoom-out' : 'zoom-in',
-                          touchAction: 'none',
+                          touchAction: modalScale > 1 ? 'none' : 'pan-x',
                           userSelect: 'none',
                           WebkitUserSelect: 'none',
                           display: 'flex',
@@ -2795,18 +2790,27 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 position: 'fixed',
                 top: 20,
                 right: 20,
-                zIndex: 100000
+                zIndex: 100000,
+                pointerEvents: 'auto'
               }}>
                 <Button
-                  onClick={resetZoom}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    resetZoom();
+                  }}
                   sx={{
-                    background: 'rgba(0, 0, 0, 0.7)',
+                    background: 'rgba(60, 60, 60, 0.7)',
                     color: 'white',
                     borderRadius: '50%',
                     minWidth: 48,
                     height: 48,
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                    backdropFilter: 'blur(4px)',
                     '&:hover': {
-                      background: 'rgba(0, 0, 0, 0.9)'
+                      background: 'rgba(40, 40, 40, 0.85)'
+                    },
+                    '&:active': {
+                      background: 'rgba(20, 20, 20, 0.9)',
                     }
                   }}
                 >
@@ -2821,27 +2825,34 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               bottom: 20,
               left: '50%',
               transform: 'translateX(-50%)',
-              zIndex: 100000
+              zIndex: 100000,
+              pointerEvents: 'auto'
             }}>
               <Button 
-                onClick={handleCloseGallery} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCloseGallery();
+                }}
                 sx={{ 
-                  background: 'rgba(255, 255, 255, 0.9)',
-                  color: '#333',
+                  background: '#f44336',
+                  color: '#fff',
                   borderRadius: 25,
                   fontWeight: 600,
                   fontSize: 16,
                   px: 4,
                   py: 2,
                   height: 50,
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+                  boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
                   textTransform: 'none',
                   minWidth: 140,
-                  border: '2px solid rgba(0, 0, 0, 0.1)',
+                  border: 'none',
                   '&:hover': {
-                    background: 'rgba(255, 255, 255, 1)',
-                    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)',
+                    background: '#d32f2f',
+                    boxShadow: '0 6px 20px rgba(244, 67, 54, 0.5)',
                   },
+                  '&:active': {
+                    background: '#c62828',
+                  }
                 }}
               >
                 {t('common.close')}
