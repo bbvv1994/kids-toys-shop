@@ -3855,10 +3855,10 @@ function AppContent({
           flexShrink: 0,
           boxShadow: '0 -4px 20px rgba(0,0,0,0.1)'
         }}>
-          <Container maxWidth="lg" sx={{ py: 6 }}>
-            <Grid container spacing={4}>
+          <Container maxWidth="lg" sx={{ py: 6, px: { xs: 2, sm: 3, md: 4 } }}>
+            <Grid container spacing={{ xs: 3, sm: 4 }}>
               {/* Информация о компании */}
-              <Grid size={{ xs: 12, md: i18n.language === 'he' ? 4 : 3 }} sx={{ ml: { md: -5 } }}>
+              <Grid size={{ xs: 12, sm: 6, md: i18n.language === 'he' ? 4 : 3 }}>
                 <Typography variant="h5" sx={{ 
                   fontWeight: 700, 
                   mb: 2, 
@@ -4039,42 +4039,48 @@ function AppContent({
             py: 2,
             borderTop: '1px solid rgba(255,255,255,0.1)'
           }}>
-            <Container maxWidth="lg">
+            <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
               <Box sx={{ 
                 display: 'flex', 
                 justifyContent: 'space-between', 
                 alignItems: 'center',
-                flexDirection: { xs: 'column', md: 'row' },
+                flexDirection: { xs: 'column', sm: 'row' },
                 gap: 2
               }}>
                 <Box sx={{ 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: 2
+                  gap: { xs: 1, sm: 2 },
+                  flexDirection: { xs: 'column', sm: 'row' }
                 }}>
-                  <Typography variant="body2" sx={{ color: '#e3f2fd', opacity: 0.8 }}>
+                  <Typography variant="body2" sx={{ 
+                    color: '#e3f2fd', 
+                    opacity: 0.8,
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    textAlign: { xs: 'center', sm: 'left' }
+                  }}>
                     © {new Date().getFullYear()} {t('footer.copyright')} - {t('footer.title')}
                   </Typography>
                   <img 
                     src="/lion-logo.png..png" 
                     alt="Kids Toys Shop Logo" 
                     style={{ 
-                      width: '60px', 
-                      height: '60px',
+                      width: '50px', 
+                      height: '50px',
                       opacity: 0.9
                     }} 
                   />
                 </Box>
                 <Box sx={{ 
                   display: 'flex', 
-                  gap: 3,
+                  gap: { xs: 2, sm: 3 },
                   flexWrap: 'wrap',
-                  justifyContent: 'center'
+                  justifyContent: { xs: 'center', sm: 'flex-end' }
                 }}>
                   <RouterLink to="/privacy" style={{ 
                     color: '#fff', 
                     textDecoration: 'none',
-                    fontSize: '0.9rem',
+                    fontSize: '0.85rem',
                     opacity: 0.8
                   }}>
                     {t('footer.privacyPolicy')}
@@ -4082,16 +4088,16 @@ function AppContent({
                   <RouterLink to="/terms" style={{ 
                     color: '#fff', 
                     textDecoration: 'none',
-                    fontSize: '0.9rem',
+                    fontSize: '0.85rem',
                     opacity: 0.8
                   }}>
                     {t('footer.termsOfService')}
                   </RouterLink>
-  
+
                   <RouterLink to="/attribution" style={{ 
                     color: '#fff', 
                     textDecoration: 'none',
-                    fontSize: '0.9rem',
+                    fontSize: '0.85rem',
                     opacity: 0.8
                   }}>
                     {t('footer.attribution')}
