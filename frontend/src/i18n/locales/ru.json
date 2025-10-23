@@ -1,6 +1,13 @@
 {
-  "common": {
+  "meta": {
+    "title": "Симба Король Игрушек | Магазин детских игрушек в Израиле",
+    "description": "Магазин детских игрушек в Израиле – игрушки, настольные игры, лего, творчество и многое другое. Отличное обслуживание клиентов.",
+    "ogTitle": "Симба Король Игрушек",
+    "ogDescription": "Магазин детских игрушек в Израиле – огромный выбор по доступным ценам. Доставка по всей стране."
+  },
     "loading": "Загрузка...",
+    "connectionError": "Ошибка соединения с сервером",
+    "unknownError": "Неизвестная ошибка",
     "error": "Ошибка",
     "success": "Успешно",
     "cancel": "Отмена",
@@ -264,14 +271,6 @@
         "backToHome": "Вернуться на главную"
       }
     },
-    "sortOptions": {
-      "newest": "По новизне",
-      "popular": "По популярности",
-      "priceLow": "По возрастанию цены",
-      "priceHigh": "По убыванию цены",
-      "nameAZ": "По названию А-Я",
-      "nameZA": "По названию Я-А"
-    },
     "viewOptions": {
       "grid": "Плиткой",
       "list": "Списком"
@@ -496,7 +495,14 @@
     "loginLoading": "Вход...",
     "registerLoading": "Регистрация...",
     "loginSuccess": "Вход выполнен успешно!",
-    "registerSuccess": "Регистрация успешна! Пожалуйста, подтвердите email перед входом в систему.",
+    "registerSuccess": "Регистрация успешна! Проверьте вашу почту для подтверждения email.",
+    "emailConfirmed": "Email успешно подтвержден! Теперь вы можете войти в систему.",
+    "invalidConfirmationLink": "Неверная ссылка подтверждения",
+    "confirmationError": "Ошибка подтверждения email",
+    "confirmingEmail": "Подтверждение email...",
+    "emailConfirmedTitle": "Email подтверждён!",
+    "confirmationErrorTitle": "Ошибка подтверждения",
+    "redirectMessage": "Вы автоматически войдёте в аккаунт и будете перенаправлены на главную страницу...",
     "or": "или",
     "loginWithGoogle": "Войти через Google",
     "loginWithFacebook": "Войти через Facebook",
@@ -509,7 +515,36 @@
     "forgotPasswordDescription": "Введите email, привязанный к вашему аккаунту. Мы отправим инструкции для восстановления пароля на указанный адрес.",
     "forgotPasswordButton": "Восстановить",
     "forgotPasswordSuccess": "Если email зарегистрирован, письмо отправлено",
-    "forgotPasswordClose": "Закрыть"
+    "forgotPasswordClose": "Закрыть",
+    "resetPassword": "Сброс пароля",
+    "resetPasswordDescription": "Введите новый пароль для вашего аккаунта",
+    "newPassword": "Новый пароль",
+    "confirmNewPassword": "Подтвердите новый пароль",
+    "resetPasswordButton": "Сбросить пароль",
+    "resetPasswordLoading": "Сброс пароля...",
+    "resetPasswordSuccess": "Пароль успешно сброшен!",
+    "backToLogin": "Вернуться к входу",
+    "invalidResetLink": "Некорректная ссылка сброса пароля",
+    "goHome": "На главную",
+    "passwordMinLength": "Пароль должен содержать минимум 6 символов",
+    "resetPasswordError": "Ошибка сброса пароля",
+    "passwordsDoNotMatch": "Пароли не совпадают",
+    "fillAllFields": "Пожалуйста, заполните все поля",
+    "googleAccountErrorText": "зарегистрирован через Google",
+    "enterCurrentPassword": "Введите текущий пароль",
+    "changePasswordError": "Ошибка смены пароля",
+    "userAlreadyExists": "Пользователь уже существует",
+    "oauthError": {
+      "title": "Ошибка авторизации",
+      "message": "Произошла ошибка при авторизации через Google",
+      "goHome": "На главную",
+      "tryAgain": "Попробовать снова"
+    },
+    "oauthSuccess": {
+      "title": "Авторизация успешна!",
+      "message": "Авторизация через Google успешна!",
+      "redirectMessage": "Вы автоматически войдёте в аккаунт и будете перенаправлены на главную страницу..."
+    }
   },
   "admin": {
     "dashboard": "Панель управления",

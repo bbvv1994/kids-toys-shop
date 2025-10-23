@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
@@ -18,6 +20,7 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 const SibApiV3Sdk = require('sib-api-v3-sdk');
+const emailTemplates = require('./emailTemplates');
 const TelegramBot = require('node-telegram-bot-api');
 const ImageMiddleware = require('./imageMiddleware');
 const BatchImageProcessor = require('./batchImageProcessor');
@@ -44,7 +47,6 @@ const productionUploadMiddleware = new ProductionUploadMiddleware();
 const cloudinaryUploadMiddleware = new CloudinaryUploadMiddleware();
 const flexibleUploadMiddleware = new FlexibleUploadMiddleware();
 const smartImageUploadMiddleware = new SmartImageUploadMiddleware();
-require('dotenv').config();
 
 // Настройка Brevo
 // Brevo API initialization
@@ -174,10 +176,10 @@ async function getTranslationFields() {
   }
 }
 
-// Функция для отправки email через Brevo
-async function sendEmail(to, subject, htmlContent) {
+// Функция для отправки email через Brevo с поддержкой локализации
+async function sendEmail(to, subject, htmlContent, language = 'he') {
   try {
-    console.log('sendEmail called with:', { to, subject, hasHtmlContent: !!htmlContent });
+    console.log('sendEmail called with:', { to, subject, hasHtmlContent: !!htmlContent, language });
     console.log('BREVO_API_KEY exists:', !!process.env.BREVO_API_KEY);
     console.log('apiInstance exists:', !!apiInstance);
     
@@ -192,13 +194,14 @@ async function sendEmail(to, subject, htmlContent) {
     sendSmtpEmail.subject = subject;
     sendSmtpEmail.htmlContent = htmlContent;
     sendSmtpEmail.sender = { 
-      name: 'Kids Toys Shop', 
-              email: 'wexkwasexort@gmail.com' 
+      name: 'סימבה מלך הצעצועים', 
+      email: 'noreply.simba.tzatzuim@gmail.com' 
     };
     
     console.log('Sending email with sender:', sendSmtpEmail.sender);
     console.log('Email to:', to);
     console.log('Email subject:', subject);
+    console.log('Email language:', language);
 
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
     console.log('Email sent successfully:', result);
@@ -1633,14 +1636,23 @@ app.get('/api/health', (req, res) => {
 // === Регистрация пользователя ===
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, language: frontendLanguage } = req.body;
+    const acceptLanguage = req.headers['accept-language'] || '';
+    const language = frontendLanguage || (acceptLanguage.includes('ru') ? 'ru' : 'he');
+    
+    console.log('🌐 Language detection:', {
+      frontendLanguage,
+      acceptLanguage,
+      detectedLanguage: language,
+      headers: req.headers['accept-language']
+    });
 
     if (!email || !password) return res.status(400).json({ error: 'Email и пароль обязательны' });
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) return res.status(400).json({ error: 'Пользователь уже существует' });
     const passwordHash = await bcrypt.hash(password, 10);
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    console.log(`Создаем пользователя: ${email}, name: ${name}`);
+    console.log(`Создаем пользователя: ${email}, name: ${name}, language: ${language}`);
     const user = await prisma.user.create({
       data: { 
         email, 
@@ -1654,67 +1666,35 @@ app.post('/api/auth/register', async (req, res) => {
 
     // Отправка письма с подтверждением через Brevo
     const confirmUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/confirm-email?token=${verificationToken}`;
-    const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
-        <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #3f51b5; margin: 0; font-size: 28px;">🎉 Добро пожаловать в Kids Toys Shop!</h1>
-          </div>
-          
-          <div style="margin-bottom: 25px;">
-            <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
-              Здравствуйте! Спасибо за регистрацию в нашем магазине детских игрушек.
-            </p>
-          </div>
-          
-          <div style="margin-bottom: 25px;">
-            <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
-              Для завершения регистрации и активации вашего аккаунта, пожалуйста, подтвердите ваш email адрес.
-            </p>
-          </div>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${confirmUrl}" style="background-color: #3f51b5; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold; display: inline-block;">
-              ✅ Подтвердить Email
-            </a>
-          </div>
-          
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-            <p style="color: #666; font-size: 14px; margin: 0;">
-              Если кнопка не работает, скопируйте эту ссылку в браузер:<br>
-              <a href="${confirmUrl}" style="color: #3f51b5;">${confirmUrl}</a>
-            </p>
-          </div>
-          
-          <div style="margin-top: 25px; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
-            <p style="color: #666; font-size: 14px; margin: 0;">
-              <strong>Что дальше?</strong><br>
-              После подтверждения email вы сможете войти в свой аккаунт и начать покупки в нашем магазине детских игрушек.
-            </p>
-          </div>
-          
-          <div style="margin-top: 25px; text-align: center;">
-            <p style="color: #999; font-size: 12px; margin: 0;">
-              С уважением,<br>
-              <strong>Команда Kids Toys Shop</strong>
-            </p>
-          </div>
-        </div>
-      </div>
-    `;
-    console.log(`Отправляем email подтверждения на: ${email}`);
+    const template = emailTemplates.registrationConfirmation[language];
+    
+    console.log('📧 Email template selection:', {
+      language,
+      templateExists: !!template,
+      templateSubject: template?.subject,
+      templateHtmlLength: template?.html?.length
+    });
+    
+    const emailHtml = template.html(name || email, confirmUrl);
+    
+    console.log(`Отправляем email подтверждения на: ${email} (язык: ${language})`);
     console.log('DEBUG: Email confirmation link for ' + email + ': ' + confirmUrl);
     
     // Временно отключаем отправку email из-за проблем с Brevo API
     try {
-      await sendEmail(email, 'Подтверждение регистрации - Kids Toys Shop', emailHtml);
+      await sendEmail(email, template.subject, emailHtml, language);
       console.log('Email подтверждения отправлен успешно');
     } catch (emailError) {
       console.log('⚠️ Email не отправлен из-за ошибки API, но ссылка для подтверждения доступна в логах');
       console.log('DEBUG: Email confirmation link for ' + email + ': ' + confirmUrl);
     }
+    
+    const successMessage = language === 'ru' 
+      ? 'Регистрация успешна! Письмо с подтверждением отправлено на email. Пожалуйста, подтвердите email перед входом в систему.'
+      : 'הרשמה הושלמה בהצלחה! נשלח לך אימייל לאישור. אנא אשר את כתובת האימייל לפני ההתחברות.';
+    
     res.json({ 
-      message: 'Регистрация успешна! Письмо с подтверждением отправлено на email. Пожалуйста, подтвердите email перед входом в систему.',
+      message: successMessage,
       requiresEmailVerification: true,
       user: {
         email: user.email,
@@ -2053,61 +2033,32 @@ app.delete('/api/profile', authMiddleware, async (req, res) => {
 // === Восстановление пароля: запрос ===
 app.post('/api/auth/forgot', async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, language: frontendLanguage } = req.body;
+    
+    // Определяем язык из запроса или заголовка
+    const acceptLanguage = req.headers['accept-language'] || '';
+    const language = frontendLanguage || (acceptLanguage.includes('ru') ? 'ru' : 'he');
+    
+    console.log('🔐 Password reset request for:', email);
+    console.log('🌐 Language detection:', { frontendLanguage, acceptLanguage, finalLanguage: language });
+    
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(200).json({ message: 'Если email зарегистрирован, письмо отправлено' });
+    
     const resetToken = crypto.randomBytes(32).toString('hex');
     await prisma.user.update({ where: { id: user.id }, data: { verificationToken: resetToken } });
-    // Отправка письма
+    
+    // Формируем ссылку для сброса пароля
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-    const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
-        <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #3f51b5; margin: 0; font-size: 28px;">🔐 Восстановление пароля</h1>
-          </div>
-          
-          <div style="margin-bottom: 25px;">
-            <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
-              Уважаемый(ая) <strong>${user.name || 'клиент'}</strong>!
-            </p>
-          </div>
-          
-          <div style="margin-bottom: 25px;">
-            <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
-              Мы получили запрос на восстановление пароля для вашего аккаунта в Kids Toys Shop.
-            </p>
-          </div>
-          
-          <div style="margin-bottom: 30px; text-align: center;">
-            <a href="${resetUrl}" style="display: inline-block; background-color: #3f51b5; color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-size: 16px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-              🔑 Сбросить пароль
-            </a>
-          </div>
-          
-          <div style="margin-bottom: 25px;">
-            <p style="color: #666; font-size: 14px; line-height: 1.5; margin: 0;">
-              Если вы не запрашивали восстановление пароля, просто проигнорируйте это письмо.
-            </p>
-          </div>
-          
-          <div style="margin-bottom: 25px;">
-            <p style="color: #666; font-size: 14px; line-height: 1.5; margin: 0;">
-              Ссылка действительна в течение 24 часов.
-            </p>
-          </div>
-          
-          <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;">
-            <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
-              С уважением,<br>
-              <strong>Команда Kids Toys Shop</strong>
-            </p>
-          </div>
-        </div>
-      </div>
-    `;
-    await sendEmail(email, 'Восстановление пароля - Kids Toys Shop', emailHtml);
-    res.json({ message: 'Если email зарегистрирован, письмо отправлено' });
+    
+    // Получаем локализованный шаблон
+    const template = emailTemplates.passwordReset[language];
+    console.log('📧 Email template selection:', { language, hasTemplate: !!template });
+    
+    const emailHtml = template.html(user.name || email, resetUrl);
+    
+    await sendEmail(email, template.subject, emailHtml, language);
+    res.json({ message: language === 'ru' ? 'Если email зарегистрирован, письмо отправлено' : 'אם האימייל רשום במערכת, נשלח לך אימייל לשחזור הסיסמה' });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ error: 'Ошибка восстановления пароля' });

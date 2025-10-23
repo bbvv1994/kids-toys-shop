@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Error Test - Simba Toys Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Heebo', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .error-icon {
+            color: #f44336;
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .error-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+        }
+        
+        .error-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+        
+        .buttons-container {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 12px 24px;
+            height: 44px;
+            cursor: pointer;
+            text-transform: none;
+            min-width: 140px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-home {
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-home:hover {
+            background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .btn-retry {
+            background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+        }
+        
+        .btn-retry:hover {
+            background: linear-gradient(135deg, #42a5f5 0%, #2196f3 100%);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .language-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .language-switch:hover {
+            background: rgba(255,255,255,1);
+            transform: translateY(-1px);
+        }
+        
+        .demo-info {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 4px;
+            text-align: right;
+            font-size: 14px;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="language-switch" onclick="switchLanguage()">
+        <span id="lang-text">עברית</span>
+    </div>
+    
+    <div class="container">
+        <div class="error-icon">⚠️</div>
+        
+        <h1 class="error-title" id="error-title">שגיאת אימות</h1>
+        
+        <p class="error-message" id="error-message">
+            שגיאה בעיבוד אסימון האימות:<br><br>InvalidCharacterError: Failed to execute 'atob' on 'Window': The string to be decoded is not correctly encoded.
+        </p>
+        
+        <div class="demo-info">
+            <strong>🎯 Демо страница OAuth ошибки</strong><br>
+            Показывает как выглядит ошибка авторизации на иврите<br>
+            Стиль кнопок как в профиле пользователя
+        </div>
+        
+        <div class="buttons-container">
+            <a href="#" class="btn btn-home" id="btn-home" onclick="goHome()">
+                לעמוד הבית
+            </a>
+            <button class="btn btn-retry" id="btn-retry" onclick="tryAgain()">
+                נסה שוב
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentLang = 'he';
+        
+        const translations = {
+            he: {
+                title: 'שגיאת אימות',
+                message: 'שגיאה בעיבוד אסימון האימות:<br><br>InvalidCharacterError: Failed to execute \'atob\' on \'Window\': The string to be decoded is not correctly encoded.',
+                goHome: 'לעמוד הבית',
+                tryAgain: 'נסה שוב',
+                langText: 'עברית'
+            },
+            ru: {
+                title: 'Ошибка авторизации',
+                message: 'Ошибка обработки токена авторизации:<br><br>InvalidCharacterError: Failed to execute \'atob\' on \'Window\': The string to be decoded is not correctly encoded.',
+                goHome: 'На главную',
+                tryAgain: 'Попробовать снова',
+                langText: 'Русский'
+            }
+        };
+        
+        function switchLanguage() {
+            currentLang = currentLang === 'he' ? 'ru' : 'he';
+            updateLanguage();
+        }
+        
+        function updateLanguage() {
+            const t = translations[currentLang];
+            
+            document.getElementById('error-title').textContent = t.title;
+            document.getElementById('error-message').innerHTML = t.message;
+            document.getElementById('btn-home').textContent = t.goHome;
+            document.getElementById('btn-retry').textContent = t.tryAgain;
+            document.getElementById('lang-text').textContent = t.langText;
+            
+            // Изменяем направление текста
+            document.documentElement.dir = currentLang === 'he' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+        }
+        
+        function goHome() {
+            alert('Переход на главную страницу (в реальном приложении)');
+        }
+        
+        function tryAgain() {
+            alert('Попытка повторной авторизации (в реальном приложении)');
+        }
+        
+        // Инициализация
+        updateLanguage();
+    </script>
+</body>
+</html>

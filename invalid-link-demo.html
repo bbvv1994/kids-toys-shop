@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Страница "Некорректная ссылка" - Демо</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 40px;
+            text-align: center;
+        }
+        .lock-icon {
+            width: 64px;
+            height: 64px;
+            color: #ff9800;
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #333;
+        }
+        .description {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        .button {
+            background-color: #3f51b5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #303f9f;
+        }
+        .language-tabs {
+            margin-bottom: 30px;
+        }
+        .tab {
+            background: #e0e0e0;
+            border: none;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: #3f51b5;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="language-tabs">
+            <button class="tab active" onclick="showLanguage('ru')">Русский</button>
+            <button class="tab" onclick="showLanguage('he')">עברית</button>
+        </div>
+        
+        <div id="ru-content">
+            <svg class="lock-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
+            </svg>
+            <div class="title">Некорректная ссылка сброса пароля</div>
+            <div class="description">Ссылка для сброса пароля недействительна или истекла</div>
+            <button class="button" onclick="alert('Переход на главную страницу')">На главную</button>
+        </div>
+        
+        <div id="he-content" style="display: none;">
+            <svg class="lock-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
+            </svg>
+            <div class="title">קישור איפוס סיסמה לא תקין</div>
+            <div class="description">הקישור לאיפוס הסיסמה לא תקין או פג תוקף</div>
+            <button class="button" onclick="alert('מעבר לעמוד הראשי')">לעמוד הראשי</button>
+        </div>
+    </div>
+
+    <script>
+        function showLanguage(lang) {
+            // Скрыть все контенты
+            document.getElementById('ru-content').style.display = 'none';
+            document.getElementById('he-content').style.display = 'none';
+            
+            // Убрать активный класс со всех табов
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            
+            // Показать нужный контент
+            document.getElementById(lang + '-content').style.display = 'block';
+            
+            // Добавить активный класс к нужному табу
+            event.target.classList.add('active');
+            
+            // Изменить направление текста для иврита
+            if (lang === 'he') {
+                document.body.style.direction = 'rtl';
+            } else {
+                document.body.style.direction = 'ltr';
+            }
+        }
+    </script>
+</body>
+</html>

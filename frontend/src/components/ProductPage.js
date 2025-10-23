@@ -896,10 +896,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         setCartAnimPlaying(false);
       }, 800); // Уменьшили время анимации
     });
-    return () => cancelAnimationFrame(frameId);
     
     const categoryName = typeof product.category === 'string' ? product.category : (product.category?.name || t('productPage.noCategory'));
     onAddToCart(product, categoryName, displayQuantity);
+    
+    return () => cancelAnimationFrame(frameId);
   };
 
   const handleQuantityChange = (newQuantity) => {

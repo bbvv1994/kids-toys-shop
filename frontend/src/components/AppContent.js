@@ -88,6 +88,7 @@ import { getTranslatedName } from '../utils/translationUtils';
 import { transformCategoriesForNavigation } from '../utils/categoryIcon';
 import { getSpeechRecognitionLanguage, getSpeechRecognitionErrorMessage, isSpeechRecognitionSupported } from '../utils/speechRecognitionUtils';
 import { useDeviceType } from '../utils/deviceDetection';
+import { normalizeUserName } from '../utils/userUtils';
 import Lenis from 'lenis';
 import LazyImage from './LazyImage';
 import ElegantProductCarousel from './ElegantProductCarousel';
@@ -110,6 +111,7 @@ import WishlistPage from './WishlistPage';
 import UserCabinetPage from './UserCabinetPage';
 import SearchResultsPage from './SearchResultsPage';
 import ConfirmEmailPage from './ConfirmEmailPage';
+import ResetPasswordPage from './ResetPasswordPage';
 import OAuthSuccessPage from './OAuthSuccessPage';
 import AboutPage from './AboutPage';
 import ReviewsPage from './ReviewsPage';
@@ -133,6 +135,7 @@ import BulkImportProducts from './BulkImportProducts';
 import BoysToysPage from './BoysToysPage';
 import GirlsToysPage from './GirlsToysPage';
 import CustomerReviews from './CustomerReviews';
+
 // Компонент навигации
 function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, profileLoading, onOpenSidebar, mobileOpen, setMobileOpen, appBarRef, drawerOpen, setDrawerOpen, miniCartOpen, setMiniCartOpen, cart, onChangeCartQuantity, onRemoveFromCart, dbCategories, selectedGenders, onGendersChange, products, selectedBrands, setSelectedBrands, selectedAgeGroups, setSelectedAgeGroups, mobileFiltersOpen, setMobileFiltersOpen, priceRange, setPriceRange, filtersMenuOpen, setFiltersMenuOpen, desktopSearchBarRef, isClosingFilters, setIsClosingFilters, savedScrollY, setSavedScrollY, isRestoringScroll, setIsRestoringScroll, lastFilterCloseTime, setLastFilterCloseTime, shouldPreventGlobalScroll, setShouldPreventGlobalScroll }) {
     const { t, i18n } = useTranslation();
@@ -897,8 +900,8 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
             console.log('🔍 AppContent: Processing category:', cat.name, 'imagePath:', imagePath, 'cat.icon:', cat.icon, 'cat.image:', cat.image);
             
             if (imagePath) {
-              // Если изображение содержит временную метку (175...), это загруженный файл
-              if (imagePath.match(/^175\d+/)) {
+              // Если изображение содержит временную метку (175... или 176...), это загруженный файл
+              if (imagePath.match(/^(175|176)\d+/)) {
                 iconPath = `${API_BASE_URL}/uploads/${imagePath}?t=${Date.now()}`;
                 console.log('✅ AppContent: Uploaded file detected:', iconPath);
               } else {
@@ -942,8 +945,8 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
         
         const imagePath = cat.icon || cat.image;
         if (imagePath) {
-          // Если изображение содержит временную метку (175...), это загруженный файл
-          if (imagePath.match(/^175\d+/)) {
+          // Если изображение содержит временную метку (175... или 176...), это загруженный файл
+          if (imagePath.match(/^(175|176)\d+/)) {
             iconPath = `${API_BASE_URL}/uploads/${imagePath}`;
           } else {
             // Если это старый файл из public папки или fallback иконка
@@ -1748,7 +1751,13 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                     </Button>
                   ) : null}
                   <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#fff', mt: 0.5, textAlign: 'center', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {user ? (user.name && user.name.trim().length > 0 ? user.name : user.email) : t('header.login')}
+                    {user ? (() => {
+                      console.log('=== App Bar Name Display ===');
+                      console.log('user.name:', user.name);
+                      console.log('user.name (bytes):', user.name ? new TextEncoder().encode(user.name).toString('hex') : 'null');
+                      console.log('normalizeUserName result:', normalizeUserName(user.name));
+                      return user.name && user.name.trim().length > 0 ? normalizeUserName(user.name) : user.email;
+                    })() : t('header.login')}
                   </Typography>
                 </Box>
                 {/* Корзина */}
@@ -2119,7 +2128,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                       cursor: 'pointer',
                     }}
                   >
-                    <img src={cat.icon} alt="" style={{ width: 32, height: 32, marginRight: 20, borderRadius: 0, objectFit: 'cover' }} />
+                    <img src={cat.icon || getCategoryIcon(cat.name)} alt="" style={{ width: 32, height: 32, marginRight: 20, borderRadius: 0, objectFit: 'cover' }} />
                     <ListItemText primary={cat.label || cat.name} sx={{ fontWeight: 600, color: '#2c3e50', fontSize: 16, lineHeight: 0.95, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} />
                     {getSubcategories(cat).length > 0 && (
                       <span style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', color: '#FFB300', height: '21px', lineHeight: '21px' }}>{'>'}</span>
@@ -2829,7 +2838,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                         >
                           <Box sx={{ mr: 2, color: '#FFB300' }}>
                             <img 
-                              src={getCategoryIcon(category.name)} 
+                              src={category.icon || `${API_BASE_URL}${getCategoryIcon(category.name)}`} 
                               alt={category.name}
                               style={{ width: 24, height: 24, objectFit: 'contain' }}
                             />
@@ -3437,47 +3446,47 @@ function AppContent({
                       width: '100%'
                     }}>
                       <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} style={{ flex: 1 }}>
-                        <TextField
-                          size="small"
-                          placeholder={t('header.searchPlaceholder')}
-                          value={isListening && interimTranscript ? interimTranscript : searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton onClick={handleMicClick} size="small" color={isListening ? 'primary' : 'default'} title="Голосовой ввод">
-                                  <MicIcon />
-                                </IconButton>
-                                <IconButton type="submit" size="small">
-                                  <SearchIcon />
-                                </IconButton>
-                              </InputAdornment>
-                            )
-                          }}
-                          sx={{ background: 'white', borderRadius: 2, width: '100%' }}
-                        />
-                      </form>
-                      
-                      {/* Кнопка фильтров для десктопа */}
-                      {shouldShowDesktopFilters && (
-                        <IconButton
-                          data-filter-button
-                          onClick={() => setFiltersMenuOpen(!filtersMenuOpen)}
-                          sx={{
-                            color: '#FF9800',
-                            backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.1)' : 'white',
-                            border: '1px solid #FF9800',
-                            borderRadius: 2,
-                            width: 48,
-                            height: 40,
-                            '&:hover': {
-                              backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.15)' : 'rgba(255, 152, 0, 0.04)',
-                            },
-                          }}
-                        >
-                          <FilterList />
-                        </IconButton>
-                      )}
+                 <TextField
+                   size="small"
+                   placeholder={t('header.searchPlaceholder')}
+                   value={isListening && interimTranscript ? interimTranscript : searchQuery}
+                   onChange={(e) => setSearchQuery(e.target.value)}
+                   InputProps={{
+                     endAdornment: (
+                       <InputAdornment position="end">
+                         <IconButton onClick={handleMicClick} size="small" color={isListening ? 'primary' : 'default'} title="Голосовой ввод">
+                           <MicIcon />
+                         </IconButton>
+                         <IconButton type="submit" size="small">
+                           <SearchIcon />
+                         </IconButton>
+                       </InputAdornment>
+                     )
+                   }}
+                   sx={{ background: 'white', borderRadius: 2, width: '100%' }}
+                 />
+               </form>
+  
+               {/* Кнопка фильтров для десктопа */}
+               {shouldShowDesktopFilters && (
+                 <IconButton
+                   data-filter-button
+                   onClick={() => setFiltersMenuOpen(!filtersMenuOpen)}
+                   sx={{
+                     color: '#FF9800',
+                     backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.1)' : 'white',
+                     border: '1px solid #FF9800',
+                     borderRadius: 2,
+                     width: 48,
+                     height: 40,
+                     '&:hover': {
+                       backgroundColor: filtersMenuOpen ? 'rgba(255, 152, 0, 0.15)' : 'rgba(255, 152, 0, 0.04)',
+                     },
+                   }}
+                 >
+                   <FilterList />
+                 </IconButton>
+               )}
                     </Box>
   
                {/* Панель фильтров для десктопа */}
@@ -3720,6 +3729,7 @@ function AppContent({
             <Route path="/test-product-reviews" element={<TestProductReviews />} />
             <Route path="/contacts" element={<ContactsPage />} />
             <Route path="/confirm-email" element={<ConfirmEmailPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/oauth-success" element={<OAuthSuccessPage />} />
             <Route path="/questions" element={<PublicQuestions />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -3774,14 +3784,14 @@ function AppContent({
             borderBottom: '2px solid #e3f2fd',
             mb: 2
           }}>
-            ✉️ Проверьте вашу почту
+            {t('auth.checkEmailTitle')}
           </DialogTitle>
           <DialogContent sx={{ textAlign: 'center', pb: 3, px: 4 }}>
             <Typography variant="body1" sx={{ mb: 2, fontSize: '1.1rem', color: '#666' }}>
-              Привет, <strong>{emailConfirmData.name}</strong>! 👋
+              {t('auth.checkEmailGreeting', { name: emailConfirmData.name })}
             </Typography>
             <Typography variant="body1" sx={{ mb: 3, fontSize: '1.1rem', color: '#666' }}>
-              Мы отправили письмо с подтверждением на адрес:
+              {t('auth.checkEmailSent')}
             </Typography>
             <Typography 
               variant="body1" 
@@ -3799,11 +3809,11 @@ function AppContent({
               {emailConfirmData.email}
             </Typography>
             <Typography variant="body1" sx={{ mb: 3, fontSize: '1.1rem', color: '#666' }}>
-              Пожалуйста, проверьте вашу почту и нажмите на ссылку для подтверждения регистрации.
+              {t('auth.checkEmailInstructions')}
             </Typography>
             <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
               <Typography variant="body2">
-                💡 <strong>Совет:</strong> Проверьте папку "Спам", если письмо не пришло в течение нескольких минут.
+                {t('auth.checkEmailSpamTip')}
               </Typography>
             </Alert>
           </DialogContent>
