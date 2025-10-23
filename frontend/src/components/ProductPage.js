@@ -2743,11 +2743,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                           alignItems: 'center',
                           justifyContent: 'center'
                         }}
-                        onClick={toggleZoom}
-                        onMouseMove={handleGalleryMouseMove}
-                        onMouseDown={handleMouseDown}
-                        onMouseUp={handleMouseUp}
-                        onWheel={handleWheel}
                       >
                         <Box sx={{
                           width: '100%',
