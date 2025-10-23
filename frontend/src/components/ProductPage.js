@@ -2777,49 +2777,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               }
             })()}
             
-            {/* Кнопка сброса zoom для мобильных устройств */}
-            {modalScale > 1 && (
-              <Box sx={{
-                position: 'fixed',
-                top: 20,
-                right: 20,
-                zIndex: 100001,
-                pointerEvents: 'auto',
-                touchAction: 'auto'
-              }}>
-                <Button
-                  onTouchEnd={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    resetZoom();
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    resetZoom();
-                  }}
-                  sx={{
-                    background: 'rgba(60, 60, 60, 0.7)',
-                    color: 'white',
-                    borderRadius: '50%',
-                    minWidth: 48,
-                    height: 48,
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                    backdropFilter: 'blur(4px)',
-                    touchAction: 'auto',
-                    pointerEvents: 'auto',
-                    '&:hover': {
-                      background: 'rgba(40, 40, 40, 0.85)'
-                    },
-                    '&:active': {
-                      background: 'rgba(20, 20, 20, 0.9)',
-                    }
-                  }}
-                >
-                  <ZoomOutIcon />
-                </Button>
-              </Box>
-            )}
-            
             {/* Кнопка закрытия для мобильных */}
             <Box sx={{ 
               position: 'fixed',
