@@ -2349,7 +2349,7 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
 ${order.items.map(item => `• ${item.product.name} x${item.quantity} - ₪${item.price * item.quantity}`).join('\n')}
 
 💰 <b>Итого:</b> ₪${totalAmount}
-📅 <b>Дата:</b> ${new Date().toLocaleString('ru-RU')}
+📅 <b>Дата:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
         `.trim();
         await sendTelegramNotification(telegramMessage);
       } catch (telegramError) {
@@ -2745,7 +2745,7 @@ app.post('/api/guest/checkout', async (req, res) => {
 ${cartItems.map(item => `• ${item.productName} x${item.quantity} - ₪${item.price * item.quantity}`).join('\n')}
 
 💰 <b>Итого:</b> ₪${totalAmount}
-📅 <b>Дата:</b> ${new Date().toLocaleString('ru-RU')}
+📅 <b>Дата:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
       `.trim();
       await sendTelegramNotification(telegramMessage);
     } catch (telegramError) {
