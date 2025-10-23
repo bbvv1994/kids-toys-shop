@@ -538,7 +538,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       galleryElement.removeEventListener('touchmove', handleTouchMove);
       galleryElement.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [galleryOpen, isSwiping, modalScale, touchStart, touchStartY, initialDistance, initialScale, lastTapTime, isZooming, touchEnd, isDesktop]);
+  }, [galleryOpen, isSwiping, modalScale, touchStart, touchStartY, initialDistance, initialScale, isZooming, touchEnd, isDesktop]);
 
   // Блокировка скролла страницы при открытии галереи
   useEffect(() => {
