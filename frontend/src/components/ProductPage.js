@@ -540,7 +540,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       galleryElement.removeEventListener('touchmove', handleTouchMove);
       galleryElement.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [galleryOpen, isSwiping, modalScale, touchStart, touchStartY, initialDistance, initialScale, isZooming, touchEnd, isDesktop]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [galleryOpen]);
 
   // Блокировка скролла страницы при открытии галереи
   useEffect(() => {
@@ -2704,7 +2705,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               overflow: 'hidden',
               zIndex: 99999,
               border: 'none',
-              touchAction: 'pan-x pan-y',
+              touchAction: 'none',
               userSelect: 'none',
               WebkitUserSelect: 'none',
               overscrollBehavior: 'none',
@@ -2737,7 +2738,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                           top: 0,
                           left: 0,
                           right: 0,
-                          touchAction: modalScale > 1 ? 'none' : 'pan-x',
+                          touchAction: 'none',
                           userSelect: 'none',
                           WebkitUserSelect: 'none',
                           display: 'flex',
@@ -2756,10 +2757,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                           transition: isAnimating ? 'transform 0.3s ease-out' : (modalScale > 1 ? 'none' : 'transform 0.2s ease-out'),
                           overflow: modalScale > 1 ? 'visible' : 'hidden',
                           transformOrigin: 'center center',
-                          ...(modalScale > 1 && {
-                            cursor: 'move',
-                            touchAction: 'none'
-                          })
+                          cursor: modalScale > 1 ? 'move' : 'default'
                         }} />
                       </Box>
                   </Box>
