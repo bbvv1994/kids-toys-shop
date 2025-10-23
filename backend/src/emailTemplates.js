@@ -138,89 +138,129 @@ const emailTemplates = {
     he: {
       subject: 'איפוס סיסמה - סימבה מלך הצעצועים',
       html: (name, resetUrl) => `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
-          <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #f44336; margin: 0; font-size: 28px;">🔐 איפוס סיסמה</h1>
-            </div>
-            
-            <div style="margin-bottom: 25px;">
-              <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
-                שלום ${name}! קיבלנו בקשה לאיפוס הסיסמה שלך.
-              </p>
-            </div>
-            
-            <div style="margin-bottom: 25px;">
-              <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
-                אם אתה רוצה לאפס את הסיסמה, לחץ על הקישור למטה:
-              </p>
-            </div>
-            
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${resetUrl}" style="background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);">
-                🔑 אפס סיסמה
-              </a>
-            </div>
-            
-            <div style="margin-top: 25px; padding: 15px; background-color: #ffebee; border-radius: 5px;">
-              <p style="color: #c62828; font-size: 14px; margin: 0;">
-                <strong>אם לא ביקשת איפוס סיסמה, התעלם מההודעה הזו.</strong><br>
-                הקישור יהיה תקף למשך 24 שעות בלבד.
-              </p>
-            </div>
-            
-            <div style="margin-top: 25px; text-align: center;">
-              <p style="color: #999; font-size: 12px; margin: 0;">
-                בברכה,<br>
-                <strong>צוות סימבה מלך הצעצועים</strong>
-              </p>
+        <!DOCTYPE html>
+        <html dir="rtl" lang="he">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>איפוס סיסמה</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; direction: rtl;">
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; direction: rtl;">
+            <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <img src="https://simba-tzatzuim.co.il/lion-logo.png..png" alt="סימבה מלך הצעצועים" style="max-width: 120px; height: auto;" />
+              </div>
+              <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #f44336; margin: 0; font-size: 28px; direction: rtl;">🔐 איפוס סיסמה</h1>
+              </div>
+              
+              <div style="margin-bottom: 25px; direction: rtl;">
+                <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0; text-align: right;">
+                  שלום ${name}!
+                </p>
+                <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 10px 0 0 0; text-align: right;">
+                  קיבלנו בקשה לאיפוס הסיסמה שלך בחנות הצעצועים שלנו.
+                </p>
+              </div>
+              
+              <div style="margin-bottom: 25px; direction: rtl;">
+                <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0; text-align: right;">
+                  אם אתה רוצה לאפס את הסיסמה, לחץ על הכפתור למטה. הקישור יהיה תקף למשך 24 שעות בלבד.
+                </p>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetUrl}" style="background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);">
+                  🔑 אפס סיסמה
+                </a>
+              </div>
+              
+              <div style="margin-top: 25px; padding: 20px; background-color: #ffebee; border-radius: 5px; border-right: 4px solid #f44336; direction: rtl;">
+                <p style="color: #c62828; font-size: 14px; margin: 0; text-align: right;">
+                  <strong>⚠️ חשוב!</strong>
+                </p>
+                <p style="color: #c62828; font-size: 14px; margin: 10px 0 0 0; text-align: right;">
+                  אם לא ביקשת איפוס סיסמה, אנא התעלם מהמייל הזה. הסיסמה שלך תישאר מאובטחת וללא שינוי.
+                </p>
+              </div>
+              
+              <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; direction: rtl;">
+                <p style="color: #999; font-size: 12px; margin: 5px 0;">
+                  בברכה,
+                </p>
+                <p style="color: #3f51b5; font-size: 14px; margin: 5px 0; font-weight: bold;">
+                  צוות סימבה מלך הצעצועים 🧸
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        </body>
+        </html>
       `
     },
     ru: {
       subject: 'Восстановление пароля - סימבה מלך הצעצועים',
       html: (name, resetUrl) => `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
-          <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #f44336; margin: 0; font-size: 28px;">🔐 Восстановление пароля</h1>
-            </div>
-            
-            <div style="margin-bottom: 25px;">
-              <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
-                Здравствуйте, ${name}! Мы получили запрос на восстановление вашего пароля.
-              </p>
-            </div>
-            
-            <div style="margin-bottom: 25px;">
-              <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
-                Если вы хотите восстановить пароль, нажмите на ссылку ниже:
-              </p>
-            </div>
-            
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${resetUrl}" style="background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);">
-                🔑 Восстановить пароль
-              </a>
-            </div>
-            
-            <div style="margin-top: 25px; padding: 15px; background-color: #ffebee; border-radius: 5px;">
-              <p style="color: #c62828; font-size: 14px; margin: 0;">
-                <strong>Если вы не запрашивали восстановление пароля, проигнорируйте это письмо.</strong><br>
-                Ссылка действительна в течение 24 часов.
-              </p>
-            </div>
-            
-            <div style="margin-top: 25px; text-align: center;">
-              <p style="color: #999; font-size: 12px; margin: 0;">
-                С уважением,<br>
-                <strong>Команда סימבה מלך הצעצועים</strong>
-              </p>
+        <!DOCTYPE html>
+        <html dir="ltr" lang="ru">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Восстановление пароля</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; direction: ltr;">
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; direction: ltr;">
+            <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <img src="https://simba-tzatzuim.co.il/lion-logo.png..png" alt="סימבה מלך הצעצועים" style="max-width: 120px; height: auto;" />
+              </div>
+              <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #f44336; margin: 0; font-size: 28px; direction: ltr;">🔐 Восстановление пароля</h1>
+              </div>
+              
+              <div style="margin-bottom: 25px; direction: ltr;">
+                <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0; text-align: left;">
+                  Здравствуйте, ${name}!
+                </p>
+                <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 10px 0 0 0; text-align: left;">
+                  Мы получили запрос на восстановление вашего пароля в нашем магазине детских игрушек.
+                </p>
+              </div>
+              
+              <div style="margin-bottom: 25px; direction: ltr;">
+                <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0; text-align: left;">
+                  Если вы хотите восстановить пароль, нажмите на кнопку ниже. Ссылка будет действительна в течение 24 часов.
+                </p>
+              </div>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetUrl}" style="background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);">
+                  🔑 Восстановить пароль
+                </a>
+              </div>
+              
+              <div style="margin-top: 25px; padding: 20px; background-color: #ffebee; border-radius: 5px; border-left: 4px solid #f44336; direction: ltr;">
+                <p style="color: #c62828; font-size: 14px; margin: 0; text-align: left;">
+                  <strong>⚠️ Важно!</strong>
+                </p>
+                <p style="color: #c62828; font-size: 14px; margin: 10px 0 0 0; text-align: left;">
+                  Если вы не запрашивали восстановление пароля, пожалуйста, проигнорируйте это письмо. Ваш пароль останется защищенным и без изменений.
+                </p>
+              </div>
+              
+              <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; direction: ltr;">
+                <p style="color: #999; font-size: 12px; margin: 5px 0;">
+                  С уважением,
+                </p>
+                <p style="color: #3f51b5; font-size: 14px; margin: 5px 0; font-weight: bold;">
+                  Команда סימבה מלך הצעצועים 🧸
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        </body>
+        </html>
       `
     }
   },
