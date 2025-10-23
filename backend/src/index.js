@@ -193,7 +193,7 @@ async function sendEmail(to, subject, htmlContent, language = 'he') {
     sendSmtpEmail.subject = subject;
     sendSmtpEmail.htmlContent = htmlContent;
     sendSmtpEmail.sender = { 
-      name: language === 'ru' ? 'Симба Король Игрушек' : 'סימבה מלך הצעצועים', 
+      name: 'סימבה מלך הצעצועים', // Всегда на иврите
       email: 'noreply.simba.tzatzuim@gmail.com' 
     };
     
