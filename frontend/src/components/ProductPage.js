@@ -381,6 +381,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [touchStartY, setTouchStartY] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [isSwiping, setIsSwiping] = useState(false);
+  
+  // Состояния для отслеживания двойного тапа
+  const [lastTapTime, setLastTapTime] = useState(0);
 
   // Состояния для масштабирования и перемещения изображений
   const [scale, setScale] = useState(1);
@@ -538,7 +541,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       galleryElement.removeEventListener('touchmove', handleTouchMove);
       galleryElement.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [galleryOpen, isSwiping, modalScale, touchStart, touchStartY, initialDistance, initialScale]);
+  }, [galleryOpen, isSwiping, modalScale, touchStart, touchStartY, initialDistance, initialScale, lastTapTime, isZooming, touchEnd, isDesktop]);
 
   // Блокировка скролла страницы при открытии галереи
   useEffect(() => {
@@ -1139,12 +1142,10 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   // Функции для свайпа в галерее (для мобильных устройств)
   const onGalleryTouchStart = (e) => {
-    // Не обрабатываем touch на кнопках
-    if (e.target.closest('button') || e.target.tagName === 'BUTTON') {
-      return;
+    // Предотвращаем стандартные touch события только если это не кнопка
+    if (!e.target.closest('button') && e.target.tagName !== 'BUTTON') {
+      e.preventDefault();
     }
-    
-    e.preventDefault(); // Предотвращаем стандартные touch события
     
     if (e.targetTouches.length === 1) {
       // Если изображение увеличено, то движение - это pan, а не свайп
@@ -1179,12 +1180,10 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   };
 
   const onGalleryTouchMove = (e) => {
-    // Не обрабатываем touch на кнопках
-    if (e.target.closest('button') || e.target.tagName === 'BUTTON') {
-      return;
+    // Предотвращаем стандартные touch события только если это не кнопка
+    if (!e.target.closest('button') && e.target.tagName !== 'BUTTON') {
+      e.preventDefault();
     }
-    
-    e.preventDefault(); // Предотвращаем стандартные touch события
     
     if (isSwiping && e.targetTouches.length === 1 && modalScale <= 1) {
       // Обработка свайпа с плавной анимацией в реальном времени (только если не увеличен)
@@ -1253,10 +1252,39 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     }
   };
 
-  const onGalleryTouchEnd = () => {
+  const onGalleryTouchEnd = (e) => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTapTime;
+    
+    // Проверяем двойной тап (менее 300мс между тапами и не было сильного движения)
+    const isDoubleTap = tapLength < 300 && tapLength > 0;
+    const hasMovement = touchEnd && touchStart && Math.abs(touchStart - touchEnd) > 10;
+    
+    if (isDoubleTap && !hasMovement && !isZooming) {
+      // Это двойной тап - переключаем zoom
+      if (modalScale > 1) {
+        resetModalZoom(); // Уменьшаем
+      } else {
+        setModalScale(isDesktop ? 2 : 3); // Увеличиваем
+      }
+      setLastTapTime(0); // Сбрасываем
+      
+      // Сбрасываем состояния
+      setIsSwiping(false);
+      setIsZooming(false);
+      setInitialDistance(null);
+      setInitialScale(1);
+      setTouchStart(null);
+      setTouchStartY(null);
+      setTouchEnd(null);
+      return;
+    }
+    
+    // Обновляем время последнего тапа
+    setLastTapTime(currentTime);
+    
     // Если изображение увеличено, не обрабатываем свайп
     if (modalScale > 1) {
-
       // Сбрасываем только состояния pan
       setTouchStart(null);
       setTouchEnd(null);
@@ -1269,18 +1297,14 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       const minSwipeDistance = 50; // Минимальное расстояние для свайпа
       const realImages = getRealImages();
 
-
-
       if (distance > minSwipeDistance) {
         // Свайп влево - следующее изображение
         if (realImages.length > 1) {
-
           animateSwipeTransition('next');
         }
       } else if (distance < -minSwipeDistance) {
         // Свайп вправо - предыдущее изображение
         if (realImages.length > 1) {
-
           animateSwipeTransition('prev');
         }
       } else {
