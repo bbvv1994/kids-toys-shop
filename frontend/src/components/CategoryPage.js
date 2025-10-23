@@ -258,7 +258,7 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
   
     const canonicalUrl = `${FRONTEND_URL || ''}/category/${id}`;
     const categoryTitle = category ? `${translateCategory(category.name)} – סימבה מלך הצעצועים` : 'סימבה מלך הצעצועים';
-    const categoryDescription = category ? `${translateCategory(category.name)} – מבחר גדול בישראל` : 'חנות צעצועים לילדים בישראל – מגוון ענק במחירים נוחים';
+    const categoryDescription = category ? `${translateCategory(category.name)} – מבחר גדול בישראל` : 'חנות צעצועים לילדים בישראל – צעצועים איכותיים במחירים נוחים';
 
     if (loading) {
       return (

@@ -1217,12 +1217,12 @@ function App() {
       <Helmet>
         <html lang="he" />
         <title>סימבה מלך הצעצועים | חנות צעצועים לילדים בישראל</title>
-        <meta name="description" content="חנות צעצועים לילדים בישראל – צעצועים איכותיים, משחקי קופסה, לגו, יצירה ועוד. איכות מעולה במחירים נוחים." />
+        <meta name="description" content="חנות צעצועים לילדים בישראל – צעצועים, משחקי קופסה, לגו, יצירה ועוד. צעצועים איכותיים במחירים נוחים." />
         <meta name="robots" content="index, follow, max-image-preview:large" />
         <meta property="og:locale" content="he_IL" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="סימבה מלך הצעצועים" />
-        <meta property="og:description" content="חנות צעצועים לילדים בישראל – מגוון ענק במחירים נוחים" />
+        <meta property="og:description" content="חנות צעצועים לילדים בישראל – צעצועים איכותיים במחירים נוחים" />
         <meta property="og:image" content="/lion-logo.png" />
         <meta property="og:image:alt" content="סימבה מלך הצעצועים" />
         <meta name="twitter:card" content="summary_large_image" />

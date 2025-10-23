@@ -295,9 +295,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   };
 
   const buildProductDescription = (p) => {
-    if (!p) return 'חנות צעצועים לילדים בישראל – מגוון ענק במחירים נוחים';
+    if (!p) return 'חנות צעצועים לילדים בישראל – צעצועים איכותיים במחירים נוחים';
     const desc = getTranslatedDescription(p, i18n.language) || p.descriptionHe || p.description || '';
-    return (desc || 'חנות צעצועים לילדים בישראל – מגוון ענק במחירים נוחים').slice(0, 300);
+    return (desc || 'חנות צעצועים לילדים בישראל – צעצועים איכותיים במחירים נוחים').slice(0, 300);
   };
 
   const getFirstImage = (p) => {

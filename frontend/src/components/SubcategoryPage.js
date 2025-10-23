@@ -246,7 +246,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
   
   const canonicalUrl = `${FRONTEND_URL || ''}/subcategory/${id}`;
   const subcategoryTitle = subcategory ? `${subcategory.name} – סימבה מלך הצעצועים` : 'סימבה מלך הצעצועים';
-  const subcategoryDescription = subcategory ? `${subcategory.name} – מבחר גדול בישראל` : 'חנות צעצועים לילדים בישראל – מגוון ענק במחירים נוחים';
+  const subcategoryDescription = subcategory ? `${subcategory.name} – מבחר גדול בישראל` : 'חנות צעצועים לילדים בישראל – צעצועים איכותיים במחירים נוחים';
 
   const subcategoryJsonLd = subcategory ? {
     '@context': 'https://schema.org',
