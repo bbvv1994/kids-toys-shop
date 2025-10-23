@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Container,
   Box,
@@ -16,6 +17,7 @@ import { useUser } from '../contexts/UserContext';
 
 // === Страница подтверждения email ===
 function ConfirmEmailPage() {
+    const { t } = useTranslation();
     const [status, setStatus] = useState('loading');
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
@@ -28,7 +30,7 @@ function ConfirmEmailPage() {
       
       if (!token) {
         setStatus('error');
-        setMessage('Некорректная ссылка подтверждения');
+        setMessage(t('auth.invalidConfirmationLink'));
         return;
       }
   
@@ -38,7 +40,7 @@ function ConfirmEmailPage() {
         .then(data => {
           if (data.message) {
             setStatus('success');
-            setMessage(data.message);
+            setMessage(t('auth.emailConfirmed'));
             
             // Если есть токен и данные пользователя, автоматически входим в аккаунт
             if (data.token && data.user) {
@@ -61,13 +63,13 @@ function ConfirmEmailPage() {
             }
           } else {
             setStatus('error');
-            setMessage(data.error || 'Ошибка подтверждения');
+            setMessage(data.error || t('auth.confirmationError'));
           }
         })
         .catch(error => {
           console.error('Confirm email error:', error);
           setStatus('error');
-          setMessage('Ошибка подтверждения email');
+          setMessage(t('auth.confirmationEmailError'));
         });
     }, [navigate, location]);
   
@@ -82,20 +84,20 @@ function ConfirmEmailPage() {
           {status === 'loading' && (
             <>
               <CircularProgress sx={{ mb: 2 }} />
-              <Typography variant="h6">Подтверждение email...</Typography>
+              <Typography variant="h6">{t('auth.confirmingEmail')}</Typography>
             </>
           )}
           {status === 'success' && (
             <>
               <CheckCircleIcon sx={{ fontSize: 60, color: 'success.main', mb: 2 }} />
               <Typography variant="h6" color="success.main" sx={{ mb: 2 }}>
-                Email подтверждён!
+                {t('auth.emailConfirmedTitle')}
               </Typography>
               <Typography variant="body1" sx={{ mb: 2 }}>
                 {message}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Вы автоматически войдёте в аккаунт и будете перенаправлены на главную страницу...
+                {t('auth.redirectMessage')}
               </Typography>
             </>
           )}
@@ -103,7 +105,7 @@ function ConfirmEmailPage() {
             <>
               <ErrorIcon sx={{ fontSize: 60, color: 'error.main', mb: 2 }} />
               <Typography variant="h6" color="error.main" sx={{ mb: 2 }}>
-                Ошибка подтверждения
+                {t('auth.confirmationErrorTitle')}
               </Typography>
               <Typography variant="body1" sx={{ mb: 3 }}>
                 {message}
@@ -136,7 +138,7 @@ function ConfirmEmailPage() {
                   transition: 'all 0.3s ease'
                 }}
               >
-                На главную
+                {t('common.goHome')}
               </Button>
               <Button 
                 onClick={() => window.location.reload()}
@@ -160,7 +162,7 @@ function ConfirmEmailPage() {
                   transition: 'all 0.3s ease'
                 }}
               >
-                Попробовать снова
+                {t('common.tryAgain')}
               </Button>
             </>
           )}

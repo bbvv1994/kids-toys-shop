@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 const API_URL = `${API_BASE_URL}/api/auth`;
 
 function ForgotPasswordDialog({ open, onClose }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [email, setEmail] = useState('');
   const [info, setInfo] = useState('');
   const [error, setError] = useState('');
@@ -69,7 +69,10 @@ function ForgotPasswordDialog({ open, onClose }) {
       const res = await fetch(`${API_URL}/forgot`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ 
+          email,
+          language: i18n.language 
+        })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || t('auth.error'));
@@ -165,7 +168,7 @@ function ForgotPasswordDialog({ open, onClose }) {
 }
 
 export default function AuthModal({ open, onClose, onLogin, onRegister, loading }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -238,7 +241,12 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
       const res = await fetch(`${API_URL}/${isLogin ? 'login' : 'register'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name: isLogin ? undefined : name })
+        body: JSON.stringify({ 
+          email, 
+          password, 
+          name: isLogin ? undefined : name,
+          language: i18n.language // Передаем текущий язык интерфейса
+        })
       });
       const data = await res.json();
       
@@ -256,9 +264,8 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
         // Закрываем диалоговое окно после успешного входа
         onClose();
       } else {
-        // Показываем сообщение от сервера или стандартное
-        const message = data.message || t('auth.registerSuccess');
-        setInfo(message);
+        // Всегда показываем переведенное сообщение
+        setInfo(t('auth.registerSuccess'));
         
         // Передаем данные пользователя для модального окна подтверждения
         const userData = {
@@ -272,8 +279,10 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
       console.error('Auth error:', e);
       
       // Проверяем специальные ошибки
-      if (e.message.includes('зарегистрирован через Google')) {
+      if (e.message.includes(t('auth.googleAccountErrorText'))) {
         setError(t('auth.googleAccountError'));
+      } else if (e.message.includes('Пользователь уже существует') || e.message.includes('User already exists') || e.message.includes('duplicate key')) {
+        setError(t('auth.userAlreadyExists'));
       } else {
         setError(e.message);
       }
@@ -429,30 +438,7 @@ export default function AuthModal({ open, onClose, onLogin, onRegister, loading 
         >
           {t('auth.loginWithGoogle')}
         </Button>
-        <Button
-          variant="contained"
-          fullWidth
-          sx={{ 
-            textTransform: 'none',
-            background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
-            color: '#fff',
-            borderRadius: 2,
-            fontWeight: 600,
-            fontSize: 15,
-            py: 1.5,
-            height: 44,
-            boxShadow: '0 2px 8px rgba(25, 118, 210, 0.3)',
-            '&:hover': {
-              background: 'linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)',
-              boxShadow: '0 4px 12px rgba(25, 118, 210, 0.4)',
-              transform: 'translateY(-1px)'
-            },
-          }}
-          onClick={() => handleOAuth('facebook')}
-          disabled={loading}
-        >
-          {t('auth.loginWithFacebook')}
-        </Button>
+        {/* Facebook авторизация отключена - не работает для всех пользователей */}
         <Box sx={{ mt: 2, textAlign: 'center' }}>
           <Button 
             onClick={handleSwitch} 

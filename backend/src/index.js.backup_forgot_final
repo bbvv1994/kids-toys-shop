@@ -2032,34 +2032,67 @@ app.delete('/api/profile', authMiddleware, async (req, res) => {
 // === Восстановление пароля: запрос ===
 app.post('/api/auth/forgot', async (req, res) => {
   try {
-    const { email, language: frontendLanguage } = req.body;
-    
-    const acceptLanguage = req.headers['accept-language'] || '';
-    const language = frontendLanguage || (acceptLanguage.includes('ru') ? 'ru' : 'he');
-    
-    console.log('🔐 Password reset request for:', email);
-    console.log('🌐 Language detection:', { frontendLanguage, acceptLanguage, finalLanguage: language });
-    
+    const { email } = req.body;
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(200).json({ message: 'Если email зарегистрирован, письмо отправлено' });
-    
     const resetToken = crypto.randomBytes(32).toString('hex');
     await prisma.user.update({ where: { id: user.id }, data: { verificationToken: resetToken } });
-    
+    // Отправка письма
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-    
-    const template = emailTemplates.passwordReset[language];
-    console.log('📧 Email template selection:', { language, hasTemplate: !!template });
-    
-    const emailHtml = template.html(user.name || email, resetUrl);
-    
-    await sendEmail(email, template.subject, emailHtml, language);
-    res.json({ message: language === 'ru' ? 'Если email зарегистрирован, письмо отправлено' : 'אם האימייל רשום במערכת, נשלח לך אימייל לשחזור הסיסמה' });
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+        <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #3f51b5; margin: 0; font-size: 28px;">🔐 Восстановление пароля</h1>
+          </div>
+          
+          <div style="margin-bottom: 25px;">
+            <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
+              Уважаемый(ая) <strong>${user.name || 'клиент'}</strong>!
+            </p>
+          </div>
+          
+          <div style="margin-bottom: 25px;">
+            <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
+              Мы получили запрос на восстановление пароля для вашего аккаунта в Kids Toys Shop.
+            </p>
+          </div>
+          
+          <div style="margin-bottom: 30px; text-align: center;">
+            <a href="${resetUrl}" style="display: inline-block; background-color: #3f51b5; color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-size: 16px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+              🔑 Сбросить пароль
+            </a>
+          </div>
+          
+          <div style="margin-bottom: 25px;">
+            <p style="color: #666; font-size: 14px; line-height: 1.5; margin: 0;">
+              Если вы не запрашивали восстановление пароля, просто проигнорируйте это письмо.
+            </p>
+          </div>
+          
+          <div style="margin-bottom: 25px;">
+            <p style="color: #666; font-size: 14px; line-height: 1.5; margin: 0;">
+              Ссылка действительна в течение 24 часов.
+            </p>
+          </div>
+          
+          <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;">
+            <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
+              С уважением,<br>
+              <strong>Команда Kids Toys Shop</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+    await sendEmail(email, 'Восстановление пароля - Kids Toys Shop', emailHtml);
+    res.json({ message: 'אם האימייל רשום במערכת, נשלח לך אימייל לשחזור הסיסמה' });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ error: 'Ошибка восстановления пароля' });
   }
 });
+
 // === Восстановление пароля: сброс ===
 app.post('/api/auth/reset', async (req, res) => {
   try {

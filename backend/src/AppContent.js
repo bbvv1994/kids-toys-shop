@@ -88,7 +88,6 @@ import { getTranslatedName } from '../utils/translationUtils';
 import { transformCategoriesForNavigation } from '../utils/categoryIcon';
 import { getSpeechRecognitionLanguage, getSpeechRecognitionErrorMessage, isSpeechRecognitionSupported } from '../utils/speechRecognitionUtils';
 import { useDeviceType } from '../utils/deviceDetection';
-import { normalizeUserName } from '../utils/userUtils';
 import Lenis from 'lenis';
 import LazyImage from './LazyImage';
 import ElegantProductCarousel from './ElegantProductCarousel';
@@ -1751,13 +1750,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                     </Button>
                   ) : null}
                   <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#fff', mt: 0.5, textAlign: 'center', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {user ? (() => {
-                      console.log('=== App Bar Name Display ===');
-                      console.log('user.name:', user.name);
-                      console.log('user.name (bytes):', user.name ? new TextEncoder().encode(user.name).toString('hex') : 'null');
-                      console.log('normalizeUserName result:', normalizeUserName(user.name));
-                      return user.name && user.name.trim().length > 0 ? normalizeUserName(user.name) : user.email;
-                    })() : t('header.login')}
+                    {user ? (user.name && user.name.trim().length > 0 ? user.name : user.email) : t('header.login')}
                   </Typography>
                 </Box>
                 {/* Корзина */}
@@ -2838,7 +2831,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                         >
                           <Box sx={{ mr: 2, color: '#FFB300' }}>
                             <img 
-                              src={category.icon || `${API_BASE_URL}${getCategoryIcon(category.name)}`} 
+                              src={category.icon || getCategoryIcon(category.name)} 
                               alt={category.name}
                               style={{ width: 24, height: 24, objectFit: 'contain' }}
                             />

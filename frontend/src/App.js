@@ -1217,7 +1217,7 @@ function App() {
       <Helmet>
         <html lang="he" />
         <title>סימבה מלך הצעצועים | חנות צעצועים לילדים בישראל</title>
-        <meta name="description" content="חנות צעצועים לילדים בישראל – צעצועים, משחקי קופסה, לגו, יצירה ועוד. משלוחים לכל הארץ ושירות לקוחות מעולה." />
+        <meta name="description" content="חנות צעצועים לילדים בישראל – צעצועים איכותיים, משחקי קופסה, לגו, יצירה ועוד. איכות מעולה במחירים נוחים." />
         <meta name="robots" content="index, follow, max-image-preview:large" />
         <meta property="og:locale" content="he_IL" />
         <meta property="og:type" content="website" />

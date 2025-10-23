@@ -223,6 +223,16 @@ export const ProductsProvider = ({ children }) => {
     }
   };
 
+  // Добавляем функцию в глобальный объект для доступа из CMS
+  useEffect(() => {
+    window.refreshProductsContextCategories = refreshCategories;
+    console.log('🔧 refreshProductsContextCategories function registered globally');
+    
+    return () => {
+      delete window.refreshProductsContextCategories;
+    };
+  }, [refreshCategories]);
+
   const value = {
     products,
     setProducts,

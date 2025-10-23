@@ -390,16 +390,16 @@ function CMSCategories({ loadCategoriesFromAPI }) {
               let newIconPath;
               const imagePath = updatedCategory.icon || updatedCategory.image;
               if (imagePath) {
-                // Если изображение содержит временную метку (175...), это загруженный файл
-                if (imagePath.match(/^175\d+/)) {
+                // Если изображение содержит временную метку (175... или 176...), это загруженный файл
+                if (imagePath.match(/^(175|176)\d+/)) {
                   newIconPath = `${API_BASE_URL}/uploads/${imagePath}?t=${Date.now()}`;
                 } else {
                   // Если это старый файл из public папки
-                  newIconPath = `${API_BASE_URL}/public/${imagePath}?t=${Date.now()}`;
+                  newIconPath = `${API_BASE_URL}/${imagePath}?t=${Date.now()}`;
                 }
               } else {
                 // Если нет изображения, используем fallback
-                newIconPath = `${API_BASE_URL}/public${getCategoryIconForAPI(updatedCategory.name)}?t=${Date.now()}`;
+                newIconPath = `${API_BASE_URL}${getCategoryIconForAPI(updatedCategory.name)}?t=${Date.now()}`;
               }
               
               console.log('🔄 Обновляем иконку категории:', {
@@ -565,7 +565,30 @@ function CMSCategories({ loadCategoriesFromAPI }) {
             </IconButton>
           )}
           {cat.parentId == null && (() => {
-            const iconUrl = getCategoryIcon(cat);
+            // Используем локальную логику для получения иконки
+            let iconUrl;
+            const imagePath = cat.image || cat.icon;
+            
+            console.log('🔍 CMS Icon Debug:', {
+              categoryId: cat.id,
+              categoryName: cat.name,
+              catImage: cat.image,
+              catIcon: cat.icon,
+              imagePath: imagePath,
+              isUploadedFile: imagePath && imagePath.match(/^(175|176)\d+/),
+              timestamp: new Date().toISOString()
+            });
+            
+            if (imagePath) {
+              // Все файлы идут в uploads, так как они загружены через CMS
+              iconUrl = `${API_BASE_URL}/uploads/${imagePath}?t=${Date.now()}`;
+              console.log('✅ Using uploads path:', iconUrl);
+            } else {
+              // Если нет изображения, используем fallback
+              iconUrl = `${API_BASE_URL}${getCategoryIconForAPI(cat.name)}?t=${Date.now()}`;
+              console.log('✅ Using fallback path:', iconUrl);
+            }
+            
             console.log('🖼️ CMS Icon render:', {
               categoryId: cat.id,
               categoryName: cat.name,
@@ -579,7 +602,7 @@ function CMSCategories({ loadCategoriesFromAPI }) {
               <img 
                 key={`${cat.id}-${cat.image}-${cat._forceUpdate || ''}`}
                 src={iconUrl} 
-                alt="icon" 
+                alt={`Иконка категории ${cat.name}`}
                 style={{ width: 32, height: 32, marginLeft: '4px', marginRight: 12, borderRadius: 0, objectFit: 'cover' }} 
                 onLoad={() => console.log('✅ Image loaded successfully:', iconUrl)}
                 onError={(e) => console.log('❌ Image failed to load:', iconUrl, e)}

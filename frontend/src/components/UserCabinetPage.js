@@ -1094,12 +1094,12 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
       e.preventDefault();
       
       if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-        alert('Новые пароли не совпадают');
+        alert(t('auth.passwordsDoNotMatch'));
         return;
       }
       
       if (passwordForm.newPassword.length < 6) {
-        alert('Новый пароль должен содержать минимум 6 символов');
+        alert(t('auth.passwordMinLength'));
         return;
       }
       
@@ -1108,7 +1108,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
       
       // Для пользователей с паролем проверяем текущий пароль
       if (hasPassword && !passwordForm.currentPassword) {
-        alert('Введите текущий пароль');
+        alert(t('auth.enterCurrentPassword'));
         return;
       }
       
@@ -1142,11 +1142,11 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
           setTimeout(() => setPasswordSaved(false), 3000);
         } else {
           const errorData = await response.json();
-          alert('Ошибка смены пароля: ' + (errorData.error || 'Неизвестная ошибка'));
+          alert(t('auth.changePasswordError') + ': ' + (errorData.error || t('common.unknownError')));
         }
       } catch (error) {
         console.error('Ошибка смены пароля:', error);
-        alert('Ошибка смены пароля');
+        alert(t('auth.changePasswordError'));
       } finally {
         setPasswordLoading(false);
       }
