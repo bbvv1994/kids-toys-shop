@@ -86,7 +86,7 @@ const BulkImportProducts = ({ categories = [] }) => {
           // Обработка CSV файла
           const csvText = e.target.result;
           const lines = csvText.split('\n');
-          const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+          const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '')).filter(h => h);
           jsonData = [headers];
           
           for (let i = 1; i < lines.length; i++) {
@@ -109,7 +109,8 @@ const BulkImportProducts = ({ categories = [] }) => {
           return;
         }
 
-        const headers = jsonData[0];
+        // Фильтруем пустые заголовки и конвертируем в строки
+        const headers = jsonData[0].map(h => h ? String(h).trim() : '').filter(h => h);
         const rows = jsonData.slice(1).filter(row => row.some(cell => cell !== null && cell !== ''));
 
         const parsed = rows.map((row, index) => {
@@ -126,6 +127,9 @@ const BulkImportProducts = ({ categories = [] }) => {
         // Автоматическое определение маппинга полей
         const autoMapping = {};
         headers.forEach(header => {
+          // Проверяем, что header это строка и не пустой
+          if (!header || typeof header !== 'string') return;
+          
           const headerLower = header.toLowerCase();
           if (headerLower.includes('название') || headerLower.includes('name')) {
             if (headerLower.includes('иврит') || headerLower.includes('hebrew') || headerLower.includes('he')) {
