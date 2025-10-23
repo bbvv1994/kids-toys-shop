@@ -2725,6 +2725,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     gap: 1
                   }}>
                                           <Box 
+                        ref={galleryRef}
                         sx={{ 
                           width: '100vw', 
                           height: '100vh', 
@@ -2735,7 +2736,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                           top: 0,
                           left: 0,
                           right: 0,
-                          cursor: modalScale > 1 ? 'zoom-out' : 'zoom-in',
                           touchAction: modalScale > 1 ? 'none' : 'pan-x',
                           userSelect: 'none',
                           WebkitUserSelect: 'none',
