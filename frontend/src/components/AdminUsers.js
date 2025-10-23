@@ -26,7 +26,6 @@ import {
   Container
 } from '@mui/material';
 import {
-  Edit,
   Delete,
   NotificationsActive,
   People,
@@ -345,18 +344,6 @@ const AdminUsers = () => {
                     </TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-                        <Tooltip title="Редактировать">
-                          <span>
-                            <IconButton disabled size="small" sx={{
-                              color: '#1976d2',
-                              '&:hover': {
-                                backgroundColor: '#e3f2fd'
-                              }
-                            }}>
-                              <Edit />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
                         <Tooltip title="Удалить">
                           <span>
                             <IconButton 
