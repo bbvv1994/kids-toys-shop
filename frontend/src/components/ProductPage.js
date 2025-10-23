@@ -1294,7 +1294,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     if (isSwiping && touchStart && touchEnd) {
       // Обработка завершения свайпа (только если изображение не увеличено)
       const distance = touchStart - touchEnd;
-      const minSwipeDistance = 50; // Минимальное расстояние для свайпа
+      const minSwipeDistance = 30; // Минимальное расстояние для свайпа (как в нативной галерее)
       const realImages = getRealImages();
 
       if (distance > minSwipeDistance) {
