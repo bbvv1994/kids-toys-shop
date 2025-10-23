@@ -503,45 +503,28 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     setIsDesktopZoomActive(false);
   }, [galleryIndex]);
 
-  // Регистрация touch обработчиков для галереи с правильными опциями
-  useEffect(() => {
-    if (!galleryOpen) return;
-    
-    const galleryElement = galleryRef.current;
-    if (!galleryElement) return;
+  // Обработчики для touch событий (теперь через props, не addEventListener)
+  const handleGalleryTouchStart = (e) => {
+    console.log('📱 Gallery Touch Start (JSX)');
+    // Не preventDefault если это кнопка
+    if (!e.target.closest('button') && e.target.tagName !== 'BUTTON') {
+      e.preventDefault();
+    }
+    onGalleryTouchStart(e);
+  };
 
-    const handleTouchStart = (e) => {
-      // Не preventDefault если это кнопка
-      if (!e.target.closest('button') && e.target.tagName !== 'BUTTON') {
-        e.preventDefault();
-      }
-      onGalleryTouchStart(e);
-    };
+  const handleGalleryTouchMove = (e) => {
+    // Не preventDefault если это кнопка
+    if (!e.target.closest('button') && e.target.tagName !== 'BUTTON') {
+      e.preventDefault();
+    }
+    onGalleryTouchMove(e);
+  };
 
-    const handleTouchMove = (e) => {
-      // Не preventDefault если это кнопка
-      if (!e.target.closest('button') && e.target.tagName !== 'BUTTON') {
-        e.preventDefault();
-      }
-      onGalleryTouchMove(e);
-    };
-
-    const handleTouchEnd = (e) => {
-      onGalleryTouchEnd(e);
-    };
-
-    // Регистрируем обработчики с passive: false
-    galleryElement.addEventListener('touchstart', handleTouchStart, { passive: false });
-    galleryElement.addEventListener('touchmove', handleTouchMove, { passive: false });
-    galleryElement.addEventListener('touchend', handleTouchEnd, { passive: false });
-
-    return () => {
-      galleryElement.removeEventListener('touchstart', handleTouchStart);
-      galleryElement.removeEventListener('touchmove', handleTouchMove);
-      galleryElement.removeEventListener('touchend', handleTouchEnd);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [galleryOpen]);
+  const handleGalleryTouchEnd = (e) => {
+    console.log('📱 Gallery Touch End (JSX)');
+    onGalleryTouchEnd(e);
+  };
 
   // Блокировка скролла страницы при открытии галереи
   useEffect(() => {
@@ -1142,6 +1125,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   // Функции для свайпа в галерее (для мобильных устройств)
   const onGalleryTouchStart = (e) => {
+    console.log('🟢 Touch Start:', e.targetTouches.length, 'touches, modalScale:', modalScale);
+    
     // Предотвращаем стандартные touch события только если это не кнопка
     if (!e.target.closest('button') && e.target.tagName !== 'BUTTON') {
       e.preventDefault();
@@ -1186,6 +1171,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     }
     
     if (isSwiping && e.targetTouches.length === 1 && modalScale <= 1) {
+      console.log('🔵 Swiping...');
       // Обработка свайпа с плавной анимацией в реальном времени (только если не увеличен)
       const currentTouch = e.targetTouches[0].clientX;
       setTouchEnd(currentTouch);
@@ -1204,6 +1190,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
         }
       }
     } else if (isZooming && e.targetTouches.length === 2) {
+      console.log('🔵 Zooming with 2 fingers...');
       // Обработка zoom
       const currentDistance = Math.hypot(
         e.targetTouches[0].clientX - e.targetTouches[1].clientX,
@@ -2728,6 +2715,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   }}>
                                           <Box 
                         ref={galleryRef}
+                        onTouchStart={handleGalleryTouchStart}
+                        onTouchMove={handleGalleryTouchMove}
+                        onTouchEnd={handleGalleryTouchEnd}
                         sx={{ 
                           width: '100vw', 
                           height: '100vh', 
