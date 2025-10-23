@@ -178,14 +178,27 @@ async function getTranslationFields() {
 // Функция для отправки email через Brevo с поддержкой локализации
 async function sendEmail(to, subject, htmlContent, language = 'he') {
   try {
-    console.log('sendEmail called with:', { to, subject, hasHtmlContent: !!htmlContent, language });
-    console.log('BREVO_API_KEY exists:', !!process.env.BREVO_API_KEY);
-    console.log('apiInstance exists:', !!apiInstance);
+    console.log('📧 sendEmail called with:', { 
+      to, 
+      subject, 
+      hasHtmlContent: !!htmlContent, 
+      htmlLength: htmlContent?.length || 0,
+      language 
+    });
+    console.log('🔑 BREVO_API_KEY exists:', !!process.env.BREVO_API_KEY);
+    console.log('🔌 apiInstance exists:', !!apiInstance);
     
-    // Если нет API ключа или экземпляра, используем fallback
+    // Проверяем что HTML контент не пустой
+    if (!htmlContent || htmlContent.length < 50) {
+      console.error('❌ HTML content is empty or too short:', htmlContent?.length || 0);
+      throw new Error('Email HTML content is empty or invalid');
+    }
+    
+    // Если нет API ключа или экземпляра, логируем но продолжаем
     if (!process.env.BREVO_API_KEY || !apiInstance) {
-      console.log('Brevo API not configured, skipping email send');
-      return true;
+      console.warn('⚠️ Brevo API not configured, email will not be sent');
+      console.log('📋 Email would have been sent:', { to, subject, language });
+      return true; // Возвращаем true для тестирования без API
     }
     
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
@@ -197,17 +210,40 @@ async function sendEmail(to, subject, htmlContent, language = 'he') {
       email: 'noreply.simba.tzatzuim@gmail.com' 
     };
     
-    console.log('Sending email with sender:', sendSmtpEmail.sender);
-    console.log('Email to:', to);
-    console.log('Email subject:', subject);
-    console.log('Email language:', language);
+    console.log('📤 Sending email with params:', {
+      sender: sendSmtpEmail.sender,
+      to: to,
+      subject: subject,
+      language: language,
+      htmlContentLength: htmlContent.length
+    });
 
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log('Email sent successfully:', result);
+    console.log('✅ Email sent successfully via Brevo:', {
+      messageId: result?.messageId || 'unknown',
+      to: to
+    });
     return true;
   } catch (error) {
-    console.error('Error sending email:', error);
-    return false;
+    console.error('❌ Error sending email:', {
+      error: error.message,
+      to: to,
+      subject: subject,
+      statusCode: error.response?.statusCode,
+      body: error.response?.body
+    });
+    
+    // Если это ошибка от Brevo API, выводим детали
+    if (error.response) {
+      console.error('Brevo API error details:', {
+        status: error.response.statusCode,
+        text: error.response.text,
+        body: error.response.body
+      });
+    }
+    
+    // Бросаем ошибку дальше, чтобы вызывающий код знал о проблеме
+    throw error;
   }
 }
 
@@ -2047,16 +2083,42 @@ app.post('/api/auth/forgot', async (req, res) => {
     await prisma.user.update({ where: { id: user.id }, data: { verificationToken: resetToken } });
     
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    console.log('🔗 Reset URL generated:', resetUrl);
     
     const template = emailTemplates.passwordReset[language];
-    console.log('📧 Email template selection:', { language, hasTemplate: !!template });
+    console.log('📧 Email template selection:', { 
+      language, 
+      hasTemplate: !!template,
+      hasSubject: !!template?.subject,
+      hasHtmlFunction: typeof template?.html === 'function'
+    });
+    
+    if (!template || !template.html) {
+      console.error('❌ Email template not found for language:', language);
+      throw new Error(`Email template not found for language: ${language}`);
+    }
     
     const emailHtml = template.html(user.name || email, resetUrl);
+    console.log('📝 Email HTML generated, length:', emailHtml?.length || 0);
     
-    await sendEmail(email, template.subject, emailHtml, language);
+    if (!emailHtml || emailHtml.length < 100) {
+      console.error('❌ Email HTML is empty or too short!');
+      throw new Error('Failed to generate email HTML');
+    }
+    
+    console.log('📤 Attempting to send email to:', email);
+    const emailSent = await sendEmail(email, template.subject, emailHtml, language);
+    
+    if (emailSent) {
+      console.log('✅ Password reset email sent successfully to:', email);
+    } else {
+      console.warn('⚠️ Email sending returned false, but no error thrown');
+    }
+    
     res.json({ message: language === 'ru' ? 'Если email зарегистрирован, письмо отправлено' : 'אם האימייל רשום במערכת, נשלח לך אימייל לשחזור הסיסמה' });
   } catch (error) {
-    console.error('Forgot password error:', error);
+    console.error('❌ Forgot password error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ error: 'Ошибка восстановления пароля' });
   }
 });
