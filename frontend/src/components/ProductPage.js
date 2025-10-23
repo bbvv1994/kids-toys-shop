@@ -505,6 +505,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   // Регистрация touch обработчиков для галереи с правильными опциями
   useEffect(() => {
+    if (!galleryOpen) return;
+    
     const galleryElement = galleryRef.current;
     if (!galleryElement) return;
 
@@ -2708,7 +2710,6 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               overscrollBehavior: 'none',
               WebkitOverflowScrolling: 'touch'
             }}
-            ref={galleryRef}
           >
             {(() => {
               const realImages = getRealImages();
