@@ -1184,7 +1184,7 @@ app.post('/api/products/:id/questions', authMiddleware, async (req, res) => {
 👤 <b>Пользователь:</b> ${user?.name || 'Не указано'}
 📧 <b>Email:</b> ${user?.email || 'Не указано'}
 ❓ <b>Вопрос:</b> ${question.trim()}
-📅 <b>Дата:</b> ${new Date().toLocaleString('ru-RU')}
+📅 <b>Дата:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
       `.trim();
       console.log('🚀 About to send Telegram notification for product question');
       await sendTelegramNotification(telegramMessage);
@@ -2388,7 +2388,7 @@ ${order.items.map(item => `• ${item.product.name} x${item.quantity} - ₪${ite
               <h3 style="color: #3f51b5; margin: 0 0 15px 0; font-size: 18px;">📋 Детали заказа</h3>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
                 <div><strong>Номер заказа:</strong> #${order.id}</div>
-                <div><strong>Дата заказа:</strong> ${new Date().toLocaleString('ru-RU')}</div>
+                <div><strong>Дата заказа:</strong> ${new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Jerusalem' })}</div>
                 <div><strong>Самовывоз из:</strong> ${getStoreInfo(pickupStore).name}</div>
                 <div><strong>Способ оплаты:</strong> ${paymentMethod === 'card' ? '💳 Карта' : '💰 Наличными или картой'}</div>
               </div>
@@ -2592,7 +2592,7 @@ ${order.items.map(item => `• ${item.product.name} x${item.quantity} - ₪${ite
               <h3 style="color: #3f51b5; margin: 0 0 15px 0; font-size: 18px;">📋 Детали заказа</h3>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
                 <div><strong>Номер заказа:</strong> #${order.id}</div>
-                <div><strong>Дата заказа:</strong> ${new Date().toLocaleString('ru-RU')}</div>
+                <div><strong>Дата заказа:</strong> ${new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Jerusalem' })}</div>
                 <div><strong>Самовывоз из:</strong> ${getStoreInfo(pickupStore).name}</div>
                 <div><strong>Способ оплаты:</strong> ${paymentMethod === 'card' ? '💳 Карта' : '💰 Наличными или картой'}</div>
               </div>
@@ -2781,7 +2781,7 @@ ${cartItems.map(item => `• ${item.productName} x${item.quantity} - ₪${item.p
               <h3 style="color: #3f51b5; margin: 0 0 15px 0; font-size: 18px;">📋 Детали заказа</h3>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
                 <div><strong>Номер заказа:</strong> #${order.id}</div>
-                <div><strong>Дата заказа:</strong> ${new Date().toLocaleString('ru-RU')}</div>
+                <div><strong>Дата заказа:</strong> ${new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Jerusalem' })}</div>
                 <div><strong>Самовывоз из:</strong> ${getStoreInfo(pickupStore).name}</div>
                 <div><strong>Способ оплаты:</strong> ${paymentMethod === 'card' ? '💳 Карта' : '💰 Наличными или картой'}</div>
               </div>
@@ -5347,7 +5347,7 @@ app.post('/api/contact', async (req, res) => {
 
 ${message}
 
-⏰ <b>Время:</b> ${new Date().toLocaleString('ru-RU')}
+⏰ <b>Время:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
 🌐 <b>Источник:</b> Форма обратной связи
     `.trim();
     
