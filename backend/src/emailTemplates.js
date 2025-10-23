@@ -312,19 +312,40 @@ const emailTemplates = {
   // Письмо подтверждения заказа
   orderConfirmation: {
     he: {
-      subject: 'אישור הזמנה #{{orderId}} - סימבה מלך הצעצועים',
-      html: (orderData) => `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
-          <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #4caf50; margin: 0; font-size: 28px;">✅ הזמנה התקבלה!</h1>
-            </div>
-            
-            <div style="margin-bottom: 25px;">
-              <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
-                שלום ${orderData.customerName}! ההזמנה שלך התקבלה בהצלחה.
-              </p>
-            </div>
+      subject: (orderData) => {
+        const time = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
+        return `אישור הזמנה #${orderData.orderId} ${time} - סימבה מלך הצעצועים`;
+      },
+      html: (orderData) => {
+        const timestamp = new Date().toISOString();
+        const uniqueId = Math.random().toString(36).substring(7);
+        return `
+        <!DOCTYPE html>
+        <html dir="rtl" lang="he">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="x-request-id" content="${uniqueId}">
+          <meta name="x-timestamp" content="${timestamp}">
+          <title>אישור הזמנה</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; direction: rtl;">
+          <!-- Unique identifier: ${uniqueId} at ${timestamp} -->
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; direction: rtl;">
+            <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <img src="https://simba-tzatzuim.co.il/lion-logo.png..png" alt="סימבה מלך הצעצועים" style="max-width: 120px; height: auto;" />
+              </div>
+              <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #4caf50; margin: 0; font-size: 28px; direction: rtl;">✅ הזמנה התקבלה!</h1>
+              </div>
+              
+              <div style="margin-bottom: 25px; direction: rtl;">
+                <span style="display:none;">${uniqueId}-${timestamp}</span>
+                <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0; text-align: right;">
+                  שלום ${orderData.customerName}!<span style="color: #fff; font-size: 1px;">${uniqueId}</span> ההזמנה שלך התקבלה בהצלחה.
+                </p>
+              </div>
             
             <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 25px 0;">
               <h3 style="color: #3f51b5; margin: 0 0 15px 0; font-size: 18px;">📋 פרטי ההזמנה</h3>
@@ -357,30 +378,56 @@ const emailTemplates = {
               </div>
             </div>
             
-            <div style="margin-top: 25px; text-align: center;">
-              <p style="color: #999; font-size: 12px; margin: 0;">
-                בברכה,<br>
-                <strong>צוות סימבה מלך הצעצועים</strong>
+            <div style="margin-top: 25px; text-align: center; direction: rtl;">
+              <p style="color: #999; font-size: 12px; margin: 5px 0;">
+                בברכה,
+              </p>
+              <p style="color: #4caf50; font-size: 14px; margin: 5px 0; font-weight: bold;">
+                צוות סימבה מלך הצעצועים 🧸<span style="display:none;">${uniqueId}</span>
               </p>
             </div>
           </div>
         </div>
-      `
+        </body>
+        </html>
+      `;
+      }
     },
     ru: {
-      subject: 'Подтверждение заказа #{{orderId}} - סימבה מלך הצעצועים',
-      html: (orderData) => `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
-          <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #4caf50; margin: 0; font-size: 28px;">✅ Заказ принят!</h1>
-            </div>
-            
-            <div style="margin-bottom: 25px;">
-              <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">
-                Здравствуйте, ${orderData.customerName}! Ваш заказ успешно принят.
-              </p>
-            </div>
+      subject: (orderData) => {
+        const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
+        return `Подтверждение заказа #${orderData.orderId} ${time} - סימבה מלך הצעצועים`;
+      },
+      html: (orderData) => {
+        const timestamp = new Date().toISOString();
+        const uniqueId = Math.random().toString(36).substring(7);
+        return `
+        <!DOCTYPE html>
+        <html dir="ltr" lang="ru">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="x-request-id" content="${uniqueId}">
+          <meta name="x-timestamp" content="${timestamp}">
+          <title>Подтверждение заказа</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; direction: ltr;">
+          <!-- Unique identifier: ${uniqueId} at ${timestamp} -->
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; direction: ltr;">
+            <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <img src="https://simba-tzatzuim.co.il/lion-logo.png..png" alt="סימבה מלך הצעצועים" style="max-width: 120px; height: auto;" />
+              </div>
+              <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #4caf50; margin: 0; font-size: 28px; direction: ltr;">✅ Заказ принят!</h1>
+              </div>
+              
+              <div style="margin-bottom: 25px; direction: ltr;">
+                <span style="display:none;">${uniqueId}-${timestamp}</span>
+                <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0; text-align: left;">
+                  Здравствуйте, ${orderData.customerName}!<span style="color: #fff; font-size: 1px;">${uniqueId}</span> Ваш заказ успешно принят.
+                </p>
+              </div>
             
             <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 25px 0;">
               <h3 style="color: #3f51b5; margin: 0 0 15px 0; font-size: 18px;">📋 Детали заказа</h3>
@@ -413,15 +460,20 @@ const emailTemplates = {
               </div>
             </div>
             
-            <div style="margin-top: 25px; text-align: center;">
-              <p style="color: #999; font-size: 12px; margin: 0;">
-                С уважением,<br>
-                <strong>Команда סימבה מלך הצעצועים</strong>
+            <div style="margin-top: 25px; text-align: center; direction: ltr;">
+              <p style="color: #999; font-size: 12px; margin: 5px 0;">
+                С уважением,
+              </p>
+              <p style="color: #4caf50; font-size: 14px; margin: 5px 0; font-weight: bold;">
+                Команда סימבה מלך הצעצועים 🧸<span style="display:none;">${uniqueId}</span>
               </p>
             </div>
           </div>
         </div>
-      `
+        </body>
+        </html>
+      `;
+      }
     }
   }
 };
