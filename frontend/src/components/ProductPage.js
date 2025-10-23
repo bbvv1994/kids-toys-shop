@@ -509,12 +509,18 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     if (!galleryElement) return;
 
     const handleTouchStart = (e) => {
-      e.preventDefault();
+      // Не preventDefault если это кнопка
+      if (!e.target.closest('button') && e.target.tagName !== 'BUTTON') {
+        e.preventDefault();
+      }
       onGalleryTouchStart(e);
     };
 
     const handleTouchMove = (e) => {
-      e.preventDefault();
+      // Не preventDefault если это кнопка
+      if (!e.target.closest('button') && e.target.tagName !== 'BUTTON') {
+        e.preventDefault();
+      }
       onGalleryTouchMove(e);
     };
 
@@ -1133,6 +1139,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   // Функции для свайпа в галерее (для мобильных устройств)
   const onGalleryTouchStart = (e) => {
+    // Не обрабатываем touch на кнопках
+    if (e.target.closest('button') || e.target.tagName === 'BUTTON') {
+      return;
+    }
+    
     e.preventDefault(); // Предотвращаем стандартные touch события
     
     if (e.targetTouches.length === 1) {
@@ -1168,6 +1179,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   };
 
   const onGalleryTouchMove = (e) => {
+    // Не обрабатываем touch на кнопках
+    if (e.target.closest('button') || e.target.tagName === 'BUTTON') {
+      return;
+    }
+    
     e.preventDefault(); // Предотвращаем стандартные touch события
     
     if (isSwiping && e.targetTouches.length === 1 && modalScale <= 1) {
@@ -2790,10 +2806,16 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 position: 'fixed',
                 top: 20,
                 right: 20,
-                zIndex: 100000,
-                pointerEvents: 'auto'
+                zIndex: 100001,
+                pointerEvents: 'auto',
+                touchAction: 'auto'
               }}>
                 <Button
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    resetZoom();
+                  }}
                   onClick={(e) => {
                     e.stopPropagation();
                     resetZoom();
@@ -2806,6 +2828,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     height: 48,
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
                     backdropFilter: 'blur(4px)',
+                    touchAction: 'auto',
+                    pointerEvents: 'auto',
                     '&:hover': {
                       background: 'rgba(40, 40, 40, 0.85)'
                     },
@@ -2825,10 +2849,16 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
               bottom: 20,
               left: '50%',
               transform: 'translateX(-50%)',
-              zIndex: 100000,
-              pointerEvents: 'auto'
+              zIndex: 100001,
+              pointerEvents: 'auto',
+              touchAction: 'auto'
             }}>
               <Button 
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCloseGallery();
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleCloseGallery();
@@ -2846,6 +2876,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   textTransform: 'none',
                   minWidth: 140,
                   border: 'none',
+                  touchAction: 'auto',
+                  pointerEvents: 'auto',
                   '&:hover': {
                     background: '#d32f2f',
                     boxShadow: '0 6px 20px rgba(244, 67, 54, 0.5)',
