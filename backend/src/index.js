@@ -1710,14 +1710,16 @@ app.post('/api/auth/register', async (req, res) => {
       templateHtmlLength: template?.html?.length
     });
     
+    const emailSubject = typeof template.subject === 'function' ? template.subject(name) : template.subject;
     const emailHtml = template.html(name || email, confirmUrl);
     
     console.log(`Отправляем email подтверждения на: ${email} (язык: ${language})`);
+    console.log('📧 Email subject:', emailSubject);
     console.log('DEBUG: Email confirmation link for ' + email + ': ' + confirmUrl);
     
     // Временно отключаем отправку email из-за проблем с Brevo API
     try {
-      await sendEmail(email, template.subject, emailHtml, language);
+      await sendEmail(email, emailSubject, emailHtml, language);
       console.log('Email подтверждения отправлен успешно');
     } catch (emailError) {
       console.log('⚠️ Email не отправлен из-за ошибки API, но ссылка для подтверждения доступна в логах');

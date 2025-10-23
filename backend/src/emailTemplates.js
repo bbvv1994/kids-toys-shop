@@ -4,16 +4,25 @@ const emailTemplates = {
   // Письмо подтверждения регистрации
   registrationConfirmation: {
     he: {
-      subject: 'אישור הרשמה - סימבה מלך הצעצועים',
-      html: (name, confirmUrl) => `
+      subject: (name) => {
+        const time = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
+        return `אישור הרשמה ${time} - סימבה מלך הצעצועים`;
+      },
+      html: (name, confirmUrl) => {
+        const timestamp = new Date().toISOString();
+        const uniqueId = Math.random().toString(36).substring(7);
+        return `
         <!DOCTYPE html>
         <html dir="rtl" lang="he">
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="x-request-id" content="${uniqueId}">
+          <meta name="x-timestamp" content="${timestamp}">
           <title>אישור הרשמה</title>
         </head>
         <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; direction: rtl;">
+          <!-- Unique identifier: ${uniqueId} at ${timestamp} -->
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; direction: rtl;">
             <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
               <div style="text-align: center; margin-bottom: 20px;">
@@ -24,8 +33,9 @@ const emailTemplates = {
               </div>
               
               <div style="margin-bottom: 25px; direction: rtl;">
+                <span style="display:none;">${uniqueId}-${timestamp}</span>
                 <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0; text-align: right;">
-                  שלום ${name}!
+                  שלום ${name}!<span style="color: #fff; font-size: 1px;">${uniqueId}</span>
                 </p>
                 <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 10px 0 0 0; text-align: right;">
                   תודה רבה על ההרשמה לחנות הצעצועים שלנו. אנחנו שמחים לקבל אותך למשפחת סימבה!
@@ -58,26 +68,36 @@ const emailTemplates = {
                   בברכה,
                 </p>
                 <p style="color: #3f51b5; font-size: 14px; margin: 5px 0; font-weight: bold;">
-                  צוות סימבה מלך הצעצועים 🧸
+                  צוות סימבה מלך הצעצועים 🧸<span style="display:none;">${uniqueId}</span>
                 </p>
               </div>
             </div>
           </div>
         </body>
         </html>
-      `
+      `;
+      }
     },
     ru: {
-      subject: 'Подтверждение регистрации - סימבה מלך הצעצועים',
-      html: (name, confirmUrl) => `
+      subject: (name) => {
+        const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
+        return `Подтверждение регистрации ${time} - סימבה מלך הצעצועים`;
+      },
+      html: (name, confirmUrl) => {
+        const timestamp = new Date().toISOString();
+        const uniqueId = Math.random().toString(36).substring(7);
+        return `
         <!DOCTYPE html>
         <html dir="ltr" lang="ru">
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="x-request-id" content="${uniqueId}">
+          <meta name="x-timestamp" content="${timestamp}">
           <title>Подтверждение регистрации</title>
         </head>
         <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; direction: ltr;">
+          <!-- Unique identifier: ${uniqueId} at ${timestamp} -->
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; direction: ltr;">
             <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
               <div style="text-align: center; margin-bottom: 20px;">
@@ -88,8 +108,9 @@ const emailTemplates = {
               </div>
               
               <div style="margin-bottom: 25px; direction: ltr;">
+                <span style="display:none;">${uniqueId}-${timestamp}</span>
                 <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0; text-align: left;">
-                  Здравствуйте, ${name}!
+                  Здравствуйте, ${name}!<span style="color: #fff; font-size: 1px;">${uniqueId}</span>
                 </p>
                 <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 10px 0 0 0; text-align: left;">
                   Спасибо большое за регистрацию в нашем магазине детских игрушек. Мы рады приветствовать вас в семье סימבה!
@@ -122,14 +143,15 @@ const emailTemplates = {
                   С уважением,
                 </p>
                 <p style="color: #3f51b5; font-size: 14px; margin: 5px 0; font-weight: bold;">
-                  Команда סימבה מלך הצעצועים 🧸
+                  Команда סימבה מלך הצעצועים 🧸<span style="display:none;">${uniqueId}</span>
                 </p>
               </div>
             </div>
           </div>
         </body>
         </html>
-      `
+      `;
+      }
     }
   },
 
