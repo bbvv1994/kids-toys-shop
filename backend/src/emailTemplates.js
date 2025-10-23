@@ -137,15 +137,21 @@ const emailTemplates = {
   passwordReset: {
     he: {
       subject: 'איפוס סיסמה - סימבה מלך הצעצועים',
-      html: (name, resetUrl) => `
+      html: (name, resetUrl) => {
+        const timestamp = new Date().toISOString();
+        const uniqueId = Math.random().toString(36).substring(7);
+        return `
         <!DOCTYPE html>
         <html dir="rtl" lang="he">
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="x-request-id" content="${uniqueId}">
+          <meta name="x-timestamp" content="${timestamp}">
           <title>איפוס סיסמה</title>
         </head>
         <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; direction: rtl;">
+          <!-- Unique identifier: ${uniqueId} at ${timestamp} -->
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; direction: rtl;">
             <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
               <div style="text-align: center; margin-bottom: 20px;">
@@ -192,24 +198,34 @@ const emailTemplates = {
                 <p style="color: #3f51b5; font-size: 14px; margin: 5px 0; font-weight: bold;">
                   צוות סימבה מלך הצעצועים 🧸
                 </p>
+                <p style="color: #ddd; font-size: 10px; margin: 15px 0 0 0; direction: ltr;">
+                  ${uniqueId} · ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' })}
+                </p>
               </div>
             </div>
           </div>
         </body>
         </html>
-      `
+      `;
+      }
     },
     ru: {
       subject: 'Восстановление пароля - סימבה מלך הצעצועים',
-      html: (name, resetUrl) => `
+      html: (name, resetUrl) => {
+        const timestamp = new Date().toISOString();
+        const uniqueId = Math.random().toString(36).substring(7);
+        return `
         <!DOCTYPE html>
         <html dir="ltr" lang="ru">
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="x-request-id" content="${uniqueId}">
+          <meta name="x-timestamp" content="${timestamp}">
           <title>Восстановление пароля</title>
         </head>
         <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; direction: ltr;">
+          <!-- Unique identifier: ${uniqueId} at ${timestamp} -->
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; direction: ltr;">
             <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
               <div style="text-align: center; margin-bottom: 20px;">
@@ -256,12 +272,16 @@ const emailTemplates = {
                 <p style="color: #3f51b5; font-size: 14px; margin: 5px 0; font-weight: bold;">
                   Команда סימבה מלך הצעצועים 🧸
                 </p>
+                <p style="color: #ddd; font-size: 10px; margin: 15px 0 0 0;">
+                  ${uniqueId} · ${new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Jerusalem' })}
+                </p>
               </div>
             </div>
           </div>
         </body>
         </html>
-      `
+      `;
+      }
     }
   },
 
