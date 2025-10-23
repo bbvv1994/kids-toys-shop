@@ -136,7 +136,10 @@ const emailTemplates = {
   // Письмо восстановления пароля
   passwordReset: {
     he: {
-      subject: 'איפוס סיסמה - סימבה מלך הצעצועים',
+      subject: (name) => {
+        const time = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
+        return `איפוס סיסמה ${time} - סימבה מלך הצעצועים`;
+      },
       html: (name, resetUrl) => {
         const timestamp = new Date().toISOString();
         const uniqueId = Math.random().toString(36).substring(7);
@@ -162,8 +165,9 @@ const emailTemplates = {
               </div>
               
               <div style="margin-bottom: 25px; direction: rtl;">
+                <span style="display:none;">${uniqueId}-${timestamp}</span>
                 <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0; text-align: right;">
-                  שלום ${name}!
+                  שלום ${name}!<span style="color: #fff; font-size: 1px;">${uniqueId}</span>
                 </p>
                 <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 10px 0 0 0; text-align: right;">
                   קיבלנו בקשה לאיפוס הסיסמה שלך בחנות הצעצועים שלנו.
@@ -196,10 +200,7 @@ const emailTemplates = {
                   בברכה,
                 </p>
                 <p style="color: #3f51b5; font-size: 14px; margin: 5px 0; font-weight: bold;">
-                  צוות סימבה מלך הצעצועים 🧸
-                </p>
-                <p style="color: #ddd; font-size: 10px; margin: 15px 0 0 0; direction: ltr;">
-                  ${uniqueId} · ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' })}
+                  צוות סימבה מלך הצעצועים 🧸<span style="display:none;">${uniqueId}</span>
                 </p>
               </div>
             </div>
@@ -210,7 +211,10 @@ const emailTemplates = {
       }
     },
     ru: {
-      subject: 'Восстановление пароля - סימבה מלך הצעצועים',
+      subject: (name) => {
+        const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' });
+        return `Восстановление пароля ${time} - סימבה מלך הצעצועים`;
+      },
       html: (name, resetUrl) => {
         const timestamp = new Date().toISOString();
         const uniqueId = Math.random().toString(36).substring(7);
@@ -236,8 +240,9 @@ const emailTemplates = {
               </div>
               
               <div style="margin-bottom: 25px; direction: ltr;">
+                <span style="display:none;">${uniqueId}-${timestamp}</span>
                 <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0; text-align: left;">
-                  Здравствуйте, ${name}!
+                  Здравствуйте, ${name}!<span style="color: #fff; font-size: 1px;">${uniqueId}</span>
                 </p>
                 <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 10px 0 0 0; text-align: left;">
                   Мы получили запрос на восстановление вашего пароля в нашем магазине детских игрушек.
@@ -270,10 +275,7 @@ const emailTemplates = {
                   С уважением,
                 </p>
                 <p style="color: #3f51b5; font-size: 14px; margin: 5px 0; font-weight: bold;">
-                  Команда סימבה מלך הצעצועים 🧸
-                </p>
-                <p style="color: #ddd; font-size: 10px; margin: 15px 0 0 0;">
-                  ${uniqueId} · ${new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Jerusalem' })}
+                  Команда סימבה מלך הצעצועים 🧸<span style="display:none;">${uniqueId}</span>
                 </p>
               </div>
             </div>

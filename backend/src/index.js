@@ -2098,8 +2098,10 @@ app.post('/api/auth/forgot', async (req, res) => {
       throw new Error(`Email template not found for language: ${language}`);
     }
     
+    const emailSubject = typeof template.subject === 'function' ? template.subject(user.name) : template.subject;
     const emailHtml = template.html(user.name || email, resetUrl);
     console.log('📝 Email HTML generated, length:', emailHtml?.length || 0);
+    console.log('📧 Email subject:', emailSubject);
     
     if (!emailHtml || emailHtml.length < 100) {
       console.error('❌ Email HTML is empty or too short!');
@@ -2107,7 +2109,7 @@ app.post('/api/auth/forgot', async (req, res) => {
     }
     
     console.log('📤 Attempting to send email to:', email);
-    const emailSent = await sendEmail(email, template.subject, emailHtml, language);
+    const emailSent = await sendEmail(email, emailSubject, emailHtml, language);
     
     if (emailSent) {
       console.log('✅ Password reset email sent successfully to:', email);
