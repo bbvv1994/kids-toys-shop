@@ -4106,11 +4106,81 @@ app.delete('/api/admin/users/:id', authMiddleware, async (req, res) => {
     return res.status(400).json({ error: 'Нельзя удалить другого администратора' });
   }
   try {
+    console.log(`🗑️ Admin: Starting deletion of user ${userId}`);
+    
+    // Удаляем все связанные записи в правильном порядке
+    
+    // 1. Удаляем элементы корзины
+    await prisma.cartItem.deleteMany({
+      where: {
+        cart: {
+          userId: userId
+        }
+      }
+    });
+    console.log(`🗑️ Admin: Deleted cart items for user ${userId}`);
+    
+    // 2. Удаляем корзину
+    await prisma.cart.deleteMany({ where: { userId: userId } });
+    console.log(`🗑️ Admin: Deleted cart for user ${userId}`);
+    
+    // 3. Удаляем элементы wishlist
+    await prisma.wishlistItem.deleteMany({
+      where: {
+        wishlist: {
+          userId: userId
+        }
+      }
+    });
+    console.log(`🗑️ Admin: Deleted wishlist items for user ${userId}`);
+    
+    // 4. Удаляем wishlist
+    await prisma.wishlist.deleteMany({ where: { userId: userId } });
+    console.log(`🗑️ Admin: Deleted wishlist for user ${userId}`);
+    
+    // 5. Удаляем скрытые отзывы (HiddenReview)
+    await prisma.hiddenReview.deleteMany({ where: { userId: userId } });
+    console.log(`🗑️ Admin: Deleted hidden reviews for user ${userId}`);
+    
+    // 6. Удаляем скрытые отзывы о магазине (HiddenShopReview)
+    await prisma.hiddenShopReview.deleteMany({ where: { userId: userId } });
+    console.log(`🗑️ Admin: Deleted hidden shop reviews for user ${userId}`);
+    
+    // 7. Удаляем скрытые заказы (UserHiddenOrder)
+    await prisma.userHiddenOrder.deleteMany({ where: { userId: userId } });
+    console.log(`🗑️ Admin: Deleted hidden orders for user ${userId}`);
+    
+    // 8. Удаляем отзывы о товарах
+    await prisma.review.deleteMany({ where: { userId: userId } });
+    console.log(`🗑️ Admin: Deleted product reviews for user ${userId}`);
+    
+    // 9. Удаляем вопросы о товарах
+    await prisma.productQuestion.deleteMany({ where: { userId: userId } });
+    console.log(`🗑️ Admin: Deleted product questions for user ${userId}`);
+    
+    // 10. Удаляем отзывы о магазине
+    await prisma.shopReview.deleteMany({ where: { userId: userId } });
+    console.log(`🗑️ Admin: Deleted shop reviews for user ${userId}`);
+    
+    // 11. Удаляем уведомления
+    await prisma.notification.deleteMany({ where: { userId: userId } });
+    console.log(`🗑️ Admin: Deleted notifications for user ${userId}`);
+    
+    // 12. Обнуляем userId в заказах (заказы оставляем для истории)
+    await prisma.order.updateMany({
+      where: { userId: userId },
+      data: { userId: null }
+    });
+    console.log(`🗑️ Admin: Nullified userId in orders for user ${userId}`);
+    
+    // 13. Наконец, удаляем самого пользователя
     await prisma.user.delete({ where: { id: userId } });
+    console.log(`✅ Admin: Successfully deleted user ${userId}`);
+    
     res.json({ message: 'Пользователь удалён' });
   } catch (error) {
-    console.error('Admin user delete error:', error);
-    res.status(500).json({ error: 'Ошибка удаления пользователя' });
+    console.error('❌ Admin user delete error:', error);
+    res.status(500).json({ error: 'Ошибка удаления пользователя: ' + error.message });
   }
 });
 
