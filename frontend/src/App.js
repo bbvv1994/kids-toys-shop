@@ -1221,11 +1221,20 @@ function App() {
         <meta name="robots" content="index, follow, max-image-preview:large" />
         <meta property="og:locale" content="he_IL" />
         <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="סימבה מלך הצעצועים" />
         <meta property="og:title" content="סימבה מלך הצעצועים" />
         <meta property="og:description" content="חנות צעצועים לילדים בישראל – צעצועים איכותיים במחירים נוחים" />
-        <meta property="og:image" content="/lion-logo.png" />
+        <meta property="og:url" content="https://simba-tzatzuim.co.il/" />
+        <meta property="og:image" content="https://simba-tzatzuim.co.il/lion-logo.png" />
+        <meta property="og:image:secure_url" content="https://simba-tzatzuim.co.il/lion-logo.png" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="512" />
+        <meta property="og:image:height" content="512" />
         <meta property="og:image:alt" content="סימבה מלך הצעצועים" />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="סימבה מלך הצעצועים" />
+        <meta name="twitter:description" content="חנות צעצועים לילדים בישראל – צעצועים איכותיים במחירים נוחים" />
+        <meta name="twitter:image" content="https://simba-tzatzuim.co.il/lion-logo.png" />
         <link rel="alternate" hrefLang="he" href="https://simba-tzatzuim.co.il/" />
         <link rel="alternate" hrefLang="ru" href="https://simba-tzatzuim.co.il/" />
         <link rel="alternate" hrefLang="x-default" href="https://simba-tzatzuim.co.il/" />
