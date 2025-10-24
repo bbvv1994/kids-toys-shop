@@ -23,6 +23,7 @@ const subcategoryImageMap = {
   'Шарики': 'shariki.webp',
   'Активные игры': 'Aktivnye-igry_11zon.webp',
   'Игрушки на радиоуправлении': 'Igrushki-na-radioupravlenii_11zon.webp',
+  'Маленькие сюрпризы': 'surprizi.jpg',
   
   // Конструкторы
   'Lego для мальчиков': 'podkategorii/konstruktor/legomalchiki.webp',
