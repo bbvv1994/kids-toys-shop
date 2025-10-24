@@ -336,21 +336,6 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
     // ВРЕМЕННЫЕ состояния и списки для фильтров
     const [selectedCategories, setSelectedCategories] = React.useState([]);
     const categories = ['Игрушки', 'Конструкторы', 'Пазлы', 'Творчество', 'Канцтовары', 'Транспорт', 'Отдых на воде', 'Настольные игры', 'Развивающие игры', 'Акции'];
-    const ageGroups = [
-      '0-1 год',
-      '1-3 года',
-      '3-5 лет',
-      '5-7 лет',
-      '7-10 лет',
-      '10-12 лет',
-      '12-14 лет',
-      '14-16 лет'
-    ];
-    const genderOptions = [
-      { value: 'boy', label: t('catalog.genderOptions.boy') },
-      { value: 'girl', label: t('catalog.genderOptions.girl') },
-      { value: 'unisex', label: t('catalog.genderOptions.unisex') }
-    ];
   
     // Функция для загрузки количества непрочитанных уведомлений
     const loadUnreadNotificationsCount = async () => {
@@ -2616,17 +2601,17 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
                   {t('catalog.ageGroup')}
                 </Typography>
-                {ageGroups.map((ageGroup) => (
+                {ageGroupOptions.map((option) => (
                   <FormControlLabel
-                    key={ageGroup}
+                    key={option.value}
                     control={
                       <Checkbox
-                        checked={selectedAgeGroups.includes(ageGroup)}
+                        checked={selectedAgeGroups.includes(option.value)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedAgeGroups([...selectedAgeGroups, ageGroup]);
+                            setSelectedAgeGroups([...selectedAgeGroups, option.value]);
                           } else {
-                            setSelectedAgeGroups(selectedAgeGroups.filter(ag => ag !== ageGroup));
+                            setSelectedAgeGroups(selectedAgeGroups.filter(ag => ag !== option.value));
                           }
                           // Автоматическая прокрутка к продуктам
                           setTimeout(() => {
@@ -2637,7 +2622,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                         }}
                       />
                     }
-                    label={ageGroup}
+                    label={option.label}
                     sx={{ display: 'block', mb: 0.5 }}
                   />
                 ))}
@@ -3061,15 +3046,15 @@ function AppContent({
     // Убраны временные состояния - фильтры применяются автоматически
     
     // Массив возрастных групп (как в форме редактирования)
-    const ageGroups = [
-      '0-1 год',
-      '1-3 года',
-      '3-5 лет',
-      '5-7 лет',
-      '7-10 лет',
-      '10-12 лет',
-      '12-14 лет',
-      '14-16 лет'
+    const ageGroupOptions = [
+      { value: '0-1 год', label: t('catalog.ageGroups.0-1_year') },
+      { value: '1-3 года', label: t('catalog.ageGroups.1-3_years') },
+      { value: '3-5 лет', label: t('catalog.ageGroups.3-5_years') },
+      { value: '5-7 лет', label: t('catalog.ageGroups.5-7_years') },
+      { value: '7-10 лет', label: t('catalog.ageGroups.7-10_years') },
+      { value: '10-12 лет', label: t('catalog.ageGroups.10-12_years') },
+      { value: '12-14 лет', label: t('catalog.ageGroups.12-14_years') },
+      { value: '14-16 лет', label: t('catalog.ageGroups.14-16_years') }
     ];
 
     // Опции для фильтра по полу
@@ -3562,17 +3547,17 @@ function AppContent({
                      {t('catalog.ageGroup')}
                    </Typography>
                    <Box sx={{ mb: 3 }}>
-                     {ageGroups.map((age) => (
+                     {ageGroupOptions.map((option) => (
                        <FormControlLabel
-                         key={age}
+                         key={option.value}
                          control={
                            <Checkbox
-                             checked={selectedAgeGroups.includes(age)}
+                             checked={selectedAgeGroups.includes(option.value)}
                              onChange={(e) => {
                                if (e.target.checked) {
-                                 setSelectedAgeGroups([...selectedAgeGroups, age]);
+                                 setSelectedAgeGroups([...selectedAgeGroups, option.value]);
                                } else {
-                                 setSelectedAgeGroups(selectedAgeGroups.filter(g => g !== age));
+                                 setSelectedAgeGroups(selectedAgeGroups.filter(g => g !== option.value));
                                }
                                // Автоматическая прокрутка к продуктам после изменения фильтра
                                setTimeout(() => {
@@ -3589,7 +3574,7 @@ function AppContent({
                              }}
                            />
                          }
-                         label={age}
+                         label={option.label}
                          sx={{ display: 'block', mb: 1 }}
                        />
                      ))}
