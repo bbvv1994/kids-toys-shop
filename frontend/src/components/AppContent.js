@@ -336,6 +336,23 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
     // ВРЕМЕННЫЕ состояния и списки для фильтров
     const [selectedCategories, setSelectedCategories] = React.useState([]);
     const categories = ['Игрушки', 'Конструкторы', 'Пазлы', 'Творчество', 'Канцтовары', 'Транспорт', 'Отдых на воде', 'Настольные игры', 'Развивающие игры', 'Акции'];
+
+    // Опции для фильтров с переводами
+    const ageGroupOptions = [
+      { value: '0-1 год', label: t('catalog.ageGroups.0-1_year') },
+      { value: '1-3 года', label: t('catalog.ageGroups.1-3_years') },
+      { value: '3-5 лет', label: t('catalog.ageGroups.3-5_years') },
+      { value: '5-7 лет', label: t('catalog.ageGroups.5-7_years') },
+      { value: '7-10 лет', label: t('catalog.ageGroups.7-10_years') },
+      { value: '10-12 лет', label: t('catalog.ageGroups.10-12_years') },
+      { value: '12-14 лет', label: t('catalog.ageGroups.12-14_years') },
+      { value: '14-16 лет', label: t('catalog.ageGroups.14-16_years') }
+    ];
+    const genderOptions = [
+      { value: 'boy', label: t('catalog.genderOptions.boy') },
+      { value: 'girl', label: t('catalog.genderOptions.girl') },
+      { value: 'unisex', label: t('catalog.genderOptions.unisex') }
+    ];
   
     // Функция для загрузки количества непрочитанных уведомлений
     const loadUnreadNotificationsCount = async () => {
