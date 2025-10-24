@@ -29,6 +29,7 @@ const FlexibleUploadMiddleware = require('./flexibleUploadMiddleware');
 const SmartImageUploadMiddleware = require('./smartImageUploadMiddleware');
 const TranslationService = require('./services/translationService');
 const SafeMigration = require('../safe-migration');
+const { COLOR_PALETTE } = require('./colorPalette');
 
 // Инициализация кэширования
 const cacheManager = require('./cache');
@@ -955,7 +956,18 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
     console.log('  - name:', req.body.name);
     console.log('  - description:', req.body.description);
     
-    const { name, description, nameHe, descriptionHe, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, inputLanguage = 'ru' } = req.body;
+    const { name, description, nameHe, descriptionHe, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, availableColors, inputLanguage = 'ru' } = req.body;
+    
+    // Парсим цвета если они переданы
+    let colorsData = null;
+    if (availableColors) {
+      try {
+        colorsData = typeof availableColors === 'string' ? JSON.parse(availableColors) : availableColors;
+        console.log('🎨 Parsed availableColors (with indices):', colorsData);
+      } catch (e) {
+        console.error('❌ Error parsing availableColors:', e);
+      }
+    }
     
     // Используем URL из Cloudinary или локальные пути
     const imageUrls = req.files ? req.files.map((file, index) => {
@@ -970,6 +982,24 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
         return `/uploads/${Date.now()}_${file.originalname}`;
       }
     }) : [];
+
+    // Преобразуем imageIndex в реальные imageUrl после загрузки изображений
+    if (colorsData && Array.isArray(colorsData) && imageUrls.length > 0) {
+      colorsData = colorsData.map(colorData => {
+        const imageIndex = colorData.imageIndex;
+        if (imageIndex !== null && imageIndex !== undefined && imageUrls[imageIndex]) {
+          return {
+            colorId: colorData.colorId,
+            imageUrl: imageUrls[imageIndex]
+          };
+        }
+        return {
+          colorId: colorData.colorId,
+          imageUrl: null
+        };
+      });
+      console.log('🎨 Transformed availableColors (with URLs):', colorsData);
+    }
 
     // Отладочная информация
 
@@ -1021,6 +1051,7 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
       length: length ? parseFloat(length) : null,
       width: width ? parseFloat(width) : null,
       height: height ? parseFloat(height) : null,
+      availableColors: colorsData || null,
       ...(isHidden !== undefined ? { isHidden: isHidden === 'true' || isHidden === true } : {})
     };
 
@@ -1082,6 +1113,7 @@ app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req,
       gender: true,
       categoryId: true,
       categoryName: true,
+      availableColors: true,
       reviews: {
         where: { status: 'published' },
         select: { rating: true }
@@ -1429,6 +1461,7 @@ app.get('/api/products/:id', async (req, res) => {
       gender: true,
       categoryId: true,
       categoryName: true,
+      availableColors: true,
       reviews: {
         where: { status: 'published' },
         select: { rating: true }
@@ -2169,7 +2202,7 @@ app.get('/api/profile', authMiddleware, async (req, res) => {
 // === Добавить товар в корзину ===
 app.post('/api/profile/cart/add', authMiddleware, async (req, res) => {
   try {
-    const { productId, quantity = 1 } = req.body;
+    const { productId, quantity = 1, selectedColor = null } = req.body;
     if (!productId) return res.status(400).json({ error: 'productId обязателен' });
     
     // Проверяем существование пользователя
@@ -2185,7 +2218,12 @@ app.post('/api/profile/cart/add', authMiddleware, async (req, res) => {
       cart = await prisma.cart.create({ data: { userId: req.user.userId } });
       console.log(`Корзина создана, ID: ${cart.id}`);
     }
-    let cartItem = await prisma.cartItem.findFirst({ where: { cartId: cart.id, productId } });
+    // Ищем товар с учетом цвета (один товар разных цветов - разные позиции в корзине)
+    const whereClause = { cartId: cart.id, productId };
+    if (selectedColor) {
+      whereClause.selectedColor = selectedColor;
+    }
+    let cartItem = await prisma.cartItem.findFirst({ where: whereClause });
     if (cartItem) {
       cartItem = await prisma.cartItem.update({
         where: { id: cartItem.id },
@@ -2193,7 +2231,7 @@ app.post('/api/profile/cart/add', authMiddleware, async (req, res) => {
       });
     } else {
       cartItem = await prisma.cartItem.create({
-        data: { cartId: cart.id, productId, quantity }
+        data: { cartId: cart.id, productId, quantity, selectedColor }
       });
     }
     const updatedCart = await prisma.cart.findUnique({
@@ -2296,7 +2334,8 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
             create: cartItems.map(item => ({
               productId: item.productId,
               quantity: item.quantity,
-              price: item.price
+              price: item.price,
+              selectedColor: item.selectedColor || null
             }))
           }
         },
@@ -2346,7 +2385,20 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
 💳 <b>Оплата:</b> ${paymentMethod === 'card' ? 'Карта' : 'Наличными или картой'}
 
   📦 <b>Товары:</b>
-${order.items.map(item => `• ${item.product.name} x${item.quantity} - ₪${item.price * item.quantity}`).join('\n')}
+${order.items.map(item => {
+  const productName = item.product.nameHe || item.product.name;
+  let itemText = `• ${productName} x${item.quantity} - ₪${item.price * item.quantity}`;
+  if (item.product.article) {
+    itemText += `\n  📋 Артикул: ${item.product.article}`;
+  }
+  if (item.selectedColor) {
+    const colorInfo = COLOR_PALETTE.find(c => c.id === item.selectedColor);
+    if (colorInfo) {
+      itemText += `\n  🎨 Цвет: ${colorInfo.nameRu}`;
+    }
+  }
+  return itemText;
+}).join('\n')}
 
 💰 <b>Итого:</b> ₪${totalAmount}
 📅 <b>Дата:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
@@ -2504,7 +2556,8 @@ ${order.items.map(item => `• ${item.product.name} x${item.quantity} - ₪${ite
           create: cart.items.map(item => ({
             productId: item.productId,
             quantity: item.quantity,
-            price: item.product.price
+            price: item.product.price,
+            selectedColor: item.selectedColor || null
           }))
         }
       },
@@ -2708,7 +2761,8 @@ app.post('/api/guest/checkout', async (req, res) => {
           create: cartItems.map(item => ({
             productId: item.productId,
             quantity: item.quantity,
-            price: item.price
+            price: item.price,
+            selectedColor: item.selectedColor || null
           }))
         }
       },
@@ -2730,7 +2784,7 @@ app.post('/api/guest/checkout', async (req, res) => {
     // Отправляем уведомление в Telegram
     console.log('📱 Sending Telegram notification...');
     try {
-      const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const totalAmount = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       
       const telegramMessage = `
 🛒 <b>Новый гостевой заказ #${order.id}</b>
@@ -2742,7 +2796,20 @@ app.post('/api/guest/checkout', async (req, res) => {
 💳 <b>Оплата:</b> ${paymentMethod === 'card' ? 'Карта' : 'Наличными или картой'}
 
 📦 <b>Товары:</b>
-${cartItems.map(item => `• ${item.productName} x${item.quantity} - ₪${item.price * item.quantity}`).join('\n')}
+${order.items.map(item => {
+  const productName = item.product.nameHe || item.product.name;
+  let itemText = `• ${productName} x${item.quantity} - ₪${item.price * item.quantity}`;
+  if (item.product.article) {
+    itemText += `\n  📋 Артикул: ${item.product.article}`;
+  }
+  if (item.selectedColor) {
+    const colorInfo = COLOR_PALETTE.find(c => c.id === item.selectedColor);
+    if (colorInfo) {
+      itemText += `\n  🎨 Цвет: ${colorInfo.nameRu}`;
+    }
+  }
+  return itemText;
+}).join('\n')}
 
 💰 <b>Итого:</b> ₪${totalAmount}
 📅 <b>Дата:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
@@ -3039,7 +3106,18 @@ app.put('/api/products/:id',
       return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
     }
     
-    const { name, description, nameHe, descriptionHe, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, removedImages, currentExistingImages, mainImageIndex, inputLanguage = 'ru' } = req.body;
+    const { name, description, nameHe, descriptionHe, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, removedImages, currentExistingImages, mainImageIndex, availableColors, inputLanguage = 'ru' } = req.body;
+    
+    // Парсим цвета если они переданы
+    let colorsData = null;
+    if (availableColors) {
+      try {
+        colorsData = typeof availableColors === 'string' ? JSON.parse(availableColors) : availableColors;
+        console.log('🎨 Parsed availableColors (with indices):', colorsData);
+      } catch (e) {
+        console.error('❌ Error parsing availableColors:', e);
+      }
+    }
     
     console.log('📝 Получены данные для обновления:', { name, price, ageGroup, gender, category, subcategory });
     
@@ -3105,6 +3183,24 @@ app.put('/api/products/:id',
         // Перемещаем главное изображение в начало массива
         imageUrls = [mainImage, ...imageUrls.filter((_, index) => index !== mainIndex)];
       }
+    }
+
+    // Преобразуем imageIndex в реальные imageUrl после загрузки изображений
+    if (colorsData && Array.isArray(colorsData) && imageUrls.length > 0) {
+      colorsData = colorsData.map(colorData => {
+        const imageIndex = colorData.imageIndex;
+        if (imageIndex !== null && imageIndex !== undefined && imageUrls[imageIndex]) {
+          return {
+            colorId: colorData.colorId,
+            imageUrl: imageUrls[imageIndex]
+          };
+        }
+        return {
+          colorId: colorData.colorId,
+          imageUrl: null
+        };
+      });
+      console.log('🎨 Transformed availableColors (with URLs):', colorsData);
     }
     
     // Получаем название категории по ID
@@ -3184,7 +3280,8 @@ app.put('/api/products/:id',
       country: country || null,
       length: length ? parseFloat(length) : null,
       width: width ? parseFloat(width) : null,
-      height: height ? parseFloat(height) : null
+      height: height ? parseFloat(height) : null,
+      ...(colorsData !== null ? { availableColors: colorsData } : {})
     };
 
     console.log('📝 API: Обновляем товар в БД с данными:', productData);
@@ -3603,6 +3700,16 @@ app.get('/api/categories', cacheMiddleware(300), smartInvalidateCache, async (re
     res.json(categoriesWithIcons);
   } catch (e) {
     res.status(500).json({ error: 'Ошибка получения категорий' });
+  }
+});
+
+// Получить палитру цветов для товаров
+app.get('/api/color-palette', (req, res) => {
+  try {
+    res.json(COLOR_PALETTE);
+  } catch (error) {
+    console.error('Error getting color palette:', error);
+    res.status(500).json({ error: 'Ошибка получения палитры цветов' });
   }
 });
 
