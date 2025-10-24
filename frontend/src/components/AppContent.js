@@ -3516,7 +3516,7 @@ function AppContent({
                  >
                    {/* Цена */}
                    <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
-                     Цена
+                     {t('common.price')}
                    </Typography>
                    <Box sx={{ px: 1, mb: 3 }}>
                      <Slider
@@ -3552,7 +3552,7 @@ function AppContent({
   
                    {/* Возраст */}
                    <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
-                     Возраст
+                     {t('catalog.ageGroup')}
                    </Typography>
                    <Box sx={{ mb: 3 }}>
                      {ageGroups.map((age) => (
@@ -3587,23 +3587,23 @@ function AppContent({
                        />
                      ))}
                    </Box>
-  
+ 
                    {/* Пол */}
                    <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
-                     Пол
+                     {t('catalog.gender')}
                    </Typography>
                    <Box sx={{ mb: 3 }}>
-                     {['Мальчики', 'Девочки', 'Унисекс'].map((gender) => (
+                     {genderOptions.map((option) => (
                        <FormControlLabel
-                         key={gender}
+                         key={option.value}
                          control={
                            <Checkbox
-                             checked={selectedGenders.includes(gender)}
+                             checked={selectedGenders.includes(option.value)}
                              onChange={(e) => {
                                if (e.target.checked) {
-                                 onGendersChange([...selectedGenders, gender]);
+                                 onGendersChange([...selectedGenders, option.value]);
                                } else {
-                                 onGendersChange(selectedGenders.filter(g => g !== gender));
+                                 onGendersChange(selectedGenders.filter(g => g !== option.value));
                                }
                                // Автоматическая прокрутка к продуктам после изменения фильтра
                                setTimeout(() => {
@@ -3620,15 +3620,15 @@ function AppContent({
                              }}
                            />
                          }
-                         label={gender}
+                         label={option.label}
                          sx={{ display: 'block', mb: 1 }}
                        />
                      ))}
                    </Box>
-  
+ 
                    {/* Бренды */}
                    <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
-                     Бренды
+                     {t('catalog.brands')}
                    </Typography>
                    <Box sx={{ mb: 2 }}>
                      {Array.from(new Set(products.map(p => p.brand))).filter(Boolean).slice(0, 10).map((brand) => (
@@ -3696,11 +3696,11 @@ function AppContent({
                            background: 'linear-gradient(135deg, #ef5350 0%, #f44336 100%)',
                            boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
                            transform: 'translateY(-1px)'
-                         },
-                       }}
-                     >
-                       Сбросить фильтры
-                     </Button>
+                       },
+                     }}
+                   >
+                     {t('catalog.clearFilters')}
+                   </Button>
                    </Box>
                  </Paper>
                )}
