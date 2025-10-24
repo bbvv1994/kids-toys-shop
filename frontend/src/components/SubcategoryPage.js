@@ -385,6 +385,7 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
         'Игрушки для песочницы': 'sandbox_toys',
         'Шарики': 'balls',
         'Игрушки на радиоуправлении': 'radio_controlled',
+        'Маленькие сюрпризы': 'small_surprises',
         // Конструкторы
         'Lego для мальчиков': 'lego_boys',
         'Lego для девочек': 'lego_girls',
