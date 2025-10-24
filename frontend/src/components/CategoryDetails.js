@@ -122,6 +122,7 @@ function CategoryDetails({ category }) {
       'Игрушки для песочницы': 'sandbox_toys',
       'Шарики': 'balls',
       'Игрушки на радиоуправлении': 'radio_controlled',
+      'Маленькие сюрпризы': 'small_surprises',
       
       // Конструкторы
       'Lego для мальчиков': 'lego_boys',
