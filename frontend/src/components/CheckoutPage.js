@@ -25,6 +25,19 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
     window.location.reload();
   };
   const { t, i18n } = useTranslation();
+  const [colorPalette, setColorPalette] = useState([]);
+  
+  // Загружаем палитру цветов
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/color-palette`)
+      .then(res => res.json())
+      .then(data => {
+        setColorPalette(data);
+      })
+      .catch(error => {
+        console.error('Error loading color palette:', error);
+      });
+  }, []);
   
 
   const [formData, setFormData] = useState({
@@ -538,19 +551,44 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
             <Typography variant="h6" gutterBottom sx={{ textAlign: 'center' }}>
               {t('checkout.orderTotals')}
             </Typography>
-            {cart.items.map((item) => (
-              <Box key={item.id} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ width: 60, height: 60, borderRadius: 3, border: '2px solid #f0f0f0', flexShrink: 0, backgroundImage: `url(${item.product.imageUrls?.[0] ? getImageUrl(item.product.imageUrls[0]) : '/photography.jpg'})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
-                    {getTranslatedName(item.product)} x {item.quantity}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    ₪{item.product.price} x {item.quantity} = ₪{item.product.price * item.quantity}
-                  </Typography>
+            {cart.items.map((item) => {
+              const paletteColor = item.selectedColor && colorPalette.length > 0 
+                ? colorPalette.find(c => c.id === item.selectedColor) 
+                : null;
+              
+              return (
+                <Box key={item.id} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ width: 60, height: 60, borderRadius: 3, border: '2px solid #f0f0f0', flexShrink: 0, backgroundImage: `url(${item.product.imageUrls?.[0] ? getImageUrl(item.product.imageUrls[0]) : '/photography.jpg'})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      {getTranslatedName(item.product)} x {item.quantity}
+                    </Typography>
+                    {paletteColor && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                        <Box
+                          sx={{
+                            width: 16,
+                            height: 16,
+                            borderRadius: 0.5,
+                            background: paletteColor.hex === 'multicolor' 
+                              ? 'linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet)'
+                              : paletteColor.hex,
+                            border: '1px solid #ddd',
+                            flexShrink: 0
+                          }}
+                        />
+                        <Typography variant="body2" sx={{ color: '#666', fontSize: '0.8rem' }}>
+                          {i18n.language === 'he' ? paletteColor.nameHe : paletteColor.nameRu}
+                        </Typography>
+                      </Box>
+                    )}
+                    <Typography variant="body1" color="text.secondary">
+                      ₪{item.product.price} x {item.quantity} = ₪{item.product.price * item.quantity}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              );
+            })}
             <Divider sx={{ my: 2 }} />
             <Box sx={{ mb: 2 }}>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>

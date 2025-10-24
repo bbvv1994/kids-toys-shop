@@ -391,6 +391,9 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   const [questionError, setQuestionError] = useState('');
   const [questionSuccess, setQuestionSuccess] = useState('');
   const [questionLoading, setQuestionLoading] = useState(false);
+  const [selectedColor, setSelectedColor] = useState(null);
+  const [colorPalette, setColorPalette] = useState([]);
+  const [colorWarning, setColorWarning] = useState(false); // Предупреждение о необходимости выбора цвета
   
   // Состояния для экранной лупы (только для десктопа)
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
@@ -471,8 +474,10 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   
 
 
-  // Безопасно ищем товар в корзине только если product загружен
-  const cartItem = product ? cart?.items?.find(item => item.product.id === product.id) : null;
+  // Безопасно ищем товар в корзине только если product загружен (с учетом выбранного цвета)
+  const cartItem = product ? cart?.items?.find(item => 
+    item.product.id === product.id && item.selectedColor === selectedColor
+  ) : null;
   const inCart = !!cartItem;
   const cartQuantity = cartItem?.quantity || 0;
 
@@ -491,6 +496,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
         setProduct(data);
         setGalleryIndex(0); // Сбрасываем индекс галереи при загрузке нового товара
+        setSelectedColor(null); // Сбрасываем выбранный цвет
         setLoading(false);
         
         // Прокручиваем к началу страницы при загрузке товара
@@ -503,6 +509,32 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
     loadProduct();
   }, [id]); // Убираем product?.updatedAt из зависимостей
+
+  // Загрузка палитры цветов
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/color-palette`)
+      .then(res => res.json())
+      .then(data => {
+        setColorPalette(data);
+      })
+      .catch(error => {
+        console.error('Error loading color palette:', error);
+      });
+  }, []);
+
+  // Обработка выбора цвета - переключение изображения
+  useEffect(() => {
+    if (selectedColor && product?.availableColors) {
+      const colorInfo = product.availableColors.find(c => c.colorId === selectedColor);
+      if (colorInfo && colorInfo.imageUrl) {
+        // Находим индекс изображения в массиве
+        const imageIndex = product.imageUrls?.indexOf(colorInfo.imageUrl);
+        if (imageIndex >= 0) {
+          setGalleryIndex(imageIndex);
+        }
+      }
+    }
+  }, [selectedColor, product]);
 
   // Определяем размер экрана при загрузке
   useEffect(() => {
@@ -537,21 +569,21 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     if (!e.target.closest('button') && e.target.tagName !== 'BUTTON') {
       e.preventDefault();
     }
-    onGalleryTouchStart(e);
-  };
+      onGalleryTouchStart(e);
+    };
 
   const handleGalleryTouchMove = (e) => {
     // Не preventDefault если это кнопка
     if (!e.target.closest('button') && e.target.tagName !== 'BUTTON') {
       e.preventDefault();
     }
-    onGalleryTouchMove(e);
-  };
+      onGalleryTouchMove(e);
+    };
 
   const handleGalleryTouchEnd = (e) => {
     console.log('📱 Gallery Touch End (JSX)');
-    onGalleryTouchEnd(e);
-  };
+      onGalleryTouchEnd(e);
+    };
 
   // Блокировка скролла страницы при открытии галереи
   useEffect(() => {
@@ -903,7 +935,15 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
   };
 
   const handleAddToCartWithQuantity = () => {
-    if (cart?.items?.some(item => item.product.id === product.id)) return;
+    // Проверяем, есть ли у товара цвета и выбран ли цвет
+    if (product?.availableColors && product.availableColors.length > 0 && !selectedColor) {
+      setColorWarning(true);
+      setTimeout(() => setColorWarning(false), 3000); // Скрываем через 3 секунды
+      return;
+    }
+    
+    // Проверяем наличие товара в корзине с учетом выбранного цвета
+    if (cart?.items?.some(item => item.product.id === product.id && item.selectedColor === selectedColor)) return;
     if (!product.quantity || product.quantity <= 0) return;
     
     // Запускаем анимацию
@@ -917,7 +957,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
     });
     
     const categoryName = typeof product.category === 'string' ? product.category : (product.category?.name || t('productPage.noCategory'));
-    onAddToCart(product, categoryName, displayQuantity);
+    onAddToCart(product, categoryName, displayQuantity, selectedColor); // Передаем selectedColor
     
     return () => cancelAnimationFrame(frameId);
   };
@@ -2311,7 +2351,91 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                 product.quantity > 0 ? <Chip label={t('productCard.availability.inStock')} color="success" size="small" /> : <Chip label={t('productCard.availability.outOfStock')} color="default" size="small" />
               )}
             </Box>
+            {/* Цена */}
+            <Box sx={{ mb: 2 }}>
             <Typography sx={{ color: '#000000', fontWeight: 700, fontSize: 24 }}>{formatPrice(product.price)}</Typography>
+            </Box>
+            
+            {/* Цветовые варианты товара */}
+            {product?.availableColors && product.availableColors.length > 0 && (
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', flexWrap: 'wrap', mb: 2 }}>
+                {product.availableColors.map((productColor) => {
+                  const paletteColor = colorPalette.find(c => c.id === productColor.colorId);
+                  if (!paletteColor) return null;
+                  
+                  const isSelected = selectedColor === productColor.colorId;
+                  
+                  return (
+                    <Box
+                      key={productColor.colorId}
+                      onClick={() => {
+                        setSelectedColor(productColor.colorId);
+                        setColorWarning(false); // Сбрасываем предупреждение при выборе цвета
+                      }}
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          transform: 'translateY(-2px)'
+                        }
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 2,
+                          background: paletteColor.hex === 'multicolor' 
+                            ? 'linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet)'
+                            : paletteColor.hex,
+                          border: isSelected ? '3px solid #4ECDC4' : '2px solid #ddd',
+                          boxShadow: isSelected ? '0 2px 8px rgba(78, 205, 196, 0.4)' : '0 1px 3px rgba(0,0,0,0.2)',
+                          transition: 'all 0.2s'
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: '0.7rem',
+                          textAlign: 'center',
+                          color: isSelected ? '#4ECDC4' : '#666',
+                          fontWeight: isSelected ? 600 : 400,
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        {i18n.language === 'he' ? paletteColor.nameHe : paletteColor.nameRu}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
+            )}
+            
+            {/* Предупреждение о необходимости выбора цвета */}
+            {colorWarning && (
+              <Box sx={{ 
+                mb: 2, 
+                p: 1.5, 
+                borderRadius: 2, 
+                backgroundColor: '#fff3cd', 
+                border: '1px solid #ffc107',
+                animation: 'shake 0.5s',
+                '@keyframes shake': {
+                  '0%, 100%': { transform: 'translateX(0)' },
+                  '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-5px)' },
+                  '20%, 40%, 60%, 80%': { transform: 'translateX(5px)' }
+                }
+              }}>
+                <Typography variant="body2" sx={{ color: '#856404', fontWeight: 600, textAlign: 'center' }}>
+                  ⚠️ {i18n.language === 'he' ? 'אנא בחר צבע לפני הוספה לעגלה' : 'Пожалуйста, выберите цвет перед добавлением в корзину'}
+                </Typography>
+              </Box>
+            )}
+            
             {/* Выбор количества */}
             {product.quantity > 0 && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
@@ -2346,8 +2470,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                     disabled={!product.quantity || product.quantity <= 0}
                   >-</button>
                   <span style={{ minWidth: 22, textAlign: 'center', fontWeight: 600, fontSize: 16 }}>
-                    {cart?.items?.some(item => item.product.id === product.id) 
-                      ? cart.items.find(item => item.product.id === product.id).quantity 
+                    {cart?.items?.some(item => item.product.id === product.id && item.selectedColor === selectedColor) 
+                      ? cart.items.find(item => item.product.id === product.id && item.selectedColor === selectedColor).quantity 
                       : displayQuantity}
                   </span>
                   <button
@@ -2389,7 +2513,7 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
                   size="large"
                   startIcon={
                     <Box sx={{ position: 'relative', width: 41, height: 41, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {(cart?.items?.some(item => item.product.id === product.id) && !cartAnimPlaying) ? (
+                      {(cart?.items?.some(item => item.product.id === product.id && item.selectedColor === selectedColor) && !cartAnimPlaying) ? (
                         <Lottie
                           animationData={addToCartAnim}
                           autoplay={false}

@@ -610,6 +610,11 @@ function AppWithProducts() {
         formData.append('inputLanguage', updatedProduct.inputLanguage);
       }
 
+      // Добавляем цветовые варианты
+      if (updatedProduct.availableColors) {
+        formData.append('availableColors', JSON.stringify(updatedProduct.availableColors));
+      }
+
       const userData = localStorage.getItem('user');
       const token = userData ? JSON.parse(userData).token : null;
       

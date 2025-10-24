@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -18,7 +18,7 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { getImageUrl } from '../config';
+import { API_BASE_URL, getImageUrl } from '../config';
 import { useTranslation } from 'react-i18next';
 import { getTranslatedName } from '../utils/translationUtils';
 
@@ -40,7 +40,20 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [removingItem, setRemovingItem] = useState(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [colorPalette, setColorPalette] = useState([]);
+  
+  // Загружаем палитру цветов
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/color-palette`)
+      .then(res => res.json())
+      .then(data => {
+        setColorPalette(data);
+      })
+      .catch(error => {
+        console.error('Error loading color palette:', error);
+      });
+  }, []);
   
   // Функция для очистки корзины от удаленных товаров
   const cleanupRemovedProducts = React.useCallback(() => {
@@ -199,6 +212,38 @@ function CartPage({ cart, onChangeCartQuantity, onRemoveFromCart }) {
                    >
                      {getTranslatedName(item.product)}
                    </Typography>
+                   
+                   {/* Отображение цвета товара */}
+                   {item.selectedColor && colorPalette.length > 0 && (() => {
+                     const paletteColor = colorPalette.find(c => c.id === item.selectedColor);
+                     if (!paletteColor) return null;
+                     
+                     return (
+                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 0.5, md: 1 } }}>
+                         <Box
+                           sx={{
+                             width: 20,
+                             height: 20,
+                             borderRadius: 1,
+                             background: paletteColor.hex === 'multicolor' 
+                               ? 'linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet)'
+                               : paletteColor.hex,
+                             border: '1px solid #ddd',
+                             flexShrink: 0
+                           }}
+                         />
+                         <Typography 
+                           variant="body2" 
+                           sx={{ 
+                             color: '#666',
+                             fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' }
+                           }}
+                         >
+                           {i18n.language === 'he' ? paletteColor.nameHe : paletteColor.nameRu}
+                         </Typography>
+                       </Box>
+                     );
+                   })()}
                    
                    {!isSmallMobile && (
                      <Typography 

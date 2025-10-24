@@ -572,7 +572,7 @@ import ElegantProductCarousel from './ElegantProductCarousel';
 
 // Новый компонент личного кабинета
 function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, refreshWishlist, cart, handleAddToCart, handleChangeCartQuantity, onEditProduct, handleUserUpdate, handleOpenReviewForm }) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
     const [selectedSection, setSelectedSection] = useState('myprofile');
@@ -643,6 +643,21 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
     // Хуки для отзывов
     const [userReviews, setUserReviews] = useState([]);
     const [reviewsLoading, setReviewsLoading] = useState(true);
+    
+    // Хук для палитры цветов
+    const [colorPalette, setColorPalette] = useState([]);
+    
+    // Загружаем палитру цветов
+    useEffect(() => {
+      fetch(`${API_BASE_URL}/api/color-palette`)
+        .then(res => res.json())
+        .then(data => {
+          setColorPalette(data);
+        })
+        .catch(error => {
+          console.error('Error loading color palette:', error);
+        });
+    }, []);
     
     // Проверяем localStorage для активной вкладки при загрузке
     useEffect(() => {
@@ -2403,6 +2418,37 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
                                 }}>
                                   {item.product ? getTranslatedName(item.product) : t('common.productNotFound')}
                                 </Typography>
+                                {/* Отображение цвета товара */}
+                                {item.selectedColor && colorPalette.length > 0 && (() => {
+                                  const paletteColor = colorPalette.find(c => c.id === item.selectedColor);
+                                  if (!paletteColor) return null;
+                                  
+                                  return (
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                                      <Box
+                                        sx={{
+                                          width: 14,
+                                          height: 14,
+                                          borderRadius: 0.5,
+                                          background: paletteColor.hex === 'multicolor' 
+                                            ? 'linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet)'
+                                            : paletteColor.hex,
+                                          border: '1px solid #ddd',
+                                          flexShrink: 0
+                                        }}
+                                      />
+                                      <Typography 
+                                        variant="caption" 
+                                        sx={{ 
+                                          color: '#666',
+                                          fontSize: { xs: 9, md: 11 }
+                                        }}
+                                      >
+                                        {i18n.language === 'he' ? paletteColor.nameHe : paletteColor.nameRu}
+                                      </Typography>
+                                    </Box>
+                                  );
+                                })()}
                                 <Typography sx={{ 
                                   color: '#666', 
                                   fontSize: { xs: 10, md: 12 } 

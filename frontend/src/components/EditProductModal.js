@@ -49,7 +49,8 @@ function EditProductModal(props) {
     width: '',
     height: '',
     gender: '',
-    isHidden: false
+    isHidden: false,
+    availableColors: []
   });
 
   const [newImages, setNewImages] = useState([]);
@@ -58,6 +59,8 @@ function EditProductModal(props) {
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [colorPalette, setColorPalette] = useState([]);
+  const [productColors, setProductColors] = useState([]);
   const [draggedImageIdx, setDraggedImageIdx] = useState(null);
   const dropZoneRef = useRef(null);
   const modalRef = useRef(null);
@@ -496,11 +499,24 @@ function EditProductModal(props) {
           }
           return genderValue || '';
         })(),
-        isHidden: product.isHidden || false
+        isHidden: product.isHidden || false,
+        availableColors: product.availableColors || []
       });
       setExistingImages(product.imageUrls || []);
       setNewImages([]);
       setRemovedExistingImages([]); // Сбрасываем список удаленных изображений
+      
+      // Инициализируем цвета товара, преобразуя imageUrl в imageIndex
+      const allImages = product.imageUrls || [];
+      const colorsWithIndices = (product.availableColors || []).map(color => {
+        const imageIndex = color.imageUrl ? allImages.indexOf(color.imageUrl) : null;
+        return {
+          ...color,
+          imageIndex: imageIndex >= 0 ? imageIndex : null
+        };
+      });
+      setProductColors(colorsWithIndices);
+      
       // Не сбрасываем главное изображение - оставляем как есть или устанавливаем 0 если изображений нет
       setMainImageIndex(product.imageUrls && product.imageUrls.length > 0 ? 0 : 0);
     }
@@ -522,6 +538,7 @@ function EditProductModal(props) {
         article: '',
         brand: '',
         country: '',
+        availableColors: [],
         length: '',
         width: '',
         height: '',
@@ -667,7 +684,8 @@ function EditProductModal(props) {
         removedExistingImages: removedExistingImages,
         currentExistingImages: existingImages, // Передаем текущее состояние существующих изображений
         mainImageIndex: mainImageIndex, // Передаем индекс главного изображения
-        inputLanguage: inputLanguage // Передаем язык ввода для автоматического перевода
+        inputLanguage: inputLanguage, // Передаем язык ввода для автоматического перевода
+        availableColors: productColors // Передаем выбранные цвета
       };
 
       
@@ -684,6 +702,30 @@ function EditProductModal(props) {
     if (product && onDelete) {
       onDelete(product.id);
     }
+  };
+
+  // Функции для работы с цветами
+  const handleAddColor = (color) => {
+    const colorExists = productColors.find(c => c.colorId === color.id);
+    if (!colorExists) {
+      setProductColors([...productColors, {
+        colorId: color.id,
+        colorRu: color.nameRu,
+        colorHe: color.nameHe,
+        hex: color.hex,
+        imageIndex: null // Храним индекс, а не URL
+      }]);
+    }
+  };
+
+  const handleRemoveColor = (colorId) => {
+    setProductColors(productColors.filter(c => c.colorId !== colorId));
+  };
+
+  const handleColorImageChange = (colorId, imageIndex) => {
+    setProductColors(productColors.map(c => 
+      c.colorId === colorId ? { ...c, imageIndex: imageIndex === '' ? null : parseInt(imageIndex) } : c
+    ));
   };
 
   // Категории и подкатегории
@@ -722,6 +764,21 @@ function EditProductModal(props) {
         setFormData(prev => ({ ...prev, subcategory: '' }));
       }
   }, [formData.category]);
+
+  // Загружаем палитру цветов с API
+  useEffect(() => {
+    if (open) {
+      fetch(`${API_BASE_URL}/api/color-palette`)
+        .then(res => res.json())
+        .then(data => {
+          setColorPalette(data);
+          console.log('🎨 Загружена палитра цветов:', data);
+        })
+        .catch(error => {
+          console.error('❌ Ошибка загрузки палитры цветов:', error);
+        });
+    }
+  }, [open]);
 
   // Инициализируем форму данными товара при каждом открытии модального окна
   useEffect(() => {
@@ -853,11 +910,13 @@ function EditProductModal(props) {
         width: product.width || '',
         height: product.height || '',
         gender: safeString(product.gender) || '',
-        isHidden: product.isHidden || false
+        isHidden: product.isHidden || false,
+        availableColors: product.availableColors || []
       };
       
         
         setFormData(initialFormData);
+      setProductColors(product.availableColors || []); // Инициализируем цвета товара
 
       // Загружаем подкатегории для выбранной категории
       if (categoryId) {
@@ -1302,6 +1361,163 @@ function EditProductModal(props) {
                       variant="outlined"
                       size="medium"
                     />
+                  </Box>
+
+                  {/* Секция выбора цветов */}
+                  <Box sx={{ mb: 4 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      🎨 Цветовые варианты товара
+                    </Typography>
+                    
+                    {/* Палитра доступных цветов */}
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="body2" sx={{ mb: 1, color: '#666' }}>
+                        Выберите доступные цвета:
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {colorPalette.map((color) => {
+                          const isSelected = productColors.some(c => c.colorId === color.id);
+                          return (
+                            <Box
+                              key={color.id}
+                              onClick={() => handleAddColor(color)}
+                              sx={{
+                                position: 'relative',
+                                cursor: 'pointer',
+                                border: isSelected ? '2px solid #4ECDC4' : '1px solid #ddd',
+                                borderRadius: 2,
+                                p: 1.5,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: 1,
+                                transition: 'all 0.2s',
+                                background: isSelected ? 'rgba(78, 205, 196, 0.1)' : '#fff',
+                                minWidth: 80,
+                                '&:hover': {
+                                  borderColor: '#4ECDC4',
+                                  boxShadow: '0 2px 8px rgba(78, 205, 196, 0.3)'
+                                }
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  borderRadius: 1,
+                                  background: color.hex === 'multicolor' 
+                                    ? 'linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet)'
+                                    : color.hex,
+                                  border: '1px solid #ddd'
+                                }}
+                              />
+                              <Typography variant="caption" sx={{ fontSize: '0.7rem', textAlign: 'center' }}>
+                                {color.nameRu}
+                              </Typography>
+                              {isSelected && (
+                                <Box
+                                  sx={{
+                                    position: 'absolute',
+                                    top: 4,
+                                    right: 4,
+                                    width: 20,
+                                    height: 20,
+                                    borderRadius: '50%',
+                                    background: '#4ECDC4',
+                                    color: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 'bold'
+                                  }}
+                                >
+                                  ✓
+                                </Box>
+                              )}
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    </Box>
+
+                    {/* Список выбранных цветов с привязкой изображений */}
+                    {productColors.length > 0 && (
+                      <Box sx={{ mt: 3 }}>
+                        <Typography variant="body2" sx={{ mb: 2, color: '#666' }}>
+                          Привяжите изображения к цветам (опционально):
+                        </Typography>
+                        {productColors.map((productColor) => {
+                          const paletteColor = colorPalette.find(c => c.id === productColor.colorId);
+                          if (!paletteColor) return null;
+
+                          const allImages = [...existingImages, ...newImages];
+                          const availableImages = allImages.map((img, idx) => ({
+                            value: idx.toString(),
+                            label: `Изображение ${idx + 1}`,
+                            preview: idx < existingImages.length ? getImageUrl(img) : URL.createObjectURL(img)
+                          }));
+
+                          return (
+                            <Box key={productColor.colorId} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Box
+                                sx={{
+                                  width: 32,
+                                  height: 32,
+                                  borderRadius: 1,
+                                  background: paletteColor.hex === 'multicolor' 
+                                    ? 'linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet)'
+                                    : paletteColor.hex,
+                                  border: '1px solid #ddd'
+                                }}
+                              />
+                              <Typography variant="body2" sx={{ minWidth: 120 }}>
+                                {paletteColor.nameRu}:
+                              </Typography>
+                              {availableImages.length > 0 ? (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <FormControl size="small" sx={{ minWidth: 200 }}>
+                                    <InputLabel>Изображение</InputLabel>
+                                    <Select
+                                      value={productColor.imageIndex !== null && productColor.imageIndex !== undefined ? productColor.imageIndex.toString() : ''}
+                                      onChange={(e) => handleColorImageChange(productColor.colorId, e.target.value)}
+                                      label="Изображение"
+                                    >
+                                      <MenuItem value="">
+                                        <em>Не выбрано</em>
+                                      </MenuItem>
+                                      {availableImages.map((img) => (
+                                        <MenuItem key={img.value} value={img.value}>
+                                          {img.label}
+                                        </MenuItem>
+                                      ))}
+                                    </Select>
+                                  </FormControl>
+                                  {productColor.imageIndex !== null && productColor.imageIndex !== undefined && availableImages[productColor.imageIndex] && (
+                                    <Box
+                                      component="img"
+                                      src={availableImages[productColor.imageIndex].preview}
+                                      sx={{
+                                        width: 50,
+                                        height: 50,
+                                        objectFit: 'cover',
+                                        borderRadius: 1,
+                                        border: '1px solid #ddd'
+                                      }}
+                                      alt="Preview"
+                                    />
+                                  )}
+                                </Box>
+                              ) : (
+                                <Typography variant="body2" sx={{ color: '#999', fontStyle: 'italic' }}>
+                                  Добавьте изображения товара ниже
+                                </Typography>
+                              )}
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    )}
                   </Box>
 
                   <Box sx={{ mb: 2 }}>

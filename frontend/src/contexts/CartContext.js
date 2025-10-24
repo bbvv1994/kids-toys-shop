@@ -36,13 +36,15 @@ export const CartProvider = ({ children }) => {
     }
   }, [user]);
 
-  const handleAddToCart = async (product, category, quantity = 1) => {
+  const handleAddToCart = async (product, category, quantity = 1, selectedColor = null) => {
     if (!user || !user.token) {
       // Для незарегистрированных пользователей используем локальную корзину
       const localCart = JSON.parse(localStorage.getItem('localCart') || '{"items": []}');
       
-      // Проверяем, есть ли уже такой товар в корзине
-      const existingItem = localCart.items.find(item => item.product.id === product.id);
+      // Проверяем, есть ли уже такой товар в корзине (с учетом цвета)
+      const existingItem = localCart.items.find(item => 
+        item.product.id === product.id && item.selectedColor === selectedColor
+      );
       
       if (existingItem) {
         existingItem.quantity += quantity;
@@ -50,7 +52,8 @@ export const CartProvider = ({ children }) => {
         localCart.items.push({
           id: Date.now() + Math.random(), // Уникальный ID для локального элемента
           product: product,
-          quantity: quantity
+          quantity: quantity,
+          selectedColor: selectedColor // Сохраняем выбранный цвет
         });
       }
       
@@ -66,7 +69,11 @@ export const CartProvider = ({ children }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${user.token}`
         },
-        body: JSON.stringify({ productId: product.id, quantity: quantity })
+        body: JSON.stringify({ 
+          productId: product.id, 
+          quantity: quantity,
+          selectedColor: selectedColor // Отправляем цвет на сервер
+        })
       });
       
       if (response.ok) {

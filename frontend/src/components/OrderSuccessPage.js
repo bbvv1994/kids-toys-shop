@@ -15,6 +15,19 @@ export default function OrderSuccessPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { orderNumber, orderData } = location.state || {};
+  const [colorPalette, setColorPalette] = React.useState([]);
+  
+  // Загружаем палитру цветов
+  React.useEffect(() => {
+    fetch(`${API_BASE_URL}/api/color-palette`)
+      .then(res => res.json())
+      .then(data => {
+        setColorPalette(data);
+      })
+      .catch(error => {
+        console.error('Error loading color palette:', error);
+      });
+  }, []);
   
   // Проверяем, является ли пользователь гостем
   const userData = localStorage.getItem('user');
@@ -147,6 +160,37 @@ export default function OrderSuccessPage() {
               <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5, fontSize: 16 }}>
                                     {getTranslatedName(item.product)}
               </Typography>
+              {/* Отображение цвета товара */}
+              {item.selectedColor && colorPalette.length > 0 && (() => {
+                const paletteColor = colorPalette.find(c => c.id === item.selectedColor);
+                if (!paletteColor) return null;
+                
+                return (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                    <Box
+                      sx={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: 0.5,
+                        background: paletteColor.hex === 'multicolor' 
+                          ? 'linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet)'
+                          : paletteColor.hex,
+                        border: '1px solid #ddd',
+                        flexShrink: 0
+                      }}
+                    />
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: '#666',
+                        fontSize: '0.75rem'
+                      }}
+                    >
+                      {i18n.language === 'he' ? paletteColor.nameHe : paletteColor.nameRu}
+                    </Typography>
+                  </Box>
+                );
+              })()}
               <Typography variant="body2" color="text.secondary">
                 {t('orderSuccess.quantity')} {item.quantity} × ₪{item.product.price}
               </Typography>
