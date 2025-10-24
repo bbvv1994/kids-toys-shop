@@ -2500,7 +2500,8 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
             lineHeight: 1.7, 
             color: '#555',
             fontSize: '1.05rem',
-            textAlign: 'justify'
+            textAlign: 'justify',
+            whiteSpace: 'pre-line'
           }}>
             {getTranslatedDescription(product) || t('productPage.noDescription')}
           </Typography>
