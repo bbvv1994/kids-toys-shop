@@ -3071,6 +3071,13 @@ function AppContent({
       '12-14 лет',
       '14-16 лет'
     ];
+
+    // Опции для фильтра по полу
+    const genderOptions = [
+      { value: 'boy', label: t('catalog.genderOptions.boy') },
+      { value: 'girl', label: t('catalog.genderOptions.girl') },
+      { value: 'unisex', label: t('catalog.genderOptions.unisex') }
+    ];
     
     // Вычисляем реальные лимиты цен на основе товаров
     const priceLimits = React.useMemo(() => {
