@@ -512,7 +512,8 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
             'Игровые фигурки': t('categories.subcategories.toys.game_figures'),
             'Игрушки для песочницы': t('categories.subcategories.toys.sandbox_toys'),
             'Шарики': t('categories.subcategories.toys.balls'),
-            'Игрушки на радиоуправлении': t('categories.subcategories.toys.radio_controlled')
+            'Игрушки на радиоуправлении': t('categories.subcategories.toys.radio_controlled'),
+            'Маленькие сюрпризы': t('categories.subcategories.toys.small_surprises')
           },
           'Конструкторы': {
             'Lego для мальчиков': t('categories.subcategories.constructors.lego_boys'),
@@ -2746,7 +2747,8 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                         'Игровые фигурки': t('categories.subcategories.toys.game_figures'),
                         'Игрушки для песочницы': t('categories.subcategories.toys.sandbox_toys'),
                         'Шарики': t('categories.subcategories.toys.balls'),
-                        'Игрушки на радиоуправлении': t('categories.subcategories.toys.radio_controlled')
+                        'Игрушки на радиоуправлении': t('categories.subcategories.toys.radio_controlled'),
+                        'Маленькие сюрпризы': t('categories.subcategories.toys.small_surprises')
                       },
                       'Конструкторы': {
                         'Lego для мальчиков': t('categories.subcategories.constructors.lego_boys'),
