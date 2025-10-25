@@ -263,7 +263,8 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
               productId: parseInt(item.product.id),
               quantity: item.quantity,
               price: item.product.price,
-              productName: getTranslatedName(item.product)
+              productName: getTranslatedName(item.product),
+              selectedColor: item.selectedColor || null
             };
             console.log('🔍 Mapped item:', mappedItem);
                       return mappedItem;
@@ -351,7 +352,8 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
             productId: parseInt(item.product.id),
             quantity: item.quantity,
             price: item.product.price,
-            productName: getTranslatedName(item.product)
+            productName: getTranslatedName(item.product),
+            selectedColor: item.selectedColor || null
           }));
 
         if (cartItems.length === 0) {

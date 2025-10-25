@@ -1380,7 +1380,7 @@ function EditProductModal(props) {
                           return (
                             <Box
                               key={color.id}
-                              onClick={() => handleAddColor(color)}
+                              onClick={() => isSelected ? handleRemoveColor(color.id) : handleAddColor(color)}
                               sx={{
                                 position: 'relative',
                                 cursor: 'pointer',

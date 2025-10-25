@@ -79,6 +79,7 @@ function CMSOrders() {
     const [orderDetailsOpen, setOrderDetailsOpen] = React.useState(false);
     const orderDetailsContentRef = React.useRef(null);
     const orderDetailsLenisRef = React.useRef(null);
+    const [colorPalette, setColorPalette] = React.useState([]);
   
     // Загрузка заказов
     const fetchOrders = async () => {
@@ -100,6 +101,16 @@ function CMSOrders() {
   
     React.useEffect(() => {
       fetchOrders();
+      
+      // Загружаем палитру цветов
+      fetch(`${API_BASE_URL}/api/color-palette`)
+        .then(res => res.json())
+        .then(data => {
+          setColorPalette(data);
+        })
+        .catch(error => {
+          console.error('Error loading color palette:', error);
+        });
     }, []);
   
     // Блокировка прокрутки фона при открытии диалога
@@ -739,6 +750,35 @@ function CMSOrders() {
                             }}>
                               {t('productCard.sku')}: {item.product?.article || '—'}
                             </Typography>
+                            {item.selectedColor && colorPalette.length > 0 && (() => {
+                              const paletteColor = colorPalette.find(c => c.id === item.selectedColor);
+                              if (!paletteColor) return null;
+                              return (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                                  <Box
+                                    sx={{
+                                      width: 16,
+                                      height: 16,
+                                      borderRadius: 0.5,
+                                      background: paletteColor.hex === 'multicolor' 
+                                        ? 'linear-gradient(135deg, red, orange, yellow, green, blue, indigo, violet)'
+                                        : paletteColor.hex,
+                                      border: '1px solid #ddd',
+                                      flexShrink: 0
+                                    }}
+                                  />
+                                  <Typography 
+                                    variant="caption" 
+                                    sx={{ 
+                                      color: '#666',
+                                      fontSize: '0.8rem'
+                                    }}
+                                  >
+                                    🎨 Цвет: {paletteColor.nameRu}
+                                  </Typography>
+                                </Box>
+                              );
+                            })()}
                             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                               <Chip 
                                 label={`Количество: ${item.quantity}`}

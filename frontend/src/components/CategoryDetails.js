@@ -17,13 +17,14 @@ const subcategoryImageMap = {
   'Декоративная косметика и украшения': 'Dekorativnaya-kosmetika-i-ukrasheniya_11zon.webp',
   'Машинки и другой транспорт': 'Mashinki.webp',
   'Игровые фигурки': 'figurki.webp',
-  'Игрушки для песочницы': 'pesochnicy.webp',
+  'Пляжные игрушки': 'pesochnicy.webp',
   'Оружие игрушечное': 'Oruzhie.webp',
   'Роботы и трансформеры': 'Roboty.webp',
   'Шарики': 'shariki.webp',
   'Активные игры': 'Aktivnye-igry_11zon.webp',
   'Игрушки на радиоуправлении': 'Igrushki-na-radioupravlenii_11zon.webp',
   'Маленькие сюрпризы': 'surprizi.jpg',
+  'Брэндовые игрушки': 'brandtoys.webp',
   
   // Конструкторы
   'Lego для мальчиков': 'podkategorii/konstruktor/legomalchiki.webp',
@@ -119,10 +120,11 @@ function CategoryDetails({ category }) {
       'Машинки и другой транспорт': 'cars_transport',
       'Роботы и трансформеры': 'robots_transformers',
       'Игровые фигурки': 'game_figures',
-      'Игрушки для песочницы': 'sandbox_toys',
+      'Пляжные игрушки': 'sandbox_toys',
       'Шарики': 'balls',
       'Игрушки на радиоуправлении': 'radio_controlled',
       'Маленькие сюрпризы': 'small_surprises',
+      'Брэндовые игрушки': 'branded_toys',
       
       // Конструкторы
       'Lego для мальчиков': 'lego_boys',

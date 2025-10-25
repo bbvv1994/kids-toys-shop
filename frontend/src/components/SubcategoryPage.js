@@ -92,6 +92,13 @@ import ElegantProductCarousel from './ElegantProductCarousel';
 import LazyImage from './LazyImage';
 import Lenis from '@studio-freight/lenis';
 
+// Маппинг полов для фильтрации
+const genderMapping = {
+  'boy': 'Для мальчиков',
+  'girl': 'Для девочек', 
+  'unisex': 'Универсальный'
+};
+
 // Страница подкатегории (показывает товары)
 function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, user, wishlist, onWishlistToggle, onEditProduct, selectedGenders }) {
     const { t, i18n } = useTranslation();
@@ -227,7 +234,11 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
   
     // Фильтрация товаров по поисковому запросу
     const filteredProducts = subcategoryProducts.filter(product => {
-      if (selectedGenders && selectedGenders.length > 0 && !selectedGenders.includes(product.gender)) return false;
+      if (selectedGenders && selectedGenders.length > 0) {
+        // Преобразуем выбранные коды в русские названия
+        const selectedRussianGenders = selectedGenders.map(code => genderMapping[code]).filter(Boolean);
+        if (!selectedRussianGenders.includes(product.gender)) return false;
+      }
       if (searchQuery) {
         const searchLower = searchQuery.toLowerCase();
         const nameMatch = product.name?.toLowerCase().includes(searchLower);
@@ -382,10 +393,11 @@ function SubcategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity
         'Машинки и другой транспорт': 'cars_transport',
         'Роботы и трансформеры': 'robots_transformers',
         'Игровые фигурки': 'game_figures',
-        'Игрушки для песочницы': 'sandbox_toys',
+        'Пляжные игрушки': 'sandbox_toys',
         'Шарики': 'balls',
         'Игрушки на радиоуправлении': 'radio_controlled',
         'Маленькие сюрпризы': 'small_surprises',
+        'Брэндовые игрушки': 'branded_toys',
         // Конструкторы
         'Lego для мальчиков': 'lego_boys',
         'Lego для девочек': 'lego_girls',
