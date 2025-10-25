@@ -2374,10 +2374,11 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
         console.log(`Удалена корзина ID: ${cart.id}`);
       }
       
+      // Вычисляем общую сумму заказа
+      const totalAmount = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      
       // Отправляем уведомления
       try {
-        const totalAmount = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        
         const telegramMessage = `
 🛒 <b>Новый заказ #${order.id}</b>
 
