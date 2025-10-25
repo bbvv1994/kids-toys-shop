@@ -289,7 +289,8 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
           pickupStore,
           paymentMethod,
           total: calculateTotal(),
-          cartItems
+          cartItems,
+          language: i18n.language
         };
         console.log('📤 Guest checkout request:', requestBody);
         
@@ -373,7 +374,8 @@ export default function CheckoutPage({ cart, cartLoading, onPlaceOrder, onClearC
             pickupStore,
             paymentMethod,
             total: calculateTotal(),
-            cartItems
+            cartItems,
+            language: i18n.language
           })
         });
 
