@@ -364,6 +364,7 @@ const emailTemplates = {
                   <div style="flex: 1;">
                     <div style="font-weight: bold; color: #333;">${item.productName}</div>
                     <div style="font-size: 12px; color: #666;">כמות: ${item.quantity} יח'</div>
+                    ${item.colorNameHe ? `<div style="font-size: 12px; color: #666;">🎨 צבע: ${item.colorNameHe}</div>` : ''}
                   </div>
                   <div style="font-weight: bold; color: #e65100; font-size: 16px;">
                     ₪${item.price * item.quantity}
@@ -446,6 +447,7 @@ const emailTemplates = {
                   <div style="flex: 1;">
                     <div style="font-weight: bold; color: #333;">${item.productName}</div>
                     <div style="font-size: 12px; color: #666;">Количество: ${item.quantity} шт.</div>
+                    ${item.colorNameRu ? `<div style="font-size: 12px; color: #666;">🎨 Цвет: ${item.colorNameRu}</div>` : ''}
                   </div>
                   <div style="font-weight: bold; color: #e65100; font-size: 16px;">
                     ₪${item.price * item.quantity}
