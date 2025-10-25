@@ -23,7 +23,7 @@ import {
   MenuItem,
   IconButton
 } from '@mui/material';
-import { Edit as EditIcon, Check as CheckIcon, QuestionAnswer as QuestionAnswerIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { Edit as EditIcon, Check as CheckIcon, QuestionAnswer as QuestionAnswerIcon, Refresh as RefreshIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
 const STATUS_LABELS = {
   pending: 'Ожидает ответа',
@@ -47,6 +47,9 @@ export default function AdminQuestions() {
   const [status, setStatus] = useState('pending');
   const [submitting, setSubmitting] = useState(false);
   const [filterStatus, setFilterStatus] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
@@ -144,6 +147,51 @@ export default function AdminQuestions() {
     setSelectedQuestion(null);
     setAnswer('');
     setStatus('pending');
+    setError('');
+  };
+
+  const handleDeleteQuestion = (question) => {
+    setQuestionToDelete(question);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!questionToDelete) return;
+
+    try {
+      setDeleting(true);
+      setError('');
+      
+      console.log('Deleting question:', questionToDelete.id);
+      
+      const response = await fetch(`${API_BASE_URL}/api/admin/questions/${questionToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Ошибка удаления вопроса (${response.status})`);
+      }
+
+      // Удаляем вопрос из списка
+      setQuestions(questions.filter(q => q.id !== questionToDelete.id));
+      setDeleteDialogOpen(false);
+      setQuestionToDelete(null);
+      console.log('Question deleted successfully');
+    } catch (err) {
+      console.error('Error deleting question:', err);
+      setError(err.message || 'Ошибка удаления вопроса');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setQuestionToDelete(null);
     setError('');
   };
 
@@ -442,6 +490,32 @@ export default function AdminQuestions() {
                           Редактировать
                         </Button>
                       )}
+                      <Button
+                        size="small"
+                        variant="contained"
+                        onClick={() => handleDeleteQuestion(question)}
+                        startIcon={<DeleteIcon />}
+                        sx={{
+                          background: 'linear-gradient(135deg, #f44336 0%, #e53935 100%)',
+                          color: '#fff',
+                          borderRadius: 2,
+                          fontWeight: 600,
+                          fontSize: 13,
+                          px: 2,
+                          py: 0.8,
+                          height: 36,
+                          boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
+                          textTransform: 'none',
+                          minWidth: 80,
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #e53935 0%, #f44336 100%)',
+                            boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                            transform: 'translateY(-1px)'
+                          },
+                        }}
+                      >
+                        Удалить
+                      </Button>
                     </Box>
                   </Box>
                 </CardContent>
@@ -563,6 +637,103 @@ export default function AdminQuestions() {
               }}
             >
               {submitting ? 'Отправка...' : (selectedQuestion?.answer ? 'Обновить ответ' : 'Отправить ответ')}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Диалог подтверждения удаления */}
+        <Dialog open={deleteDialogOpen} onClose={handleCancelDelete} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ color: '#f44336', fontWeight: 'bold' }}>
+            Подтверждение удаления
+          </DialogTitle>
+          <DialogContent>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+            {questionToDelete && (
+              <Box>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  Вы уверены, что хотите удалить этот вопрос?
+                </Typography>
+                <Paper sx={{ p: 2, backgroundColor: '#f5f5f5', mb: 2 }}>
+                  <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 1 }}>
+                    Товар: {questionToDelete.product?.name || 'Неизвестно'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>Вопрос:</strong> {questionToDelete.question}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    От: {questionToDelete.user?.name || 'Пользователь'} ({new Date(questionToDelete.createdAt).toLocaleDateString('ru-RU')})
+                  </Typography>
+                </Paper>
+                <Alert severity="warning">
+                  Это действие нельзя отменить. Вопрос будет удален навсегда.
+                </Alert>
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button 
+              onClick={handleCancelDelete} 
+              disabled={deleting}
+              sx={{
+                background: 'linear-gradient(135deg, #9e9e9e 0%, #757575 100%)',
+                color: '#fff',
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: 15,
+                px: 3,
+                py: 1.5,
+                height: 44,
+                boxShadow: '0 2px 8px rgba(158, 158, 158, 0.3)',
+                textTransform: 'none',
+                minWidth: 120,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #757575 0%, #9e9e9e 100%)',
+                  boxShadow: '0 4px 12px rgba(158, 158, 158, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+                '&:disabled': {
+                  background: '#ccc',
+                  boxShadow: 'none',
+                  transform: 'none'
+                }
+              }}
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={handleConfirmDelete}
+              variant="contained"
+              disabled={deleting}
+              startIcon={deleting ? <CircularProgress size={20} /> : <DeleteIcon />}
+              sx={{
+                background: 'linear-gradient(135deg, #f44336 0%, #e53935 100%)',
+                color: '#fff',
+                borderRadius: 2,
+                fontWeight: 600,
+                fontSize: 15,
+                px: 3,
+                py: 1.5,
+                height: 44,
+                boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
+                textTransform: 'none',
+                minWidth: 120,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #e53935 0%, #f44336 100%)',
+                  boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+                '&:disabled': {
+                  background: '#ccc',
+                  boxShadow: 'none',
+                  transform: 'none'
+                }
+              }}
+            >
+              {deleting ? 'Удаление...' : 'Удалить'}
             </Button>
           </DialogActions>
         </Dialog>

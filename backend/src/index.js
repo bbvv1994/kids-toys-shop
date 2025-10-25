@@ -1427,6 +1427,39 @@ app.put('/api/admin/questions/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// Удалить вопрос (для админа)
+app.delete('/api/admin/questions/:id', authMiddleware, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+  }
+  try {
+    const questionId = parseInt(req.params.id);
+    
+    // Проверяем, существует ли вопрос
+    const question = await prisma.productQuestion.findUnique({
+      where: { id: questionId },
+      include: { product: { select: { name: true } }, user: { select: { name: true } } }
+    });
+    
+    if (!question) {
+      return res.status(404).json({ error: 'Вопрос не найден' });
+    }
+    
+    // Удаляем вопрос
+    await prisma.productQuestion.delete({
+      where: { id: questionId }
+    });
+    
+    console.log(`Admin deleted question #${questionId} about product "${question.product?.name}" from user "${question.user?.name}"`);
+    
+    res.json({ message: 'Вопрос успешно удален', id: questionId });
+  } catch (error) {
+    console.error('Error deleting question:', error);
+    res.status(500).json({ error: 'Failed to delete question' });
+  }
+});
+
 app.get('/api/products/:id', async (req, res) => {
   try {
     const { admin } = req.query;
