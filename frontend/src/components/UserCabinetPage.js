@@ -561,7 +561,6 @@ import {
   Settings as SettingsIcon,
   ExitToApp as ExitToAppIcon,
   Google,
-  Facebook,
 } from '@mui/icons-material';
 import { Link as RouterLink, useNavigate, Navigate } from 'react-router-dom';
 import { getImageUrl, API_BASE_URL } from '../config';
@@ -3173,7 +3172,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
                     )}
                     
                     {/* Информация для OAuth пользователей */}
-                    {!profileData?.hasPassword && (
+                    {!profileData?.hasPassword && profileData?.googleId && (
                       <Box sx={{ 
                         mb: 3, 
                         p: 2, 
@@ -3182,7 +3181,7 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
                         border: '1px solid #e3f2fd' 
                       }}>
                         <Typography sx={{ color: '#1976d2', fontSize: 14, fontWeight: 500 }}>
-                          {t('profile.auth.oauthInfo', { provider: profileData?.googleId ? 'Google' : 'Facebook' })}
+                          {t('profile.auth.oauthInfo', { provider: 'Google' })}
                         </Typography>
                       </Box>
                     )}
@@ -3320,54 +3319,6 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
                           }}
                         >
                           {profileData?.googleId ? t('profile.auth.disconnect') : t('profile.auth.connect')}
-                        </Button>
-                    </Box>
-                    
-                    {/* Facebook */}
-                    <Box sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: { xs: 'flex-start', md: 'space-between' },
-                      flexDirection: { xs: 'column', md: 'row' },
-                      gap: { xs: 2, md: 0 },
-                      p: { xs: 2, md: 3 },
-                      border: '1px solid #e0e0e0',
-                      borderRadius: 2,
-                      background: '#fafafa'
-                    }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Facebook sx={{ color: '#1877f2', fontSize: { xs: 20, sm: 22, md: 24, lg: 28, xl: 32 } }} />
-                        <Box>
-                          <Typography sx={{ fontWeight: 600, color: '#333' }}>
-                            Facebook
-                          </Typography>
-                          <Typography sx={{ color: '#666', fontSize: 14 }}>
-                            {profileData?.facebookId ? t('profile.auth.connected') : t('profile.auth.notConnected')}
-                          </Typography>
-                        </Box>
-                      </Box>
-                                            <Button
-                          variant="contained"
-                          sx={{
-                            background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
-                            color: '#fff',
-                            borderRadius: 2,
-                            fontWeight: 600,
-                            fontSize: { xs: 14, md: 15 },
-                            px: { xs: 2, md: 3 },
-                            py: 1.5,
-                            height: 44,
-                            boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
-                            textTransform: 'none',
-                            minWidth: { xs: '100%', md: 120 },
-                            '&:hover': {
-                              background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
-                              boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
-                              transform: 'translateY(-1px)'
-                            },
-                          }}
-                        >
-                          {profileData?.facebookId ? t('profile.auth.disconnect') : t('profile.auth.connect')}
                         </Button>
                     </Box>
                   </Box>
