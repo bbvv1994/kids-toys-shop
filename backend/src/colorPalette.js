@@ -100,3 +100,5 @@ const COLOR_PALETTE = [
 
 module.exports = { COLOR_PALETTE };
 
+
+

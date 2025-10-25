@@ -579,10 +579,11 @@
         "cars_transport": "Машинки и другой транспорт",
         "robots_transformers": "Роботы и трансформеры",
         "game_figures": "Игровые фигурки",
-        "sandbox_toys": "Игрушки для песочницы",
+        "sandbox_toys": "Пляжные игрушки",
         "balls": "Шарики",
         "radio_controlled": "Игрушки на радиоуправлении",
-        "small_surprises": "Маленькие сюрпризы"
+        "small_surprises": "Маленькие сюрпризы",
+        "branded_toys": "Брэндовые игрушки"
       },
       "constructors": {
         "lego_boys": "Lego для мальчиков",

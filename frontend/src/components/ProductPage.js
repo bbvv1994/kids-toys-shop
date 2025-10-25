@@ -115,10 +115,11 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
       'Машинки и другой транспорт': 'cars_transport',
       'Роботы и трансформеры': 'robots_transformers',
       'Игровые фигурки': 'game_figures',
-      'Игрушки для песочницы': 'sandbox_toys',
+      'Пляжные игрушки': 'sandbox_toys',
       'Шарики': 'balls',
       'Игрушки на радиоуправлении': 'radio_controlled',
       'Маленькие сюрпризы': 'small_surprises',
+      'Брэндовые игрушки': 'branded_toys',
       // Конструкторы
       'Lego для мальчиков': 'lego_boys',
       'Lego для девочек': 'lego_girls',

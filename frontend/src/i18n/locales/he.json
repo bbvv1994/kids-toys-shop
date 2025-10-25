@@ -556,10 +556,10 @@
     "sales": "מבצעים",
     "subcategories": {
       "toys": {
-        "for_babies": "צעצועים קטנטנים",
+        "for_babies": "צעצועים לקטנטנים",
         "dolls": "בובות",
         "toy_weapons": "נשק צעצוע",
-        "tracks_parking_railway": "מסלולים, חניות ורכבות",
+        "tracks_parking_railway": "מסלולים,חניונים ורכבות",
         "soft_toys": "צעצועים רכים",
         "antistress_squishy": "צעצועים נגד לחץ וסקווישי",
         "active_games": "משחקים פעילים",
@@ -568,10 +568,11 @@
         "cars_transport": "מכוניות ותחבורה אחרת",
         "robots_transformers": "רובוטים וטרנספורמרים",
         "game_figures": "דמויות משחק",
-        "sandbox_toys": "צעצועים לארגז חול",
-        "balls": "כדורים",
+        "sandbox_toys": "צעצועים לחוף ים",
+        "balls": "בלוני הליום",
         "radio_controlled": "צעצועים בשלט רחוק",
-        "small_surprises": "הפתעות קטנות"
+        "small_surprises": "הפתעות קטנות",
+        "branded_toys": "מותגים"
       },
       "constructors": {
         "lego_boys": "לגו לבנים",

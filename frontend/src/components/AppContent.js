@@ -512,10 +512,11 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
             'Машинки и другой транспорт': t('categories.subcategories.toys.cars_transport'),
             'Роботы и трансформеры': t('categories.subcategories.toys.robots_transformers'),
             'Игровые фигурки': t('categories.subcategories.toys.game_figures'),
-            'Игрушки для песочницы': t('categories.subcategories.toys.sandbox_toys'),
+            'Пляжные игрушки': t('categories.subcategories.toys.sandbox_toys'),
             'Шарики': t('categories.subcategories.toys.balls'),
             'Игрушки на радиоуправлении': t('categories.subcategories.toys.radio_controlled'),
-            'Маленькие сюрпризы': t('categories.subcategories.toys.small_surprises')
+            'Маленькие сюрпризы': t('categories.subcategories.toys.small_surprises'),
+            'Брэндовые игрушки': t('categories.subcategories.toys.branded_toys')
           },
           'Конструкторы': {
             'Lego для мальчиков': t('categories.subcategories.constructors.lego_boys'),
@@ -607,9 +608,10 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
               translateSubcategory('Игрушки', 'Машинки и другой транспорт'),
               translateSubcategory('Игрушки', 'Роботы и трансформеры'),
               translateSubcategory('Игрушки', 'Игровые фигурки'),
-              translateSubcategory('Игрушки', 'Игрушки для песочницы'),
+              translateSubcategory('Игрушки', 'Пляжные игрушки'),
               translateSubcategory('Игрушки', 'Шарики'),
-              translateSubcategory('Игрушки', 'Игрушки на радиоуправлении')
+              translateSubcategory('Игрушки', 'Игрушки на радиоуправлении'),
+              translateSubcategory('Игрушки', 'Брэндовые игрушки')
             ]
           },
           {
@@ -761,9 +763,10 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
               translateSubcategory('Игрушки', 'Машинки и другой транспорт'),
               translateSubcategory('Игрушки', 'Роботы и трансформеры'),
               translateSubcategory('Игрушки', 'Игровые фигурки'),
-              translateSubcategory('Игрушки', 'Игрушки для песочницы'),
+              translateSubcategory('Игрушки', 'Пляжные игрушки'),
               translateSubcategory('Игрушки', 'Шарики'),
-              translateSubcategory('Игрушки', 'Игрушки на радиоуправлении')
+              translateSubcategory('Игрушки', 'Игрушки на радиоуправлении'),
+              translateSubcategory('Игрушки', 'Брэндовые игрушки')
             ]
           },
           {
@@ -2747,10 +2750,11 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                         'Машинки и другой транспорт': t('categories.subcategories.toys.cars_transport'),
                         'Роботы и трансформеры': t('categories.subcategories.toys.robots_transformers'),
                         'Игровые фигурки': t('categories.subcategories.toys.game_figures'),
-                        'Игрушки для песочницы': t('categories.subcategories.toys.sandbox_toys'),
+                        'Пляжные игрушки': t('categories.subcategories.toys.sandbox_toys'),
                         'Шарики': t('categories.subcategories.toys.balls'),
                         'Игрушки на радиоуправлении': t('categories.subcategories.toys.radio_controlled'),
-                        'Маленькие сюрпризы': t('categories.subcategories.toys.small_surprises')
+                        'Маленькие сюрпризы': t('categories.subcategories.toys.small_surprises'),
+                        'Брэндовые игрушки': t('categories.subcategories.toys.branded_toys')
                       },
                       'Конструкторы': {
                         'Lego для мальчиков': t('categories.subcategories.constructors.lego_boys'),
@@ -3596,7 +3600,7 @@ function AppContent({
                        />
                      ))}
                    </Box>
- 
+  
                    {/* Пол */}
                    <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
                      {t('catalog.gender')}
@@ -3634,7 +3638,7 @@ function AppContent({
                        />
                      ))}
                    </Box>
- 
+  
                    {/* Бренды */}
                    <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 600 }}>
                      {t('catalog.brands')}
@@ -3705,11 +3709,11 @@ function AppContent({
                            background: 'linear-gradient(135deg, #ef5350 0%, #f44336 100%)',
                            boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
                            transform: 'translateY(-1px)'
-                       },
-                     }}
-                   >
+                         },
+                       }}
+                     >
                      {t('catalog.clearFilters')}
-                   </Button>
+                     </Button>
                    </Box>
                  </Paper>
                )}
@@ -4104,7 +4108,7 @@ function AppContent({
                   }}>
                     {t('footer.termsOfService')}
                   </RouterLink>
-
+  
                   <RouterLink to="/attribution" style={{ 
                     color: '#fff', 
                     textDecoration: 'none',
