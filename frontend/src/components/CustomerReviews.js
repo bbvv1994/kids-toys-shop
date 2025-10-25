@@ -32,11 +32,19 @@ const CustomerReviews = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setReviews(data);
+        setReviews(Array.isArray(data) ? data : []);
+        setError(''); // Очищаем ошибку, если запрос успешен
       } else {
-        setError(t('reviews.customerReviews.loadError'));
+        // Не показываем ошибку, если просто отзывов нет (404 или пустой ответ)
+        if (response.status === 404) {
+          setReviews([]);
+          setError('');
+        } else {
+          setError(t('reviews.customerReviews.loadError'));
+        }
       }
     } catch (err) {
+      console.error('Error loading reviews:', err);
       setError(t('reviews.customerReviews.networkError'));
     } finally {
       setLoading(false);
