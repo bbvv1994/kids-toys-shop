@@ -97,7 +97,6 @@ import {
   ChevronRight,
   Lock,
   Security,
-  AccountCircle,
   Dashboard,
   Store,
   LocalShipping,
@@ -560,7 +559,6 @@ import {
   QuestionAnswer as QuestionAnswerIcon,
   Settings as SettingsIcon,
   ExitToApp as ExitToAppIcon,
-  Google,
 } from '@mui/icons-material';
 import { Link as RouterLink, useNavigate, Navigate } from 'react-router-dom';
 import { getImageUrl, API_BASE_URL } from '../config';
@@ -3261,66 +3259,6 @@ function UserCabinetPage({ user, handleLogout, wishlist, handleWishlistToggle, r
                     >
                       {passwordLoading ? <CircularProgress size={24} color="inherit" /> : t('profile.auth.changePassword')}
                     </Button>
-                  </Box>
-                </Box>
-                
-                {/* Подключенные аккаунты */}
-                <Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                    <AccountCircle sx={{ color: '#ff0844', fontSize: { xs: 24, sm: 26, md: 28, lg: 32, xl: 36 } }} />
-                                       <Typography variant="h5" sx={{ fontWeight: 600, color: '#333', fontSize: { xs: '1.2rem', sm: '1.4rem', md: '1.5rem', lg: '1.8rem', xl: '2rem' } }}>
-                       {t('profile.auth.connectedAccounts')}
-                     </Typography>
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {/* Google */}
-                    <Box sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: { xs: 'flex-start', md: 'space-between' },
-                      flexDirection: { xs: 'column', md: 'row' },
-                      gap: { xs: 2, md: 0 },
-                      p: { xs: 2, md: 3 },
-                      border: '1px solid #e0e0e0',
-                      borderRadius: 2,
-                      background: '#fafafa'
-                    }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Google sx={{ color: '#4285f4', fontSize: { xs: 20, sm: 22, md: 24, lg: 28, xl: 32 } }} />
-                        <Box>
-                          <Typography sx={{ fontWeight: 600, color: '#333' }}>
-                            Google
-                          </Typography>
-                          <Typography sx={{ color: '#666', fontSize: 14 }}>
-                            {profileData?.googleId ? t('profile.auth.connected') : t('profile.auth.notConnected')}
-                          </Typography>
-                        </Box>
-                      </Box>
-                                            <Button
-                          variant="contained"
-                          sx={{
-                            background: 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)',
-                            color: '#fff',
-                            borderRadius: 2,
-                            fontWeight: 600,
-                            fontSize: { xs: 14, md: 15 },
-                            px: { xs: 2, md: 3 },
-                            py: 1.5,
-                            height: 44,
-                            boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
-                            textTransform: 'none',
-                            minWidth: { xs: '100%', md: 120 },
-                            '&:hover': {
-                              background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
-                              boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
-                              transform: 'translateY(-1px)'
-                            },
-                          }}
-                        >
-                          {profileData?.googleId ? t('profile.auth.disconnect') : t('profile.auth.connect')}
-                        </Button>
-                    </Box>
                   </Box>
                 </Box>
               </Box>
