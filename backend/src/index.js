@@ -1212,7 +1212,7 @@ app.post('/api/products/:id/questions', authMiddleware, async (req, res) => {
       const telegramMessage = `
 ❓ <b>Новый вопрос о товаре</b>
 
-🛍️ <b>Товар:</b> ${product.name}
+🛍️ <b>Товар:</b> ${product.name}${product.article ? `\n📋 <b>Артикул:</b> ${product.article}` : ''}
 👤 <b>Пользователь:</b> ${user?.name || 'Не указано'}
 📧 <b>Email:</b> ${user?.email || 'Не указано'}
 ❓ <b>Вопрос:</b> ${question.trim()}
