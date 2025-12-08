@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-09-13T21:12:03.612Z",
+  "testVersion": "v2 - After Context Integration",
+  "tests": [
+    {
+      "name": "Home Page",
+      "path": "/",
+      "statusCode": 200,
+      "duration": 55,
+      "contentLength": 3120,
+      "status": "success"
+    },
+    {
+      "name": "Catalog Page",
+      "path": "/catalog",
+      "statusCode": 404,
+      "duration": 3,
+      "contentLength": 146,
+      "status": "failed"
+    },
+    {
+      "name": "About Page",
+      "path": "/about",
+      "statusCode": 404,
+      "duration": 5,
+      "contentLength": 144,
+      "status": "failed"
+    },
+    {
+      "name": "Reviews Page",
+      "path": "/reviews",
+      "statusCode": 404,
+      "duration": 5,
+      "contentLength": 146,
+      "status": "failed"
+    }
+  ],
+  "summary": {
+    "totalTests": 4,
+    "successfulTests": 1,
+    "failedTests": 3,
+    "averageDuration": 55,
+    "totalDuration": 55,
+    "totalContentLength": 3120
+  }
+}

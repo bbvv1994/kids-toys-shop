@@ -1,0 +1,23 @@
+{
+  "name": "kids-toys-shop",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm start",
+    "frontend": "cd frontend && npm start",
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend\"",
+    "backend:dev": "cd backend && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "serve": "node server.js",
+    "build": "cd frontend && npm run build"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.11.1",
+    "@studio-freight/lenis": "^1.0.42",
+    "axios": "^1.10.0",
+    "concurrently": "^8.2.2",
+    "multer": "^2.0.1",
+    "react-scroll": "^1.9.3",
+    "swiper": "^11.2.10"
+  }
+}

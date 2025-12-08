@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://simba-tzatzuim.co.il/sitemap.xml

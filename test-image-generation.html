@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест генерации изображений</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .preview {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .preview h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .generated-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border: 4px solid #f8f9fa;
+        }
+        
+        .notification-preview {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .notification-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+        
+        .notification-header {
+            padding: 30px 25px 25px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ff8a65 100%);
+            color: white;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .notification-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+        }
+        
+        .notification-icon {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 40px;
+            transform: rotate(-10deg);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+        
+        .notification-title {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .notification-subtitle {
+            font-size: 14px;
+            opacity: 0.95;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        
+        .notification-content {
+            padding: 25px;
+            background: white;
+        }
+        
+        .info-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 15px;
+            line-height: 1.5;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 700;
+            color: #2c3e50;
+            min-width: 80px;
+            margin-right: 12px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+            color: #34495e;
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .items-list {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 18px;
+            margin: 18px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .items-header {
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #2c3e50;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .items-header::before {
+            content: '📦';
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+        
+        .item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: #2c3e50;
+            flex: 1;
+        }
+        
+        .item-price {
+            font-weight: 700;
+            color: #e74c3c;
+            font-size: 15px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-top: 2px solid #e9ecef;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .total-label {
+            font-size: 18px;
+            font-weight: 800;
+            color: #2c3e50;
+        }
+        
+        .total-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: #e74c3c;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .status h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .status p {
+            color: #34495e;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Генератор изображений уведомлений</h1>
+        
+        <div class="controls">
+            <button onclick="generateImage()" id="generateBtn">Сгенерировать изображение</button>
+            <button onclick="downloadImage()" id="downloadBtn" style="display: none;">Скачать изображение</button>
+        </div>
+        
+        <div class="notification-preview" id="notificationPreview">
+            <div class="notification-card">
+                <div class="notification-header">
+                    <span class="notification-icon">🔔</span>
+                    <div class="notification-title">НОВЫЙ ЗАКАЗ</div>
+                    <div class="notification-subtitle">Заказ #TEST-123</div>
+                </div>
+                
+                <div class="notification-content">
+                    <div class="info-row">
+                        <span class="info-label">Имя:</span>
+                        <span class="info-value">Тестовый клиент</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">Сумма:</span>
+                        <span class="info-value">1500 ₪</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">Статус:</span>
+                        <span class="info-value">Требует внимания</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">Телефон:</span>
+                        <span class="info-value">+972-50-123-4567</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">Магазин:</span>
+                        <span class="info-value">חנות קריית ים</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">Оплата:</span>
+                        <span class="info-value">Карта</span>
+                    </div>
+                    
+                    <div class="items-list">
+                        <div class="items-header">Товары:</div>
+                        <div class="item">
+                            <span class="item-name">Игрушка 1</span>
+                            <span class="item-price">1000 ₪</span>
+                        </div>
+                        <div class="item">
+                            <span class="item-name">Игрушка 2</span>
+                            <span class="item-price">500 ₪</span>
+                        </div>
+                    </div>
+                    
+                    <div class="total-row">
+                        <span class="total-label">Итого:</span>
+                        <span class="total-value">1500 ₪</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="preview" id="preview" style="display: none;">
+            <h3>Сгенерированное изображение:</h3>
+            <img id="generatedImage" class="generated-image" alt="Сгенерированное уведомление">
+        </div>
+        
+        <div class="status" id="status">
+            <h4>Статус:</h4>
+            <p>Готов к генерации изображения. Нажмите кнопку "Сгенерировать изображение" для создания уведомления.</p>
+        </div>
+    </div>
+
+    <script>
+        let generatedImageData = null;
+        
+        async function generateImage() {
+            const generateBtn = document.getElementById('generateBtn');
+            const status = document.getElementById('status');
+            const preview = document.getElementById('preview');
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Генерация...';
+            status.innerHTML = '<h4>Статус:</h4><p>Генерируем изображение...</p>';
+            
+            try {
+                // Ждем загрузки стилей
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const notificationCard = document.querySelector('.notification-card');
+                
+                // Генерируем изображение
+                const canvas = await html2canvas(notificationCard, {
+                    width: 440,
+                    height: 640,
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null
+                });
+                
+                // Конвертируем в изображение
+                generatedImageData = canvas.toDataURL('image/jpeg', 0.9);
+                
+                // Показываем результат
+                const generatedImage = document.getElementById('generatedImage');
+                generatedImage.src = generatedImageData;
+                
+                preview.style.display = 'block';
+                downloadBtn.style.display = 'inline-block';
+                
+                status.innerHTML = '<h4>Статус:</h4><p>✅ Изображение успешно сгенерировано!</p>';
+                
+            } catch (error) {
+                console.error('Error generating image:', error);
+                status.innerHTML = '<h4>Статус:</h4><p>❌ Ошибка при генерации изображения: ' + error.message + '</p>';
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Сгенерировать изображение';
+            }
+        }
+        
+        function downloadImage() {
+            if (!generatedImageData) return;
+            
+            const link = document.createElement('a');
+            link.download = `notification-${Date.now()}.jpg`;
+            link.href = generatedImageData;
+            link.click();
+        }
+    </script>
+</body>
+</html> 

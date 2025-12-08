@@ -1,0 +1,26 @@
+{
+  "short_name": "סימבה מלך הצעצועים",
+  "name": "סימבה מלך הצעצועים",
+  "description": "חנות צעצועים לילדים בישראל – צעצועים איכותיים במחירים נוחים",
+  "icons": [
+    {
+      "src": "lion-logo.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "lion-logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "lion-logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#a69c91",
+  "background_color": "#ffffff"
+}
