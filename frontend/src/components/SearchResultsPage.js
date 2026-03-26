@@ -2,14 +2,66 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Container, Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet-async';
 import ProductCard from './ProductCard';
 import { searchInProductNames } from '../utils/translationUtils';
+import { FRONTEND_URL } from '../config';
 
 export default function SearchResultsPage({ products, cart, onChangeCartQuantity }) {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const query = params.get('q') || '';
+
+  const isHebrew = i18n.language === 'he';
+  const runtimeBaseUrl = typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.host}`
+    : '';
+  const siteUrl = (FRONTEND_URL || runtimeBaseUrl || 'https://simba-tzatzuim.co.il').replace(/\/+$/, '');
+  const canonicalUrl = `${siteUrl}/search`;
+
+  const seoTitle = isHebrew
+    ? 'תוצאות חיפוש | סימבה מלך הצעצועים בקריית ים ובקריות'
+    : 'Результаты поиска | Симба - Король игрушек в Кирьят-Яме и Крайот';
+
+  const seoDescription = isHebrew
+    ? 'תוצאות חיפוש של סימבה מלך הצעצועים לפי מילות חיפוש. צעצועים לפי קטגוריות, מותגים וגיל.'
+    : 'Результаты поиска по сайту Симба - Король игрушек. Подбор игрушек по категориям, брендам и возрасту.';
+
+  // Fallback in case Helmet updates are delayed/skipped in some environments.
+  React.useEffect(() => {
+    document.title = seoTitle;
+
+    const ensureMeta = (selector, attrs, content) => {
+      let el = document.head.querySelector(selector);
+      if (!el) {
+        el = document.createElement('meta');
+        Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    let canonicalEl = document.head.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      canonicalEl.setAttribute('data-manual-canonical', 'true');
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.setAttribute('href', canonicalUrl);
+
+    ensureMeta('meta[name="description"]', { name: 'description' }, seoDescription);
+    ensureMeta('meta[property="og:locale"]', { property: 'og:locale' }, isHebrew ? 'he_IL' : 'ru_RU');
+    ensureMeta('meta[property="og:type"]', { property: 'og:type' }, 'website');
+    ensureMeta('meta[property="og:site_name"]', { property: 'og:site_name' }, isHebrew ? 'סימבה מלך הצעצועים' : 'Симба - Король игрушек');
+    ensureMeta('meta[property="og:title"]', { property: 'og:title' }, seoTitle);
+    ensureMeta('meta[property="og:description"]', { property: 'og:description' }, seoDescription);
+    ensureMeta('meta[property="og:url"]', { property: 'og:url' }, canonicalUrl);
+    ensureMeta('meta[name="twitter:card"]', { name: 'twitter:card' }, 'summary_large_image');
+    ensureMeta('meta[name="twitter:title"]', { name: 'twitter:title' }, seoTitle);
+    ensureMeta('meta[name="twitter:description"]', { name: 'twitter:description' }, seoDescription);
+  }, [canonicalUrl, isHebrew, seoDescription, seoTitle]);
   const filteredProducts = products.filter(product =>
     query && (
       searchInProductNames(product, query) ||
@@ -21,6 +73,20 @@ export default function SearchResultsPage({ products, cart, onChangeCartQuantity
   );
   return (
     <>
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:locale" content={isHebrew ? 'he_IL' : 'ru_RU'} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={isHebrew ? 'סימבה מלך הצעצועים' : 'Симба - Король игрушек'} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+      </Helmet>
       {/* Заголовок по центру всего экрана */}
       <Container maxWidth={false} sx={{ py: { xs: 2, md: 0.25 }, px: { xs: 2, md: 4 } }}>
         <Box sx={{ mb: 4, pt: { xs: 0, md: 0 } }}>
