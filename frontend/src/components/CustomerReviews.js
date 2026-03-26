@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import {
   Box,
   Typography,
@@ -13,11 +14,35 @@ import {
   ListItemSecondaryAction
 } from '@mui/material';
 import { Store, Star } from '@mui/icons-material';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, FRONTEND_URL } from '../config';
 import { useTranslation } from 'react-i18next';
 
 const CustomerReviews = () => {
   const { t, i18n } = useTranslation();
+  const isHebrew = i18n.language === 'he';
+  const runtimeBaseUrl = typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.host}`
+    : '';
+  const siteUrl = (FRONTEND_URL || runtimeBaseUrl || 'https://simba-tzatzuim.co.il').replace(/\/+$/, '');
+  const canonicalUrl = `${siteUrl}/reviews`;
+  const seoTitle = isHebrew
+    ? 'ביקורות לקוחות | סימבה מלך הצעצועים בקריית ים ובקריות'
+    : 'Отзывы клиентов | Симба - Король игрушек в Кирьят-Яме и Крайот';
+  const seoDescription = isHebrew
+    ? 'ביקורות של לקוחות על סימבה מלך הצעצועים. איכות צעצועים ושירות בקריית ים והקריות.'
+    : 'Читайте отзывы клиентов о Симба - Король игрушек. Качество детских игрушек и сервис в Кирьят-Яме и Крайот.';
+
+  useEffect(() => {
+    document.title = seoTitle;
+    let canonicalEl = document.head.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      canonicalEl.setAttribute('data-manual-canonical', 'true');
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.setAttribute('href', canonicalUrl);
+  }, [canonicalUrl, seoTitle]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -73,8 +98,22 @@ const CustomerReviews = () => {
   };
 
   return (
-    <Box sx={{ p: 2, width: '100%', mx: 'auto', mt: 3.75, display: 'flex', justifyContent: 'center' }}>
-      <Box sx={{ width: '100%', maxWidth: '1200px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <>
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content={isHebrew ? 'he_IL' : 'ru_RU'} />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+      <Box sx={{ p: 2, width: '100%', mx: 'auto', mt: 3.75, display: 'flex', justifyContent: 'center' }}>
+        <Box sx={{ width: '100%', maxWidth: '1200px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {/* Заголовок */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4, justifyContent: 'center' }}>
           <Store color="primary" sx={{ fontSize: 40 }} />
@@ -159,8 +198,9 @@ const CustomerReviews = () => {
             </>
           )}
         </Box>
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 

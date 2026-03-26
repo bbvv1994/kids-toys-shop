@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { 
   Container, 
   Box, 
@@ -18,9 +19,33 @@ import {
   Favorite
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import { FRONTEND_URL } from '../config';
 
 export default function AboutPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isHebrew = i18n.language === 'he';
+  const runtimeBaseUrl = typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.host}`
+    : '';
+  const siteUrl = (FRONTEND_URL || runtimeBaseUrl || 'https://simba-tzatzuim.co.il').replace(/\/+$/, '');
+  const canonicalUrl = `${siteUrl}/about`;
+  const seoTitle = isHebrew
+    ? 'אודות | סימבה מלך הצעצועים בקריית ים ובקריות'
+    : 'О магазине | Симба - Король игрушек в Кирьят-Яме и Крайот';
+  const seoDescription = isHebrew
+    ? 'אודות סימבה מלך הצעצועים: החנות המשפחתית שלנו, ערכים, איכות צעצועים ושירות בקריית ים והקריות.'
+    : 'О магазине Симба - Король игрушек: наша история, ценности и качественные детские игрушки в Кирьят-Яме и Крайот.';
+
+  React.useEffect(() => {
+    document.title = seoTitle;
+    let canonicalEl = document.head.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.setAttribute('href', canonicalUrl);
+  }, [canonicalUrl, seoTitle]);
 
   const advantages = [
     {
@@ -44,6 +69,17 @@ export default function AboutPage() {
   ];
 
   return (
+    <>
+    <Helmet>
+      <title>{seoTitle}</title>
+      <meta name="description" content={seoDescription} />
+      <link rel="canonical" href={canonicalUrl} />
+      <meta property="og:title" content={seoTitle} />
+      <meta property="og:description" content={seoDescription} />
+      <meta property="og:url" content={canonicalUrl} />
+      <meta name="twitter:title" content={seoTitle} />
+      <meta name="twitter:description" content={seoDescription} />
+    </Helmet>
     <Container maxWidth="lg" sx={{ 
       py: { xs: 0, md: 0 }, 
       mt: { xs: 2, md: 4 }, 
@@ -366,5 +402,6 @@ export default function AboutPage() {
         </Box>
       </Box>
     </Container>
+    </>
   );
 } 

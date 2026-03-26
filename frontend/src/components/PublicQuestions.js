@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { API_BASE_URL } from '../config';
+import { FRONTEND_URL } from '../config';
 import { 
   Box, 
   Typography, 
@@ -19,11 +21,37 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import PersonIcon from '@mui/icons-material/Person';
 import ScheduleIcon from '@mui/icons-material/Schedule';
+import { useTranslation } from 'react-i18next';
 
 export default function PublicQuestions() {
+  const { i18n } = useTranslation();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const runtimeBaseUrl = typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.host}`
+    : '';
+  const siteUrl = (FRONTEND_URL || runtimeBaseUrl || 'https://simba-tzatzuim.co.il').replace(/\/+$/, '');
+  const canonicalUrl = `${siteUrl}/questions`;
+  const isHebrew = i18n.language === 'he';
+  const seoTitle = isHebrew
+    ? 'שאלות ותשובות | סימבה מלך הצעצועים בקריית ים ובקריות'
+    : 'Вопросы и ответы | Симба - Король игрушек в Кирьят-Яме и Крайот';
+  const seoDescription = isHebrew
+    ? 'שאלות ותשובות על סימבה מלך הצעצועים. מידע על צעצועים ושירות בקריית ים והקריות.'
+    : 'Вопросы и ответы о Симба - Король игрушек. Информация о товарах и сервисе в Кирьят-Яме и Крайот.';
+
+  useEffect(() => {
+    document.title = seoTitle;
+    let canonicalEl = document.head.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      canonicalEl.setAttribute('data-manual-canonical', 'true');
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.setAttribute('href', canonicalUrl);
+  }, [canonicalUrl, seoTitle]);
 
   useEffect(() => {
     loadQuestions();
@@ -80,7 +108,21 @@ export default function PublicQuestions() {
   }
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <>
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content={isHebrew ? 'he_IL' : 'ru_RU'} />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+      <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
       <Typography variant="h4" sx={{ mb: 3, fontWeight: 600, textAlign: 'center' }}>
         ❓ Вопросы и ответы ({questions.length})
       </Typography>
@@ -162,5 +204,6 @@ export default function PublicQuestions() {
         </Box>
       )}
     </Box>
+    </>
   );
 } 

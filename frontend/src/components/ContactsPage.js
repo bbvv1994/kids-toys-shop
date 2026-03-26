@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { 
   Container, 
   Typography, 
@@ -22,10 +23,34 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import OpenStreetMapComponent from './OpenStreetMap';
+import { FRONTEND_URL } from '../config';
 import { API_ENDPOINTS } from '../config/api';
 
 export default function ContactsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isHebrew = i18n.language === 'he';
+  const runtimeBaseUrl = typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.host}`
+    : '';
+  const siteUrl = (FRONTEND_URL || runtimeBaseUrl || 'https://simba-tzatzuim.co.il').replace(/\/+$/, '');
+  const canonicalUrl = `${siteUrl}/contacts`;
+  const seoTitle = isHebrew
+    ? 'יצירת קשר | סימבה מלך הצעצועים בקריית ים ובקריות'
+    : 'Контакты | Симба - Король игрушек в Кирьят-Яме и Крайот';
+  const seoDescription = isHebrew
+    ? 'יצירת קשר עם סימבה מלך הצעצועים בקריית ים והקריות: כתובת החנויות, טלפונים, וואטסאפ וטופס פנייה.'
+    : 'Контакты магазина Симба - Король игрушек: адреса в Кирьят-Яме и Крайот, телефоны, WhatsApp и форма обратной связи.';
+
+  React.useEffect(() => {
+    document.title = seoTitle;
+    let canonicalEl = document.head.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.setAttribute('href', canonicalUrl);
+  }, [canonicalUrl, seoTitle]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -106,6 +131,17 @@ export default function ContactsPage() {
   const mapCenter = { lat: 32.8344, lng: 35.0693 }; // Центр между магазинами в Хайфском заливе
 
   return (
+    <>
+    <Helmet>
+      <title>{seoTitle}</title>
+      <meta name="description" content={seoDescription} />
+      <link rel="canonical" href={canonicalUrl} />
+      <meta property="og:title" content={seoTitle} />
+      <meta property="og:description" content={seoDescription} />
+      <meta property="og:url" content={canonicalUrl} />
+      <meta name="twitter:title" content={seoTitle} />
+      <meta name="twitter:description" content={seoDescription} />
+    </Helmet>
     <Container maxWidth="lg" sx={{ 
       py: { xs: 1, md: 6 }, 
       pt: { xs: 4, md: 5.75 }, 
@@ -584,5 +620,6 @@ export default function ContactsPage() {
 
 
     </Container>
+    </>
   );
 } 
