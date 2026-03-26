@@ -122,12 +122,12 @@ class SitemapGenerator {
         '0.9'
       ));
 
-      // 3. Статические страницы
+      // 3. Статические страницы (только реальные роуты из фронтенд-роутера)
       const staticPages = [
         { url: '/about', priority: '0.7', changefreq: 'monthly' },
-        { url: '/contact', priority: '0.7', changefreq: 'monthly' },
-        { url: '/delivery', priority: '0.6', changefreq: 'monthly' },
-        { url: '/returns', priority: '0.6', changefreq: 'monthly' },
+        { url: '/contacts', priority: '0.7', changefreq: 'monthly' },
+        { url: '/reviews', priority: '0.7', changefreq: 'weekly' },
+        { url: '/questions', priority: '0.6', changefreq: 'weekly' },
         { url: '/privacy', priority: '0.5', changefreq: 'yearly' },
         { url: '/terms', priority: '0.5', changefreq: 'yearly' }
       ];

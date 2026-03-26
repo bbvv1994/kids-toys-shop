@@ -334,6 +334,32 @@ export default function ProductPage({ onAddToCart, cart, user, onChangeCartQuant
 
   const canonicalUrl = `${FRONTEND_URL || ''}/product/${id}`;
 
+  // Fallback for environments where Helmet may skip <link rel="canonical">.
+  // Keeps canonical stable for product URLs in the live DOM.
+  useEffect(() => {
+    let canonicalEl = document.querySelector('link[rel="canonical"]');
+    const createdByFallback = !canonicalEl;
+
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      canonicalEl.setAttribute('data-manual-canonical', 'true');
+      document.head.appendChild(canonicalEl);
+    }
+
+    canonicalEl.setAttribute('href', canonicalUrl);
+
+    return () => {
+      if (
+        createdByFallback &&
+        canonicalEl &&
+        canonicalEl.getAttribute('data-manual-canonical') === 'true'
+      ) {
+        canonicalEl.remove();
+      }
+    };
+  }, [canonicalUrl]);
+
   const productJsonLd = (p) => {
     if (!p) return null;
     

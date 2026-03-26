@@ -67,7 +67,7 @@ import {
   Info
 } from '@mui/icons-material';
 import { API_BASE_URL, getImageUrl } from '../../config';
-import Lenis from '@studio-freight/lenis';
+import Lenis from 'lenis';
 
 function CMSOrders() {
     const { t } = useTranslation();

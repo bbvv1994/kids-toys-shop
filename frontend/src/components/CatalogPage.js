@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -21,6 +22,7 @@ import {
 } from '@mui/icons-material';
 import { useDeviceType } from '../utils/deviceDetection';
 import { getSpeechRecognitionLanguage, getSpeechRecognitionErrorMessage, isSpeechRecognitionSupported } from '../utils/speechRecognitionUtils';
+import { FRONTEND_URL } from '../config';
 import CustomSelect from './CustomSelect';
 import ProductCard from './ProductCard';
 
@@ -55,6 +57,54 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState('grid');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const isHebrew = i18n.language === 'he';
+  const runtimeBaseUrl = typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.host}`
+    : '';
+  const siteUrl = (FRONTEND_URL || runtimeBaseUrl || 'https://simba-tzatzuim.co.il').replace(/\/+$/, '');
+  const canonicalUrl = `${siteUrl}/catalog`;
+  const seoTitle = isHebrew
+    ? 'קטלוג צעצועים | סימבה מלך הצעצועים בקריית ים ובקריות'
+    : 'Каталог игрушек | Симба - Король игрушек в Кирьят-Яме и Крайот';
+  const seoDescription = isHebrew
+    ? 'קטלוג סימבה מלך הצעצועים: צעצועים לבנים ולבנות, קטגוריות, מותגים וסינון לפי מחיר. קריית ים והקריות.'
+    : 'Каталог Симба - Король игрушек: игрушки для мальчиков и девочек, категории, бренды и фильтры по цене. Кирьят-Ям и Крайот.';
+  const ogLocale = isHebrew ? 'he_IL' : 'ru_RU';
+
+  // Fallback in case Helmet updates are delayed/skipped in some environments.
+  useEffect(() => {
+    document.title = seoTitle;
+
+    const ensureMeta = (selector, attrs, content) => {
+      let el = document.head.querySelector(selector);
+      if (!el) {
+        el = document.createElement('meta');
+        Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    let canonicalEl = document.head.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      canonicalEl.setAttribute('data-manual-canonical', 'true');
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.setAttribute('href', canonicalUrl);
+
+    ensureMeta('meta[name="description"]', { name: 'description' }, seoDescription);
+    ensureMeta('meta[property="og:locale"]', { property: 'og:locale' }, ogLocale);
+    ensureMeta('meta[property="og:type"]', { property: 'og:type' }, 'website');
+    ensureMeta('meta[property="og:site_name"]', { property: 'og:site_name' }, isHebrew ? 'סימבה מלך הצעצועים' : 'Симба - Король игрушек');
+    ensureMeta('meta[property="og:title"]', { property: 'og:title' }, seoTitle);
+    ensureMeta('meta[property="og:description"]', { property: 'og:description' }, seoDescription);
+    ensureMeta('meta[property="og:url"]', { property: 'og:url' }, canonicalUrl);
+    ensureMeta('meta[name="twitter:card"]', { name: 'twitter:card' }, 'summary_large_image');
+    ensureMeta('meta[name="twitter:title"]', { name: 'twitter:title' }, seoTitle);
+    ensureMeta('meta[name="twitter:description"]', { name: 'twitter:description' }, seoDescription);
+  }, [canonicalUrl, isHebrew, ogLocale, seoDescription, seoTitle]);
   
   // Автоматически переключаем на grid view на мобильных устройствах
   useEffect(() => {
@@ -448,6 +498,20 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
 
   return (
     <Box sx={{ position: 'relative' }}>
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:locale" content={ogLocale} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={isHebrew ? 'סימבה מלך הצעצועים' : 'Симба - Король игрушек'} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+      </Helmet>
       <Container maxWidth={false} sx={{ py: { xs: 2, md: 0.25 }, px: { xs: 2, md: 4 } }}>
         <Box sx={{ mb: 4, pt: { xs: 0, md: 0 } }}>
           <Typography variant="h2" sx={{ 

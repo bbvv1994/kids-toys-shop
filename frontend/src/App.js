@@ -1,4 +1,4 @@
-﻿
+
 
 
 
@@ -31,7 +31,7 @@ import { useDeviceType } from './utils/deviceDetection';
 import { CartProvider } from './contexts/CartContext';
 import { UserProvider } from './contexts/UserContext';
 import { ProductsProvider, useProducts } from './contexts/ProductsContext';
-import { getImageUrl, API_BASE_URL } from './config';
+import { getImageUrl, API_BASE_URL, FRONTEND_URL } from './config';
 import { getTranslatedName, forceLanguageUpdate, checkTranslationsAvailable } from './utils/translationUtils';
 import TranslationDebugger from './components/TranslationDebugger';
 import { getSpeechRecognitionLanguage, getSpeechRecognitionErrorMessage, isSpeechRecognitionSupported } from './utils/speechRecognitionUtils';
@@ -1217,6 +1217,16 @@ function AppWithProducts() {
 
 // Главный компонент приложения
 function App() {
+  const runtimeBaseUrl = typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.host}`
+    : '';
+  const siteUrl = (FRONTEND_URL || runtimeBaseUrl || 'https://simba-tzatzuim.co.il').replace(/\/+$/, '');
+  const isLocalhost = typeof window !== 'undefined' && /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
+  const robotsContent = isLocalhost
+    ? 'noindex, nofollow, noarchive'
+    : 'index, follow, max-image-preview:large';
+  const defaultOgImage = `${siteUrl}/lion-logo.png`;
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -1224,15 +1234,16 @@ function App() {
         <html lang="he" />
         <title>סימבה מלך הצעצועים | חנות צעצועים לילדים בישראל</title>
         <meta name="description" content="חנות צעצועים לילדים בישראל – צעצועים, משחקי קופסה, לגו, יצירה ועוד. צעצועים איכותיים במחירים נוחים." />
-        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <meta name="robots" content={robotsContent} />
+        <link rel="canonical" href={`${siteUrl}/`} />
         <meta property="og:locale" content="he_IL" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="סימבה מלך הצעצועים" />
         <meta property="og:title" content="סימבה מלך הצעצועים" />
         <meta property="og:description" content="חנות צעצועים לילדים בישראל – צעצועים איכותיים במחירים נוחים" />
-        <meta property="og:url" content="https://simba-tzatzuim.co.il/" />
-        <meta property="og:image" content="https://simba-tzatzuim.co.il/lion-logo.png" />
-        <meta property="og:image:secure_url" content="https://simba-tzatzuim.co.il/lion-logo.png" />
+        <meta property="og:url" content={`${siteUrl}/`} />
+        <meta property="og:image" content={defaultOgImage} />
+        <meta property="og:image:secure_url" content={defaultOgImage} />
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:width" content="512" />
         <meta property="og:image:height" content="512" />
@@ -1240,19 +1251,16 @@ function App() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="סימבה מלך הצעצועים" />
         <meta name="twitter:description" content="חנות צעצועים לילדים בישראל – צעצועים איכותיים במחירים נוחים" />
-        <meta name="twitter:image" content="https://simba-tzatzuim.co.il/lion-logo.png" />
-        <link rel="alternate" hrefLang="he" href="https://simba-tzatzuim.co.il/" />
-        <link rel="alternate" hrefLang="ru" href="https://simba-tzatzuim.co.il/" />
-        <link rel="alternate" hrefLang="x-default" href="https://simba-tzatzuim.co.il/" />
-        <link rel="canonical" href="https://simba-tzatzuim.co.il/" />
+        <meta name="twitter:image" content={defaultOgImage} />
         <script type="application/ld+json">{`
           {
             "@context": "https://schema.org",
             "@type": "Organization",
+            "@id": "${siteUrl}",
             "name": "סימבה מלך הצעצועים",
             "description": "חנות צעצועים לילדים בישראל – צעצועים איכותיים במחירים נוחים",
-            "url": "https://simba-tzatzuim.co.il/",
-            "logo": "/lion-logo.png",
+            "url": "${siteUrl}/",
+            "logo": "${defaultOgImage}",
             "sameAs": [
               "https://www.facebook.com/simbakingoftoys",
               "https://www.instagram.com/simbaking_oftoys"
@@ -1271,10 +1279,10 @@ function App() {
             "@context": "https://schema.org",
             "@type": "WebSite",
             "name": "סימבה מלך הצעצועים",
-            "url": "https://simba-tzatzuim.co.il/",
+            "url": "${siteUrl}/",
             "potentialAction": {
               "@type": "SearchAction",
-              "target": "https://simba-tzatzuim.co.il/search?q={search_term_string}",
+              "target": "${siteUrl}/search?q={search_term_string}",
               "query-input": "required name=search_term_string"
             }
           }
