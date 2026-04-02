@@ -997,6 +997,8 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
       { text: t('navigation.reviews'), path: '/reviews', icon: <RateReview /> },
       { text: t('navigation.contacts'), path: '/contacts', icon: <ContactMail /> },
       { text: t('navigation.about'), path: '/about', icon: <Info /> },
+      // Добавляем CMS для админа только в мобильном меню
+      ...(isMobile && !userLoading && user?.role === 'admin' ? [{ text: 'CMS', path: '/cms', icon: <AdminPanelSettings /> }] : []),
     ];
   
   
@@ -1537,7 +1539,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                   minWidth: 0,
                   flexShrink: 0
                 }}>
-                  {navItems.map((item) => (
+                  {navItems.filter(item => item.path !== '/cms').map((item) => (
                     <Button
                       key={item.text}
                       component={RouterLink}
@@ -1575,8 +1577,8 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
               )}
               
               
-              {/* Корзина и профиль - Desktop */}
-              {!isMediumOrSmaller && (
+              {/* Корзина и профиль - Desktop (полный блок) */}
+              {isDesktop && (
               <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
                 {/* Кнопка CMS для админа */}
                 {!userLoading && user?.role === 'admin' && (
@@ -1835,6 +1837,26 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                   >
                     <PersonIcon sx={{ fontSize: 24 }} />
                   </IconButton>
+                  
+                  {/* Кнопка CMS для планшетов (только для планшетов, не для мобильных) */}
+                  {!isMobile && !userLoading && user?.role === 'admin' && (
+                    <IconButton
+                      color="inherit"
+                      onClick={() => {
+                        navigate('/cms');
+                        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                      }}
+                      sx={{ 
+                        color: '#FFD700',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255,215,0,0.1)',
+                        },
+                      }}
+                      title="CMS"
+                    >
+                      <AdminPanelSettings sx={{ fontSize: 24 }} />
+                    </IconButton>
+                  )}
                   
                   {/* Корзина для мобильных */}
                   <IconButton
@@ -2329,7 +2351,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
               {t('catalog.categoriesButton')}
             </Button>
             <List className="catalog-sidebar-categories">
-              {navItems.map((item) => (
+              {navItems.filter(item => item.path !== '/cms').map((item) => (
                 <ListItem
                   key={item.text}
                   component={RouterLink}
@@ -2398,37 +2420,40 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
               
               {/* Навигационные пункты */}
               <List>
-                {navItems.map((item) => (
-                  <ListItem
-                    key={item.text}
-                    component={RouterLink}
-                    to={item.path}
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-                    }}
-                    sx={{
-                      backgroundColor: location.pathname === item.path ? '#FFF3E0' : 'transparent',
-                      borderRadius: 2,
-                      mb: 1,
-                      cursor: 'pointer',
-                      '&:hover': {
-                        backgroundColor: '#FFF3E0',
-                      },
-                    }}
-                  >
-                    <Box sx={{ mr: 2, color: '#FF9800' }}>{item.icon}</Box>
-                    <ListItemText
-                      primary={item.text}
-                      sx={{
-                        '& .MuiListItemText-primary': {
-                          fontWeight: 'bold',
-                          color: location.pathname === item.path ? '#FF9800' : '#333'
-                        }
+                {navItems.map((item) => {
+                  const isCMS = item.path === '/cms';
+                  return (
+                    <ListItem
+                      key={item.text}
+                      component={RouterLink}
+                      to={item.path}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
                       }}
-                    />
-                  </ListItem>
-                ))}
+                      sx={{
+                        backgroundColor: location.pathname === item.path ? (isCMS ? '#FFF9C4' : '#FFF3E0') : 'transparent',
+                        borderRadius: 2,
+                        mb: 1,
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: isCMS ? '#FFF9C4' : '#FFF3E0',
+                        },
+                      }}
+                    >
+                      <Box sx={{ mr: 2, color: isCMS ? '#FFD700' : '#FF9800' }}>{item.icon}</Box>
+                      <ListItemText
+                        primary={item.text}
+                        sx={{
+                          '& .MuiListItemText-primary': {
+                            fontWeight: 'bold',
+                            color: location.pathname === item.path ? (isCMS ? '#FFD700' : '#FF9800') : (isCMS ? '#FFD700' : '#333')
+                          }
+                        }}
+                      />
+                    </ListItem>
+                  );
+                })}
               </List>
             </Box>
           </Drawer>

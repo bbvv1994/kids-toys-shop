@@ -124,89 +124,14 @@ function EditProductModal(props) {
     };
   }, [open]);
 
-  // Инициализация Lenis для модального окна
+  // Отключаем Lenis для модального окна - используем нативную прокрутку
+  // Lenis может блокировать обычную прокрутку колесиком мыши
   useEffect(() => {
-    if (open) {
-      // Добавляем небольшую задержку для гарантии готовности DOM
-      const initLenis = () => {
-        if (dialogContentRef.current) {
-          // Уничтожаем предыдущий экземпляр Lenis
-          if (lenisRef.current) {
-            lenisRef.current.destroy();
-            lenisRef.current = null;
-          }
-
-          // Инициализируем новый экземпляр Lenis для прокрутки внутри модального окна
-          lenisRef.current = new Lenis({
-            wrapper: dialogContentRef.current,
-            duration: 1.2,
-            smooth: true,
-            easing: (t) => 1 - Math.pow(1 - t, 3),
-            syncTouch: true,
-            wheelMultiplier: 1,
-            touchMultiplier: 2,
-            infinite: false,
-            orientation: 'vertical',
-            gestureOrientation: 'vertical',
-            smoothWheel: true,
-            wheelMultiplier: 0.8,
-            // Добавляем обработчик для исключения выпадающих списков и области с изображениями
-            wheel: (e) => {
-              const target = e.target;
-              const isInSelect = target.closest('.MuiPopover-root') || 
-                                target.closest('.MuiMenu-root');
-              const isInImageGallery = target.closest('.image-gallery-area');
-              
-              if (isInSelect || isInImageGallery) {
-                // Полностью отключаем Lenis для этих областей
-                e.preventDefault();
-                e.stopPropagation();
-                return false; // Не обрабатываем прокрутку в выпадающих списках и области с изображениями
-              }
-              return true; // Обрабатываем прокрутку в остальных местах
-            },
-            touch: (e) => {
-              const target = e.target;
-              const isInSelect = target.closest('.MuiPopover-root') || 
-                                target.closest('.MuiMenu-root');
-              const isInImageGallery = target.closest('.image-gallery-area');
-              
-              if (isInSelect || isInImageGallery) {
-                return false; // Не обрабатываем touch в выпадающих списках и области с изображениями
-              }
-              return true; // Обрабатываем touch в остальных местах
-            }
-          });
-
-          // Функция для анимации кадров
-          function raf(time) {
-            lenisRef.current?.raf(time);
-            if (open) requestAnimationFrame(raf);
-          }
-          requestAnimationFrame(raf);
-
-        } else {
-          // Если элемент еще не готов, пробуем еще раз через 100мс
-          setTimeout(initLenis, 100);
-        }
-      };
-
-      initLenis();
-    } else {
-      // Уничтожаем Lenis при закрытии модального окна
-      if (lenisRef.current) {
-        lenisRef.current.destroy();
-        lenisRef.current = null;
-      }
+    // Уничтожаем Lenis если он был создан
+    if (lenisRef.current) {
+      lenisRef.current.destroy();
+      lenisRef.current = null;
     }
-
-    // Очистка при размонтировании
-    return () => {
-      if (lenisRef.current) {
-        lenisRef.current.destroy();
-        lenisRef.current = null;
-      }
-    };
   }, [open]);
 
 
@@ -245,104 +170,22 @@ function EditProductModal(props) {
     return ageGroupMap[ageGroup] || ageGroup;
   };
 
-  // Обработчики для управления Lenis в выпадающих списках
+  // Обработчики для управления выпадающими списками (Lenis отключен)
   const handleSelectOpen = (selectName) => {
-    if (lenisRef.current) {
-      lenisRef.current.stop();
-    }
     setOpenSelects(prev => ({ ...prev, [selectName]: true }));
   };
 
   const handleSelectClose = (selectName) => {
-    if (lenisRef.current) {
-      lenisRef.current.start();
-    }
     setOpenSelects(prev => ({ ...prev, [selectName]: false }));
   };
 
-  // Автоматически возобновляем Lenis при закрытии всех выпадающих списков
-  useEffect(() => {
-    const hasOpenSelects = Object.values(openSelects).some(isOpen => isOpen);
-    
-    if (!hasOpenSelects && lenisRef.current) {
-      lenisRef.current.start();
-    }
-  }, [openSelects]);
-
   const handleMenuOpen = () => {
-    if (lenisRef.current) {
-      lenisRef.current.stop();
-    }
+    // Lenis отключен, обработчик оставлен для совместимости
   };
 
   const handleMenuClose = () => {
-    if (lenisRef.current) {
-      lenisRef.current.start();
-    }
+    // Lenis отключен, обработчик оставлен для совместимости
   };
-
-  // Добавляем обработчик для предотвращения прокрутки в выпадающих списках
-  useEffect(() => {
-    const handleWheel = (e) => {
-      // Проверяем, находится ли событие в выпадающем списке или области с изображениями
-      const target = e.target;
-      const isInSelect = target.closest('.MuiPopover-root') || 
-                        target.closest('.MuiMenu-root');
-      const isInImageGallery = target.closest('.image-gallery-area');
-      
-      if (isInSelect || isInImageGallery) {
-        // Полностью останавливаем Lenis и предотвращаем его обработку
-        if (lenisRef.current) {
-          lenisRef.current.stop();
-        }
-        // Предотвращаем всплытие события
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      } else {
-        // Если не в выпадающем списке или области с изображениями, возобновляем Lenis
-        if (lenisRef.current) {
-          lenisRef.current.start();
-        }
-      }
-    };
-
-    const handleTouchStart = (e) => {
-      const target = e.target;
-      const isInSelect = target.closest('.MuiPopover-root') || 
-                        target.closest('.MuiMenu-root');
-      const isInImageGallery = target.closest('.image-gallery-area');
-      
-      if (isInSelect || isInImageGallery) {
-        if (lenisRef.current) {
-          lenisRef.current.stop();
-        }
-      }
-    };
-
-    const handleTouchEnd = (e) => {
-      const target = e.target;
-      const isInSelect = target.closest('.MuiPopover-root') || 
-                        target.closest('.MuiMenu-root');
-      const isInImageGallery = target.closest('.image-gallery-area');
-      
-      if (!isInSelect && !isInImageGallery && lenisRef.current) {
-        lenisRef.current.start();
-      }
-    };
-
-    if (open) {
-      document.addEventListener('wheel', handleWheel, { passive: false });
-      document.addEventListener('touchstart', handleTouchStart, { passive: true });
-      document.addEventListener('touchend', handleTouchEnd, { passive: true });
-    }
-
-    return () => {
-      document.removeEventListener('wheel', handleWheel);
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [open]);
 
   // Обработчик клика вне выпадающих списков
   const handleClickOutside = useCallback((event) => {
@@ -1079,18 +922,9 @@ function EditProductModal(props) {
         <DialogContent
             ref={dialogContentRef}
             onWheel={(e) => {
-              // Проверяем, находится ли событие в области с изображениями
-              const target = e.target;
-              const isInImageGallery = target.closest('.image-gallery-area');
-              
-              if (isInImageGallery) {
-                // Если в области с изображениями, останавливаем Lenis
-                if (lenisRef.current) {
-                  lenisRef.current.stop();
-                }
-                // Разрешаем обычную прокрутку
-                e.stopPropagation();
-              }
+              // Разрешаем прокрутку внутри DialogContent
+              // Это предотвращает блокировку глобальными обработчиками
+              e.stopPropagation();
             }}
             sx={{ 
               p: 3,
@@ -1098,6 +932,9 @@ function EditProductModal(props) {
               overflowX: 'hidden',
               flex: 1,
               maxHeight: 'calc(90vh - 120px)', // Высота минус заголовок и отступы
+              WebkitOverflowScrolling: 'touch', // Плавная прокрутка на iOS
+              overscrollBehavior: 'contain', // Предотвращает прокрутку фона
+              touchAction: 'pan-y', // Разрешает вертикальную прокрутку на touch-устройствах
               '&::-webkit-scrollbar': {
                 width: '8px',
               },
@@ -1611,26 +1448,6 @@ function EditProductModal(props) {
                         </Typography>
                         <Box 
                           className="image-gallery-area"
-                          onWheel={(e) => {
-                            // Предотвращаем всплытие события прокрутки
-                            e.stopPropagation();
-                            // Разрешаем обычную прокрутку в этой области
-                            const container = e.currentTarget;
-                            const scrollTop = container.scrollTop;
-                            const scrollHeight = container.scrollHeight;
-                            const clientHeight = container.clientHeight;
-                            
-                            // Если контент не помещается, прокручиваем контейнер
-                            if (scrollHeight > clientHeight) {
-                              container.scrollTop = scrollTop + e.deltaY;
-                            } else {
-                              // Если контент помещается, прокручиваем родительский элемент
-                              const parent = container.closest('.MuiDialogContent-root');
-                              if (parent) {
-                                parent.scrollTop += e.deltaY;
-                              }
-                            }
-                          }}
                           sx={{ 
                             display: 'flex', 
                             flexWrap: 'wrap', 
@@ -1644,8 +1461,9 @@ function EditProductModal(props) {
                             WebkitUserSelect: 'none',
                             MozUserSelect: 'none',
                             msUserSelect: 'none',
-                            overflowY: 'auto',
-                            maxHeight: '400px'
+                            overflow: 'visible',
+                            position: 'relative',
+                            zIndex: 1
                           }}
                           onDragOver={(e) => {
                             e.preventDefault();

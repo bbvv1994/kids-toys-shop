@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
@@ -6,12 +6,12 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Логирование для диагностики
-console.log('🚀 Starting backend server...');
-console.log('🔍 DEBUG: __dirname:', __dirname);
-console.log('🔍 DEBUG: process.cwd():', process.cwd());
-console.log('🔍 DEBUG: Node.js version:', process.version);
-console.log('🔍 DEBUG: Platform:', process.platform);
+// Р›РѕРіРёСЂРѕРІР°РЅРёРµ РґР»СЏ РґРёР°РіРЅРѕСЃС‚РёРєРё
+console.log('рџљЂ Starting backend server...');
+console.log('рџ”Ќ DEBUG: __dirname:', __dirname);
+console.log('рџ”Ќ DEBUG: process.cwd():', process.cwd());
+console.log('рџ”Ќ DEBUG: Node.js version:', process.version);
+console.log('рџ”Ќ DEBUG: Platform:', process.platform);
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
@@ -27,28 +27,32 @@ const ProductionUploadMiddleware = require('./productionUploadMiddleware');
 const CloudinaryUploadMiddleware = require('./cloudinaryUploadMiddleware');
 const FlexibleUploadMiddleware = require('./flexibleUploadMiddleware');
 const SmartImageUploadMiddleware = require('./smartImageUploadMiddleware');
+const DualStorageUploadMiddleware = require('./dualStorageUploadMiddleware');
 const TranslationService = require('./services/translationService');
 const SafeMigration = require('../safe-migration');
 const { COLOR_PALETTE } = require('./colorPalette');
 
-// Инициализация кэширования
+// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєСЌС€РёСЂРѕРІР°РЅРёСЏ
 const cacheManager = require('./cache');
 const { cacheMiddleware, smartInvalidateCache, invalidateCache, CACHE_PATTERNS } = require('./cacheMiddleware');
 
-// Подключение к Redis
+// РџРѕРґРєР»СЋС‡РµРЅРёРµ Рє Redis
 cacheManager.connect().then(() => {
-  console.log('✅ Кэширование инициализировано');
+  console.log('вњ… РљСЌС€РёСЂРѕРІР°РЅРёРµ РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅРѕ');
 }).catch(err => {
-  console.log('❌ Ошибка инициализации кэширования:', err.message);
+  console.log('вќЊ РћС€РёР±РєР° РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РєСЌС€РёСЂРѕРІР°РЅРёСЏ:', err.message);
 });
-// Создаем один экземпляр ImageMiddleware для использования во всех маршрутах
+// РЎРѕР·РґР°РµРј РѕРґРёРЅ СЌРєР·РµРјРїР»СЏСЂ ImageMiddleware РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РІРѕ РІСЃРµС… РјР°СЂС€СЂСѓС‚Р°С…
 const imageMiddleware = new ImageMiddleware();
 const productionUploadMiddleware = new ProductionUploadMiddleware();
 const cloudinaryUploadMiddleware = new CloudinaryUploadMiddleware();
 const flexibleUploadMiddleware = new FlexibleUploadMiddleware();
 const smartImageUploadMiddleware = new SmartImageUploadMiddleware();
+// РСЃРїРѕР»СЊР·СѓРµРј DualStorage РґР»СЏ С‚СЂРѕР№РЅРѕРіРѕ СЃРѕС…СЂР°РЅРµРЅРёСЏ (Cloudinary + HD + compressed)
+const dualStorageUploadMiddleware = new DualStorageUploadMiddleware();
+console.log('рџЋЇ РђРєС‚РёРІРЅС‹Р№ РѕР±СЂР°Р±РѕС‚С‡РёРє РёР·РѕР±СЂР°Р¶РµРЅРёР№: DualStorage (Triple Storage)');
 
-// Настройка Brevo
+// РќР°СЃС‚СЂРѕР№РєР° Brevo
 // Brevo API initialization
 let apiInstance = null;
 console.log('Initializing Brevo API...');
@@ -70,7 +74,7 @@ if (process.env.BREVO_API_KEY) {
   console.log('BREVO_API_KEY not found in environment variables');
 }
 
-// Настройка Telegram бота
+// РќР°СЃС‚СЂРѕР№РєР° Telegram Р±РѕС‚Р°
 let telegramBot = null;
 if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
   try {
@@ -82,51 +86,51 @@ if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
   }
 }
 
-// Функция для отправки уведомления в Telegram
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РѕС‚РїСЂР°РІРєРё СѓРІРµРґРѕРјР»РµРЅРёСЏ РІ Telegram
 async function sendTelegramNotification(message) {
   try {
-    console.log('🔍 Telegram notification function called');
-    console.log('📱 Telegram bot exists:', !!telegramBot);
-    console.log('🔑 TELEGRAM_BOT_TOKEN exists:', !!process.env.TELEGRAM_BOT_TOKEN);
-    console.log('💬 TELEGRAM_CHAT_ID exists:', !!process.env.TELEGRAM_CHAT_ID);
-    console.log('👥 TELEGRAM_CHAT_IDS exists:', !!process.env.TELEGRAM_CHAT_IDS);
-    console.log('📝 Message to send:', message.substring(0, 100) + '...');
+    console.log('рџ”Ќ Telegram notification function called');
+    console.log('рџ“± Telegram bot exists:', !!telegramBot);
+    console.log('рџ”‘ TELEGRAM_BOT_TOKEN exists:', !!process.env.TELEGRAM_BOT_TOKEN);
+    console.log('рџ’¬ TELEGRAM_CHAT_ID exists:', !!process.env.TELEGRAM_CHAT_ID);
+    console.log('рџ‘Ґ TELEGRAM_CHAT_IDS exists:', !!process.env.TELEGRAM_CHAT_IDS);
+    console.log('рџ“ќ Message to send:', message.substring(0, 100) + '...');
     
     if (!telegramBot) {
-      console.log('❌ Telegram bot not configured, skipping notification');
+      console.log('вќЊ Telegram bot not configured, skipping notification');
       return true;
     }
     
-    // Получаем список Chat ID из переменной окружения
+    // РџРѕР»СѓС‡Р°РµРј СЃРїРёСЃРѕРє Chat ID РёР· РїРµСЂРµРјРµРЅРЅРѕР№ РѕРєСЂСѓР¶РµРЅРёСЏ
     let chatIds = [];
     
     if (process.env.TELEGRAM_CHAT_IDS) {
-      console.log('📋 Using TELEGRAM_CHAT_IDS:', process.env.TELEGRAM_CHAT_IDS);
+      console.log('рџ“‹ Using TELEGRAM_CHAT_IDS:', process.env.TELEGRAM_CHAT_IDS);
       chatIds = process.env.TELEGRAM_CHAT_IDS.split(',').map(id => id.trim());
     } else if (process.env.TELEGRAM_CHAT_ID) {
-      console.log('📋 Using TELEGRAM_CHAT_ID:', process.env.TELEGRAM_CHAT_ID);
+      console.log('рџ“‹ Using TELEGRAM_CHAT_ID:', process.env.TELEGRAM_CHAT_ID);
       chatIds = [process.env.TELEGRAM_CHAT_ID];
     }
     
-    console.log('🎯 Chat IDs to send to:', chatIds);
+    console.log('рџЋЇ Chat IDs to send to:', chatIds);
     
     if (chatIds.length === 0) {
-      console.log('❌ No Telegram chat IDs configured, skipping notification');
-      console.log('💡 Available environment variables:');
+      console.log('вќЊ No Telegram chat IDs configured, skipping notification');
+      console.log('рџ’Ў Available environment variables:');
       console.log('   - TELEGRAM_CHAT_ID:', process.env.TELEGRAM_CHAT_ID);
       console.log('   - TELEGRAM_CHAT_IDS:', process.env.TELEGRAM_CHAT_IDS);
       return true;
     }
     
-    // Отправляем сообщение всем пользователям
+    // РћС‚РїСЂР°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ РІСЃРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏРј
     const sendPromises = chatIds.map(chatId => 
       telegramBot.sendMessage(chatId, message, { parse_mode: 'HTML' })
         .then(() => {
-          console.log(`✅ Telegram notification sent successfully to chat ID: ${chatId}`);
+          console.log(`вњ… Telegram notification sent successfully to chat ID: ${chatId}`);
           return true;
         })
         .catch(error => {
-          console.error(`❌ Error sending Telegram notification to chat ID ${chatId}:`, error.message);
+          console.error(`вќЊ Error sending Telegram notification to chat ID ${chatId}:`, error.message);
           return false;
         })
     );
@@ -134,33 +138,33 @@ async function sendTelegramNotification(message) {
     const results = await Promise.allSettled(sendPromises);
     const successCount = results.filter(result => result.status === 'fulfilled' && result.value).length;
     
-    console.log(`📊 Telegram notifications summary: ${successCount}/${chatIds.length} successful`);
+    console.log(`рџ“Љ Telegram notifications summary: ${successCount}/${chatIds.length} successful`);
     return successCount > 0;
   } catch (error) {
-    console.error('💥 Error in sendTelegramNotification function:', error);
+    console.error('рџ’Ґ Error in sendTelegramNotification function:', error);
     return false;
   }
 }
 
-// Функция для получения адреса магазина
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ Р°РґСЂРµСЃР° РјР°РіР°Р·РёРЅР°
 function getStoreAddress(pickupStore) {
   const storeAddresses = {
-    'store1': 'רוברט סולד 8 קריית ים',
-    'store2': 'ויצמן 6 קריית מוצקין'
+    'store1': 'ЧЁЧ•Ч‘ЧЁЧ ЧЎЧ•ЧњЧ“ 8 Ч§ЧЁЧ™Ч™ЧЄ Ч™Чќ',
+    'store2': 'Ч•Ч™Ч¦ЧћЧџ 6 Ч§ЧЁЧ™Ч™ЧЄ ЧћЧ•Ч¦Ч§Ч™Чџ'
   };
-  return storeAddresses[pickupStore] || 'כתובת לא צוינה';
+  return storeAddresses[pickupStore] || 'Ч›ЧЄЧ•Ч‘ЧЄ ЧњЧђ Ч¦Ч•Ч™Ч Ч”';
 }
 
-// Функция для получения полной информации о магазине
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РїРѕР»РЅРѕР№ РёРЅС„РѕСЂРјР°С†РёРё Рѕ РјР°РіР°Р·РёРЅРµ
 function getStoreInfo(pickupStore) {
   const storeInfo = {
-    'store1': { name: 'חנות קריית ים', address: 'רוברט סולד 8 קריית ים' },
-    'store2': { name: 'חנות קריית מוצקין', address: 'ויצמן 6 קריית מוצקין' }
+    'store1': { name: 'Ч—Ч Ч•ЧЄ Ч§ЧЁЧ™Ч™ЧЄ Ч™Чќ', address: 'ЧЁЧ•Ч‘ЧЁЧ ЧЎЧ•ЧњЧ“ 8 Ч§ЧЁЧ™Ч™ЧЄ Ч™Чќ' },
+    'store2': { name: 'Ч—Ч Ч•ЧЄ Ч§ЧЁЧ™Ч™ЧЄ ЧћЧ•Ч¦Ч§Ч™Чџ', address: 'Ч•Ч™Ч¦ЧћЧџ 6 Ч§ЧЁЧ™Ч™ЧЄ ЧћЧ•Ч¦Ч§Ч™Чџ' }
   };
-  return storeInfo[pickupStore] || { name: 'חנות לא נמצאה', address: 'כתובת לא צוינה' };
+  return storeInfo[pickupStore] || { name: 'Ч—Ч Ч•ЧЄ ЧњЧђ Ч ЧћЧ¦ЧђЧ”', address: 'Ч›ЧЄЧ•Ч‘ЧЄ ЧњЧђ Ч¦Ч•Ч™Ч Ч”' };
 }
 
-// Функция для безопасного получения полей переводов
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ Р±РµР·РѕРїР°СЃРЅРѕРіРѕ РїРѕР»СѓС‡РµРЅРёСЏ РїРѕР»РµР№ РїРµСЂРµРІРѕРґРѕРІ
 async function getTranslationFields() {
   try {
     const tableInfo = await prisma.$queryRaw`
@@ -171,35 +175,35 @@ async function getTranslationFields() {
     `;
     return tableInfo.map(col => col.column_name);
   } catch (error) {
-    console.log('⚠️ Не удалось проверить поля переводов:', error.message);
+    console.log('вљ пёЏ РќРµ СѓРґР°Р»РѕСЃСЊ РїСЂРѕРІРµСЂРёС‚СЊ РїРѕР»СЏ РїРµСЂРµРІРѕРґРѕРІ:', error.message);
     return [];
   }
 }
 
-// Функция для отправки email через Brevo с поддержкой локализации
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РѕС‚РїСЂР°РІРєРё email С‡РµСЂРµР· Brevo СЃ РїРѕРґРґРµСЂР¶РєРѕР№ Р»РѕРєР°Р»РёР·Р°С†РёРё
 async function sendEmail(to, subject, htmlContent, language = 'he') {
   try {
-    console.log('📧 sendEmail called with:', { 
+    console.log('рџ“§ sendEmail called with:', { 
       to, 
       subject, 
       hasHtmlContent: !!htmlContent, 
       htmlLength: htmlContent?.length || 0,
       language 
     });
-    console.log('🔑 BREVO_API_KEY exists:', !!process.env.BREVO_API_KEY);
-    console.log('🔌 apiInstance exists:', !!apiInstance);
+    console.log('рџ”‘ BREVO_API_KEY exists:', !!process.env.BREVO_API_KEY);
+    console.log('рџ”Њ apiInstance exists:', !!apiInstance);
     
-    // Проверяем что HTML контент не пустой
+    // РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ HTML РєРѕРЅС‚РµРЅС‚ РЅРµ РїСѓСЃС‚РѕР№
     if (!htmlContent || htmlContent.length < 50) {
-      console.error('❌ HTML content is empty or too short:', htmlContent?.length || 0);
+      console.error('вќЊ HTML content is empty or too short:', htmlContent?.length || 0);
       throw new Error('Email HTML content is empty or invalid');
     }
     
-    // Если нет API ключа или экземпляра, логируем но продолжаем
+    // Р•СЃР»Рё РЅРµС‚ API РєР»СЋС‡Р° РёР»Рё СЌРєР·РµРјРїР»СЏСЂР°, Р»РѕРіРёСЂСѓРµРј РЅРѕ РїСЂРѕРґРѕР»Р¶Р°РµРј
     if (!process.env.BREVO_API_KEY || !apiInstance) {
-      console.warn('⚠️ Brevo API not configured, email will not be sent');
-      console.log('📋 Email would have been sent:', { to, subject, language });
-      return true; // Возвращаем true для тестирования без API
+      console.warn('вљ пёЏ Brevo API not configured, email will not be sent');
+      console.log('рџ“‹ Email would have been sent:', { to, subject, language });
+      return true; // Р’РѕР·РІСЂР°С‰Р°РµРј true РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ Р±РµР· API
     }
     
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
@@ -207,11 +211,11 @@ async function sendEmail(to, subject, htmlContent, language = 'he') {
     sendSmtpEmail.subject = subject;
     sendSmtpEmail.htmlContent = htmlContent;
     sendSmtpEmail.sender = { 
-      name: 'סימבה מלך הצעצועים', // Всегда на иврите
+      name: 'ЧЎЧ™ЧћЧ‘Ч” ЧћЧњЧљ Ч”Ч¦ЧўЧ¦Ч•ЧўЧ™Чќ', // Р’СЃРµРіРґР° РЅР° РёРІСЂРёС‚Рµ
       email: 'noreply.simba.tzatzuim@gmail.com' 
     };
     
-    console.log('📤 Sending email with params:', {
+    console.log('рџ“¤ Sending email with params:', {
       sender: sendSmtpEmail.sender,
       to: to,
       subject: subject,
@@ -220,13 +224,13 @@ async function sendEmail(to, subject, htmlContent, language = 'he') {
     });
 
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log('✅ Email sent successfully via Brevo:', {
+    console.log('вњ… Email sent successfully via Brevo:', {
       messageId: result?.messageId || 'unknown',
       to: to
     });
     return true;
   } catch (error) {
-    console.error('❌ Error sending email:', {
+    console.error('вќЊ Error sending email:', {
       error: error.message,
       to: to,
       subject: subject,
@@ -234,7 +238,7 @@ async function sendEmail(to, subject, htmlContent, language = 'he') {
       body: error.response?.body
     });
     
-    // Если это ошибка от Brevo API, выводим детали
+    // Р•СЃР»Рё СЌС‚Рѕ РѕС€РёР±РєР° РѕС‚ Brevo API, РІС‹РІРѕРґРёРј РґРµС‚Р°Р»Рё
     if (error.response) {
       console.error('Brevo API error details:', {
         status: error.response.statusCode,
@@ -243,7 +247,7 @@ async function sendEmail(to, subject, htmlContent, language = 'he') {
       });
     }
     
-    // Бросаем ошибку дальше, чтобы вызывающий код знал о проблеме
+    // Р‘СЂРѕСЃР°РµРј РѕС€РёР±РєСѓ РґР°Р»СЊС€Рµ, С‡С‚РѕР±С‹ РІС‹Р·С‹РІР°СЋС‰РёР№ РєРѕРґ Р·РЅР°Р» Рѕ РїСЂРѕР±Р»РµРјРµ
     throw error;
   }
 }
@@ -254,19 +258,19 @@ const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 });
 
-// Логирование инициализации Prisma
-console.log('🔧 Initializing Prisma Client...');
-console.log('📊 DATABASE_URL:', process.env.DATABASE_URL ? 'Present' : 'Missing');
-console.log('🔑 JWT_SECRET:', process.env.JWT_SECRET ? 'Present' : 'Missing');
+// Р›РѕРіРёСЂРѕРІР°РЅРёРµ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё Prisma
+console.log('рџ”§ Initializing Prisma Client...');
+console.log('рџ“Љ DATABASE_URL:', process.env.DATABASE_URL ? 'Present' : 'Missing');
+console.log('рџ”‘ JWT_SECRET:', process.env.JWT_SECRET ? 'Present' : 'Missing');
 
-// Тестируем подключение к базе данных
+// РўРµСЃС‚РёСЂСѓРµРј РїРѕРґРєР»СЋС‡РµРЅРёРµ Рє Р±Р°Р·Рµ РґР°РЅРЅС‹С…
 prisma.$connect()
   .then(() => {
-    console.log('✅ Prisma connected to database successfully');
+    console.log('вњ… Prisma connected to database successfully');
   })
   .catch((error) => {
-    console.error('❌ Prisma connection failed:', error);
-    console.error('❌ Error details:', {
+    console.error('вќЊ Prisma connection failed:', error);
+    console.error('вќЊ Error details:', {
       message: error.message,
       code: error.code,
       meta: error.meta
@@ -282,11 +286,11 @@ prisma.$connect()
 
 const PORT = process.env.PORT || 5001;
 
-// Настройка multer для production и development
+// РќР°СЃС‚СЂРѕР№РєР° multer РґР»СЏ production Рё development
 let storage;
 let upload;
 
-// Всегда используем память для загрузки файлов, чтобы можно было обрабатывать их
+// Р’СЃРµРіРґР° РёСЃРїРѕР»СЊР·СѓРµРј РїР°РјСЏС‚СЊ РґР»СЏ Р·Р°РіСЂСѓР·РєРё С„Р°Р№Р»РѕРІ, С‡С‚РѕР±С‹ РјРѕР¶РЅРѕ Р±С‹Р»Рѕ РѕР±СЂР°Р±Р°С‚С‹РІР°С‚СЊ РёС…
 upload = multer({ 
   storage: multer.memoryStorage(),
   limits: {
@@ -294,19 +298,19 @@ upload = multer({
   }
 });
 
-// Создаем папку uploads если её нет
+// РЎРѕР·РґР°РµРј РїР°РїРєСѓ uploads РµСЃР»Рё РµС‘ РЅРµС‚
 if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }
 
-// CORS настройки
+// CORS РЅР°СЃС‚СЂРѕР№РєРё
 const corsOptions = {
   origin: function (origin, callback) {
-    console.log('🌐 CORS check - Origin:', origin);
+    console.log('рџЊђ CORS check - Origin:', origin);
     
-    // Разрешаем запросы без origin (например, Postman)
+    // Р Р°Р·СЂРµС€Р°РµРј Р·Р°РїСЂРѕСЃС‹ Р±РµР· origin (РЅР°РїСЂРёРјРµСЂ, Postman)
     if (!origin) {
-      console.log('✅ CORS allowed - No origin (Postman, etc.)');
+      console.log('вњ… CORS allowed - No origin (Postman, etc.)');
       return callback(null, true);
     }
     
@@ -321,34 +325,34 @@ const corsOptions = {
       'http://91.99.85.48',
       'http://91.99.85.48:80',
       'http://91.99.85.48:3000',
-      // Продакшен домен
+      // РџСЂРѕРґР°РєС€РµРЅ РґРѕРјРµРЅ
       'https://simba-tzatzuim.co.il',
       'https://www.simba-tzatzuim.co.il',
       'http://simba-tzatzuim.co.il',
       'http://www.simba-tzatzuim.co.il',
     ];
     
-    // Проверяем точное совпадение
+    // РџСЂРѕРІРµСЂСЏРµРј С‚РѕС‡РЅРѕРµ СЃРѕРІРїР°РґРµРЅРёРµ
     if (allowedOrigins.includes(origin)) {
-      console.log('✅ CORS allowed origin:', origin);
+      console.log('вњ… CORS allowed origin:', origin);
       return callback(null, true);
     }
     
-    // Разрешаем все локальные IP адреса (для мобильного тестирования)
+    // Р Р°Р·СЂРµС€Р°РµРј РІСЃРµ Р»РѕРєР°Р»СЊРЅС‹Рµ IP Р°РґСЂРµСЃР° (РґР»СЏ РјРѕР±РёР»СЊРЅРѕРіРѕ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ)
     if (origin.includes('192.168.') || origin.includes('10.') || origin.includes('172.')) {
-      console.log('✅ CORS allowed local network origin:', origin);
+      console.log('вњ… CORS allowed local network origin:', origin);
       return callback(null, true);
     }
     
-    // В production разрешаем все домены
+    // Р’ production СЂР°Р·СЂРµС€Р°РµРј РІСЃРµ РґРѕРјРµРЅС‹
     if (process.env.NODE_ENV === 'production') {
-      console.log('✅ CORS allowed production origin:', origin);
+      console.log('вњ… CORS allowed production origin:', origin);
       return callback(null, true);
     }
     
     
-    console.log('❌ CORS blocked origin:', origin);
-    console.log('❌ Allowed origins:', allowedOrigins);
+    console.log('вќЊ CORS blocked origin:', origin);
+    console.log('вќЊ Allowed origins:', allowedOrigins);
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
@@ -358,7 +362,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Настройка body-parser с правильной кодировкой
+// РќР°СЃС‚СЂРѕР№РєР° body-parser СЃ РїСЂР°РІРёР»СЊРЅРѕР№ РєРѕРґРёСЂРѕРІРєРѕР№
 const bodyParser = require('body-parser');
 app.use(bodyParser.json({ 
   limit: '100mb'
@@ -368,41 +372,41 @@ app.use(bodyParser.urlencoded({
   limit: '100mb'
 }));
 
-// Добавляем детальное логирование для всех запросов
+// Р”РѕР±Р°РІР»СЏРµРј РґРµС‚Р°Р»СЊРЅРѕРµ Р»РѕРіРёСЂРѕРІР°РЅРёРµ РґР»СЏ РІСЃРµС… Р·Р°РїСЂРѕСЃРѕРІ
 app.use((req, res, next) => {
-  console.log(`\n🔍 [${new Date().toISOString()}] ${req.method} ${req.url}`);
-  console.log('📋 Headers:', JSON.stringify(req.headers, null, 2));
-  console.log('📊 Body size:', req.headers['content-length'] || 'unknown');
-  console.log('🌐 User-Agent:', req.headers['user-agent'] || 'unknown');
-  console.log('🔐 Content-Type:', req.headers['content-type'] || 'unknown');
-  console.log('🔑 Authorization:', req.headers['authorization'] ? 'Present' : 'Missing');
+  console.log(`\nрџ”Ќ [${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('рџ“‹ Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('рџ“Љ Body size:', req.headers['content-length'] || 'unknown');
+  console.log('рџЊђ User-Agent:', req.headers['user-agent'] || 'unknown');
+  console.log('рџ”ђ Content-Type:', req.headers['content-type'] || 'unknown');
+  console.log('рџ”‘ Authorization:', req.headers['authorization'] ? 'Present' : 'Missing');
   
-  // Логируем body для POST/PUT запросов
+  // Р›РѕРіРёСЂСѓРµРј body РґР»СЏ POST/PUT Р·Р°РїСЂРѕСЃРѕРІ
   if (req.method === 'POST' || req.method === 'PUT') {
-    console.log('📝 Request body preview:', JSON.stringify(req.body, null, 2));
+    console.log('рџ“ќ Request body preview:', JSON.stringify(req.body, null, 2));
   }
   
   next();
 });
 
-// Middleware для правильной обработки UTF-8 только для JSON ответов
+// Middleware РґР»СЏ РїСЂР°РІРёР»СЊРЅРѕР№ РѕР±СЂР°Р±РѕС‚РєРё UTF-8 С‚РѕР»СЊРєРѕ РґР»СЏ JSON РѕС‚РІРµС‚РѕРІ
 app.use((req, res, next) => {
   const originalJson = res.json;
   res.json = function(obj) {
-    console.log(`📤 [${new Date().toISOString()}] Sending JSON response:`, JSON.stringify(obj, null, 2));
+    console.log(`рџ“¤ [${new Date().toISOString()}] Sending JSON response:`, JSON.stringify(obj, null, 2));
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return originalJson.call(this, obj);
   };
   next();
 });
 
-// Middleware для логирования ошибок
+// Middleware РґР»СЏ Р»РѕРіРёСЂРѕРІР°РЅРёСЏ РѕС€РёР±РѕРє
 app.use((err, req, res, next) => {
-  console.error(`\n❌ [${new Date().toISOString()}] ERROR in ${req.method} ${req.url}:`);
-  console.error('🚨 Error message:', err.message);
-  console.error('📊 Error stack:', err.stack);
-  console.error('🔍 Request body:', req.body);
-  console.error('📋 Request headers:', req.headers);
+  console.error(`\nвќЊ [${new Date().toISOString()}] ERROR in ${req.method} ${req.url}:`);
+  console.error('рџљЁ Error message:', err.message);
+  console.error('рџ“Љ Error stack:', err.stack);
+  console.error('рџ”Ќ Request body:', req.body);
+  console.error('рџ“‹ Request headers:', req.headers);
   
   res.status(500).json({
     error: 'Internal Server Error',
@@ -411,142 +415,28 @@ app.use((err, req, res, next) => {
   });
 });
 
-// --- SEO: sitemap.xml ---
-app.get('/sitemap.xml', async (req, res) => {
-  try {
-    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-    const baseUrl = 'https://simba-tzatzuim.co.il';
-
-    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
-
-    // Add static pages
-    sitemap += `
-  <url>
-    <loc>${baseUrl}/</loc>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/catalog</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/about</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/contacts</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/privacy</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/terms</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/questions</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/reviews</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>`;
-
-    try {
-      // Add categories
-      const categories = await prisma.category.findMany({
-        where: { isActive: true },
-        select: { id: true, updatedAt: true }
-      });
-      categories.forEach(category => {
-        const lastMod = category.updatedAt ? new Date(category.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-        sitemap += `
-  <url>
-    <loc>${baseUrl}/category/${category.id}</loc>
-    <lastmod>${lastMod}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
-      });
-
-      // Add subcategories
-      const subcategories = await prisma.subcategory.findMany({
-        where: { isActive: true },
-        select: { id: true, updatedAt: true }
-      });
-      subcategories.forEach(subcategory => {
-        const lastMod = subcategory.updatedAt ? new Date(subcategory.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-        sitemap += `
-  <url>
-    <loc>${baseUrl}/subcategory/${subcategory.id}</loc>
-    <lastmod>${lastMod}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>`;
-      });
-
-      // Add products
-      const products = await prisma.product.findMany({
-        where: { isActive: true },
-        select: { id: true, updatedAt: true }
-      });
-      products.forEach(product => {
-        const lastMod = product.updatedAt ? new Date(product.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-        sitemap += `
-  <url>
-    <loc>${baseUrl}/product/${product.id}</loc>
-    <lastmod>${lastMod}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>`;
-      });
-    } catch (dbError) {
-      console.error('Database error in sitemap generation:', dbError);
-      // Continue with static sitemap if DB fails
-    }
-
-    sitemap += `
-</urlset>`;
-
-    res.send(sitemap);
-  } catch (e) {
-    console.error('sitemap.xml error:', e);
-    res.status(500).send('Error generating sitemap');
-  }
-});
-// Логирование для диагностики статических файлов
+// Р›РѕРіРёСЂРѕРІР°РЅРёРµ РґР»СЏ РґРёР°РіРЅРѕСЃС‚РёРєРё СЃС‚Р°С‚РёС‡РµСЃРєРёС… С„Р°Р№Р»РѕРІ
 const uploadsPath = path.join(__dirname, '..', '..', 'backend', 'uploads');
 const hdUploadsPath = path.join(__dirname, '..', '..', 'backend', 'uploads', 'hd');
 
-console.log('🔍 DEBUG: Uploads path:', uploadsPath);
-console.log('🔍 DEBUG: HD uploads path:', hdUploadsPath);
-console.log('🔍 DEBUG: Uploads directory exists:', require('fs').existsSync(uploadsPath));
-console.log('🔍 DEBUG: HD uploads directory exists:', require('fs').existsSync(hdUploadsPath));
+console.log('рџ”Ќ DEBUG: Uploads path:', uploadsPath);
+console.log('рџ”Ќ DEBUG: HD uploads path:', hdUploadsPath);
+console.log('рџ”Ќ DEBUG: Uploads directory exists:', require('fs').existsSync(uploadsPath));
+console.log('рџ”Ќ DEBUG: HD uploads directory exists:', require('fs').existsSync(hdUploadsPath));
 
-// Middleware для логирования запросов к статическим файлам
+// Middleware РґР»СЏ Р»РѕРіРёСЂРѕРІР°РЅРёСЏ Р·Р°РїСЂРѕСЃРѕРІ Рє СЃС‚Р°С‚РёС‡РµСЃРєРёРј С„Р°Р№Р»Р°Рј
 app.use('/uploads', (req, res, next) => {
   const filePath = path.join(uploadsPath, req.path);
-  console.log('🔍 DEBUG: Static file request:', req.path);
-  console.log('🔍 DEBUG: Full file path:', filePath);
-  console.log('🔍 DEBUG: File exists:', require('fs').existsSync(filePath));
+  console.log('рџ”Ќ DEBUG: Static file request:', req.path);
+  console.log('рџ”Ќ DEBUG: Full file path:', filePath);
+  console.log('рџ”Ќ DEBUG: File exists:', require('fs').existsSync(filePath));
   
   if (require('fs').existsSync(filePath)) {
     const stats = require('fs').statSync(filePath);
-    console.log('🔍 DEBUG: File size:', stats.size, 'bytes');
-    console.log('🔍 DEBUG: File permissions:', stats.mode.toString(8));
+    console.log('рџ”Ќ DEBUG: File size:', stats.size, 'bytes');
+    console.log('рџ”Ќ DEBUG: File permissions:', stats.mode.toString(8));
   } else {
-    console.log('❌ DEBUG: File not found:', filePath);
+    console.log('вќЊ DEBUG: File not found:', filePath);
   }
   
   next();
@@ -560,9 +450,9 @@ app.use('/uploads', (req, res, next) => {
 
 app.use('/uploads/hd', (req, res, next) => {
   const filePath = path.join(hdUploadsPath, req.path);
-  console.log('🔍 DEBUG: HD static file request:', req.path);
-  console.log('🔍 DEBUG: HD full file path:', filePath);
-  console.log('🔍 DEBUG: HD file exists:', require('fs').existsSync(filePath));
+  console.log('рџ”Ќ DEBUG: HD static file request:', req.path);
+  console.log('рџ”Ќ DEBUG: HD full file path:', filePath);
+  console.log('рџ”Ќ DEBUG: HD file exists:', require('fs').existsSync(filePath));
   next();
 }, express.static(hdUploadsPath, {
   setHeaders: (res, path) => {
@@ -584,7 +474,7 @@ passport.deserializeUser(async (id, done) => {
   done(null, user);
 });
 
-// Тестовый endpoint для проверки JSON парсинга
+// РўРµСЃС‚РѕРІС‹Р№ endpoint РґР»СЏ РїСЂРѕРІРµСЂРєРё JSON РїР°СЂСЃРёРЅРіР°
 app.post('/api/test-json', (req, res) => {
   console.log('Test JSON endpoint called');
   console.log('Request body:', req.body);
@@ -596,7 +486,7 @@ app.post('/api/test-json', (req, res) => {
   });
 });
 
-// Тестовый endpoint для проверки raw данных
+// РўРµСЃС‚РѕРІС‹Р№ endpoint РґР»СЏ РїСЂРѕРІРµСЂРєРё raw РґР°РЅРЅС‹С…
 app.post('/api/test-raw', (req, res) => {
   let body = '';
   req.on('data', chunk => {
@@ -615,7 +505,7 @@ app.post('/api/test-raw', (req, res) => {
   });
 });
 
-// Простой endpoint для тестирования без body-parser
+// РџСЂРѕСЃС‚РѕР№ endpoint РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ Р±РµР· body-parser
 app.post('/api/test-simple', (req, res) => {
   console.log('Test simple endpoint called');
   console.log('Request body:', req.body);
@@ -636,7 +526,49 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Тестовый endpoint для проверки статических файлов
+// Sitemap.xml endpoint РґР»СЏ SEO
+const SitemapGenerator = require('./sitemapGenerator');
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    console.log('рџ“Ќ Sitemap.xml requested');
+    const generator = new SitemapGenerator();
+    const sitemap = await generator.generate();
+    
+    res.header('Content-Type', 'application/xml; charset=utf-8');
+    res.header('Cache-Control', 'public, max-age=3600'); // РљСЌС€РёСЂРѕРІР°С‚СЊ РЅР° 1 С‡Р°СЃ
+    res.send(sitemap);
+  } catch (error) {
+    console.error('Error generating sitemap:', error);
+    res.status(500).send('Error generating sitemap');
+  }
+});
+
+// Robots.txt endpoint РґР»СЏ SEO
+app.get('/robots.txt', (req, res) => {
+  const robotsTxt = `User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://simba-tzatzuim.co.il/sitemap.xml
+
+# Disallow admin pages
+Disallow: /admin
+Disallow: /cms
+Disallow: /api/admin
+
+# Allow all other pages
+Allow: /catalog
+Allow: /product
+Allow: /category
+Allow: /subcategory
+`;
+
+  res.header('Content-Type', 'text/plain; charset=utf-8');
+  res.header('Cache-Control', 'public, max-age=86400'); // РљСЌС€ РЅР° 24 С‡Р°СЃР°
+  res.send(robotsTxt);
+});
+
+// РўРµСЃС‚РѕРІС‹Р№ endpoint РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃС‚Р°С‚РёС‡РµСЃРєРёС… С„Р°Р№Р»РѕРІ
 app.get('/api/test-static', (req, res) => {
   const fs = require('fs');
   const path = require('path');
@@ -652,11 +584,11 @@ app.get('/api/test-static', (req, res) => {
     let hdFiles = [];
     
     if (uploadsExists) {
-      uploadsFiles = fs.readdirSync(uploadsPath).slice(0, 5); // Первые 5 файлов
+      uploadsFiles = fs.readdirSync(uploadsPath).slice(0, 5); // РџРµСЂРІС‹Рµ 5 С„Р°Р№Р»РѕРІ
     }
     
     if (hdExists) {
-      hdFiles = fs.readdirSync(hdPath).slice(0, 5); // Первые 5 файлов
+      hdFiles = fs.readdirSync(hdPath).slice(0, 5); // РџРµСЂРІС‹Рµ 5 С„Р°Р№Р»РѕРІ
     }
     
     res.json({
@@ -681,7 +613,7 @@ app.get('/api/test-static', (req, res) => {
   }
 });
 
-// Debug endpoint для проверки категорий
+// Debug endpoint РґР»СЏ РїСЂРѕРІРµСЂРєРё РєР°С‚РµРіРѕСЂРёР№
 app.get('/api/debug/categories', async (req, res) => {
   try {
     const categories = await prisma.category.findMany({ 
@@ -703,39 +635,39 @@ app.get('/api/debug/categories', async (req, res) => {
   }
 });
 
-// Endpoint для импорта данных в Render базу данных
+// Endpoint РґР»СЏ РёРјРїРѕСЂС‚Р° РґР°РЅРЅС‹С… РІ Render Р±Р°Р·Сѓ РґР°РЅРЅС‹С…
 app.post('/api/debug/import-data', async (req, res) => {
   try {
-    console.log('🚀 Начинаем импорт данных через API...');
+    console.log('рџљЂ РќР°С‡РёРЅР°РµРј РёРјРїРѕСЂС‚ РґР°РЅРЅС‹С… С‡РµСЂРµР· API...');
     
-    // Временно отключаем авторизацию для тестирования
+    // Р’СЂРµРјРµРЅРЅРѕ РѕС‚РєР»СЋС‡Р°РµРј Р°РІС‚РѕСЂРёР·Р°С†РёСЋ РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ
     // const token = req.headers.authorization?.split(' ')[1];
     // if (!token) {
-    //   return res.status(401).json({ error: 'Требуется авторизация' });
+    //   return res.status(401).json({ error: 'РўСЂРµР±СѓРµС‚СЃСЏ Р°РІС‚РѕСЂРёР·Р°С†РёСЏ' });
     // }
     
     // const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
     // if (!user || user.role !== 'admin') {
-    //   return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    //   return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     // }
     
-    // Создаем тестовые данные прямо в коде
+    // РЎРѕР·РґР°РµРј С‚РµСЃС‚РѕРІС‹Рµ РґР°РЅРЅС‹Рµ РїСЂСЏРјРѕ РІ РєРѕРґРµ
     const testCategories = [
-      { id: 1, name: 'Игрушки', active: true, order: 1, parentId: null },
-      { id: 2, name: 'Конструкторы', active: true, order: 2, parentId: null },
-      { id: 3, name: 'Пазлы', active: true, order: 3, parentId: null },
-      { id: 4, name: 'Творчество', active: true, order: 4, parentId: null },
-      { id: 5, name: 'Канцтовары', active: true, order: 5, parentId: null }
+      { id: 1, name: 'РРіСЂСѓС€РєРё', active: true, order: 1, parentId: null },
+      { id: 2, name: 'РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹', active: true, order: 2, parentId: null },
+      { id: 3, name: 'РџР°Р·Р»С‹', active: true, order: 3, parentId: null },
+      { id: 4, name: 'РўРІРѕСЂС‡РµСЃС‚РІРѕ', active: true, order: 4, parentId: null },
+      { id: 5, name: 'РљР°РЅС†С‚РѕРІР°СЂС‹', active: true, order: 5, parentId: null }
     ];
     
     const testProducts = [
-      { id: 1, name: 'Кукла Барби', price: 299.99, description: 'Красивая кукла', categoryId: 1, active: true },
-      { id: 2, name: 'Машинка радиоуправляемая', price: 599.99, description: 'Быстрая машинка', categoryId: 1, active: true },
-      { id: 3, name: 'Пазл 100 деталей', price: 199.99, description: 'Развивающий пазл', categoryId: 3, active: true }
+      { id: 1, name: 'РљСѓРєР»Р° Р‘Р°СЂР±Рё', price: 299.99, description: 'РљСЂР°СЃРёРІР°СЏ РєСѓРєР»Р°', categoryId: 1, active: true },
+      { id: 2, name: 'РњР°С€РёРЅРєР° СЂР°РґРёРѕСѓРїСЂР°РІР»СЏРµРјР°СЏ', price: 599.99, description: 'Р‘С‹СЃС‚СЂР°СЏ РјР°С€РёРЅРєР°', categoryId: 1, active: true },
+      { id: 3, name: 'РџР°Р·Р» 100 РґРµС‚Р°Р»РµР№', price: 199.99, description: 'Р Р°Р·РІРёРІР°СЋС‰РёР№ РїР°Р·Р»', categoryId: 3, active: true }
     ];
     
-    console.log('📂 Импортируем тестовые категории...');
+    console.log('рџ“‚ РРјРїРѕСЂС‚РёСЂСѓРµРј С‚РµСЃС‚РѕРІС‹Рµ РєР°С‚РµРіРѕСЂРёРё...');
     for (const category of testCategories) {
       await prisma.category.upsert({
         where: { id: category.id },
@@ -743,9 +675,9 @@ app.post('/api/debug/import-data', async (req, res) => {
         create: category
       });
     }
-    console.log(`✅ Импортировано ${testCategories.length} категорий`);
+    console.log(`вњ… РРјРїРѕСЂС‚РёСЂРѕРІР°РЅРѕ ${testCategories.length} РєР°С‚РµРіРѕСЂРёР№`);
     
-    console.log('📦 Импортируем тестовые продукты...');
+    console.log('рџ“¦ РРјРїРѕСЂС‚РёСЂСѓРµРј С‚РµСЃС‚РѕРІС‹Рµ РїСЂРѕРґСѓРєС‚С‹...');
     for (const product of testProducts) {
       await prisma.product.upsert({
         where: { id: product.id },
@@ -753,9 +685,9 @@ app.post('/api/debug/import-data', async (req, res) => {
         create: product
       });
     }
-    console.log(`✅ Импортировано ${testProducts.length} продуктов`);
+    console.log(`вњ… РРјРїРѕСЂС‚РёСЂРѕРІР°РЅРѕ ${testProducts.length} РїСЂРѕРґСѓРєС‚РѕРІ`);
     
-    // Проверяем количество записей
+    // РџСЂРѕРІРµСЂСЏРµРј РєРѕР»РёС‡РµСЃС‚РІРѕ Р·Р°РїРёСЃРµР№
     const categoriesCount = await prisma.category.count();
     const productsCount = await prisma.product.count();
     const usersCount = await prisma.user.count();
@@ -764,7 +696,7 @@ app.post('/api/debug/import-data', async (req, res) => {
     
     res.json({
       success: true,
-      message: 'Данные успешно импортированы',
+      message: 'Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ РёРјРїРѕСЂС‚РёСЂРѕРІР°РЅС‹',
       stats: {
         categories: categoriesCount,
         products: productsCount,
@@ -775,37 +707,37 @@ app.post('/api/debug/import-data', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('❌ Ошибка при импорте данных:', error);
+    console.error('вќЊ РћС€РёР±РєР° РїСЂРё РёРјРїРѕСЂС‚Рµ РґР°РЅРЅС‹С…:', error);
     res.status(500).json({ 
-      error: 'Ошибка при импорте данных', 
+      error: 'РћС€РёР±РєР° РїСЂРё РёРјРїРѕСЂС‚Рµ РґР°РЅРЅС‹С…', 
       message: error.message 
     });
   }
 });
 
-// Функция для безопасного декодирования имени пользователя
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ Р±РµР·РѕРїР°СЃРЅРѕРіРѕ РґРµРєРѕРґРёСЂРѕРІР°РЅРёСЏ РёРјРµРЅРё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 function decodeUserName(name) {
   if (!name) return '';
   
   try {
     console.log('Original name for decoding:', name);
     
-    // Проверяем, нужно ли декодировать
+    // РџСЂРѕРІРµСЂСЏРµРј, РЅСѓР¶РЅРѕ Р»Рё РґРµРєРѕРґРёСЂРѕРІР°С‚СЊ
     let decoded = name;
     
-    // Если имя содержит %XX кодировку, декодируем
+    // Р•СЃР»Рё РёРјСЏ СЃРѕРґРµСЂР¶РёС‚ %XX РєРѕРґРёСЂРѕРІРєСѓ, РґРµРєРѕРґРёСЂСѓРµРј
     if (name.includes('%')) {
       decoded = decodeURIComponent(name);
       console.log('First decode:', decoded);
     }
     
-    // Если результат содержит еще %XX, декодируем еще раз
+    // Р•СЃР»Рё СЂРµР·СѓР»СЊС‚Р°С‚ СЃРѕРґРµСЂР¶РёС‚ РµС‰Рµ %XX, РґРµРєРѕРґРёСЂСѓРµРј РµС‰Рµ СЂР°Р·
     if (decoded.includes('%')) {
       decoded = decodeURIComponent(decoded);
       console.log('Second decode:', decoded);
     }
     
-    // Проверяем, не является ли результат base64
+    // РџСЂРѕРІРµСЂСЏРµРј, РЅРµ СЏРІР»СЏРµС‚СЃСЏ Р»Рё СЂРµР·СѓР»СЊС‚Р°С‚ base64
     if (decoded && /^[A-Za-z0-9+/]*={0,2}$/.test(decoded)) {
       try {
         const base64Decoded = Buffer.from(decoded, 'base64').toString('utf8');
@@ -818,9 +750,9 @@ function decodeUserName(name) {
       }
     }
     
-    // Обработка специальных символов и эмодзи
+    // РћР±СЂР°Р±РѕС‚РєР° СЃРїРµС†РёР°Р»СЊРЅС‹С… СЃРёРјРІРѕР»РѕРІ Рё СЌРјРѕРґР·Рё
     try {
-      // Пробуем декодировать как JSON, если это возможно
+      // РџСЂРѕР±СѓРµРј РґРµРєРѕРґРёСЂРѕРІР°С‚СЊ РєР°Рє JSON, РµСЃР»Рё СЌС‚Рѕ РІРѕР·РјРѕР¶РЅРѕ
       if (decoded.startsWith('"') && decoded.endsWith('"')) {
         const jsonDecoded = JSON.parse(decoded);
         if (jsonDecoded && typeof jsonDecoded === 'string') {
@@ -829,24 +761,24 @@ function decodeUserName(name) {
         }
       }
     } catch (jsonError) {
-      // Игнорируем ошибки JSON парсинга
+      // РРіРЅРѕСЂРёСЂСѓРµРј РѕС€РёР±РєРё JSON РїР°СЂСЃРёРЅРіР°
     }
     
-    // Дополнительная обработка для URL-encoded символов
+    // Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РѕР±СЂР°Р±РѕС‚РєР° РґР»СЏ URL-encoded СЃРёРјРІРѕР»РѕРІ
     if (decoded.includes('+')) {
       decoded = decoded.replace(/\+/g, ' ');
     }
     
-    // Убираем лишние пробелы и нормализуем
+    // РЈР±РёСЂР°РµРј Р»РёС€РЅРёРµ РїСЂРѕР±РµР»С‹ Рё РЅРѕСЂРјР°Р»РёР·СѓРµРј
     decoded = decoded.trim().replace(/\s+/g, ' ');
     
     console.log('Final decoded name:', decoded);
     
-    // Если результат пустой, возвращаем оригинальное имя
+    // Р•СЃР»Рё СЂРµР·СѓР»СЊС‚Р°С‚ РїСѓСЃС‚РѕР№, РІРѕР·РІСЂР°С‰Р°РµРј РѕСЂРёРіРёРЅР°Р»СЊРЅРѕРµ РёРјСЏ
     return decoded || name;
   } catch (error) {
     console.error('Error decoding user name:', error);
-    // В случае ошибки возвращаем оригинальное имя
+    // Р’ СЃР»СѓС‡Р°Рµ РѕС€РёР±РєРё РІРѕР·РІСЂР°С‰Р°РµРј РѕСЂРёРіРёРЅР°Р»СЊРЅРѕРµ РёРјСЏ
     return name;
   }
 }
@@ -861,21 +793,21 @@ passport.use(new GoogleStrategy({
     console.log('Google OAuth profile:', profile);
     console.log('Original displayName:', profile.displayName);
     
-    // Декодируем имя пользователя
+    // Р”РµРєРѕРґРёСЂСѓРµРј РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     const decodedName = decodeUserName(profile.displayName);
     console.log('Decoded displayName:', decodedName);
     
-    // Проверяем, есть ли пользователь с таким Google ID
+    // РџСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ С‚Р°РєРёРј Google ID
     let user = await prisma.user.findUnique({ where: { googleId: profile.id } });
     
     if (!user) {
-      // Проверяем, есть ли пользователь с таким email
+      // РџСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ С‚Р°РєРёРј email
       const existingUser = await prisma.user.findUnique({ 
         where: { email: profile.emails[0].value } 
       });
       
       if (existingUser) {
-        // Если пользователь существует, но не связан с Google, обновляем его
+        // Р•СЃР»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃСѓС‰РµСЃС‚РІСѓРµС‚, РЅРѕ РЅРµ СЃРІСЏР·Р°РЅ СЃ Google, РѕР±РЅРѕРІР»СЏРµРј РµРіРѕ
         user = await prisma.user.update({
           where: { id: existingUser.id },
           data: { 
@@ -885,7 +817,7 @@ passport.use(new GoogleStrategy({
           }
         });
       } else {
-        // Создаем нового пользователя
+        // РЎРѕР·РґР°РµРј РЅРѕРІРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
         user = await prisma.user.create({
           data: {
             email: profile.emails[0].value,
@@ -897,7 +829,7 @@ passport.use(new GoogleStrategy({
         });
       }
     } else {
-      // Обновляем имя существующего пользователя, если оно изменилось
+      // РћР±РЅРѕРІР»СЏРµРј РёРјСЏ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РµСЃР»Рё РѕРЅРѕ РёР·РјРµРЅРёР»РѕСЃСЊ
       if (user.name !== decodedName) {
         user = await prisma.user.update({
           where: { id: user.id },
@@ -940,17 +872,17 @@ passport.use(new FacebookStrategy({
 }));
 
 app.post('/api/products', authMiddleware, upload.array('images', 7), 
-  smartImageUploadMiddleware.processUploadedFiles.bind(smartImageUploadMiddleware), 
+  dualStorageUploadMiddleware.processUploadedFiles.bind(dualStorageUploadMiddleware), 
   async (req, res) => {
-  // Проверка роли admin
+  // РџСЂРѕРІРµСЂРєР° СЂРѕР»Рё admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   try {
-    console.log('📦 Создание нового товара...');
-    console.log('📥 Полученные данные:', JSON.stringify(req.body, null, 2));
-    console.log('🔍 Проверка полей переводов:');
+    console.log('рџ“¦ РЎРѕР·РґР°РЅРёРµ РЅРѕРІРѕРіРѕ С‚РѕРІР°СЂР°...');
+    console.log('рџ“Ґ РџРѕР»СѓС‡РµРЅРЅС‹Рµ РґР°РЅРЅС‹Рµ:', JSON.stringify(req.body, null, 2));
+    console.log('рџ”Ќ РџСЂРѕРІРµСЂРєР° РїРѕР»РµР№ РїРµСЂРµРІРѕРґРѕРІ:');
     console.log('  - nameHe:', req.body.nameHe);
     console.log('  - descriptionHe:', req.body.descriptionHe);
     console.log('  - name:', req.body.name);
@@ -958,32 +890,32 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
     
     const { name, description, nameHe, descriptionHe, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, availableColors, inputLanguage = 'ru' } = req.body;
     
-    // Парсим цвета если они переданы
+    // РџР°СЂСЃРёРј С†РІРµС‚Р° РµСЃР»Рё РѕРЅРё РїРµСЂРµРґР°РЅС‹
     let colorsData = null;
     if (availableColors) {
       try {
         colorsData = typeof availableColors === 'string' ? JSON.parse(availableColors) : availableColors;
-        console.log('🎨 Parsed availableColors (with indices):', colorsData);
+        console.log('рџЋЁ Parsed availableColors (with indices):', colorsData);
       } catch (e) {
-        console.error('❌ Error parsing availableColors:', e);
+        console.error('вќЊ Error parsing availableColors:', e);
       }
     }
     
-    // Используем URL из Cloudinary или локальные пути
+    // РСЃРїРѕР»СЊР·СѓРµРј URL РёР· Cloudinary РёР»Рё Р»РѕРєР°Р»СЊРЅС‹Рµ РїСѓС‚Рё
     const imageUrls = req.files ? req.files.map((file, index) => {
       if (req.imageUrls && req.imageUrls[index]) {
-        // Используем URL из Cloudinary
+        // РСЃРїРѕР»СЊР·СѓРµРј URL РёР· Cloudinary
         return req.imageUrls[index];
       } else if (file.filename) {
-        // Fallback для локальных файлов
+        // Fallback РґР»СЏ Р»РѕРєР°Р»СЊРЅС‹С… С„Р°Р№Р»РѕРІ
         return `/uploads/${file.filename}`;
       } else {
-        // Fallback для production
+        // Fallback РґР»СЏ production
         return `/uploads/${Date.now()}_${file.originalname}`;
       }
     }) : [];
 
-    // Преобразуем imageIndex в реальные imageUrl после загрузки изображений
+    // РџСЂРµРѕР±СЂР°Р·СѓРµРј imageIndex РІ СЂРµР°Р»СЊРЅС‹Рµ imageUrl РїРѕСЃР»Рµ Р·Р°РіСЂСѓР·РєРё РёР·РѕР±СЂР°Р¶РµРЅРёР№
     if (colorsData && Array.isArray(colorsData) && imageUrls.length > 0) {
       colorsData = colorsData.map(colorData => {
         const imageIndex = colorData.imageIndex;
@@ -998,13 +930,13 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
           imageUrl: null
         };
       });
-      console.log('🎨 Transformed availableColors (with URLs):', colorsData);
+      console.log('рџЋЁ Transformed availableColors (with URLs):', colorsData);
     }
 
-    // Отладочная информация
+    // РћС‚Р»Р°РґРѕС‡РЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ
 
 
-    // Получаем название категории по ID
+    // РџРѕР»СѓС‡Р°РµРј РЅР°Р·РІР°РЅРёРµ РєР°С‚РµРіРѕСЂРёРё РїРѕ ID
     let categoryName = category;
     if (category && !isNaN(category)) {
       const categoryRecord = await prisma.category.findUnique({
@@ -1013,14 +945,14 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
       categoryName = categoryRecord ? categoryRecord.name : category;
     }
 
-    // Получаем ID подкатегории
+    // РџРѕР»СѓС‡Р°РµРј ID РїРѕРґРєР°С‚РµРіРѕСЂРёРё
     let subcategoryId = null;
     if (subcategory) {
-      // Если subcategory - это ID, используем его напрямую
+      // Р•СЃР»Рё subcategory - СЌС‚Рѕ ID, РёСЃРїРѕР»СЊР·СѓРµРј РµРіРѕ РЅР°РїСЂСЏРјСѓСЋ
       if (!isNaN(subcategory)) {
         subcategoryId = parseInt(subcategory);
       } else {
-        // Если subcategory - это название, ищем по названию
+        // Р•СЃР»Рё subcategory - СЌС‚Рѕ РЅР°Р·РІР°РЅРёРµ, РёС‰РµРј РїРѕ РЅР°Р·РІР°РЅРёСЋ
         const subcategoryRecord = await prisma.category.findFirst({
           where: { 
             name: subcategory,
@@ -1031,7 +963,7 @@ app.post('/api/products', authMiddleware, upload.array('images', 7),
       }
     }
 
-    // Создаем данные товара с поддержкой ручных переводов
+    // РЎРѕР·РґР°РµРј РґР°РЅРЅС‹Рµ С‚РѕРІР°СЂР° СЃ РїРѕРґРґРµСЂР¶РєРѕР№ СЂСѓС‡РЅС‹С… РїРµСЂРµРІРѕРґРѕРІ
     const productData = {
       name,
       description,
@@ -1085,7 +1017,7 @@ app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req,
       whereClause.subcategoryId = parseInt(subcategoryId);
     }
     
-    // Если запрос не от админа, скрываем товары с isHidden = true
+    // Р•СЃР»Рё Р·Р°РїСЂРѕСЃ РЅРµ РѕС‚ Р°РґРјРёРЅР°, СЃРєСЂС‹РІР°РµРј С‚РѕРІР°СЂС‹ СЃ isHidden = true
     if (admin !== 'true') {
       whereClause.isHidden = false;
     }
@@ -1132,14 +1064,14 @@ app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req,
       orderBy: { createdAt: 'desc' }
     });
 
-    console.log('🔧 API /products - First product sample:', products[0] ? {
+    console.log('рџ”§ API /products - First product sample:', products[0] ? {
       id: products[0].id,
       name: products[0].name,
       hasNameHe: !!products[0].nameHe,
       nameHe: products[0].nameHe
     } : 'No products');
 
-    // Добавляем расчет рейтинга и количества отзывов для каждого товара
+    // Р”РѕР±Р°РІР»СЏРµРј СЂР°СЃС‡РµС‚ СЂРµР№С‚РёРЅРіР° Рё РєРѕР»РёС‡РµСЃС‚РІР° РѕС‚Р·С‹РІРѕРІ РґР»СЏ РєР°Р¶РґРѕРіРѕ С‚РѕРІР°СЂР°
     const productsWithRating = products.map(product => {
       const reviews = product.reviews || [];
       const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
@@ -1147,7 +1079,7 @@ app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req,
       
       return {
         ...product,
-        rating: Math.round(averageRating * 10) / 10, // Округляем до 1 знака после запятой
+        rating: Math.round(averageRating * 10) / 10, // РћРєСЂСѓРіР»СЏРµРј РґРѕ 1 Р·РЅР°РєР° РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№
         reviewCount: reviews.length
       };
     });
@@ -1159,9 +1091,9 @@ app.get('/api/products', cacheMiddleware(300), smartInvalidateCache, async (req,
   }
 });
 
-// === ВОПРОСЫ О ТОВАРАХ ===
+// === Р’РћРџР РћРЎР« Рћ РўРћР’РђР РђРҐ ===
 
-// Получить вопросы по товару (только published)
+// РџРѕР»СѓС‡РёС‚СЊ РІРѕРїСЂРѕСЃС‹ РїРѕ С‚РѕРІР°СЂСѓ (С‚РѕР»СЊРєРѕ published)
 app.get('/api/products/:id/questions', async (req, res) => {
   try {
     const questions = await prisma.productQuestion.findMany({
@@ -1176,7 +1108,7 @@ app.get('/api/products/:id/questions', async (req, res) => {
   }
 });
 
-// Задать вопрос о товаре
+// Р—Р°РґР°С‚СЊ РІРѕРїСЂРѕСЃ Рѕ С‚РѕРІР°СЂРµ
 app.post('/api/products/:id/questions', authMiddleware, async (req, res) => {
   try {
     const { question } = req.body;
@@ -1184,16 +1116,16 @@ app.post('/api/products/:id/questions', authMiddleware, async (req, res) => {
     const userId = req.user.userId;
 
     if (!question || !question.trim()) {
-      return res.status(400).json({ error: 'Вопрос обязателен' });
+      return res.status(400).json({ error: 'Р’РѕРїСЂРѕСЃ РѕР±СЏР·Р°С‚РµР»РµРЅ' });
     }
 
-    // Проверяем, что товар существует
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ С‚РѕРІР°СЂ СЃСѓС‰РµСЃС‚РІСѓРµС‚
     const product = await prisma.product.findUnique({
       where: { id: productId }
     });
 
     if (!product) {
-      return res.status(404).json({ error: 'Товар не найден' });
+      return res.status(404).json({ error: 'РўРѕРІР°СЂ РЅРµ РЅР°Р№РґРµРЅ' });
     }
 
     const productQuestion = await prisma.productQuestion.create({
@@ -1206,19 +1138,19 @@ app.post('/api/products/:id/questions', authMiddleware, async (req, res) => {
       include: { user: { select: { id: true, name: true } } }
     });
 
-    // Отправляем уведомление в Telegram
+    // РћС‚РїСЂР°РІР»СЏРµРј СѓРІРµРґРѕРјР»РµРЅРёРµ РІ Telegram
     try {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       const telegramMessage = `
-❓ <b>Новый вопрос о товаре</b>
+вќ“ <b>РќРѕРІС‹Р№ РІРѕРїСЂРѕСЃ Рѕ С‚РѕРІР°СЂРµ</b>
 
-🛍️ <b>Товар:</b> ${product.name}${product.article ? `\n📋 <b>Артикул:</b> ${product.article}` : ''}
-👤 <b>Пользователь:</b> ${user?.name || 'Не указано'}
-📧 <b>Email:</b> ${user?.email || 'Не указано'}
-❓ <b>Вопрос:</b> ${question.trim()}
-📅 <b>Дата:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
+рџ›ЌпёЏ <b>РўРѕРІР°СЂ:</b> ${product.name}${product.article ? `\nрџ“‹ <b>РђСЂС‚РёРєСѓР»:</b> ${product.article}` : ''}
+рџ‘¤ <b>РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ:</b> ${user?.name || 'РќРµ СѓРєР°Р·Р°РЅРѕ'}
+рџ“§ <b>Email:</b> ${user?.email || 'РќРµ СѓРєР°Р·Р°РЅРѕ'}
+вќ“ <b>Р’РѕРїСЂРѕСЃ:</b> ${question.trim()}
+рџ“… <b>Р”Р°С‚Р°:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
       `.trim();
-      console.log('🚀 About to send Telegram notification for product question');
+      console.log('рџљЂ About to send Telegram notification for product question');
       await sendTelegramNotification(telegramMessage);
     } catch (telegramError) {
       console.error('Error sending Telegram notification:', telegramError);
@@ -1231,7 +1163,7 @@ app.post('/api/products/:id/questions', authMiddleware, async (req, res) => {
   }
 });
 
-// Тестовый endpoint для проверки работы API
+// РўРµСЃС‚РѕРІС‹Р№ endpoint РґР»СЏ РїСЂРѕРІРµСЂРєРё СЂР°Р±РѕС‚С‹ API
 app.get('/api/test', (req, res) => {
   res.json({ 
     message: 'API is working',
@@ -1240,14 +1172,14 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-// Тестовый endpoint для проверки базы данных
+// РўРµСЃС‚РѕРІС‹Р№ endpoint РґР»СЏ РїСЂРѕРІРµСЂРєРё Р±Р°Р·С‹ РґР°РЅРЅС‹С…
 app.get('/api/test-db', async (req, res) => {
   try {
     console.log('Testing database connection...');
     await prisma.$connect();
     console.log('Database connection successful');
     
-    // Проверяем, существует ли таблица ProductQuestion
+    // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё С‚Р°Р±Р»РёС†Р° ProductQuestion
     const tableExists = await prisma.$queryRaw`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
@@ -1273,7 +1205,7 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-// Тестовый endpoint для проверки аутентификации
+// РўРµСЃС‚РѕРІС‹Р№ endpoint РґР»СЏ РїСЂРѕРІРµСЂРєРё Р°СѓС‚РµРЅС‚РёС„РёРєР°С†РёРё
 app.get('/api/test-auth', authMiddleware, async (req, res) => {
   try {
     console.log('Testing authentication...');
@@ -1297,19 +1229,19 @@ app.get('/api/test-auth', authMiddleware, async (req, res) => {
   }
 });
 
-// Получить все вопросы (для админа, с фильтрацией по статусу)
+// РџРѕР»СѓС‡РёС‚СЊ РІСЃРµ РІРѕРїСЂРѕСЃС‹ (РґР»СЏ Р°РґРјРёРЅР°, СЃ С„РёР»СЊС‚СЂР°С†РёРµР№ РїРѕ СЃС‚Р°С‚СѓСЃСѓ)
 app.get('/api/admin/questions', authMiddleware, async (req, res) => {
   try {
     console.log('Admin questions endpoint: Starting request');
     console.log('User ID from token:', req.user.userId);
     
-    // Логируем переменные окружения (без секретных данных)
+    // Р›РѕРіРёСЂСѓРµРј РїРµСЂРµРјРµРЅРЅС‹Рµ РѕРєСЂСѓР¶РµРЅРёСЏ (Р±РµР· СЃРµРєСЂРµС‚РЅС‹С… РґР°РЅРЅС‹С…)
     console.log('Environment check:');
     console.log('- NODE_ENV:', process.env.NODE_ENV);
     console.log('- DATABASE_URL exists:', !!process.env.DATABASE_URL);
     console.log('- JWT_SECRET exists:', !!process.env.JWT_SECRET);
     
-    // Проверяем подключение к базе данных
+    // РџСЂРѕРІРµСЂСЏРµРј РїРѕРґРєР»СЋС‡РµРЅРёРµ Рє Р±Р°Р·Рµ РґР°РЅРЅС‹С…
     try {
       await prisma.$connect();
       console.log('Database connection successful');
@@ -1323,14 +1255,14 @@ app.get('/api/admin/questions', authMiddleware, async (req, res) => {
     
     if (!user || user.role !== 'admin') {
       console.log('Access denied: user is not admin');
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
     
     console.log('User is admin, proceeding with query');
     const { status } = req.query;
     console.log('Filter status:', status);
     
-    // Проверяем, существует ли таблица ProductQuestion
+    // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё С‚Р°Р±Р»РёС†Р° ProductQuestion
     try {
       const tableExists = await prisma.$queryRaw`
         SELECT EXISTS (
@@ -1344,7 +1276,7 @@ app.get('/api/admin/questions', authMiddleware, async (req, res) => {
       console.error('Error checking table existence:', tableError);
     }
     
-    // Проверяем доступность модели ProductQuestion
+    // РџСЂРѕРІРµСЂСЏРµРј РґРѕСЃС‚СѓРїРЅРѕСЃС‚СЊ РјРѕРґРµР»Рё ProductQuestion
     try {
       console.log('Checking if ProductQuestion model is available...');
       console.log('Prisma client methods:', Object.keys(prisma).filter(key => key.includes('Question')));
@@ -1370,7 +1302,7 @@ app.get('/api/admin/questions', authMiddleware, async (req, res) => {
   }
 });
 
-// Получить все опубликованные вопросы (публичный доступ)
+// РџРѕР»СѓС‡РёС‚СЊ РІСЃРµ РѕРїСѓР±Р»РёРєРѕРІР°РЅРЅС‹Рµ РІРѕРїСЂРѕСЃС‹ (РїСѓР±Р»РёС‡РЅС‹Р№ РґРѕСЃС‚СѓРї)
 app.get('/api/questions', cacheMiddleware(300), smartInvalidateCache, async (req, res) => {
   try {
     const questions = await prisma.productQuestion.findMany({
@@ -1388,21 +1320,21 @@ app.get('/api/questions', cacheMiddleware(300), smartInvalidateCache, async (req
   }
 });
 
-// Ответить на вопрос (для админа)
+// РћС‚РІРµС‚РёС‚СЊ РЅР° РІРѕРїСЂРѕСЃ (РґР»СЏ Р°РґРјРёРЅР°)
 app.put('/api/admin/questions/:id', authMiddleware, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   try {
     const { answer, status } = req.body;
     
     if (!answer || !answer.trim()) {
-      return res.status(400).json({ error: 'Ответ обязателен' });
+      return res.status(400).json({ error: 'РћС‚РІРµС‚ РѕР±СЏР·Р°С‚РµР»РµРЅ' });
     }
 
     if (!['pending', 'published', 'rejected'].includes(status)) {
-      return res.status(400).json({ error: 'Некорректный статус' });
+      return res.status(400).json({ error: 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ СЃС‚Р°С‚СѓСЃ' });
     }
 
     const question = await prisma.productQuestion.update({
@@ -1418,7 +1350,7 @@ app.put('/api/admin/questions/:id', authMiddleware, async (req, res) => {
       }
     });
 
-    // Уведомления в Telegram отключены - только для новых вопросов
+    // РЈРІРµРґРѕРјР»РµРЅРёСЏ РІ Telegram РѕС‚РєР»СЋС‡РµРЅС‹ - С‚РѕР»СЊРєРѕ РґР»СЏ РЅРѕРІС‹С… РІРѕРїСЂРѕСЃРѕРІ
 
     res.json(question);
   } catch (error) {
@@ -1427,33 +1359,33 @@ app.put('/api/admin/questions/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// Удалить вопрос (для админа)
+// РЈРґР°Р»РёС‚СЊ РІРѕРїСЂРѕСЃ (РґР»СЏ Р°РґРјРёРЅР°)
 app.delete('/api/admin/questions/:id', authMiddleware, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   try {
     const questionId = parseInt(req.params.id);
     
-    // Проверяем, существует ли вопрос
+    // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё РІРѕРїСЂРѕСЃ
     const question = await prisma.productQuestion.findUnique({
       where: { id: questionId },
       include: { product: { select: { name: true } }, user: { select: { name: true } } }
     });
     
     if (!question) {
-      return res.status(404).json({ error: 'Вопрос не найден' });
+      return res.status(404).json({ error: 'Р’РѕРїСЂРѕСЃ РЅРµ РЅР°Р№РґРµРЅ' });
     }
     
-    // Удаляем вопрос
+    // РЈРґР°Р»СЏРµРј РІРѕРїСЂРѕСЃ
     await prisma.productQuestion.delete({
       where: { id: questionId }
     });
     
     console.log(`Admin deleted question #${questionId} about product "${question.product?.name}" from user "${question.user?.name}"`);
     
-    res.json({ message: 'Вопрос успешно удален', id: questionId });
+    res.json({ message: 'Р’РѕРїСЂРѕСЃ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ', id: questionId });
   } catch (error) {
     console.error('Error deleting question:', error);
     res.status(500).json({ error: 'Failed to delete question' });
@@ -1466,7 +1398,7 @@ app.get('/api/products/:id', async (req, res) => {
     
     let whereClause = { id: parseInt(req.params.id) };
     
-    // Если запрос не от админа, скрываем товары с isHidden = true
+    // Р•СЃР»Рё Р·Р°РїСЂРѕСЃ РЅРµ РѕС‚ Р°РґРјРёРЅР°, СЃРєСЂС‹РІР°РµРј С‚РѕРІР°СЂС‹ СЃ isHidden = true
     if (admin !== 'true') {
       whereClause.isHidden = false;
     }
@@ -1522,7 +1454,7 @@ app.get('/api/products/:id', async (req, res) => {
     
     console.log('API: GET - Raw product from database:', product);
     
-    // Проверяем, существуют ли связанные записи для GET
+    // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓСЋС‚ Р»Рё СЃРІСЏР·Р°РЅРЅС‹Рµ Р·Р°РїРёСЃРё РґР»СЏ GET
     if (product?.categoryId) {
       const categoryCheck = await prisma.category.findUnique({
         where: { id: product.categoryId }
@@ -1545,7 +1477,7 @@ app.get('/api/products/:id', async (req, res) => {
       }
     }
     
-    // Проверяем, существуют ли связанные записи для GET
+    // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓСЋС‚ Р»Рё СЃРІСЏР·Р°РЅРЅС‹Рµ Р·Р°РїРёСЃРё РґР»СЏ GET
     if (product?.categoryId) {
       const categoryCheck = await prisma.category.findUnique({
         where: { id: product.categoryId }
@@ -1563,14 +1495,14 @@ app.get('/api/products/:id', async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
     
-    // Добавляем расчет рейтинга и количества отзывов
+    // Р”РѕР±Р°РІР»СЏРµРј СЂР°СЃС‡РµС‚ СЂРµР№С‚РёРЅРіР° Рё РєРѕР»РёС‡РµСЃС‚РІР° РѕС‚Р·С‹РІРѕРІ
     const reviews = product.reviews || [];
     const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
     const averageRating = reviews.length > 0 ? totalRating / reviews.length : 0;
     
     const productWithRating = {
       ...product,
-      rating: Math.round(averageRating * 10) / 10, // Округляем до 1 знака после запятой
+      rating: Math.round(averageRating * 10) / 10, // РћРєСЂСѓРіР»СЏРµРј РґРѕ 1 Р·РЅР°РєР° РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№
       reviewCount: reviews.length
     };
     
@@ -1585,32 +1517,32 @@ app.delete('/api/products/:id', authMiddleware, async (req, res) => {
   try {
     console.log('DELETE /api/products/:id - Starting deletion process');
     
-    // Проверяем права администратора
+    // РџСЂРѕРІРµСЂСЏРµРј РїСЂР°РІР° Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
       console.log('DELETE /api/products/:id - Access denied: user is not admin');
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
 
     const productId = parseInt(req.params.id);
     console.log('DELETE /api/products/:id - Product ID:', productId);
     
-    // Сначала проверяем, существует ли товар
+    // РЎРЅР°С‡Р°Р»Р° РїСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё С‚РѕРІР°СЂ
     const existingProduct = await prisma.product.findUnique({
       where: { id: productId }
     });
     
     if (!existingProduct) {
       console.log('DELETE /api/products/:id - Product not found');
-      return res.status(404).json({ error: 'Товар не найден' });
+      return res.status(404).json({ error: 'РўРѕРІР°СЂ РЅРµ РЅР°Р№РґРµРЅ' });
     }
 
     console.log('DELETE /api/products/:id - Product found, starting deletion of related data');
 
-    // Удаляем связанные данные (отзывы, элементы корзины, элементы заказов, избранное)
+    // РЈРґР°Р»СЏРµРј СЃРІСЏР·Р°РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ (РѕС‚Р·С‹РІС‹, СЌР»РµРјРµРЅС‚С‹ РєРѕСЂР·РёРЅС‹, СЌР»РµРјРµРЅС‚С‹ Р·Р°РєР°Р·РѕРІ, РёР·Р±СЂР°РЅРЅРѕРµ)
     try {
       console.log('DELETE /api/products/:id - Deleting hidden reviews...');
-      // Сначала удаляем скрытые отзывы
+      // РЎРЅР°С‡Р°Р»Р° СѓРґР°Р»СЏРµРј СЃРєСЂС‹С‚С‹Рµ РѕС‚Р·С‹РІС‹
       const reviews = await prisma.review.findMany({
         where: { productId: productId },
         select: { id: true }
@@ -1673,7 +1605,7 @@ app.delete('/api/products/:id', authMiddleware, async (req, res) => {
       console.error('DELETE /api/products/:id - Error deleting product questions:', questionError);
     }
 
-    // Проверяем, есть ли заказы с этим товаром и удаляем скрытые заказы
+    // РџСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё Р·Р°РєР°Р·С‹ СЃ СЌС‚РёРј С‚РѕРІР°СЂРѕРј Рё СѓРґР°Р»СЏРµРј СЃРєСЂС‹С‚С‹Рµ Р·Р°РєР°Р·С‹
     try {
       console.log('DELETE /api/products/:id - Checking for hidden orders...');
       const orderItems = await prisma.orderItem.findMany({
@@ -1692,14 +1624,14 @@ app.delete('/api/products/:id', authMiddleware, async (req, res) => {
       console.error('DELETE /api/products/:id - Error deleting hidden orders:', hiddenOrderError);
     }
 
-    // Теперь удаляем сам товар
+    // РўРµРїРµСЂСЊ СѓРґР°Р»СЏРµРј СЃР°Рј С‚РѕРІР°СЂ
     console.log('DELETE /api/products/:id - Deleting product...');
     const product = await prisma.product.delete({
       where: { id: productId }
     });
     console.log('DELETE /api/products/:id - Product deleted successfully');
 
-    // Удаляем изображения с диска
+    // РЈРґР°Р»СЏРµРј РёР·РѕР±СЂР°Р¶РµРЅРёСЏ СЃ РґРёСЃРєР°
     if (product.imageUrls && Array.isArray(product.imageUrls)) {
       console.log('DELETE /api/products/:id - Deleting image files...');
       product.imageUrls.forEach(imageUrl => {
@@ -1734,42 +1666,42 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
 });
 
-// === Регистрация пользователя ===
+// === Р РµРіРёСЃС‚СЂР°С†РёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ ===
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, password, name, language: frontendLanguage } = req.body;
     const acceptLanguage = req.headers['accept-language'] || '';
     const language = frontendLanguage || (acceptLanguage.includes('ru') ? 'ru' : 'he');
     
-    console.log('🌐 Language detection:', {
+    console.log('рџЊђ Language detection:', {
       frontendLanguage,
       acceptLanguage,
       detectedLanguage: language,
       headers: req.headers['accept-language']
     });
 
-    if (!email || !password) return res.status(400).json({ error: 'Email и пароль обязательны' });
+    if (!email || !password) return res.status(400).json({ error: 'Email Рё РїР°СЂРѕР»СЊ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹' });
     const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) return res.status(400).json({ error: 'Пользователь уже существует' });
+    if (existing) return res.status(400).json({ error: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚' });
     const passwordHash = await bcrypt.hash(password, 10);
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    console.log(`Создаем пользователя: ${email}, name: ${name}, language: ${language}`);
+    console.log(`РЎРѕР·РґР°РµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ: ${email}, name: ${name}, language: ${language}`);
     const user = await prisma.user.create({
       data: { 
         email, 
         passwordHash, 
         name, 
         verificationToken,
-        emailVerified: false // Явно указываем false
+        emailVerified: false // РЇРІРЅРѕ СѓРєР°Р·С‹РІР°РµРј false
       }
     });
-    console.log(`Пользователь создан с ID: ${user.id}, emailVerified: ${user.emailVerified}`);
+    console.log(`РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃРѕР·РґР°РЅ СЃ ID: ${user.id}, emailVerified: ${user.emailVerified}`);
 
-    // Отправка письма с подтверждением через Brevo
+    // РћС‚РїСЂР°РІРєР° РїРёСЃСЊРјР° СЃ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёРµРј С‡РµСЂРµР· Brevo
     const confirmUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/confirm-email?token=${verificationToken}`;
     const template = emailTemplates.registrationConfirmation[language];
     
-    console.log('📧 Email template selection:', {
+    console.log('рџ“§ Email template selection:', {
       language,
       templateExists: !!template,
       templateSubject: template?.subject,
@@ -1779,22 +1711,22 @@ app.post('/api/auth/register', async (req, res) => {
     const emailSubject = typeof template.subject === 'function' ? template.subject(name) : template.subject;
     const emailHtml = template.html(name || email, confirmUrl);
     
-    console.log(`Отправляем email подтверждения на: ${email} (язык: ${language})`);
-    console.log('📧 Email subject:', emailSubject);
+    console.log(`РћС‚РїСЂР°РІР»СЏРµРј email РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ РЅР°: ${email} (СЏР·С‹Рє: ${language})`);
+    console.log('рџ“§ Email subject:', emailSubject);
     console.log('DEBUG: Email confirmation link for ' + email + ': ' + confirmUrl);
     
-    // Временно отключаем отправку email из-за проблем с Brevo API
+    // Р’СЂРµРјРµРЅРЅРѕ РѕС‚РєР»СЋС‡Р°РµРј РѕС‚РїСЂР°РІРєСѓ email РёР·-Р·Р° РїСЂРѕР±Р»РµРј СЃ Brevo API
     try {
       await sendEmail(email, emailSubject, emailHtml, language);
-      console.log('Email подтверждения отправлен успешно');
+      console.log('Email РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ РѕС‚РїСЂР°РІР»РµРЅ СѓСЃРїРµС€РЅРѕ');
     } catch (emailError) {
-      console.log('⚠️ Email не отправлен из-за ошибки API, но ссылка для подтверждения доступна в логах');
+      console.log('вљ пёЏ Email РЅРµ РѕС‚РїСЂР°РІР»РµРЅ РёР·-Р·Р° РѕС€РёР±РєРё API, РЅРѕ СЃСЃС‹Р»РєР° РґР»СЏ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ РґРѕСЃС‚СѓРїРЅР° РІ Р»РѕРіР°С…');
       console.log('DEBUG: Email confirmation link for ' + email + ': ' + confirmUrl);
     }
     
     const successMessage = language === 'ru' 
-      ? 'Регистрация успешна! Письмо с подтверждением отправлено на email. Пожалуйста, подтвердите email перед входом в систему.'
-      : 'הרשמה הושלמה בהצלחה! נשלח לך אימייל לאישור. אנא אשר את כתובת האימייל לפני ההתחברות.';
+      ? 'Р РµРіРёСЃС‚СЂР°С†РёСЏ СѓСЃРїРµС€РЅР°! РџРёСЃСЊРјРѕ СЃ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёРµРј РѕС‚РїСЂР°РІР»РµРЅРѕ РЅР° email. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РїРѕРґС‚РІРµСЂРґРёС‚Рµ email РїРµСЂРµРґ РІС…РѕРґРѕРј РІ СЃРёСЃС‚РµРјСѓ.'
+      : 'Ч”ЧЁЧ©ЧћЧ” Ч”Ч•Ч©ЧњЧћЧ” Ч‘Ч”Ч¦ЧњЧ—Ч”! Ч Ч©ЧњЧ— ЧњЧљ ЧђЧ™ЧћЧ™Ч™Чњ ЧњЧђЧ™Ч©Ч•ЧЁ. ЧђЧ Чђ ЧђЧ©ЧЁ ЧђЧЄ Ч›ЧЄЧ•Ч‘ЧЄ Ч”ЧђЧ™ЧћЧ™Ч™Чњ ЧњЧ¤Ч Ч™ Ч”Ч”ЧЄЧ—Ч‘ЧЁЧ•ЧЄ.';
     
     res.json({ 
       message: successMessage,
@@ -1806,30 +1738,30 @@ app.post('/api/auth/register', async (req, res) => {
     });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: 'Ошибка регистрации' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СЂРµРіРёСЃС‚СЂР°С†РёРё' });
   }
 });
 
-// === Подтверждение email ===
+// === РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ email ===
 app.get('/api/auth/confirm', async (req, res) => {
   try {
     const { token } = req.query;
-    if (!token) return res.status(400).json({ error: 'Нет токена' });
+    if (!token) return res.status(400).json({ error: 'РќРµС‚ С‚РѕРєРµРЅР°' });
     
     const user = await prisma.user.findFirst({ where: { verificationToken: token } });
     if (!user) {
-      // Если токен не найден, возможно email уже подтвержден
-      // Возвращаем успех вместо ошибки для лучшего UX
-      return res.json({ message: 'Email уже подтверждён!' });
+      // Р•СЃР»Рё С‚РѕРєРµРЅ РЅРµ РЅР°Р№РґРµРЅ, РІРѕР·РјРѕР¶РЅРѕ email СѓР¶Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅ
+      // Р’РѕР·РІСЂР°С‰Р°РµРј СѓСЃРїРµС… РІРјРµСЃС‚Рѕ РѕС€РёР±РєРё РґР»СЏ Р»СѓС‡С€РµРіРѕ UX
+      return res.json({ message: 'Email СѓР¶Рµ РїРѕРґС‚РІРµСЂР¶РґС‘РЅ!' });
     }
     
-    // Обновляем статус подтверждения
+    // РћР±РЅРѕРІР»СЏРµРј СЃС‚Р°С‚СѓСЃ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ
     await prisma.user.update({
       where: { id: user.id },
       data: { emailVerified: true, verificationToken: null }
     });
     
-    // Генерируем JWT токен для автоматического входа
+    // Р“РµРЅРµСЂРёСЂСѓРµРј JWT С‚РѕРєРµРЅ РґР»СЏ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРѕРіРѕ РІС…РѕРґР°
     const jwtToken = jwt.sign({ 
       userId: user.id, 
       email: user.email, 
@@ -1837,9 +1769,9 @@ app.get('/api/auth/confirm', async (req, res) => {
       role: user.role 
     }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '7d' });
     
-    // Возвращаем данные для автоматического входа
+    // Р’РѕР·РІСЂР°С‰Р°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРѕРіРѕ РІС…РѕРґР°
     res.json({ 
-      message: 'Email подтверждён!',
+      message: 'Email РїРѕРґС‚РІРµСЂР¶РґС‘РЅ!',
       token: jwtToken,
       user: { 
         id: user.id, 
@@ -1851,49 +1783,49 @@ app.get('/api/auth/confirm', async (req, res) => {
     });
   } catch (error) {
     console.error('Email confirm error:', error);
-    res.status(500).json({ error: 'Ошибка подтверждения email' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ email' });
   }
 });
 
-// === Логин ===
+// === Р›РѕРіРёРЅ ===
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await prisma.user.findUnique({ where: { email } });
-    console.log(`Попытка входа для email: ${email}, пользователь найден: ${!!user}, emailVerified: ${user?.emailVerified}`);
+    console.log(`РџРѕРїС‹С‚РєР° РІС…РѕРґР° РґР»СЏ email: ${email}, РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅР°Р№РґРµРЅ: ${!!user}, emailVerified: ${user?.emailVerified}`);
     
     if (!user) {
-      return res.status(400).json({ error: 'Неверный email или пароль' });
+      return res.status(400).json({ error: 'РќРµРІРµСЂРЅС‹Р№ email РёР»Рё РїР°СЂРѕР»СЊ' });
     }
     
-    // Проверяем, что пользователь подтвердил email
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РїРѕРґС‚РІРµСЂРґРёР» email
     if (!user.emailVerified) {
       return res.status(400).json({ 
-        error: 'Email не подтверждён. Пожалуйста, проверьте вашу почту и подтвердите email перед входом в систему.',
+        error: 'Email РЅРµ РїРѕРґС‚РІРµСЂР¶РґС‘РЅ. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РїСЂРѕРІРµСЂСЊС‚Рµ РІР°С€Сѓ РїРѕС‡С‚Сѓ Рё РїРѕРґС‚РІРµСЂРґРёС‚Рµ email РїРµСЂРµРґ РІС…РѕРґРѕРј РІ СЃРёСЃС‚РµРјСѓ.',
         requiresEmailVerification: true 
       });
     }
     
-    // Если у пользователя есть Google ID (зарегистрирован через Google), но нет пароля
+    // Р•СЃР»Рё Сѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РµСЃС‚СЊ Google ID (Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ С‡РµСЂРµР· Google), РЅРѕ РЅРµС‚ РїР°СЂРѕР»СЏ
     if (user.googleId && !user.passwordHash) {
       return res.status(400).json({ 
-        error: 'Этот аккаунт зарегистрирован через Google. Пожалуйста, используйте кнопку "Войти через Google" для входа.',
+        error: 'Р­С‚РѕС‚ Р°РєРєР°СѓРЅС‚ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ С‡РµСЂРµР· Google. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РёСЃРїРѕР»СЊР·СѓР№С‚Рµ РєРЅРѕРїРєСѓ "Р’РѕР№С‚Рё С‡РµСЂРµР· Google" РґР»СЏ РІС…РѕРґР°.',
         requiresGoogleAuth: true 
       });
     }
     
-    // Проверяем наличие пароля
+    // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ РїР°СЂРѕР»СЏ
     if (!user.passwordHash) {
-      return res.status(400).json({ error: 'Неверный email или пароль' });
+      return res.status(400).json({ error: 'РќРµРІРµСЂРЅС‹Р№ email РёР»Рё РїР°СЂРѕР»СЊ' });
     }
     
-    // Проверяем пароль
+    // РџСЂРѕРІРµСЂСЏРµРј РїР°СЂРѕР»СЊ
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
-      return res.status(400).json({ error: 'Неверный email или пароль' });
+      return res.status(400).json({ error: 'РќРµРІРµСЂРЅС‹Р№ email РёР»Рё РїР°СЂРѕР»СЊ' });
     }
     
-    // Генерируем JWT
+    // Р“РµРЅРµСЂРёСЂСѓРµРј JWT
     const token = jwt.sign({ 
       userId: user.id, 
       email: user.email, 
@@ -1913,7 +1845,7 @@ app.post('/api/auth/login', async (req, res) => {
     res.json(responseData);
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Ошибка входа' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РІС…РѕРґР°' });
   }
 });
 
@@ -1927,11 +1859,11 @@ app.get('/api/auth/google/callback', passport.authenticate('google', { session: 
   try {
     console.log('Google OAuth callback, user:', req.user);
     
-    // Убеждаемся, что имя пользователя правильно декодировано
+    // РЈР±РµР¶РґР°РµРјСЃСЏ, С‡С‚Рѕ РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РїСЂР°РІРёР»СЊРЅРѕ РґРµРєРѕРґРёСЂРѕРІР°РЅРѕ
     const userName = decodeUserName(req.user.name);
     console.log('Final user name for JWT:', userName);
     
-    // Генерируем JWT
+    // Р“РµРЅРµСЂРёСЂСѓРµРј JWT
     const token = jwt.sign({ 
       userId: req.user.id, 
       email: req.user.email, 
@@ -1939,7 +1871,7 @@ app.get('/api/auth/google/callback', passport.authenticate('google', { session: 
       role: req.user.role 
     }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '7d' });
     
-    // Редирект на фронт с токеном
+    // Р РµРґРёСЂРµРєС‚ РЅР° С„СЂРѕРЅС‚ СЃ С‚РѕРєРµРЅРѕРј
     res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/oauth-success?token=${token}`);
   } catch (error) {
     console.error('Google OAuth callback error:', error);
@@ -1954,44 +1886,44 @@ app.get('/api/auth/facebook/callback', passport.authenticate('facebook', { sessi
   res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/oauth-success?token=${token}`);
 });
 
-// Middleware для проверки JWT
+// Middleware РґР»СЏ РїСЂРѕРІРµСЂРєРё JWT
 function authMiddleware(req, res, next) {
-  console.log('\n🔐 Auth middleware: Starting authentication check');
-  console.log('🔍 Request URL:', req.url);
-  console.log('🔍 Request method:', req.method);
+  console.log('\nрџ”ђ Auth middleware: Starting authentication check');
+  console.log('рџ”Ќ Request URL:', req.url);
+  console.log('рџ”Ќ Request method:', req.method);
   
   const auth = req.headers.authorization;
-  console.log('🔑 Authorization header:', auth ? 'Present' : 'Missing');
-  console.log('🔑 Authorization value:', auth ? auth.substring(0, 20) + '...' : 'None');
+  console.log('рџ”‘ Authorization header:', auth ? 'Present' : 'Missing');
+  console.log('рџ”‘ Authorization value:', auth ? auth.substring(0, 20) + '...' : 'None');
   
   if (!auth || !auth.startsWith('Bearer ')) {
-    console.log('❌ Auth middleware: No valid Bearer token');
-    return res.status(401).json({ error: 'Нет токена' });
+    console.log('вќЊ Auth middleware: No valid Bearer token');
+    return res.status(401).json({ error: 'РќРµС‚ С‚РѕРєРµРЅР°' });
   }
   
   const token = auth.slice(7);
-  console.log('🎫 Token extracted, length:', token.length);
-  console.log('🎫 Token preview:', token.substring(0, 20) + '...');
+  console.log('рџЋ« Token extracted, length:', token.length);
+  console.log('рџЋ« Token preview:', token.substring(0, 20) + '...');
   
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
-    console.log('✅ Token verified successfully');
-    console.log('👤 User ID:', payload.userId);
-    console.log('👤 User email:', payload.email);
-    console.log('👤 User role:', payload.role);
+    console.log('вњ… Token verified successfully');
+    console.log('рџ‘¤ User ID:', payload.userId);
+    console.log('рџ‘¤ User email:', payload.email);
+    console.log('рџ‘¤ User role:', payload.role);
     req.user = payload;
     next();
   } catch (error) {
-    console.error('❌ Token verification failed:', error.message);
-    console.error('❌ Error details:', error);
-    return res.status(401).json({ error: 'Некорректный токен' });
+    console.error('вќЊ Token verification failed:', error.message);
+    console.error('вќЊ Error details:', error);
+    return res.status(401).json({ error: 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ С‚РѕРєРµРЅ' });
   }
 }
 
-// История заказов пользователя
+// РСЃС‚РѕСЂРёСЏ Р·Р°РєР°Р·РѕРІ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 app.get('/api/profile/orders', authMiddleware, async (req, res) => {
   try {
-    // Получаем скрытые заказы пользователя
+    // РџРѕР»СѓС‡Р°РµРј СЃРєСЂС‹С‚С‹Рµ Р·Р°РєР°Р·С‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     const hiddenOrders = await prisma.userHiddenOrder.findMany({
       where: { userId: req.user.userId },
       select: { orderId: true }
@@ -2010,7 +1942,7 @@ app.get('/api/profile/orders', authMiddleware, async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
     
-    // Добавляем расчет суммы для каждого заказа
+    // Р”РѕР±Р°РІР»СЏРµРј СЂР°СЃС‡РµС‚ СЃСѓРјРјС‹ РґР»СЏ РєР°Р¶РґРѕРіРѕ Р·Р°РєР°Р·Р°
     const ordersWithTotal = orders.map(order => ({
       ...order,
       total: order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
@@ -2019,18 +1951,18 @@ app.get('/api/profile/orders', authMiddleware, async (req, res) => {
     res.json(ordersWithTotal);
   } catch (error) {
     console.error('Orders fetch error:', error);
-    res.status(500).json({ error: 'Ошибка получения заказов' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ Р·Р°РєР°Р·РѕРІ' });
   }
 });
 
-// Текущая корзина пользователя
+// РўРµРєСѓС‰Р°СЏ РєРѕСЂР·РёРЅР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 app.get('/api/profile/cart', authMiddleware, async (req, res) => {
   try {
-    // Сначала проверяем, существует ли пользователь
+    // РЎРЅР°С‡Р°Р»Р° РїСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user) {
-      console.error('Пользователь не найден при попытке получить корзину:', req.user.userId);
-      return res.status(404).json({ error: 'Пользователь не найден' });
+      console.error('РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ РїСЂРё РїРѕРїС‹С‚РєРµ РїРѕР»СѓС‡РёС‚СЊ РєРѕСЂР·РёРЅСѓ:', req.user.userId);
+      return res.status(404).json({ error: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ' });
     }
 
     let cart = await prisma.cart.findUnique({
@@ -2040,38 +1972,38 @@ app.get('/api/profile/cart', authMiddleware, async (req, res) => {
     
     if (!cart) {
       try {
-        console.log(`Создаем корзину для пользователя ID: ${req.user.userId}`);
+        console.log(`РЎРѕР·РґР°РµРј РєРѕСЂР·РёРЅСѓ РґР»СЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ ID: ${req.user.userId}`);
         await prisma.cart.create({ data: { userId: req.user.userId } });
         cart = await prisma.cart.findUnique({
           where: { userId: req.user.userId },
           include: { items: { include: { product: true }, orderBy: { id: 'asc' } } }
         });
-        console.log(`Корзина создана успешно, ID: ${cart?.id}`);
+        console.log(`РљРѕСЂР·РёРЅР° СЃРѕР·РґР°РЅР° СѓСЃРїРµС€РЅРѕ, ID: ${cart?.id}`);
   
       } catch (e) {
-        console.error('Ошибка создания корзины:', e);
+        console.error('РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ РєРѕСЂР·РёРЅС‹:', e);
         return res.json({ items: [] });
       }
     }
     
     if (!cart) {
-      console.log('Корзина не найдена после попытки создания');
+      console.log('РљРѕСЂР·РёРЅР° РЅРµ РЅР°Р№РґРµРЅР° РїРѕСЃР»Рµ РїРѕРїС‹С‚РєРё СЃРѕР·РґР°РЅРёСЏ');
       return res.json({ items: [] });
     }
     
     res.json(cart);
   } catch (error) {
     console.error('Cart fetch error:', error);
-    res.status(500).json({ error: 'Ошибка получения корзины' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РєРѕСЂР·РёРЅС‹' });
   }
 });
 
-// === Редактирование профиля ===
+// === Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РїСЂРѕС„РёР»СЏ ===
 app.put('/api/profile', authMiddleware, async (req, res) => {
   try {
     const { name, surname, email, phone } = req.body;
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
-    if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+    if (!user) return res.status(404).json({ error: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ' });
     
     let updateData = { 
       name: name || user.name,
@@ -2080,7 +2012,7 @@ app.put('/api/profile', authMiddleware, async (req, res) => {
     };
     
     if (email && email !== user.email) {
-      // Если email меняется — просто обновляем без подтверждения
+      // Р•СЃР»Рё email РјРµРЅСЏРµС‚СЃСЏ вЂ” РїСЂРѕСЃС‚Рѕ РѕР±РЅРѕРІР»СЏРµРј Р±РµР· РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ
       updateData.email = email;
     }
     
@@ -2100,40 +2032,40 @@ app.put('/api/profile', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('Profile update error:', error);
-    res.status(500).json({ error: 'Ошибка обновления профиля' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РѕР±РЅРѕРІР»РµРЅРёСЏ РїСЂРѕС„РёР»СЏ' });
   }
 });
 
-// === Удаление профиля ===
+// === РЈРґР°Р»РµРЅРёРµ РїСЂРѕС„РёР»СЏ ===
 app.delete('/api/profile', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
-    if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+    if (!user) return res.status(404).json({ error: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ' });
     
-    // Удаляем все связанные данные пользователя
+    // РЈРґР°Р»СЏРµРј РІСЃРµ СЃРІСЏР·Р°РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     await prisma.$transaction([
-      // Удаляем корзину
+      // РЈРґР°Р»СЏРµРј РєРѕСЂР·РёРЅСѓ
       prisma.cart.deleteMany({ where: { userId: user.id } }),
-      // Удаляем заказы
+      // РЈРґР°Р»СЏРµРј Р·Р°РєР°Р·С‹
       prisma.order.deleteMany({ where: { userId: user.id } }),
-      // Удаляем отзывы
+      // РЈРґР°Р»СЏРµРј РѕС‚Р·С‹РІС‹
       prisma.review.deleteMany({ where: { userId: user.id } }),
-      // Удаляем избранное
+      // РЈРґР°Р»СЏРµРј РёР·Р±СЂР°РЅРЅРѕРµ
       prisma.wishlist.deleteMany({ where: { userId: user.id } }),
-      // Удаляем уведомления
+      // РЈРґР°Р»СЏРµРј СѓРІРµРґРѕРјР»РµРЅРёСЏ
       prisma.notification.deleteMany({ where: { userId: user.id } }),
-      // Удаляем самого пользователя
+      // РЈРґР°Р»СЏРµРј СЃР°РјРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
       prisma.user.delete({ where: { id: user.id } })
     ]);
     
-    res.json({ message: 'Профиль успешно удален' });
+    res.json({ message: 'РџСЂРѕС„РёР»СЊ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ' });
   } catch (error) {
     console.error('Profile deletion error:', error);
-    res.status(500).json({ error: 'Ошибка удаления профиля' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РїСЂРѕС„РёР»СЏ' });
   }
 });
 
-// === Восстановление пароля: запрос ===
+// === Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ РїР°СЂРѕР»СЏ: Р·Р°РїСЂРѕСЃ ===
 app.post('/api/auth/forgot', async (req, res) => {
   try {
     const { email, language: frontendLanguage } = req.body;
@@ -2141,20 +2073,20 @@ app.post('/api/auth/forgot', async (req, res) => {
     const acceptLanguage = req.headers['accept-language'] || '';
     const language = frontendLanguage || (acceptLanguage.includes('ru') ? 'ru' : 'he');
     
-    console.log('🔐 Password reset request for:', email);
-    console.log('🌐 Language detection:', { frontendLanguage, acceptLanguage, finalLanguage: language });
+    console.log('рџ”ђ Password reset request for:', email);
+    console.log('рџЊђ Language detection:', { frontendLanguage, acceptLanguage, finalLanguage: language });
     
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(200).json({ message: 'Если email зарегистрирован, письмо отправлено' });
+    if (!user) return res.status(200).json({ message: 'Р•СЃР»Рё email Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ, РїРёСЃСЊРјРѕ РѕС‚РїСЂР°РІР»РµРЅРѕ' });
     
     const resetToken = crypto.randomBytes(32).toString('hex');
     await prisma.user.update({ where: { id: user.id }, data: { verificationToken: resetToken } });
     
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-    console.log('🔗 Reset URL generated:', resetUrl);
+    console.log('рџ”— Reset URL generated:', resetUrl);
     
     const template = emailTemplates.passwordReset[language];
-    console.log('📧 Email template selection:', { 
+    console.log('рџ“§ Email template selection:', { 
       language, 
       hasTemplate: !!template,
       hasSubject: !!template?.subject,
@@ -2162,57 +2094,57 @@ app.post('/api/auth/forgot', async (req, res) => {
     });
     
     if (!template || !template.html) {
-      console.error('❌ Email template not found for language:', language);
+      console.error('вќЊ Email template not found for language:', language);
       throw new Error(`Email template not found for language: ${language}`);
     }
     
     const emailSubject = typeof template.subject === 'function' ? template.subject(user.name) : template.subject;
     const emailHtml = template.html(user.name || email, resetUrl);
-    console.log('📝 Email HTML generated, length:', emailHtml?.length || 0);
-    console.log('📧 Email subject:', emailSubject);
+    console.log('рџ“ќ Email HTML generated, length:', emailHtml?.length || 0);
+    console.log('рџ“§ Email subject:', emailSubject);
     
     if (!emailHtml || emailHtml.length < 100) {
-      console.error('❌ Email HTML is empty or too short!');
+      console.error('вќЊ Email HTML is empty or too short!');
       throw new Error('Failed to generate email HTML');
     }
     
-    console.log('📤 Attempting to send email to:', email);
+    console.log('рџ“¤ Attempting to send email to:', email);
     const emailSent = await sendEmail(email, emailSubject, emailHtml, language);
     
     if (emailSent) {
-      console.log('✅ Password reset email sent successfully to:', email);
+      console.log('вњ… Password reset email sent successfully to:', email);
     } else {
-      console.warn('⚠️ Email sending returned false, but no error thrown');
+      console.warn('вљ пёЏ Email sending returned false, but no error thrown');
     }
     
-    res.json({ message: language === 'ru' ? 'Если email зарегистрирован, письмо отправлено' : 'אם האימייל רשום במערכת, נשלח לך אימייל לשחזור הסיסמה' });
+    res.json({ message: language === 'ru' ? 'Р•СЃР»Рё email Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ, РїРёСЃСЊРјРѕ РѕС‚РїСЂР°РІР»РµРЅРѕ' : 'ЧђЧќ Ч”ЧђЧ™ЧћЧ™Ч™Чњ ЧЁЧ©Ч•Чќ Ч‘ЧћЧўЧЁЧ›ЧЄ, Ч Ч©ЧњЧ— ЧњЧљ ЧђЧ™ЧћЧ™Ч™Чњ ЧњЧ©Ч—Ч–Ч•ЧЁ Ч”ЧЎЧ™ЧЎЧћЧ”' });
   } catch (error) {
-    console.error('❌ Forgot password error:', error);
+    console.error('вќЊ Forgot password error:', error);
     console.error('Error stack:', error.stack);
-    res.status(500).json({ error: 'Ошибка восстановления пароля' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РїР°СЂРѕР»СЏ' });
   }
 });
-// === Восстановление пароля: сброс ===
+// === Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ РїР°СЂРѕР»СЏ: СЃР±СЂРѕСЃ ===
 app.post('/api/auth/reset', async (req, res) => {
   try {
     const { token, password } = req.body;
-    if (!token || !password) return res.status(400).json({ error: 'Нет токена или пароля' });
+    if (!token || !password) return res.status(400).json({ error: 'РќРµС‚ С‚РѕРєРµРЅР° РёР»Рё РїР°СЂРѕР»СЏ' });
     const user = await prisma.user.findFirst({ where: { verificationToken: token } });
-    if (!user) return res.status(400).json({ error: 'Некорректный токен' });
+    if (!user) return res.status(400).json({ error: 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ С‚РѕРєРµРЅ' });
     const passwordHash = await bcrypt.hash(password, 10);
     await prisma.user.update({ where: { id: user.id }, data: { passwordHash, verificationToken: null } });
-    res.json({ message: 'Пароль успешно сброшен' });
+    res.json({ message: 'РџР°СЂРѕР»СЊ СѓСЃРїРµС€РЅРѕ СЃР±СЂРѕС€РµРЅ' });
   } catch (error) {
     console.error('Reset password error:', error);
-    res.status(500).json({ error: 'Ошибка сброса пароля' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СЃР±СЂРѕСЃР° РїР°СЂРѕР»СЏ' });
   }
 });
 
-// === Профиль пользователя (имя, фамилия, email, роль, телефон, дата регистрации) ===
+// === РџСЂРѕС„РёР»СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ (РёРјСЏ, С„Р°РјРёР»РёСЏ, email, СЂРѕР»СЊ, С‚РµР»РµС„РѕРЅ, РґР°С‚Р° СЂРµРіРёСЃС‚СЂР°С†РёРё) ===
 app.get('/api/profile', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
-    if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+    if (!user) return res.status(404).json({ error: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ' });
     res.json({ 
       user: { 
         id: user.id, 
@@ -2228,30 +2160,30 @@ app.get('/api/profile', authMiddleware, async (req, res) => {
       } 
     });
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка получения профиля' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РїСЂРѕС„РёР»СЏ' });
   }
 });
 
-// === Добавить товар в корзину ===
+// === Р”РѕР±Р°РІРёС‚СЊ С‚РѕРІР°СЂ РІ РєРѕСЂР·РёРЅСѓ ===
 app.post('/api/profile/cart/add', authMiddleware, async (req, res) => {
   try {
     const { productId, quantity = 1, selectedColor = null } = req.body;
-    if (!productId) return res.status(400).json({ error: 'productId обязателен' });
+    if (!productId) return res.status(400).json({ error: 'productId РѕР±СЏР·Р°С‚РµР»РµРЅ' });
     
-    // Проверяем существование пользователя
+    // РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user) {
-      console.error('Пользователь не найден при попытке добавить товар в корзину:', req.user.userId);
-      return res.status(404).json({ error: 'Пользователь не найден' });
+      console.error('РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ РїСЂРё РїРѕРїС‹С‚РєРµ РґРѕР±Р°РІРёС‚СЊ С‚РѕРІР°СЂ РІ РєРѕСЂР·РёРЅСѓ:', req.user.userId);
+      return res.status(404).json({ error: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ' });
     }
     
     let cart = await prisma.cart.findUnique({ where: { userId: req.user.userId } });
     if (!cart) {
-      console.log(`Создаем корзину для пользователя ID: ${req.user.userId}`);
+      console.log(`РЎРѕР·РґР°РµРј РєРѕСЂР·РёРЅСѓ РґР»СЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ ID: ${req.user.userId}`);
       cart = await prisma.cart.create({ data: { userId: req.user.userId } });
-      console.log(`Корзина создана, ID: ${cart.id}`);
+      console.log(`РљРѕСЂР·РёРЅР° СЃРѕР·РґР°РЅР°, ID: ${cart.id}`);
     }
-    // Ищем товар с учетом цвета (один товар разных цветов - разные позиции в корзине)
+    // РС‰РµРј С‚РѕРІР°СЂ СЃ СѓС‡РµС‚РѕРј С†РІРµС‚Р° (РѕРґРёРЅ С‚РѕРІР°СЂ СЂР°Р·РЅС‹С… С†РІРµС‚РѕРІ - СЂР°Р·РЅС‹Рµ РїРѕР·РёС†РёРё РІ РєРѕСЂР·РёРЅРµ)
     const whereClause = { cartId: cart.id, productId };
     if (selectedColor) {
       whereClause.selectedColor = selectedColor;
@@ -2274,17 +2206,17 @@ app.post('/api/profile/cart/add', authMiddleware, async (req, res) => {
     res.json(updatedCart);
   } catch (error) {
     console.error('Cart add error:', error);
-    res.status(500).json({ error: 'Ошибка добавления в корзину' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РґРѕР±Р°РІР»РµРЅРёСЏ РІ РєРѕСЂР·РёРЅСѓ' });
   }
 });
 
-// === Удалить товар из корзины ===
+// === РЈРґР°Р»РёС‚СЊ С‚РѕРІР°СЂ РёР· РєРѕСЂР·РёРЅС‹ ===
 app.post('/api/profile/cart/remove', authMiddleware, async (req, res) => {
   try {
     const { productId } = req.body;
-    if (!productId) return res.status(400).json({ error: 'productId обязателен' });
+    if (!productId) return res.status(400).json({ error: 'productId РѕР±СЏР·Р°С‚РµР»РµРЅ' });
     let cart = await prisma.cart.findUnique({ where: { userId: req.user.userId } });
-    if (!cart) return res.status(404).json({ error: 'Корзина не найдена' });
+    if (!cart) return res.status(404).json({ error: 'РљРѕСЂР·РёРЅР° РЅРµ РЅР°Р№РґРµРЅР°' });
     await prisma.cartItem.deleteMany({ where: { cartId: cart.id, productId } });
     const updatedCart = await prisma.cart.findUnique({
       where: { id: cart.id },
@@ -2293,19 +2225,19 @@ app.post('/api/profile/cart/remove', authMiddleware, async (req, res) => {
     res.json(updatedCart);
   } catch (error) {
     console.error('Cart remove error:', error);
-    res.status(500).json({ error: 'Ошибка удаления из корзины' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РёР· РєРѕСЂР·РёРЅС‹' });
   }
 });
 
-// === Изменить количество товара в корзине ===
+// === РР·РјРµРЅРёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ С‚РѕРІР°СЂР° РІ РєРѕСЂР·РёРЅРµ ===
 app.post('/api/profile/cart/update', authMiddleware, async (req, res) => {
   try {
     const { productId, quantity } = req.body;
-    if (!productId || typeof quantity !== 'number' || quantity < 1) return res.status(400).json({ error: 'productId и quantity >= 1 обязательны' });
+    if (!productId || typeof quantity !== 'number' || quantity < 1) return res.status(400).json({ error: 'productId Рё quantity >= 1 РѕР±СЏР·Р°С‚РµР»СЊРЅС‹' });
     let cart = await prisma.cart.findUnique({ where: { userId: req.user.userId } });
-    if (!cart) return res.status(404).json({ error: 'Корзина не найдена' });
+    if (!cart) return res.status(404).json({ error: 'РљРѕСЂР·РёРЅР° РЅРµ РЅР°Р№РґРµРЅР°' });
     let cartItem = await prisma.cartItem.findFirst({ where: { cartId: cart.id, productId } });
-    if (!cartItem) return res.status(404).json({ error: 'Товар не найден в корзине' });
+    if (!cartItem) return res.status(404).json({ error: 'РўРѕРІР°СЂ РЅРµ РЅР°Р№РґРµРЅ РІ РєРѕСЂР·РёРЅРµ' });
     cartItem = await prisma.cartItem.update({ where: { id: cartItem.id }, data: { quantity } });
     const updatedCart = await prisma.cart.findUnique({
       where: { id: cart.id },
@@ -2315,40 +2247,40 @@ app.post('/api/profile/cart/update', authMiddleware, async (req, res) => {
     res.json(updatedCart);
   } catch (error) {
     console.error('Cart update error:', error);
-    res.status(500).json({ error: 'Ошибка изменения количества' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РёР·РјРµРЅРµРЅРёСЏ РєРѕР»РёС‡РµСЃС‚РІР°' });
   }
 });
 
-// === Оформление заказа (checkout) ===
+// === РћС„РѕСЂРјР»РµРЅРёРµ Р·Р°РєР°Р·Р° (checkout) ===
 app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
   try {
-    // Определяем язык для email так же, как в регистрации
+    // РћРїСЂРµРґРµР»СЏРµРј СЏР·С‹Рє РґР»СЏ email С‚Р°Рє Р¶Рµ, РєР°Рє РІ СЂРµРіРёСЃС‚СЂР°С†РёРё
     const { language: frontendLanguage } = req.body;
     const acceptLanguage = req.headers['accept-language'] || '';
     const language = frontendLanguage || (acceptLanguage.includes('ru') ? 'ru' : 'he');
     
     const { customerInfo, pickupStore, paymentMethod, total, cartItems } = req.body;
     
-    // Проверяем, есть ли cartItems в запросе
+    // РџСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё cartItems РІ Р·Р°РїСЂРѕСЃРµ
     if (cartItems && cartItems.length > 0) {
-      console.log('📦 Using cartItems from request:', cartItems);
+      console.log('рџ“¦ Using cartItems from request:', cartItems);
       
-      // Проверяем наличие товара на складе
+      // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ С‚РѕРІР°СЂР° РЅР° СЃРєР»Р°РґРµ
       for (const item of cartItems) {
         const product = await prisma.product.findUnique({
           where: { id: item.productId }
         });
         
         if (!product) {
-          return res.status(400).json({ error: `Товар не найден: ID ${item.productId}` });
+          return res.status(400).json({ error: `РўРѕРІР°СЂ РЅРµ РЅР°Р№РґРµРЅ: ID ${item.productId}` });
         }
         
         if (item.quantity > product.quantity) {
-          return res.status(400).json({ error: `Недостаточно товара: ${product.name}` });
+          return res.status(400).json({ error: `РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ С‚РѕРІР°СЂР°: ${product.name}` });
         }
       }
       
-      // Обновляем информацию о пользователе, если предоставлена
+      // РћР±РЅРѕРІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ, РµСЃР»Рё РїСЂРµРґРѕСЃС‚Р°РІР»РµРЅР°
       if (customerInfo) {
         await prisma.user.update({
           where: { id: req.user.userId },
@@ -2360,7 +2292,7 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
         });
       }
       
-      // Создаём заказ с cartItems из запроса
+      // РЎРѕР·РґР°С‘Рј Р·Р°РєР°Р· СЃ cartItems РёР· Р·Р°РїСЂРѕСЃР°
       const order = await prisma.order.create({
         data: {
           userId: req.user.userId,
@@ -2381,7 +2313,7 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
         }
       });
       
-      // Уменьшаем количество на складе
+      // РЈРјРµРЅСЊС€Р°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РЅР° СЃРєР»Р°РґРµ
       for (const item of cartItems) {
         await prisma.product.update({
           where: { id: item.productId },
@@ -2389,68 +2321,68 @@ app.post('/api/profile/checkout', authMiddleware, async (req, res) => {
         });
       }
       
-      // Очищаем корзину пользователя
+      // РћС‡РёС‰Р°РµРј РєРѕСЂР·РёРЅСѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
       const cart = await prisma.cart.findUnique({
         where: { userId: req.user.userId },
         include: { items: true }
       });
       
       if (cart) {
-        console.log(`Очищаем корзину ID: ${cart.id}`);
+        console.log(`РћС‡РёС‰Р°РµРј РєРѕСЂР·РёРЅСѓ ID: ${cart.id}`);
         
-        // Сначала удаляем все элементы корзины
+        // РЎРЅР°С‡Р°Р»Р° СѓРґР°Р»СЏРµРј РІСЃРµ СЌР»РµРјРµРЅС‚С‹ РєРѕСЂР·РёРЅС‹
         const deletedItems = await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
-        console.log(`Удалено ${deletedItems.count} элементов корзины для корзины ID: ${cart.id}`);
+        console.log(`РЈРґР°Р»РµРЅРѕ ${deletedItems.count} СЌР»РµРјРµРЅС‚РѕРІ РєРѕСЂР·РёРЅС‹ РґР»СЏ РєРѕСЂР·РёРЅС‹ ID: ${cart.id}`);
         
-        // Удаляем саму корзину
+        // РЈРґР°Р»СЏРµРј СЃР°РјСѓ РєРѕСЂР·РёРЅСѓ
         await prisma.cart.delete({ where: { id: cart.id } });
-        console.log(`Удалена корзина ID: ${cart.id}`);
+        console.log(`РЈРґР°Р»РµРЅР° РєРѕСЂР·РёРЅР° ID: ${cart.id}`);
       }
       
-      // Вычисляем общую сумму заказа
-      const totalAmount = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      
-      // Отправляем уведомления
+      // Р’С‹С‡РёСЃР»СЏРµРј РѕР±С‰СѓСЋ СЃСѓРјРјСѓ Р·Р°РєР°Р·Р°
+        const totalAmount = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+      // РћС‚РїСЂР°РІР»СЏРµРј СѓРІРµРґРѕРјР»РµРЅРёСЏ
       try {
         const telegramMessage = `
-🛒 <b>Новый заказ #${order.id}</b>
+рџ›’ <b>РќРѕРІС‹Р№ Р·Р°РєР°Р· #${order.id}</b>
 
-👤 <b>Клиент:</b> ${(order.user.name || order.user.surname || '').trim() || 'Не указано'}
-📧 <b>Email:</b> ${order.user.email || 'Не указано'}
-📱 <b>Телефон:</b> ${order.user.phone || 'Не указано'}
-🏬 <b>Самовывоз из:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
-💳 <b>Оплата:</b> ${paymentMethod === 'card' ? 'Карта' : 'Наличными или картой'}
+рџ‘¤ <b>РљР»РёРµРЅС‚:</b> ${(order.user.name || order.user.surname || '').trim() || 'РќРµ СѓРєР°Р·Р°РЅРѕ'}
+рџ“§ <b>Email:</b> ${order.user.email || 'РќРµ СѓРєР°Р·Р°РЅРѕ'}
+рџ“± <b>РўРµР»РµС„РѕРЅ:</b> ${order.user.phone || 'РќРµ СѓРєР°Р·Р°РЅРѕ'}
+рџЏ¬ <b>РЎР°РјРѕРІС‹РІРѕР· РёР·:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
+рџ’і <b>РћРїР»Р°С‚Р°:</b> ${paymentMethod === 'card' ? 'РљР°СЂС‚Р°' : 'РќР°Р»РёС‡РЅС‹РјРё РёР»Рё РєР°СЂС‚РѕР№'}
 
-  📦 <b>Товары:</b>
+  рџ“¦ <b>РўРѕРІР°СЂС‹:</b>
 ${order.items.map(item => {
   const productName = item.product.nameHe || item.product.name;
-  let itemText = `• ${productName} x${item.quantity} - ₪${item.price * item.quantity}`;
+  let itemText = `вЂў ${productName} x${item.quantity} - в‚Є${item.price * item.quantity}`;
   if (item.product.article) {
-    itemText += `\n  📋 Артикул: ${item.product.article}`;
+    itemText += `\n  рџ“‹ РђСЂС‚РёРєСѓР»: ${item.product.article}`;
   }
   if (item.selectedColor) {
     const colorInfo = COLOR_PALETTE.find(c => c.id === item.selectedColor);
     if (colorInfo) {
-      itemText += `\n  🎨 Цвет: ${colorInfo.nameRu}`;
+      itemText += `\n  рџЋЁ Р¦РІРµС‚: ${colorInfo.nameRu}`;
     }
   }
   return itemText;
 }).join('\n')}
 
-💰 <b>Итого:</b> ₪${totalAmount}
-📅 <b>Дата:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
+рџ’° <b>РС‚РѕРіРѕ:</b> в‚Є${totalAmount}
+рџ“… <b>Р”Р°С‚Р°:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
         `.trim();
         await sendTelegramNotification(telegramMessage);
       } catch (telegramError) {
-        console.error('Ошибка отправки в Telegram:', telegramError);
+        console.error('РћС€РёР±РєР° РѕС‚РїСЂР°РІРєРё РІ Telegram:', telegramError);
       }
       
-      // Отправляем email с использованием шаблона
+      // РћС‚РїСЂР°РІР»СЏРµРј email СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј С€Р°Р±Р»РѕРЅР°
       try {
-        // Подготавливаем данные для email с информацией о цветах
+        // РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ email СЃ РёРЅС„РѕСЂРјР°С†РёРµР№ Рѕ С†РІРµС‚Р°С…
         const orderData = {
           orderId: order.id,
-          customerName: order.user.name || order.user.surname || (language === 'he' ? 'לקוח' : 'клиент'),
+          customerName: order.user.name || order.user.surname || (language === 'he' ? 'ЧњЧ§Ч•Ч—' : 'РєР»РёРµРЅС‚'),
           storeName: getStoreInfo(pickupStore).name,
           storeAddress: getStoreInfo(pickupStore).address,
           paymentMethod: paymentMethod,
@@ -2462,7 +2394,7 @@ ${order.items.map(item => {
               price: item.price
             };
             
-            // Добавляем информацию о цвете если есть
+            // Р”РѕР±Р°РІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ С†РІРµС‚Рµ РµСЃР»Рё РµСЃС‚СЊ
             if (item.selectedColor) {
               const colorInfo = COLOR_PALETTE.find(c => c.id === item.selectedColor);
               if (colorInfo) {
@@ -2481,18 +2413,18 @@ ${order.items.map(item => {
         
         await sendEmail(order.user.email, emailSubject, emailHtml);
       } catch (emailError) {
-        console.error('Ошибка отправки email:', emailError);
+        console.error('РћС€РёР±РєР° РѕС‚РїСЂР°РІРєРё email:', emailError);
       }
       
       res.json({ 
         success: true, 
         order,
-        message: 'Заказ успешно создан'
+        message: 'Р—Р°РєР°Р· СѓСЃРїРµС€РЅРѕ СЃРѕР·РґР°РЅ'
       });
       
     } else {
-      // Fallback: получаем корзину пользователя из базы данных
-      console.log('📦 Using cart from database');
+      // Fallback: РїРѕР»СѓС‡Р°РµРј РєРѕСЂР·РёРЅСѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёР· Р±Р°Р·С‹ РґР°РЅРЅС‹С…
+      console.log('рџ“¦ Using cart from database');
       
       const cart = await prisma.cart.findUnique({
         where: { userId: req.user.userId },
@@ -2500,20 +2432,20 @@ ${order.items.map(item => {
       });
       
       if (!cart || !cart.items.length) {
-        return res.status(400).json({ error: 'Корзина пуста' });
+        return res.status(400).json({ error: 'РљРѕСЂР·РёРЅР° РїСѓСЃС‚Р°' });
       }
     
     
     
-    // Проверяем наличие товара на складе
+    // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ С‚РѕРІР°СЂР° РЅР° СЃРєР»Р°РґРµ
     for (const item of cart.items) {
       
       if (item.quantity > item.product.quantity) {
-        return res.status(400).json({ error: `Недостаточно товара: ${item.product.name}` });
+        return res.status(400).json({ error: `РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ С‚РѕРІР°СЂР°: ${item.product.name}` });
       }
     }
     
-    // Обновляем информацию о пользователе, если предоставлена
+    // РћР±РЅРѕРІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ, РµСЃР»Рё РїСЂРµРґРѕСЃС‚Р°РІР»РµРЅР°
     if (customerInfo) {
 
       await prisma.user.update({
@@ -2526,7 +2458,7 @@ ${order.items.map(item => {
       });
     }
     
-    // Создаём заказ
+    // РЎРѕР·РґР°С‘Рј Р·Р°РєР°Р·
     
     const order = await prisma.order.create({
       data: {
@@ -2549,7 +2481,7 @@ ${order.items.map(item => {
     });
     
     
-    // Уменьшаем количество на складе
+    // РЈРјРµРЅСЊС€Р°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РЅР° СЃРєР»Р°РґРµ
     for (const item of cart.items) {
       await prisma.product.update({
         where: { id: item.productId },
@@ -2557,55 +2489,55 @@ ${order.items.map(item => {
       });
     }
     
-    // Очищаем корзину
+    // РћС‡РёС‰Р°РµРј РєРѕСЂР·РёРЅСѓ
     try {
-      console.log(`Очищаем корзину ID: ${cart.id}`);
+      console.log(`РћС‡РёС‰Р°РµРј РєРѕСЂР·РёРЅСѓ ID: ${cart.id}`);
       
-      // Сначала удаляем все элементы корзины
+      // РЎРЅР°С‡Р°Р»Р° СѓРґР°Р»СЏРµРј РІСЃРµ СЌР»РµРјРµРЅС‚С‹ РєРѕСЂР·РёРЅС‹
       const deletedItems = await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
-      console.log(`Удалено ${deletedItems.count} элементов корзины для корзины ID: ${cart.id}`);
+      console.log(`РЈРґР°Р»РµРЅРѕ ${deletedItems.count} СЌР»РµРјРµРЅС‚РѕРІ РєРѕСЂР·РёРЅС‹ РґР»СЏ РєРѕСЂР·РёРЅС‹ ID: ${cart.id}`);
       
-      // Проверяем, что все элементы действительно удалены
+      // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІСЃРµ СЌР»РµРјРµРЅС‚С‹ РґРµР№СЃС‚РІРёС‚РµР»СЊРЅРѕ СѓРґР°Р»РµРЅС‹
       const remainingItems = await prisma.cartItem.findMany({ where: { cartId: cart.id } });
       if (remainingItems.length > 0) {
-        console.log(`Предупреждение: осталось ${remainingItems.length} элементов в корзине`);
-        // Принудительно удаляем оставшиеся элементы
+        console.log(`РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ: РѕСЃС‚Р°Р»РѕСЃСЊ ${remainingItems.length} СЌР»РµРјРµРЅС‚РѕРІ РІ РєРѕСЂР·РёРЅРµ`);
+        // РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ СѓРґР°Р»СЏРµРј РѕСЃС‚Р°РІС€РёРµСЃСЏ СЌР»РµРјРµРЅС‚С‹
         await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
       }
       
-      // Проверяем, существует ли корзина перед удалением
+      // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё РєРѕСЂР·РёРЅР° РїРµСЂРµРґ СѓРґР°Р»РµРЅРёРµРј
       const cartExists = await prisma.cart.findUnique({ where: { id: cart.id } });
       if (cartExists) {
         await prisma.cart.delete({ where: { id: cart.id } });
-        console.log(`Удалена корзина ID: ${cart.id}`);
+        console.log(`РЈРґР°Р»РµРЅР° РєРѕСЂР·РёРЅР° ID: ${cart.id}`);
       } else {
-        console.log(`Корзина ID: ${cart.id} уже была удалена`);
+        console.log(`РљРѕСЂР·РёРЅР° ID: ${cart.id} СѓР¶Рµ Р±С‹Р»Р° СѓРґР°Р»РµРЅР°`);
       }
       
-      // Дополнительная проверка - убеждаемся, что корзина действительно удалена
+      // Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РїСЂРѕРІРµСЂРєР° - СѓР±РµР¶РґР°РµРјСЃСЏ, С‡С‚Рѕ РєРѕСЂР·РёРЅР° РґРµР№СЃС‚РІРёС‚РµР»СЊРЅРѕ СѓРґР°Р»РµРЅР°
       const cartStillExists = await prisma.cart.findUnique({ where: { id: cart.id } });
       if (cartStillExists) {
-        console.log(`ОШИБКА: Корзина ID: ${cart.id} все еще существует после удаления`);
-        // Принудительно удаляем корзину
+        console.log(`РћРЁРР‘РљРђ: РљРѕСЂР·РёРЅР° ID: ${cart.id} РІСЃРµ РµС‰Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚ РїРѕСЃР»Рµ СѓРґР°Р»РµРЅРёСЏ`);
+        // РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ СѓРґР°Р»СЏРµРј РєРѕСЂР·РёРЅСѓ
         await prisma.cart.delete({ where: { id: cart.id } });
       }
       
     } catch (clearError) {
-      console.error('Ошибка при очистке корзины:', clearError);
-      // Продолжаем выполнение, даже если очистка корзины не удалась
+      console.error('РћС€РёР±РєР° РїСЂРё РѕС‡РёСЃС‚РєРµ РєРѕСЂР·РёРЅС‹:', clearError);
+      // РџСЂРѕРґРѕР»Р¶Р°РµРј РІС‹РїРѕР»РЅРµРЅРёРµ, РґР°Р¶Рµ РµСЃР»Рё РѕС‡РёСЃС‚РєР° РєРѕСЂР·РёРЅС‹ РЅРµ СѓРґР°Р»Р°СЃСЊ
     }
     
 
     
-    // Отправляем email подтверждения заказа покупателю
+    // РћС‚РїСЂР°РІР»СЏРµРј email РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ Р·Р°РєР°Р·Р° РїРѕРєСѓРїР°С‚РµР»СЋ
     try {
       const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
       const totalAmount = cart.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
       
-      // Подготавливаем данные для email с информацией о цветах
+      // РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ email СЃ РёРЅС„РѕСЂРјР°С†РёРµР№ Рѕ С†РІРµС‚Р°С…
       const orderData = {
         orderId: order.id,
-        customerName: user.name || customerInfo?.firstName || (language === 'he' ? 'לקוח' : 'клиент'),
+        customerName: user.name || customerInfo?.firstName || (language === 'he' ? 'ЧњЧ§Ч•Ч—' : 'РєР»РёРµРЅС‚'),
         storeName: getStoreInfo(pickupStore).name,
         storeAddress: getStoreInfo(pickupStore).address,
         paymentMethod: paymentMethod,
@@ -2617,7 +2549,7 @@ ${order.items.map(item => {
             price: item.product.price
           };
           
-          // Добавляем информацию о цвете если есть
+          // Р”РѕР±Р°РІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ С†РІРµС‚Рµ РµСЃР»Рё РµСЃС‚СЊ
           if (item.selectedColor) {
             const colorInfo = COLOR_PALETTE.find(c => c.id === item.selectedColor);
             if (colorInfo) {
@@ -2639,57 +2571,57 @@ ${order.items.map(item => {
       console.error('Error sending order confirmation email:', emailError);
     }
     
-    // Возвращаем заказ и информацию о том, что корзина очищена
+    // Р’РѕР·РІСЂР°С‰Р°РµРј Р·Р°РєР°Р· Рё РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ С‚РѕРј, С‡С‚Рѕ РєРѕСЂР·РёРЅР° РѕС‡РёС‰РµРЅР°
     res.json({
       order,
       cartCleared: true,
-      message: 'Заказ успешно оформлен, корзина очищена'
+      message: 'Р—Р°РєР°Р· СѓСЃРїРµС€РЅРѕ РѕС„РѕСЂРјР»РµРЅ, РєРѕСЂР·РёРЅР° РѕС‡РёС‰РµРЅР°'
     });
     } // Closing brace for the else block
   } catch (error) {
     console.error('Checkout error:', error);
-    res.status(500).json({ error: 'Ошибка оформления заказа' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РѕС„РѕСЂРјР»РµРЅРёСЏ Р·Р°РєР°Р·Р°' });
   }
 });
 
-// === Оформление гостевого заказа (без авторизации) ===
+// === РћС„РѕСЂРјР»РµРЅРёРµ РіРѕСЃС‚РµРІРѕРіРѕ Р·Р°РєР°Р·Р° (Р±РµР· Р°РІС‚РѕСЂРёР·Р°С†РёРё) ===
 app.post('/api/guest/checkout', async (req, res) => {
   try {
-    console.log('🛒 Guest checkout request received:', req.body);
-    // Определяем язык для email
+    console.log('рџ›’ Guest checkout request received:', req.body);
+    // РћРїСЂРµРґРµР»СЏРµРј СЏР·С‹Рє РґР»СЏ email
     const { language: frontendLanguage } = req.body;
     const acceptLanguage = req.headers['accept-language'] || '';
     const language = frontendLanguage || (acceptLanguage.includes('ru') ? 'ru' : 'he');
     
     const { customerInfo, pickupStore, paymentMethod, total, cartItems } = req.body;
     
-    console.log('📋 Parsed data:', { customerInfo, pickupStore, paymentMethod, total, cartItems });
+    console.log('рџ“‹ Parsed data:', { customerInfo, pickupStore, paymentMethod, total, cartItems });
     
-    // Валидация входных данных
+    // Р’Р°Р»РёРґР°С†РёСЏ РІС…РѕРґРЅС‹С… РґР°РЅРЅС‹С…
     if (!customerInfo || !customerInfo.firstName || !customerInfo.lastName || 
         !customerInfo.email || !customerInfo.phone || !pickupStore || !cartItems || !cartItems.length) {
-      console.log('❌ Validation failed:', { customerInfo, pickupStore, cartItems });
-      return res.status(400).json({ error: 'Необходимо заполнить все обязательные поля и добавить товары в корзину' });
+      console.log('вќЊ Validation failed:', { customerInfo, pickupStore, cartItems });
+      return res.status(400).json({ error: 'РќРµРѕР±С…РѕРґРёРјРѕ Р·Р°РїРѕР»РЅРёС‚СЊ РІСЃРµ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рµ РїРѕР»СЏ Рё РґРѕР±Р°РІРёС‚СЊ С‚РѕРІР°СЂС‹ РІ РєРѕСЂР·РёРЅСѓ' });
     }
     
-    // Проверяем наличие товара на складе
-    console.log('🔍 Checking product availability...');
+    // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ С‚РѕРІР°СЂР° РЅР° СЃРєР»Р°РґРµ
+    console.log('рџ”Ќ Checking product availability...');
     for (const item of cartItems) {
-      console.log('🔍 Checking product:', item);
+      console.log('рџ”Ќ Checking product:', item);
       const product = await prisma.product.findUnique({ where: { id: item.productId } });
       if (!product) {
-        console.log('❌ Product not found:', item.productId);
-        return res.status(400).json({ error: `Товар не найден: ID ${item.productId}` });
+        console.log('вќЊ Product not found:', item.productId);
+        return res.status(400).json({ error: `РўРѕРІР°СЂ РЅРµ РЅР°Р№РґРµРЅ: ID ${item.productId}` });
       }
       if (item.quantity > product.quantity) {
-        console.log('❌ Insufficient quantity:', { requested: item.quantity, available: product.quantity });
-        return res.status(400).json({ error: `Недостаточно товара: ${product.name}` });
+        console.log('вќЊ Insufficient quantity:', { requested: item.quantity, available: product.quantity });
+        return res.status(400).json({ error: `РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ С‚РѕРІР°СЂР°: ${product.name}` });
       }
-      console.log('✅ Product available:', { productId: item.productId, quantity: product.quantity });
+      console.log('вњ… Product available:', { productId: item.productId, quantity: product.quantity });
     }
     
-    // Создаём гостевой заказ
-    console.log('📝 Creating guest order...');
+    // РЎРѕР·РґР°С‘Рј РіРѕСЃС‚РµРІРѕР№ Р·Р°РєР°Р·
+    console.log('рџ“ќ Creating guest order...');
     const order = await prisma.order.create({
       data: {
         status: 'pending',
@@ -2711,60 +2643,60 @@ app.post('/api/guest/checkout', async (req, res) => {
       }
     });
     
-    // Уменьшаем количество на складе
-    console.log('📦 Updating product quantities...');
+    // РЈРјРµРЅСЊС€Р°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РЅР° СЃРєР»Р°РґРµ
+    console.log('рџ“¦ Updating product quantities...');
     for (const item of cartItems) {
-      console.log('📦 Updating product:', item.productId, 'quantity:', item.quantity);
+      console.log('рџ“¦ Updating product:', item.productId, 'quantity:', item.quantity);
       await prisma.product.update({
         where: { id: item.productId },
         data: { quantity: { decrement: item.quantity } }
       });
     }
     
-    // Отправляем уведомление в Telegram
-    console.log('📱 Sending Telegram notification...');
+    // РћС‚РїСЂР°РІР»СЏРµРј СѓРІРµРґРѕРјР»РµРЅРёРµ РІ Telegram
+    console.log('рџ“± Sending Telegram notification...');
     try {
       const totalAmount = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       
       const telegramMessage = `
-🛒 <b>Новый гостевой заказ #${order.id}</b>
+рџ›’ <b>РќРѕРІС‹Р№ РіРѕСЃС‚РµРІРѕР№ Р·Р°РєР°Р· #${order.id}</b>
 
-👤 <b>Клиент:</b> ${(customerInfo.firstName || '').trim()} ${(customerInfo.lastName || '').trim()}
-📧 <b>Email:</b> ${customerInfo.email}
-📱 <b>Телефон:</b> ${customerInfo.phone}
-🏬 <b>Самовывоз из:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
-💳 <b>Оплата:</b> ${paymentMethod === 'card' ? 'Карта' : 'Наличными или картой'}
+рџ‘¤ <b>РљР»РёРµРЅС‚:</b> ${(customerInfo.firstName || '').trim()} ${(customerInfo.lastName || '').trim()}
+рџ“§ <b>Email:</b> ${customerInfo.email}
+рџ“± <b>РўРµР»РµС„РѕРЅ:</b> ${customerInfo.phone}
+рџЏ¬ <b>РЎР°РјРѕРІС‹РІРѕР· РёР·:</b> ${getStoreInfo(pickupStore).name} (${getStoreInfo(pickupStore).address})
+рџ’і <b>РћРїР»Р°С‚Р°:</b> ${paymentMethod === 'card' ? 'РљР°СЂС‚Р°' : 'РќР°Р»РёС‡РЅС‹РјРё РёР»Рё РєР°СЂС‚РѕР№'}
 
-📦 <b>Товары:</b>
+рџ“¦ <b>РўРѕРІР°СЂС‹:</b>
 ${order.items.map(item => {
   const productName = item.product.nameHe || item.product.name;
-  let itemText = `• ${productName} x${item.quantity} - ₪${item.price * item.quantity}`;
+  let itemText = `вЂў ${productName} x${item.quantity} - в‚Є${item.price * item.quantity}`;
   if (item.product.article) {
-    itemText += `\n  📋 Артикул: ${item.product.article}`;
+    itemText += `\n  рџ“‹ РђСЂС‚РёРєСѓР»: ${item.product.article}`;
   }
   if (item.selectedColor) {
     const colorInfo = COLOR_PALETTE.find(c => c.id === item.selectedColor);
     if (colorInfo) {
-      itemText += `\n  🎨 Цвет: ${colorInfo.nameRu}`;
+      itemText += `\n  рџЋЁ Р¦РІРµС‚: ${colorInfo.nameRu}`;
     }
   }
   return itemText;
 }).join('\n')}
 
-💰 <b>Итого:</b> ₪${totalAmount}
-📅 <b>Дата:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
+рџ’° <b>РС‚РѕРіРѕ:</b> в‚Є${totalAmount}
+рџ“… <b>Р”Р°С‚Р°:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
       `.trim();
       await sendTelegramNotification(telegramMessage);
     } catch (telegramError) {
       console.error('Error sending Telegram notification:', telegramError);
     }
     
-    // Отправляем email подтверждения заказа гостю
-    console.log('📧 Sending order confirmation email...');
+    // РћС‚РїСЂР°РІР»СЏРµРј email РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ Р·Р°РєР°Р·Р° РіРѕСЃС‚СЋ
+    console.log('рџ“§ Sending order confirmation email...');
     try {
       const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       
-      // Подготавливаем данные для email с информацией о цветах
+      // РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ email СЃ РёРЅС„РѕСЂРјР°С†РёРµР№ Рѕ С†РІРµС‚Р°С…
       const orderData = {
         orderId: order.id,
         customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
@@ -2779,7 +2711,7 @@ ${order.items.map(item => {
             price: item.price
           };
           
-          // Добавляем информацию о цвете если есть
+          // Р”РѕР±Р°РІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ С†РІРµС‚Рµ РµСЃР»Рё РµСЃС‚СЊ
           if (item.selectedColor) {
             const colorInfo = COLOR_PALETTE.find(c => c.id === item.selectedColor);
             if (colorInfo) {
@@ -2801,18 +2733,18 @@ ${order.items.map(item => {
       console.error('Error sending order confirmation email:', emailError);
     }
     
-    console.log('✅ Guest order created successfully:', order.id);
+    console.log('вњ… Guest order created successfully:', order.id);
     res.json({
       order,
-      message: 'Гостевой заказ успешно оформлен'
+      message: 'Р“РѕСЃС‚РµРІРѕР№ Р·Р°РєР°Р· СѓСЃРїРµС€РЅРѕ РѕС„РѕСЂРјР»РµРЅ'
     });
   } catch (error) {
-    console.error('❌ Guest checkout error:', error);
-    res.status(500).json({ error: 'Ошибка оформления гостевого заказа' });
+    console.error('вќЊ Guest checkout error:', error);
+    res.status(500).json({ error: 'РћС€РёР±РєР° РѕС„РѕСЂРјР»РµРЅРёСЏ РіРѕСЃС‚РµРІРѕРіРѕ Р·Р°РєР°Р·Р°' });
   }
 });
 
-// === Получить конкретный заказ ===
+// === РџРѕР»СѓС‡РёС‚СЊ РєРѕРЅРєСЂРµС‚РЅС‹Р№ Р·Р°РєР°Р· ===
 app.get('/api/profile/orders/:id', authMiddleware, async (req, res) => {
   try {
     console.log('Order fetch request:', { 
@@ -2821,11 +2753,11 @@ app.get('/api/profile/orders/:id', authMiddleware, async (req, res) => {
       userRole: req.user.role 
     });
     
-    // Проверяем, что orderId является числом
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ orderId СЏРІР»СЏРµС‚СЃСЏ С‡РёСЃР»РѕРј
     const orderId = parseInt(req.params.id);
     if (isNaN(orderId)) {
       console.log('Invalid orderId:', req.params.id);
-      return res.status(400).json({ error: 'Неверный ID заказа' });
+      return res.status(400).json({ error: 'РќРµРІРµСЂРЅС‹Р№ ID Р·Р°РєР°Р·Р°' });
     }
     
     const order = await prisma.order.findUnique({
@@ -2850,71 +2782,71 @@ app.get('/api/profile/orders/:id', authMiddleware, async (req, res) => {
     console.log('Order found:', order ? { id: order.id, userId: order.userId } : null);
     
     if (!order) {
-      return res.status(404).json({ error: 'Заказ не найден' });
+      return res.status(404).json({ error: 'Р—Р°РєР°Р· РЅРµ РЅР°Р№РґРµРЅ' });
     }
     
     if (order.userId !== req.user.userId && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Нет доступа к заказу' });
+      return res.status(403).json({ error: 'РќРµС‚ РґРѕСЃС‚СѓРїР° Рє Р·Р°РєР°Р·Сѓ' });
     }
     
     res.json(order);
   } catch (error) {
     console.error('Order fetch error:', error);
-    res.status(500).json({ error: 'Ошибка получения заказа' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ Р·Р°РєР°Р·Р°' });
   }
 });
 
-// === Отмена заказа ===
+// === РћС‚РјРµРЅР° Р·Р°РєР°Р·Р° ===
 app.post('/api/profile/orders/:id/cancel', authMiddleware, async (req, res) => {
   try {
     const order = await prisma.order.findUnique({
       where: { id: parseInt(req.params.id) },
       include: { items: true }
     });
-    if (!order) return res.status(404).json({ error: 'Заказ не найден' });
+    if (!order) return res.status(404).json({ error: 'Р—Р°РєР°Р· РЅРµ РЅР°Р№РґРµРЅ' });
     if (order.userId !== req.user.userId && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Нет доступа к отмене заказа' });
+      return res.status(403).json({ error: 'РќРµС‚ РґРѕСЃС‚СѓРїР° Рє РѕС‚РјРµРЅРµ Р·Р°РєР°Р·Р°' });
     }
     if (order.status === 'cancelled') {
-      return res.status(400).json({ error: 'Заказ уже отменён' });
+      return res.status(400).json({ error: 'Р—Р°РєР°Р· СѓР¶Рµ РѕС‚РјРµРЅС‘РЅ' });
     }
-    // Возвращаем количество на склад
+    // Р’РѕР·РІСЂР°С‰Р°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РЅР° СЃРєР»Р°Рґ
     for (const item of order.items) {
       await prisma.product.update({
         where: { id: item.productId },
         data: { quantity: { increment: item.quantity } }
       });
     }
-    // Меняем статус заказа
+    // РњРµРЅСЏРµРј СЃС‚Р°С‚СѓСЃ Р·Р°РєР°Р·Р°
     await prisma.order.update({
       where: { id: order.id },
       data: { status: 'cancelled' }
     });
-    res.json({ message: 'Заказ отменён и количество возвращено на склад' });
+    res.json({ message: 'Р—Р°РєР°Р· РѕС‚РјРµРЅС‘РЅ Рё РєРѕР»РёС‡РµСЃС‚РІРѕ РІРѕР·РІСЂР°С‰РµРЅРѕ РЅР° СЃРєР»Р°Рґ' });
   } catch (error) {
     console.error('Order cancel error:', error);
-    res.status(500).json({ error: 'Ошибка отмены заказа' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РѕС‚РјРµРЅС‹ Р·Р°РєР°Р·Р°' });
   }
 });
 
-// === Скрытие заказа пользователем ===
+// === РЎРєСЂС‹С‚РёРµ Р·Р°РєР°Р·Р° РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј ===
 app.delete('/api/profile/orders/:id', authMiddleware, async (req, res) => {
   try {
     const order = await prisma.order.findUnique({
       where: { id: parseInt(req.params.id) },
       include: { items: true }
     });
-    if (!order) return res.status(404).json({ error: 'Заказ не найден' });
+    if (!order) return res.status(404).json({ error: 'Р—Р°РєР°Р· РЅРµ РЅР°Р№РґРµРЅ' });
     if (order.userId !== req.user.userId && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Нет доступа к скрытию заказа' });
+      return res.status(403).json({ error: 'РќРµС‚ РґРѕСЃС‚СѓРїР° Рє СЃРєСЂС‹С‚РёСЋ Р·Р°РєР°Р·Р°' });
     }
     
-    // Проверяем, что заказ имеет статус "получен" или "отменен"
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ Р·Р°РєР°Р· РёРјРµРµС‚ СЃС‚Р°С‚СѓСЃ "РїРѕР»СѓС‡РµРЅ" РёР»Рё "РѕС‚РјРµРЅРµРЅ"
     if (order.status !== 'pickedup' && order.status !== 'cancelled') {
-      return res.status(400).json({ error: 'Можно скрыть только заказы со статусом "Получен" или "Отменен"' });
+      return res.status(400).json({ error: 'РњРѕР¶РЅРѕ СЃРєСЂС‹С‚СЊ С‚РѕР»СЊРєРѕ Р·Р°РєР°Р·С‹ СЃРѕ СЃС‚Р°С‚СѓСЃРѕРј "РџРѕР»СѓС‡РµРЅ" РёР»Рё "РћС‚РјРµРЅРµРЅ"' });
     }
     
-    // Скрываем заказ (добавляем в скрытые заказы пользователя)
+    // РЎРєСЂС‹РІР°РµРј Р·Р°РєР°Р· (РґРѕР±Р°РІР»СЏРµРј РІ СЃРєСЂС‹С‚С‹Рµ Р·Р°РєР°Р·С‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
     await prisma.userHiddenOrder.create({
       data: {
         userId: req.user.userId,
@@ -2922,21 +2854,21 @@ app.delete('/api/profile/orders/:id', authMiddleware, async (req, res) => {
       }
     });
     
-    res.json({ message: 'Заказ скрыт из списка' });
+    res.json({ message: 'Р—Р°РєР°Р· СЃРєСЂС‹С‚ РёР· СЃРїРёСЃРєР°' });
   } catch (error) {
     console.error('Order hide error:', error);
-    res.status(500).json({ error: 'Ошибка скрытия заказа' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СЃРєСЂС‹С‚РёСЏ Р·Р°РєР°Р·Р°' });
   }
 });
 
-// ВРЕМЕННАЯ МИГРАЦИЯ: переносим imageUrl в imageUrls
+// Р’Р Р•РњР•РќРќРђРЇ РњРР“Р РђР¦РРЇ: РїРµСЂРµРЅРѕСЃРёРј imageUrl РІ imageUrls
 async function migrateImageUrls() {
   try {
-    // Проверяем, существуют ли поля переводов
+    // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓСЋС‚ Р»Рё РїРѕР»СЏ РїРµСЂРµРІРѕРґРѕРІ
     const translationFields = await getTranslationFields();
     
     if (translationFields.length === 0) {
-      console.log('⚠️ Поля переводов еще не созданы. Пропускаем миграцию изображений.');
+      console.log('вљ пёЏ РџРѕР»СЏ РїРµСЂРµРІРѕРґРѕРІ РµС‰Рµ РЅРµ СЃРѕР·РґР°РЅС‹. РџСЂРѕРїСѓСЃРєР°РµРј РјРёРіСЂР°С†РёСЋ РёР·РѕР±СЂР°Р¶РµРЅРёР№.');
       return;
     }
     
@@ -2952,23 +2884,23 @@ async function migrateImageUrls() {
         });
       }
     }
-    console.log('✅ Миграция изображений завершена');
+    console.log('вњ… РњРёРіСЂР°С†РёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№ Р·Р°РІРµСЂС€РµРЅР°');
   } catch (error) {
-    console.error('❌ Ошибка миграции изображений:', error.message);
+    console.error('вќЊ РћС€РёР±РєР° РјРёРіСЂР°С†РёРё РёР·РѕР±СЂР°Р¶РµРЅРёР№:', error.message);
   }
 }
 
-// Запускаем миграцию изображений только после проверки готовности базы
+// Р—Р°РїСѓСЃРєР°РµРј РјРёРіСЂР°С†РёСЋ РёР·РѕР±СЂР°Р¶РµРЅРёР№ С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ РїСЂРѕРІРµСЂРєРё РіРѕС‚РѕРІРЅРѕСЃС‚Рё Р±Р°Р·С‹
 setTimeout(() => {
   migrateImageUrls();
-}, 5000); // Задержка 5 секунд для применения миграций
+}, 5000); // Р—Р°РґРµСЂР¶РєР° 5 СЃРµРєСѓРЅРґ РґР»СЏ РїСЂРёРјРµРЅРµРЅРёСЏ РјРёРіСЂР°С†РёР№
 
-// Эндпоинт для изменения только поля isHidden
+// Р­РЅРґРїРѕРёРЅС‚ РґР»СЏ РёР·РјРµРЅРµРЅРёСЏ С‚РѕР»СЊРєРѕ РїРѕР»СЏ isHidden
 app.patch('/api/products/:id/hidden', authMiddleware, async (req, res) => {
-  // Проверка роли admin
+  // РџСЂРѕРІРµСЂРєР° СЂРѕР»Рё admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   try {
     const { isHidden } = req.body;
@@ -2988,46 +2920,46 @@ app.patch('/api/products/:id/hidden', authMiddleware, async (req, res) => {
 app.put('/api/products/:id', 
   authMiddleware, 
   upload.array('images', 7), 
-  smartImageUploadMiddleware.processUploadedFiles.bind(smartImageUploadMiddleware), 
+  dualStorageUploadMiddleware.processUploadedFiles.bind(dualStorageUploadMiddleware), 
   invalidateCache([CACHE_PATTERNS.PRODUCTS, CACHE_PATTERNS.CATEGORIES, CACHE_PATTERNS.SEARCH]),
   async (req, res) => {
   try {
-    console.log('📝 Обновление товара ID:', req.params.id);
+    console.log('рџ“ќ РћР±РЅРѕРІР»РµРЅРёРµ С‚РѕРІР°СЂР° ID:', req.params.id);
     
-    // Проверка роли admin
+    // РџСЂРѕРІРµСЂРєР° СЂРѕР»Рё admin
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
     
     const { name, description, nameHe, descriptionHe, price, category, subcategory, ageGroup, gender, quantity, article, brand, country, length, width, height, isHidden, removedImages, currentExistingImages, mainImageIndex, availableColors, inputLanguage = 'ru' } = req.body;
     
-    // Парсим цвета если они переданы
+    // РџР°СЂСЃРёРј С†РІРµС‚Р° РµСЃР»Рё РѕРЅРё РїРµСЂРµРґР°РЅС‹
     let colorsData = null;
     if (availableColors) {
       try {
         colorsData = typeof availableColors === 'string' ? JSON.parse(availableColors) : availableColors;
-        console.log('🎨 Parsed availableColors (with indices):', colorsData);
+        console.log('рџЋЁ Parsed availableColors (with indices):', colorsData);
       } catch (e) {
-        console.error('❌ Error parsing availableColors:', e);
+        console.error('вќЊ Error parsing availableColors:', e);
       }
     }
     
-    console.log('📝 Получены данные для обновления:', { name, price, ageGroup, gender, category, subcategory });
+    console.log('рџ“ќ РџРѕР»СѓС‡РµРЅС‹ РґР°РЅРЅС‹Рµ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ:', { name, price, ageGroup, gender, category, subcategory });
     
-    // Получаем текущий товар для сохранения существующих изображений
+    // РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РёР№ С‚РѕРІР°СЂ РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёС… РёР·РѕР±СЂР°Р¶РµРЅРёР№
     const currentProduct = await prisma.product.findUnique({
       where: { id: parseInt(req.params.id) }
     });
     
     if (!currentProduct) {
-      return res.status(404).json({ error: 'Товар не найден' });
+      return res.status(404).json({ error: 'РўРѕРІР°СЂ РЅРµ РЅР°Р№РґРµРЅ' });
     }
     
-    // Обрабатываем изображения
+    // РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
     let imageUrls = currentProduct.imageUrls || [];
     
-    // Если передано текущее состояние существующих изображений, используем его
+    // Р•СЃР»Рё РїРµСЂРµРґР°РЅРѕ С‚РµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёС… РёР·РѕР±СЂР°Р¶РµРЅРёР№, РёСЃРїРѕР»СЊР·СѓРµРј РµРіРѕ
     if (currentExistingImages) {
       try {
         const parsedCurrentImages = JSON.parse(currentExistingImages);
@@ -3037,49 +2969,49 @@ app.put('/api/products/:id',
       }
     }
     
-    // Добавляем новые изображения
-    console.log('🖼️ PUT /api/products/:id - Обработка файлов');
-    console.log('🖼️ PUT /api/products/:id - req.files =', req.files ? req.files.length : 'undefined');
-    console.log('🖼️ PUT /api/products/:id - req.imageUrls =', req.imageUrls);
+    // Р”РѕР±Р°РІР»СЏРµРј РЅРѕРІС‹Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
+    console.log('рџ–јпёЏ PUT /api/products/:id - РћР±СЂР°Р±РѕС‚РєР° С„Р°Р№Р»РѕРІ');
+    console.log('рџ–јпёЏ PUT /api/products/:id - req.files =', req.files ? req.files.length : 'undefined');
+    console.log('рџ–јпёЏ PUT /api/products/:id - req.imageUrls =', req.imageUrls);
     
     if (req.files && req.files.length > 0) {
       const newImageUrls = req.files.map((file, index) => {
-        console.log('🖼️ PUT /api/products/:id - Обработка файла:', file.originalname);
-        console.log('🖼️ PUT /api/products/:id - file.filename =', file.filename);
+        console.log('рџ–јпёЏ PUT /api/products/:id - РћР±СЂР°Р±РѕС‚РєР° С„Р°Р№Р»Р°:', file.originalname);
+        console.log('рџ–јпёЏ PUT /api/products/:id - file.filename =', file.filename);
         
-        // Используем URL из Cloudinary или локальные пути
+        // РСЃРїРѕР»СЊР·СѓРµРј URL РёР· Cloudinary РёР»Рё Р»РѕРєР°Р»СЊРЅС‹Рµ РїСѓС‚Рё
         if (req.imageUrls && req.imageUrls[index]) {
-          // Используем URL из Cloudinary
+          // РСЃРїРѕР»СЊР·СѓРµРј URL РёР· Cloudinary
           const url = req.imageUrls[index];
-          console.log('🖼️ PUT /api/products/:id - Используем Cloudinary URL:', url);
+          console.log('рџ–јпёЏ PUT /api/products/:id - РСЃРїРѕР»СЊР·СѓРµРј Cloudinary URL:', url);
           return url;
         } else if (file.filename) {
-          // Fallback для локальных файлов
+          // Fallback РґР»СЏ Р»РѕРєР°Р»СЊРЅС‹С… С„Р°Р№Р»РѕРІ
           const url = `/uploads/${file.filename}`;
-          console.log('🖼️ PUT /api/products/:id - Используем file.filename:', url);
+          console.log('рџ–јпёЏ PUT /api/products/:id - РСЃРїРѕР»СЊР·СѓРµРј file.filename:', url);
           return url;
         } else {
-          // Fallback для production
+          // Fallback РґР»СЏ production
           const url = `/uploads/${Date.now()}_${file.originalname}`;
-          console.log('🖼️ PUT /api/products/:id - Fallback URL:', url);
+          console.log('рџ–јпёЏ PUT /api/products/:id - Fallback URL:', url);
           return url;
         }
       });
       imageUrls = [...imageUrls, ...newImageUrls];
-      console.log('🖼️ PUT /api/products/:id - Итоговые imageUrls:', imageUrls);
+      console.log('рџ–јпёЏ PUT /api/products/:id - РС‚РѕРіРѕРІС‹Рµ imageUrls:', imageUrls);
     }
     
-    // Переупорядочиваем изображения, если указан главный индекс
+    // РџРµСЂРµСѓРїРѕСЂСЏРґРѕС‡РёРІР°РµРј РёР·РѕР±СЂР°Р¶РµРЅРёСЏ, РµСЃР»Рё СѓРєР°Р·Р°РЅ РіР»Р°РІРЅС‹Р№ РёРЅРґРµРєСЃ
     if (mainImageIndex !== undefined && imageUrls.length > 0) {
       const mainIndex = parseInt(mainImageIndex);
       if (mainIndex >= 0 && mainIndex < imageUrls.length) {
         const mainImage = imageUrls[mainIndex];
-        // Перемещаем главное изображение в начало массива
+        // РџРµСЂРµРјРµС‰Р°РµРј РіР»Р°РІРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РІ РЅР°С‡Р°Р»Рѕ РјР°СЃСЃРёРІР°
         imageUrls = [mainImage, ...imageUrls.filter((_, index) => index !== mainIndex)];
       }
     }
 
-    // Преобразуем imageIndex в реальные imageUrl после загрузки изображений
+    // РџСЂРµРѕР±СЂР°Р·СѓРµРј imageIndex РІ СЂРµР°Р»СЊРЅС‹Рµ imageUrl РїРѕСЃР»Рµ Р·Р°РіСЂСѓР·РєРё РёР·РѕР±СЂР°Р¶РµРЅРёР№
     if (colorsData && Array.isArray(colorsData) && imageUrls.length > 0) {
       colorsData = colorsData.map(colorData => {
         const imageIndex = colorData.imageIndex;
@@ -3094,10 +3026,10 @@ app.put('/api/products/:id',
           imageUrl: null
         };
       });
-      console.log('🎨 Transformed availableColors (with URLs):', colorsData);
+      console.log('рџЋЁ Transformed availableColors (with URLs):', colorsData);
     }
     
-    // Получаем название категории по ID
+    // РџРѕР»СѓС‡Р°РµРј РЅР°Р·РІР°РЅРёРµ РєР°С‚РµРіРѕСЂРёРё РїРѕ ID
     let categoryName = category;
     if (category && !isNaN(category)) {
       const categoryRecord = await prisma.category.findUnique({
@@ -3107,15 +3039,15 @@ app.put('/api/products/:id',
       console.log('API: Category processing - category:', category, 'categoryName:', categoryName);
     }
 
-    // Получаем ID подкатегории
+    // РџРѕР»СѓС‡Р°РµРј ID РїРѕРґРєР°С‚РµРіРѕСЂРёРё
     let subcategoryId = null;
     if (subcategory) {
-      // Если subcategory - это ID, используем его напрямую
+      // Р•СЃР»Рё subcategory - СЌС‚Рѕ ID, РёСЃРїРѕР»СЊР·СѓРµРј РµРіРѕ РЅР°РїСЂСЏРјСѓСЋ
       if (!isNaN(subcategory)) {
         subcategoryId = parseInt(subcategory);
         console.log('API: Subcategory processing - subcategory ID:', subcategoryId);
       } else {
-        // Если subcategory - это название, ищем по названию
+        // Р•СЃР»Рё subcategory - СЌС‚Рѕ РЅР°Р·РІР°РЅРёРµ, РёС‰РµРј РїРѕ РЅР°Р·РІР°РЅРёСЋ
         const subcategoryRecord = await prisma.category.findFirst({
           where: { 
             name: subcategory,
@@ -3130,7 +3062,7 @@ app.put('/api/products/:id',
     console.log('API: Final update data - categoryId:', category && !isNaN(category) ? parseInt(category) : null, 'subcategoryId:', subcategoryId);
     console.log('API: About to update product with include...');
     
-    // Проверяем, существуют ли категории перед обновлением
+    // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓСЋС‚ Р»Рё РєР°С‚РµРіРѕСЂРёРё РїРµСЂРµРґ РѕР±РЅРѕРІР»РµРЅРёРµРј
     if (category && !isNaN(category)) {
       const categoryExists = await prisma.category.findUnique({
         where: { id: parseInt(category) }
@@ -3153,7 +3085,7 @@ app.put('/api/products/:id',
       }
     }
     
-    // Создаем данные товара с поддержкой ручных переводов
+    // РЎРѕР·РґР°РµРј РґР°РЅРЅС‹Рµ С‚РѕРІР°СЂР° СЃ РїРѕРґРґРµСЂР¶РєРѕР№ СЂСѓС‡РЅС‹С… РїРµСЂРµРІРѕРґРѕРІ
     const productData = {
       name,
       description,
@@ -3168,7 +3100,7 @@ app.put('/api/products/:id',
       imageUrls,
       ...(quantity !== undefined ? { quantity: parseInt(quantity) } : {}),
       ...(isHidden !== undefined ? { isHidden: isHidden === 'true' || isHidden === true } : {}),
-      // Дополнительные поля:
+      // Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїРѕР»СЏ:
       article: article || null,
       brand: brand || null,
       country: country || null,
@@ -3178,7 +3110,7 @@ app.put('/api/products/:id',
       ...(colorsData !== null ? { availableColors: colorsData } : {})
     };
 
-    console.log('📝 API: Обновляем товар в БД с данными:', productData);
+    console.log('рџ“ќ API: РћР±РЅРѕРІР»СЏРµРј С‚РѕРІР°СЂ РІ Р‘Р” СЃ РґР°РЅРЅС‹РјРё:', productData);
     
     const updated = await prisma.product.update({
       where: { id: parseInt(req.params.id) },
@@ -3193,7 +3125,7 @@ app.put('/api/products/:id',
       }
     });
     
-    console.log('✅ API: Товар успешно обновлен в БД:', updated);
+    console.log('вњ… API: РўРѕРІР°СЂ СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅ РІ Р‘Р”:', updated);
     
     console.log('API: Product updated successfully:', updated.id);
     console.log('API: Updated product category:', updated.category);
@@ -3201,7 +3133,7 @@ app.put('/api/products/:id',
     console.log('API: Updated product categoryId:', updated.categoryId);
     console.log('API: Updated product subcategoryId:', updated.subcategoryId);
     
-    // Проверяем, существуют ли связанные записи
+    // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓСЋС‚ Р»Рё СЃРІСЏР·Р°РЅРЅС‹Рµ Р·Р°РїРёСЃРё
     if (updated.categoryId) {
       const categoryCheck = await prisma.category.findUnique({
         where: { id: updated.categoryId }
@@ -3216,11 +3148,11 @@ app.put('/api/products/:id',
       console.log('API: Subcategory check result:', subcategoryCheck);
     }
     
-    console.log('✅ Товар успешно обновлен:', updated.id);
+    console.log('вњ… РўРѕРІР°СЂ СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅ:', updated.id);
     res.json(updated);
   } catch (error) {
-    console.error('❌ Ошибка обновления товара:', error);
-    console.error('❌ Детали ошибки:', {
+    console.error('вќЊ РћС€РёР±РєР° РѕР±РЅРѕРІР»РµРЅРёСЏ С‚РѕРІР°СЂР°:', error);
+    console.error('вќЊ Р”РµС‚Р°Р»Рё РѕС€РёР±РєРё:', {
       message: error.message,
       stack: error.stack,
       code: error.code,
@@ -3234,12 +3166,12 @@ app.put('/api/products/:id',
   }
 });
 
-// Удалить изображение товара
+// РЈРґР°Р»РёС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёРµ С‚РѕРІР°СЂР°
 app.delete('/api/products/:id/images/:imageIndex', authMiddleware, async (req, res) => {
-  // Проверка роли admin
+  // РџСЂРѕРІРµСЂРєР° СЂРѕР»Рё admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   
   try {
@@ -3251,15 +3183,15 @@ app.delete('/api/products/:id/images/:imageIndex', authMiddleware, async (req, r
     });
     
     if (!product) {
-      return res.status(404).json({ error: 'Товар не найден' });
+      return res.status(404).json({ error: 'РўРѕРІР°СЂ РЅРµ РЅР°Р№РґРµРЅ' });
     }
     
     const imageUrls = product.imageUrls || [];
     if (imageIndex < 0 || imageIndex >= imageUrls.length) {
-      return res.status(400).json({ error: 'Неверный индекс изображения' });
+      return res.status(400).json({ error: 'РќРµРІРµСЂРЅС‹Р№ РёРЅРґРµРєСЃ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ' });
     }
     
-    // Удаляем изображение из массива
+    // РЈРґР°Р»СЏРµРј РёР·РѕР±СЂР°Р¶РµРЅРёРµ РёР· РјР°СЃСЃРёРІР°
     const updatedImageUrls = imageUrls.filter((_, index) => index !== imageIndex);
     
     const updated = await prisma.product.update({
@@ -3274,14 +3206,14 @@ app.delete('/api/products/:id/images/:imageIndex', authMiddleware, async (req, r
   }
 });
 
-// === API для переводов товаров ===
+// === API РґР»СЏ РїРµСЂРµРІРѕРґРѕРІ С‚РѕРІР°СЂРѕРІ ===
 
-// Автоматический перевод товара
+// РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРёР№ РїРµСЂРµРІРѕРґ С‚РѕРІР°СЂР°
 app.post('/api/products/:id/translate', authMiddleware, async (req, res) => {
-  // Проверка роли admin
+  // РџСЂРѕРІРµСЂРєР° СЂРѕР»Рё admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   
   try {
@@ -3290,21 +3222,21 @@ app.post('/api/products/:id/translate', authMiddleware, async (req, res) => {
     
     res.json({
       success: true,
-      message: 'Товар успешно переведен',
+      message: 'РўРѕРІР°СЂ СѓСЃРїРµС€РЅРѕ РїРµСЂРµРІРµРґРµРЅ',
       product: translatedProduct
     });
   } catch (error) {
     console.error('Error translating product:', error);
-    res.status(500).json({ error: 'Ошибка перевода товара' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРµСЂРµРІРѕРґР° С‚РѕРІР°СЂР°' });
   }
 });
 
-// Автоматический перевод всех товаров
+// РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРёР№ РїРµСЂРµРІРѕРґ РІСЃРµС… С‚РѕРІР°СЂРѕРІ
 app.post('/api/products/translate-all', authMiddleware, async (req, res) => {
-  // Проверка роли admin
+  // РџСЂРѕРІРµСЂРєР° СЂРѕР»Рё admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   
   try {
@@ -3312,16 +3244,16 @@ app.post('/api/products/translate-all', authMiddleware, async (req, res) => {
     
     res.json({
       success: true,
-      message: `Переведено ${translatedCount} товаров`,
+      message: `РџРµСЂРµРІРµРґРµРЅРѕ ${translatedCount} С‚РѕРІР°СЂРѕРІ`,
       translatedCount
     });
   } catch (error) {
     console.error('Error translating all products:', error);
-    res.status(500).json({ error: 'Ошибка перевода товаров' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРµСЂРµРІРѕРґР° С‚РѕРІР°СЂРѕРІ' });
   }
 });
 
-// Получить товары с переводами для указанного языка
+// РџРѕР»СѓС‡РёС‚СЊ С‚РѕРІР°СЂС‹ СЃ РїРµСЂРµРІРѕРґР°РјРё РґР»СЏ СѓРєР°Р·Р°РЅРЅРѕРіРѕ СЏР·С‹РєР°
 app.get('/api/products/with-translations', async (req, res) => {
   try {
     const { language = 'ru' } = req.query;
@@ -3330,27 +3262,27 @@ app.get('/api/products/with-translations', async (req, res) => {
     res.json(products);
   } catch (error) {
     console.error('Error getting products with translations:', error);
-    res.status(500).json({ error: 'Ошибка получения товаров с переводами' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ С‚РѕРІР°СЂРѕРІ СЃ РїРµСЂРµРІРѕРґР°РјРё' });
   }
 });
 
-// Обновить переводы товара вручную
+// РћР±РЅРѕРІРёС‚СЊ РїРµСЂРµРІРѕРґС‹ С‚РѕРІР°СЂР° РІСЂСѓС‡РЅСѓСЋ
 app.put('/api/products/:id/translations', authMiddleware, async (req, res) => {
-  // Проверка роли admin
+  // РџСЂРѕРІРµСЂРєР° СЂРѕР»Рё admin
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   
   try {
     const productId = parseInt(req.params.id);
     const { nameHe, descriptionHe } = req.body;
     
-    // Проверяем доступность полей переводов
+    // РџСЂРѕРІРµСЂСЏРµРј РґРѕСЃС‚СѓРїРЅРѕСЃС‚СЊ РїРѕР»РµР№ РїРµСЂРµРІРѕРґРѕРІ
     const translationFields = await getTranslationFields();
     if (translationFields.length === 0) {
       return res.status(400).json({ 
-        error: 'Поля переводов еще не созданы. Примените миграции базы данных.' 
+        error: 'РџРѕР»СЏ РїРµСЂРµРІРѕРґРѕРІ РµС‰Рµ РЅРµ СЃРѕР·РґР°РЅС‹. РџСЂРёРјРµРЅРёС‚Рµ РјРёРіСЂР°С†РёРё Р±Р°Р·С‹ РґР°РЅРЅС‹С….' 
       });
     }
     
@@ -3362,20 +3294,20 @@ app.put('/api/products/:id/translations', authMiddleware, async (req, res) => {
     
     res.json({
       success: true,
-      message: 'Переводы обновлены',
+      message: 'РџРµСЂРµРІРѕРґС‹ РѕР±РЅРѕРІР»РµРЅС‹',
       product: updatedProduct
     });
   } catch (error) {
     console.error('Error updating product translations:', error);
-    res.status(500).json({ error: 'Ошибка обновления переводов' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РѕР±РЅРѕРІР»РµРЅРёСЏ РїРµСЂРµРІРѕРґРѕРІ' });
   }
 });
 
-// === Admin: получить все заказы ===
+// === Admin: РїРѕР»СѓС‡РёС‚СЊ РІСЃРµ Р·Р°РєР°Р·С‹ ===
 app.get('/api/admin/orders', authMiddleware, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   try {
     const orders = await prisma.order.findMany({
@@ -3386,36 +3318,36 @@ app.get('/api/admin/orders', authMiddleware, async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
     
-    // Добавляем расчет суммы для каждого заказа и обрабатываем гостевые заказы
+    // Р”РѕР±Р°РІР»СЏРµРј СЂР°СЃС‡РµС‚ СЃСѓРјРјС‹ РґР»СЏ РєР°Р¶РґРѕРіРѕ Р·Р°РєР°Р·Р° Рё РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј РіРѕСЃС‚РµРІС‹Рµ Р·Р°РєР°Р·С‹
     const ordersWithTotal = orders.map(order => ({
       ...order,
       total: order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-      // Для гостевых заказов добавляем информацию о госте
+      // Р”Р»СЏ РіРѕСЃС‚РµРІС‹С… Р·Р°РєР°Р·РѕРІ РґРѕР±Р°РІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РіРѕСЃС‚Рµ
       user: order.user || {
-        name: order.guestName || 'Гостевой заказ',
-        email: order.guestEmail || 'Не указано',
-        phone: order.guestPhone || 'Не указано'
+        name: order.guestName || 'Р“РѕСЃС‚РµРІРѕР№ Р·Р°РєР°Р·',
+        email: order.guestEmail || 'РќРµ СѓРєР°Р·Р°РЅРѕ',
+        phone: order.guestPhone || 'РќРµ СѓРєР°Р·Р°РЅРѕ'
       }
     }));
     
     res.json(ordersWithTotal);
   } catch (error) {
     console.error('Admin orders fetch error:', error);
-    res.status(500).json({ error: 'Ошибка получения заказов' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ Р·Р°РєР°Р·РѕРІ' });
   }
 });
 
-// === Admin: изменить статус заказа ===
+// === Admin: РёР·РјРµРЅРёС‚СЊ СЃС‚Р°С‚СѓСЃ Р·Р°РєР°Р·Р° ===
 app.put('/api/admin/orders/:id', authMiddleware, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   try {
     const { status } = req.body;
 
     
-    // Получаем информацию о заказе и пользователе
+    // РџРѕР»СѓС‡Р°РµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ Р·Р°РєР°Р·Рµ Рё РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ
     const order = await prisma.order.findUnique({
       where: { id: parseInt(req.params.id) },
       include: { 
@@ -3433,15 +3365,15 @@ app.put('/api/admin/orders/:id', authMiddleware, async (req, res) => {
       }
     });
     
-    // Уведомления в Telegram отключены - только для новых заказов и новых вопросов
+    // РЈРІРµРґРѕРјР»РµРЅРёСЏ РІ Telegram РѕС‚РєР»СЋС‡РµРЅС‹ - С‚РѕР»СЊРєРѕ РґР»СЏ РЅРѕРІС‹С… Р·Р°РєР°Р·РѕРІ Рё РЅРѕРІС‹С… РІРѕРїСЂРѕСЃРѕРІ
     
-    // В endpoint смены статуса заказа (например, PUT /api/admin/orders/:id):
-    // После успешного обновления статуса на 'delivered':
+    // Р’ endpoint СЃРјРµРЅС‹ СЃС‚Р°С‚СѓСЃР° Р·Р°РєР°Р·Р° (РЅР°РїСЂРёРјРµСЂ, PUT /api/admin/orders/:id):
+    // РџРѕСЃР»Рµ СѓСЃРїРµС€РЅРѕРіРѕ РѕР±РЅРѕРІР»РµРЅРёСЏ СЃС‚Р°С‚СѓСЃР° РЅР° 'delivered':
     
     if (status === 'pickedup') {
       
       try {
-        // Создаем уведомление только если есть userId (не гостевой заказ)
+        // РЎРѕР·РґР°РµРј СѓРІРµРґРѕРјР»РµРЅРёРµ С‚РѕР»СЊРєРѕ РµСЃР»Рё РµСЃС‚СЊ userId (РЅРµ РіРѕСЃС‚РµРІРѕР№ Р·Р°РєР°Р·)
         if (order.userId) {
           const notification = await prisma.notification.create({
             data: {
@@ -3453,13 +3385,13 @@ app.put('/api/admin/orders/:id', authMiddleware, async (req, res) => {
               actionText: 'reviews.notification.actionText'
             }
           });
-          console.log('✅ Уведомление о отзыве создано для заказа:', order.id);
+          console.log('вњ… РЈРІРµРґРѕРјР»РµРЅРёРµ Рѕ РѕС‚Р·С‹РІРµ СЃРѕР·РґР°РЅРѕ РґР»СЏ Р·Р°РєР°Р·Р°:', order.id);
         } else {
-          console.log('ℹ️ Пропускаем создание уведомления для гостевого заказа:', order.id);
+          console.log('в„№пёЏ РџСЂРѕРїСѓСЃРєР°РµРј СЃРѕР·РґР°РЅРёРµ СѓРІРµРґРѕРјР»РµРЅРёСЏ РґР»СЏ РіРѕСЃС‚РµРІРѕРіРѕ Р·Р°РєР°Р·Р°:', order.id);
         }
         
       } catch (error) {
-        console.error('Ошибка создания уведомления:', error);
+        console.error('РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ СѓРІРµРґРѕРјР»РµРЅРёСЏ:', error);
       }
     } else {
       
@@ -3469,15 +3401,15 @@ app.put('/api/admin/orders/:id', authMiddleware, async (req, res) => {
     res.json(updated);
   } catch (error) {
     console.error('Admin order status update error:', error);
-    res.status(500).json({ error: 'Ошибка изменения статуса заказа' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РёР·РјРµРЅРµРЅРёСЏ СЃС‚Р°С‚СѓСЃР° Р·Р°РєР°Р·Р°' });
   }
 });
 
-// === Admin: удалить заказ ===
+// === Admin: СѓРґР°Р»РёС‚СЊ Р·Р°РєР°Р· ===
 app.delete('/api/admin/orders/:id', authMiddleware, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   try {
     const orderId = parseInt(req.params.id);
@@ -3485,7 +3417,7 @@ app.delete('/api/admin/orders/:id', authMiddleware, async (req, res) => {
     console.log('DELETE /api/admin/orders/:id - Starting deletion process');
     console.log('DELETE /api/admin/orders/:id - Order ID:', orderId);
     
-    // Сначала удаляем связанные данные
+    // РЎРЅР°С‡Р°Р»Р° СѓРґР°Р»СЏРµРј СЃРІСЏР·Р°РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ
     try {
       console.log('DELETE /api/admin/orders/:id - Deleting order items...');
       await prisma.orderItem.deleteMany({
@@ -3506,42 +3438,42 @@ app.delete('/api/admin/orders/:id', authMiddleware, async (req, res) => {
       console.error('DELETE /api/admin/orders/:id - Error deleting hidden orders:', hiddenOrdersError);
     }
     
-    // Теперь удаляем сам заказ
+    // РўРµРїРµСЂСЊ СѓРґР°Р»СЏРµРј СЃР°Рј Р·Р°РєР°Р·
     console.log('DELETE /api/admin/orders/:id - Deleting order...');
     await prisma.order.delete({ 
       where: { id: orderId } 
     });
     console.log('DELETE /api/admin/orders/:id - Order deleted successfully');
     
-    res.json({ message: 'Заказ удалён' });
+    res.json({ message: 'Р—Р°РєР°Р· СѓРґР°Р»С‘РЅ' });
   } catch (error) {
     console.error('DELETE /api/admin/orders/:id - Error details:', {
       message: error.message,
       code: error.code,
       meta: error.meta
     });
-    res.status(500).json({ error: 'Ошибка удаления заказа' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ Р·Р°РєР°Р·Р°' });
   }
 });
 
-// --- Магазины ---
+// --- РњР°РіР°Р·РёРЅС‹ ---
 app.get('/api/stores', async (req, res) => {
   try {
     const stores = [
-      { id: 'store1', name: 'חנות קריית ים', address: 'רוברט סולד 8 קריית ים' },
-      { id: 'store2', name: 'חנות קריית מוצקין', address: 'ויצמן 6 קריית מוצקין' }
+      { id: 'store1', name: 'Ч—Ч Ч•ЧЄ Ч§ЧЁЧ™Ч™ЧЄ Ч™Чќ', address: 'ЧЁЧ•Ч‘ЧЁЧ ЧЎЧ•ЧњЧ“ 8 Ч§ЧЁЧ™Ч™ЧЄ Ч™Чќ' },
+      { id: 'store2', name: 'Ч—Ч Ч•ЧЄ Ч§ЧЁЧ™Ч™ЧЄ ЧћЧ•Ч¦Ч§Ч™Чџ', address: 'Ч•Ч™Ч¦ЧћЧџ 6 Ч§ЧЁЧ™Ч™ЧЄ ЧћЧ•Ч¦Ч§Ч™Чџ' }
     ];
     res.json(stores);
   } catch (error) {
     console.error('Error fetching stores:', error);
-    res.status(500).json({ error: 'Ошибка получения списка магазинов' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ СЃРїРёСЃРєР° РјР°РіР°Р·РёРЅРѕРІ' });
   }
 });
 
-// --- Категории ---
+// --- РљР°С‚РµРіРѕСЂРёРё ---
 app.get('/api/categories', cacheMiddleware(300), smartInvalidateCache, async (req, res) => {
   try {
-    // Проверяем, является ли пользователь администратором
+    // РџСЂРѕРІРµСЂСЏРµРј, СЏРІР»СЏРµС‚СЃСЏ Р»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРј
     const token = req.headers.authorization?.split(' ')[1];
     let isAdmin = false;
     
@@ -3551,14 +3483,14 @@ app.get('/api/categories', cacheMiddleware(300), smartInvalidateCache, async (re
         const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
         isAdmin = user?.role === 'admin';
       } catch (e) {
-        // Токен недействителен, но это не критично для получения категорий
+        // РўРѕРєРµРЅ РЅРµРґРµР№СЃС‚РІРёС‚РµР»РµРЅ, РЅРѕ СЌС‚Рѕ РЅРµ РєСЂРёС‚РёС‡РЅРѕ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РєР°С‚РµРіРѕСЂРёР№
       }
     }
     
-    // Если администратор - возвращаем все категории, иначе только активные
+    // Р•СЃР»Рё Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ - РІРѕР·РІСЂР°С‰Р°РµРј РІСЃРµ РєР°С‚РµРіРѕСЂРёРё, РёРЅР°С‡Рµ С‚РѕР»СЊРєРѕ Р°РєС‚РёРІРЅС‹Рµ
     let whereClause = isAdmin ? {} : { active: true };
     
-    // Добавляем фильтрацию по parentId если указан
+    // Р”РѕР±Р°РІР»СЏРµРј С„РёР»СЊС‚СЂР°С†РёСЋ РїРѕ parentId РµСЃР»Рё СѓРєР°Р·Р°РЅ
     if (req.query.parentId) {
       whereClause.parentId = parseInt(req.query.parentId);
     }
@@ -3568,24 +3500,24 @@ app.get('/api/categories', cacheMiddleware(300), smartInvalidateCache, async (re
       orderBy: { order: 'asc' }
     });
 
-    // Функция для получения fallback иконки по названию категории
+    // Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ fallback РёРєРѕРЅРєРё РїРѕ РЅР°Р·РІР°РЅРёСЋ РєР°С‚РµРіРѕСЂРёРё
     const getCategoryIcon = (categoryName) => {
       const iconMap = {
-        'Игрушки': '/toys.png',
-        'Конструкторы': '/constructor.png',
-        'Пазлы': '/puzzle.png',
-        'Творчество': '/creativity.png',
-        'Канцтовары': '/stationery.png',
-        'Транспорт': '/bicycle.png',
-        'Отдых на воде': '/voda.png',
-        'Настольные игры': '/nastolka.png',
-        'Развивающие игры': '/edu_game.png',
-        'Акции': '/sale.png'
+        'РРіСЂСѓС€РєРё': '/toys.png',
+        'РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹': '/constructor.png',
+        'РџР°Р·Р»С‹': '/puzzle.png',
+        'РўРІРѕСЂС‡РµСЃС‚РІРѕ': '/creativity.png',
+        'РљР°РЅС†С‚РѕРІР°СЂС‹': '/stationery.png',
+        'РўСЂР°РЅСЃРїРѕСЂС‚': '/bicycle.png',
+        'РћС‚РґС‹С… РЅР° РІРѕРґРµ': '/voda.png',
+        'РќР°СЃС‚РѕР»СЊРЅС‹Рµ РёРіСЂС‹': '/nastolka.png',
+        'Р Р°Р·РІРёРІР°СЋС‰РёРµ РёРіСЂС‹': '/edu_game.png',
+        'РђРєС†РёРё': '/sale.png'
       };
       return iconMap[categoryName] || '/toys.png';
     };
 
-    // Добавляем fallback иконки для категорий без изображений
+    // Р”РѕР±Р°РІР»СЏРµРј fallback РёРєРѕРЅРєРё РґР»СЏ РєР°С‚РµРіРѕСЂРёР№ Р±РµР· РёР·РѕР±СЂР°Р¶РµРЅРёР№
     const categoriesWithIcons = categories.map(category => ({
       ...category,
       image: category.image || getCategoryIcon(category.name)
@@ -3593,50 +3525,50 @@ app.get('/api/categories', cacheMiddleware(300), smartInvalidateCache, async (re
 
     res.json(categoriesWithIcons);
   } catch (e) {
-    res.status(500).json({ error: 'Ошибка получения категорий' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РєР°С‚РµРіРѕСЂРёР№' });
   }
 });
 
-// Получить палитру цветов для товаров
+// РџРѕР»СѓС‡РёС‚СЊ РїР°Р»РёС‚СЂСѓ С†РІРµС‚РѕРІ РґР»СЏ С‚РѕРІР°СЂРѕРІ
 app.get('/api/color-palette', (req, res) => {
   try {
     res.json(COLOR_PALETTE);
   } catch (error) {
     console.error('Error getting color palette:', error);
-    res.status(500).json({ error: 'Ошибка получения палитры цветов' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РїР°Р»РёС‚СЂС‹ С†РІРµС‚РѕРІ' });
   }
 });
 
-// Получить все категории (включая отключенные) для администраторов
+// РџРѕР»СѓС‡РёС‚СЊ РІСЃРµ РєР°С‚РµРіРѕСЂРёРё (РІРєР»СЋС‡Р°СЏ РѕС‚РєР»СЋС‡РµРЅРЅС‹Рµ) РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ
 app.get('/api/admin/categories', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
     
     const categories = await prisma.category.findMany({
       orderBy: { order: 'asc' }
     });
 
-    // Функция для получения fallback иконки по названию категории
+    // Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ fallback РёРєРѕРЅРєРё РїРѕ РЅР°Р·РІР°РЅРёСЋ РєР°С‚РµРіРѕСЂРёРё
     const getCategoryIcon = (categoryName) => {
       const iconMap = {
-        'Игрушки': '/toys.png',
-        'Конструкторы': '/constructor.png',
-        'Пазлы': '/puzzle.png',
-        'Творчество': '/creativity.png',
-        'Канцтовары': '/stationery.png',
-        'Транспорт': '/bicycle.png',
-        'Отдых на воде': '/voda.png',
-        'Настольные игры': '/nastolka.png',
-        'Развивающие игры': '/edu_game.png',
-        'Акции': '/sale.png'
+        'РРіСЂСѓС€РєРё': '/toys.png',
+        'РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹': '/constructor.png',
+        'РџР°Р·Р»С‹': '/puzzle.png',
+        'РўРІРѕСЂС‡РµСЃС‚РІРѕ': '/creativity.png',
+        'РљР°РЅС†С‚РѕРІР°СЂС‹': '/stationery.png',
+        'РўСЂР°РЅСЃРїРѕСЂС‚': '/bicycle.png',
+        'РћС‚РґС‹С… РЅР° РІРѕРґРµ': '/voda.png',
+        'РќР°СЃС‚РѕР»СЊРЅС‹Рµ РёРіСЂС‹': '/nastolka.png',
+        'Р Р°Р·РІРёРІР°СЋС‰РёРµ РёРіСЂС‹': '/edu_game.png',
+        'РђРєС†РёРё': '/sale.png'
       };
       return iconMap[categoryName] || '/toys.png';
     };
 
-    // Добавляем fallback иконки для категорий без изображений
+    // Р”РѕР±Р°РІР»СЏРµРј fallback РёРєРѕРЅРєРё РґР»СЏ РєР°С‚РµРіРѕСЂРёР№ Р±РµР· РёР·РѕР±СЂР°Р¶РµРЅРёР№
     const categoriesWithIcons = categories.map(category => ({
       ...category,
       image: category.image || getCategoryIcon(category.name)
@@ -3644,7 +3576,7 @@ app.get('/api/admin/categories', authMiddleware, async (req, res) => {
 
     res.json(categoriesWithIcons);
   } catch (e) {
-    res.status(500).json({ error: 'Ошибка получения категорий' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РєР°С‚РµРіРѕСЂРёР№' });
   }
 });
 
@@ -3652,37 +3584,37 @@ app.patch('/api/categories/:id/toggle', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
     
     const id = Number(req.params.id);
-    console.log('API: Toggle категории ID:', id);
+    console.log('API: Toggle РєР°С‚РµРіРѕСЂРёРё ID:', id);
     
     const category = await prisma.category.findUnique({ where: { id } });
     if (!category) {
-      console.log('API: Категория не найдена ID:', id);
-      return res.status(404).json({ error: 'Категория не найдена' });
+      console.log('API: РљР°С‚РµРіРѕСЂРёСЏ РЅРµ РЅР°Р№РґРµРЅР° ID:', id);
+      return res.status(404).json({ error: 'РљР°С‚РµРіРѕСЂРёСЏ РЅРµ РЅР°Р№РґРµРЅР°' });
     }
     
-    console.log('API: Текущее состояние категории:', category.name, 'active:', category.active);
+    console.log('API: РўРµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ РєР°С‚РµРіРѕСЂРёРё:', category.name, 'active:', category.active);
     const newActiveState = !category.active;
-    console.log('API: Новое состояние active:', newActiveState);
+    console.log('API: РќРѕРІРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ active:', newActiveState);
     
     const updated = await prisma.category.update({
       where: { id },
       data: { active: newActiveState }
     });
     
-    console.log('API: Категория обновлена:', updated.name, 'active:', updated.active);
+    console.log('API: РљР°С‚РµРіРѕСЂРёСЏ РѕР±РЅРѕРІР»РµРЅР°:', updated.name, 'active:', updated.active);
     
-    // Проверяем, что обновление действительно произошло
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РѕР±РЅРѕРІР»РµРЅРёРµ РґРµР№СЃС‚РІРёС‚РµР»СЊРЅРѕ РїСЂРѕРёР·РѕС€Р»Рѕ
     const verification = await prisma.category.findUnique({ where: { id } });
-    console.log('API: Проверка после обновления:', verification.name, 'active:', verification.active);
+    console.log('API: РџСЂРѕРІРµСЂРєР° РїРѕСЃР»Рµ РѕР±РЅРѕРІР»РµРЅРёСЏ:', verification.name, 'active:', verification.active);
     
     res.json(updated);
   } catch (e) {
-    console.error('API: Ошибка toggle категории:', e);
-    res.status(500).json({ error: 'Ошибка обновления категории' });
+    console.error('API: РћС€РёР±РєР° toggle РєР°С‚РµРіРѕСЂРёРё:', e);
+    res.status(500).json({ error: 'РћС€РёР±РєР° РѕР±РЅРѕРІР»РµРЅРёСЏ РєР°С‚РµРіРѕСЂРёРё' });
   }
 });
 
@@ -3690,10 +3622,10 @@ app.get('/api/categories/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
     const category = await prisma.category.findUnique({ where: { id } });
-    if (!category) return res.status(404).json({ error: 'Категория не найдена' });
+    if (!category) return res.status(404).json({ error: 'РљР°С‚РµРіРѕСЂРёСЏ РЅРµ РЅР°Р№РґРµРЅР°' });
     res.json(category);
   } catch (e) {
-    res.status(500).json({ error: 'Ошибка получения категории' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РєР°С‚РµРіРѕСЂРёРё' });
   }
 });
 
@@ -3701,18 +3633,18 @@ app.delete('/api/categories/:id', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
     
     const id = Number(req.params.id);
     await prisma.category.delete({ where: { id } });
     res.json({ success: true });
   } catch (e) {
-    res.status(500).json({ error: 'Ошибка удаления категории' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РєР°С‚РµРіРѕСЂРёРё' });
   }
 });
 
-// Обновление порядка категорий
+// РћР±РЅРѕРІР»РµРЅРёРµ РїРѕСЂСЏРґРєР° РєР°С‚РµРіРѕСЂРёР№
 app.put('/api/categories/reorder', authMiddleware, async (req, res) => {
   try {
 
@@ -3720,20 +3652,20 @@ app.put('/api/categories/reorder', authMiddleware, async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
 
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
     
-    const { categoryIds } = req.body; // массив ID категорий в новом порядке
+    const { categoryIds } = req.body; // РјР°СЃСЃРёРІ ID РєР°С‚РµРіРѕСЂРёР№ РІ РЅРѕРІРѕРј РїРѕСЂСЏРґРєРµ
     
     
     if (!Array.isArray(categoryIds)) {
       
-      return res.status(400).json({ error: 'categoryIds должен быть массивом' });
+      return res.status(400).json({ error: 'categoryIds РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РјР°СЃСЃРёРІРѕРј' });
     }
     
     
     
-    // Обновляем порядок категорий
+    // РћР±РЅРѕРІР»СЏРµРј РїРѕСЂСЏРґРѕРє РєР°С‚РµРіРѕСЂРёР№
     for (let i = 0; i < categoryIds.length; i++) {
       const categoryId = Number(categoryIds[i]);
       
@@ -3745,25 +3677,25 @@ app.put('/api/categories/reorder', authMiddleware, async (req, res) => {
     }
     
     
-    res.json({ success: true, message: 'Порядок категорий обновлен' });
+    res.json({ success: true, message: 'РџРѕСЂСЏРґРѕРє РєР°С‚РµРіРѕСЂРёР№ РѕР±РЅРѕРІР»РµРЅ' });
   } catch (e) {
-    console.error('Ошибка обновления порядка категорий:', e);
-    res.status(500).json({ error: 'Ошибка обновления порядка категорий' });
+    console.error('РћС€РёР±РєР° РѕР±РЅРѕРІР»РµРЅРёСЏ РїРѕСЂСЏРґРєР° РєР°С‚РµРіРѕСЂРёР№:', e);
+    res.status(500).json({ error: 'РћС€РёР±РєР° РѕР±РЅРѕРІР»РµРЅРёСЏ РїРѕСЂСЏРґРєР° РєР°С‚РµРіРѕСЂРёР№' });
   }
 });
 
 app.put('/api/categories/:id', authMiddleware, upload.single('image'), productionUploadMiddleware.processSingleImage.bind(productionUploadMiddleware), async (req, res) => {
   try {
-    console.log('🚀🚀🚀 PUT /api/categories/:id - Начало обработки запроса');
-    console.log('📥 req.body:', req.body);
-    console.log('📁 req.file:', req.file);
-    console.log('🖼️ req.processedFile:', req.processedFile);
-    console.log('🔗 req.imageUrl:', req.imageUrl);
+    console.log('рџљЂрџљЂрџљЂ PUT /api/categories/:id - РќР°С‡Р°Р»Рѕ РѕР±СЂР°Р±РѕС‚РєРё Р·Р°РїСЂРѕСЃР°');
+    console.log('рџ“Ґ req.body:', req.body);
+    console.log('рџ“Ѓ req.file:', req.file);
+    console.log('рџ–јпёЏ req.processedFile:', req.processedFile);
+    console.log('рџ”— req.imageUrl:', req.imageUrl);
     
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
-      console.log('❌ Доступ запрещён: пользователь не админ');
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      console.log('вќЊ Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ Р°РґРјРёРЅ');
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
     
     const id = Number(req.params.id);
@@ -3776,27 +3708,27 @@ app.put('/api/categories/:id', authMiddleware, upload.single('image'), productio
       data.parentId = null;
     }
     
-    // Если загружено новое изображение, добавляем его в данные
+    // Р•СЃР»Рё Р·Р°РіСЂСѓР¶РµРЅРѕ РЅРѕРІРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ, РґРѕР±Р°РІР»СЏРµРј РµРіРѕ РІ РґР°РЅРЅС‹Рµ
     if (req.file) {
       data.image = req.file.filename;
-      console.log('✅ API: Обновление изображения категории:', req.file.filename);
+      console.log('вњ… API: РћР±РЅРѕРІР»РµРЅРёРµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РєР°С‚РµРіРѕСЂРёРё:', req.file.filename);
     } else {
-      console.log('⚠️ API: Нет нового изображения для обновления');
+      console.log('вљ пёЏ API: РќРµС‚ РЅРѕРІРѕРіРѕ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ');
     }
     
-    console.log('📝 API: Обновление категории ID:', id, 'Данные:', data);
+    console.log('рџ“ќ API: РћР±РЅРѕРІР»РµРЅРёРµ РєР°С‚РµРіРѕСЂРёРё ID:', id, 'Р”Р°РЅРЅС‹Рµ:', data);
     
     const updated = await prisma.category.update({ where: { id }, data });
-    console.log('✅ API: Категория обновлена в БД:', updated);
+    console.log('вњ… API: РљР°С‚РµРіРѕСЂРёСЏ РѕР±РЅРѕРІР»РµРЅР° РІ Р‘Р”:', updated);
     
-    // Проверяем, что данные действительно сохранились
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РґР°РЅРЅС‹Рµ РґРµР№СЃС‚РІРёС‚РµР»СЊРЅРѕ СЃРѕС…СЂР°РЅРёР»РёСЃСЊ
     const verification = await prisma.category.findUnique({ where: { id } });
-    console.log('🔍 API: Проверка после обновления:', verification);
+    console.log('рџ”Ќ API: РџСЂРѕРІРµСЂРєР° РїРѕСЃР»Рµ РѕР±РЅРѕРІР»РµРЅРёСЏ:', verification);
     
     res.json(updated);
   } catch (e) {
-    console.error('❌ API: Ошибка редактирования категории:', e);
-    res.status(500).json({ error: 'Ошибка редактирования категории' });
+    console.error('вќЊ API: РћС€РёР±РєР° СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ РєР°С‚РµРіРѕСЂРёРё:', e);
+    res.status(500).json({ error: 'РћС€РёР±РєР° СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ РєР°С‚РµРіРѕСЂРёРё' });
   }
 });
 
@@ -3804,7 +3736,7 @@ app.post('/api/categories', authMiddleware, upload.single('image'), productionUp
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
     const { name, parentId } = req.body;
     const data = { name };
@@ -3812,12 +3744,12 @@ app.post('/api/categories', authMiddleware, upload.single('image'), productionUp
       data.parentId = Number(parentId);
     }
     
-    // Если загружено изображение, добавляем его в данные
+    // Р•СЃР»Рё Р·Р°РіСЂСѓР¶РµРЅРѕ РёР·РѕР±СЂР°Р¶РµРЅРёРµ, РґРѕР±Р°РІР»СЏРµРј РµРіРѕ РІ РґР°РЅРЅС‹Рµ
     if (req.file) {
       data.image = req.file.filename;
     }
     
-    // Находим максимальный порядок для категорий того же уровня
+    // РќР°С…РѕРґРёРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ РїРѕСЂСЏРґРѕРє РґР»СЏ РєР°С‚РµРіРѕСЂРёР№ С‚РѕРіРѕ Р¶Рµ СѓСЂРѕРІРЅСЏ
     const maxOrder = await prisma.category.findFirst({
       where: { parentId: data.parentId || null },
       orderBy: { order: 'desc' },
@@ -3830,7 +3762,7 @@ app.post('/api/categories', authMiddleware, upload.single('image'), productionUp
     const category = await prisma.category.create({ data });
     res.json(category);
   } catch (e) {
-    res.status(500).json({ error: 'Ошибка создания категории' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ РєР°С‚РµРіРѕСЂРёРё' });
   }
 });
 
@@ -3838,23 +3770,23 @@ app.patch('/api/categories/:id/image', authMiddleware, upload.single('image'), p
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
     
     const id = Number(req.params.id);
-    if (!req.file) return res.status(400).json({ error: 'Нет файла' });
+    if (!req.file) return res.status(400).json({ error: 'РќРµС‚ С„Р°Р№Р»Р°' });
     const updated = await prisma.category.update({
       where: { id },
       data: { image: req.file.filename }
     });
     res.json(updated);
   } catch (e) {
-    console.error('API: Ошибка загрузки изображения категории:', e);
-    res.status(500).json({ error: 'Ошибка загрузки изображения категории' });
+    console.error('API: РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РєР°С‚РµРіРѕСЂРёРё:', e);
+    res.status(500).json({ error: 'РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РєР°С‚РµРіРѕСЂРёРё' });
   }
 });
 
-// Получить отзывы по товару (только published)
+// РџРѕР»СѓС‡РёС‚СЊ РѕС‚Р·С‹РІС‹ РїРѕ С‚РѕРІР°СЂСѓ (С‚РѕР»СЊРєРѕ published)
 app.get('/api/products/:id/reviews', async (req, res) => {
   try {
     const reviews = await prisma.review.findMany({
@@ -3869,13 +3801,13 @@ app.get('/api/products/:id/reviews', async (req, res) => {
   }
 });
 
-// Оставить отзыв (только если пользователь заказывал этот товар)
+// РћСЃС‚Р°РІРёС‚СЊ РѕС‚Р·С‹РІ (С‚РѕР»СЊРєРѕ РµСЃР»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ Р·Р°РєР°Р·С‹РІР°Р» СЌС‚РѕС‚ С‚РѕРІР°СЂ)
 app.post('/api/products/:id/reviews', authMiddleware, async (req, res) => {
   try {
     const { rating, text } = req.body;
     const productId = parseInt(req.params.id);
     const userId = req.user.userId;
-    // Проверяем, был ли заказ этого товара этим пользователем
+    // РџСЂРѕРІРµСЂСЏРµРј, Р±С‹Р» Р»Рё Р·Р°РєР°Р· СЌС‚РѕРіРѕ С‚РѕРІР°СЂР° СЌС‚РёРј РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј
     const orderWithProduct = await prisma.order.findFirst({
       where: {
         userId,
@@ -3883,12 +3815,12 @@ app.post('/api/products/:id/reviews', authMiddleware, async (req, res) => {
       }
     });
     if (!orderWithProduct) {
-      return res.status(403).json({ error: 'Вы можете оставить отзыв только после покупки этого товара.' });
+      return res.status(403).json({ error: 'Р’С‹ РјРѕР¶РµС‚Рµ РѕСЃС‚Р°РІРёС‚СЊ РѕС‚Р·С‹РІ С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ РїРѕРєСѓРїРєРё СЌС‚РѕРіРѕ С‚РѕРІР°СЂР°.' });
     }
-    // Проверяем, не оставлял ли уже отзыв
+    // РџСЂРѕРІРµСЂСЏРµРј, РЅРµ РѕСЃС‚Р°РІР»СЏР» Р»Рё СѓР¶Рµ РѕС‚Р·С‹РІ
     const existing = await prisma.review.findFirst({ where: { productId, userId } });
     if (existing) {
-      return res.status(400).json({ error: 'Вы уже оставили отзыв на этот товар.' });
+      return res.status(400).json({ error: 'Р’С‹ СѓР¶Рµ РѕСЃС‚Р°РІРёР»Рё РѕС‚Р·С‹РІ РЅР° СЌС‚РѕС‚ С‚РѕРІР°СЂ.' });
     }
     const review = await prisma.review.create({
       data: { productId, userId, rating, text, status: 'pending' }
@@ -3900,11 +3832,11 @@ app.post('/api/products/:id/reviews', authMiddleware, async (req, res) => {
   }
 });
 
-// Получить все отзывы (для админа, с фильтрацией по статусу)
+// РџРѕР»СѓС‡РёС‚СЊ РІСЃРµ РѕС‚Р·С‹РІС‹ (РґР»СЏ Р°РґРјРёРЅР°, СЃ С„РёР»СЊС‚СЂР°С†РёРµР№ РїРѕ СЃС‚Р°С‚СѓСЃСѓ)
 app.get('/api/admin/reviews', authMiddleware, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   try {
     const { status } = req.query;
@@ -3920,16 +3852,16 @@ app.get('/api/admin/reviews', authMiddleware, async (req, res) => {
   }
 });
 
-// Модерация отзыва (published/rejected)
+// РњРѕРґРµСЂР°С†РёСЏ РѕС‚Р·С‹РІР° (published/rejected)
 app.put('/api/admin/reviews/:id', authMiddleware, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   try {
-    const { status } = req.body; // 'published' или 'rejected'
+    const { status } = req.body; // 'published' РёР»Рё 'rejected'
     if (!['published', 'rejected'].includes(status)) {
-      return res.status(400).json({ error: 'Некорректный статус' });
+      return res.status(400).json({ error: 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ СЃС‚Р°С‚СѓСЃ' });
     }
     const review = await prisma.review.update({
       where: { id: parseInt(req.params.id) },
@@ -3942,7 +3874,7 @@ app.put('/api/admin/reviews/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// === Получить избранное пользователя ===
+// === РџРѕР»СѓС‡РёС‚СЊ РёР·Р±СЂР°РЅРЅРѕРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ ===
 app.get('/api/profile/wishlist', authMiddleware, async (req, res) => {
   try {
     let wishlist = await prisma.wishlist.findUnique({
@@ -3956,59 +3888,59 @@ app.get('/api/profile/wishlist', authMiddleware, async (req, res) => {
     res.json(wishlist);
   } catch (error) {
     console.error('Wishlist fetch error:', error);
-    res.status(500).json({ error: 'Ошибка получения избранного' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РёР·Р±СЂР°РЅРЅРѕРіРѕ' });
   }
 });
 
-// === Добавить товар в избранное ===
+// === Р”РѕР±Р°РІРёС‚СЊ С‚РѕРІР°СЂ РІ РёР·Р±СЂР°РЅРЅРѕРµ ===
 app.post('/api/profile/wishlist/add', authMiddleware, async (req, res) => {
   try {
     const { productId } = req.body;
-    if (!productId) return res.status(400).json({ error: 'productId обязателен' });
+    if (!productId) return res.status(400).json({ error: 'productId РѕР±СЏР·Р°С‚РµР»РµРЅ' });
     let wishlist = await prisma.wishlist.findUnique({ where: { userId: req.user.userId } });
     if (!wishlist) {
       wishlist = await prisma.wishlist.create({ data: { userId: req.user.userId } });
     }
     const existing = await prisma.wishlistItem.findFirst({ where: { wishlistId: wishlist.id, productId } });
-    if (existing) return res.status(400).json({ error: 'Товар уже в избранном' });
+    if (existing) return res.status(400).json({ error: 'РўРѕРІР°СЂ СѓР¶Рµ РІ РёР·Р±СЂР°РЅРЅРѕРј' });
     await prisma.wishlistItem.create({ data: { wishlistId: wishlist.id, productId } });
     const updated = await prisma.wishlist.findUnique({ where: { id: wishlist.id }, include: { items: { include: { product: true } } } });
     res.json(updated);
   } catch (error) {
     console.error('Wishlist add error:', error);
-    res.status(500).json({ error: 'Ошибка добавления в избранное' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РґРѕР±Р°РІР»РµРЅРёСЏ РІ РёР·Р±СЂР°РЅРЅРѕРµ' });
   }
 });
 
-// === Удалить товар из избранного ===
+// === РЈРґР°Р»РёС‚СЊ С‚РѕРІР°СЂ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ ===
 app.post('/api/profile/wishlist/remove', authMiddleware, async (req, res) => {
   try {
     const { productId } = req.body;
-    if (!productId) return res.status(400).json({ error: 'productId обязателен' });
+    if (!productId) return res.status(400).json({ error: 'productId РѕР±СЏР·Р°С‚РµР»РµРЅ' });
     let wishlist = await prisma.wishlist.findUnique({ where: { userId: req.user.userId } });
-    if (!wishlist) return res.status(404).json({ error: 'Избранное не найдено' });
+    if (!wishlist) return res.status(404).json({ error: 'РР·Р±СЂР°РЅРЅРѕРµ РЅРµ РЅР°Р№РґРµРЅРѕ' });
     await prisma.wishlistItem.deleteMany({ where: { wishlistId: wishlist.id, productId } });
     const updated = await prisma.wishlist.findUnique({ where: { id: wishlist.id }, include: { items: { include: { product: true } } } });
     res.json(updated);
   } catch (error) {
     console.error('Wishlist remove error:', error);
-    res.status(500).json({ error: 'Ошибка удаления из избранного' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ' });
   }
 });
 
-// === Очистить весь список избранного ===
+// === РћС‡РёСЃС‚РёС‚СЊ РІРµСЃСЊ СЃРїРёСЃРѕРє РёР·Р±СЂР°РЅРЅРѕРіРѕ ===
 app.post('/api/profile/wishlist/clear', authMiddleware, async (req, res) => {
   try {
     let wishlist = await prisma.wishlist.findUnique({ where: { userId: req.user.userId } });
     if (!wishlist) {
-      // Если wishlist не существует, создаем пустой
+      // Р•СЃР»Рё wishlist РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚, СЃРѕР·РґР°РµРј РїСѓСЃС‚РѕР№
       wishlist = await prisma.wishlist.create({ data: { userId: req.user.userId } });
     } else {
-      // Удаляем все товары из wishlist
+      // РЈРґР°Р»СЏРµРј РІСЃРµ С‚РѕРІР°СЂС‹ РёР· wishlist
       await prisma.wishlistItem.deleteMany({ where: { wishlistId: wishlist.id } });
     }
     
-    // Возвращаем пустой wishlist
+    // Р’РѕР·РІСЂР°С‰Р°РµРј РїСѓСЃС‚РѕР№ wishlist
     const updated = await prisma.wishlist.findUnique({ 
       where: { id: wishlist.id }, 
       include: { items: { include: { product: true } } } 
@@ -4016,67 +3948,67 @@ app.post('/api/profile/wishlist/clear', authMiddleware, async (req, res) => {
     res.json(updated);
   } catch (error) {
     console.error('Wishlist clear error:', error);
-    res.status(500).json({ error: 'Ошибка очистки избранного' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РѕС‡РёСЃС‚РєРё РёР·Р±СЂР°РЅРЅРѕРіРѕ' });
   }
 });
 
-// === Смена пароля ===
+// === РЎРјРµРЅР° РїР°СЂРѕР»СЏ ===
 app.post('/api/auth/change-password', authMiddleware, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     
     if (!newPassword) {
-      return res.status(400).json({ error: 'Новый пароль обязателен' });
+      return res.status(400).json({ error: 'РќРѕРІС‹Р№ РїР°СЂРѕР»СЊ РѕР±СЏР·Р°С‚РµР»РµРЅ' });
     }
     
     if (newPassword.length < 6) {
-      return res.status(400).json({ error: 'Новый пароль должен содержать минимум 6 символов' });
+      return res.status(400).json({ error: 'РќРѕРІС‹Р№ РїР°СЂРѕР»СЊ РґРѕР»Р¶РµРЅ СЃРѕРґРµСЂР¶Р°С‚СЊ РјРёРЅРёРјСѓРј 6 СЃРёРјРІРѕР»РѕРІ' });
     }
     
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user) {
-      return res.status(404).json({ error: 'Пользователь не найден' });
+      return res.status(404).json({ error: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ' });
     }
     
-    // Проверяем, есть ли у пользователя пароль (не OAuth пользователь)
+    // РџСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё Сѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РїР°СЂРѕР»СЊ (РЅРµ OAuth РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ)
     if (user.passwordHash) {
-      // Пользователь с паролем - проверяем текущий пароль
+      // РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ РїР°СЂРѕР»РµРј - РїСЂРѕРІРµСЂСЏРµРј С‚РµРєСѓС‰РёР№ РїР°СЂРѕР»СЊ
       if (!currentPassword) {
-        return res.status(400).json({ error: 'Текущий пароль обязателен для пользователей с паролем' });
+        return res.status(400).json({ error: 'РўРµРєСѓС‰РёР№ РїР°СЂРѕР»СЊ РѕР±СЏР·Р°С‚РµР»РµРЅ РґР»СЏ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ СЃ РїР°СЂРѕР»РµРј' });
       }
       
       const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
       if (!isCurrentPasswordValid) {
-        return res.status(400).json({ error: 'Неверный текущий пароль' });
+        return res.status(400).json({ error: 'РќРµРІРµСЂРЅС‹Р№ С‚РµРєСѓС‰РёР№ РїР°СЂРѕР»СЊ' });
       }
     } else {
-      // OAuth пользователь (Google/Facebook) - не проверяем текущий пароль
+      // OAuth РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ (Google/Facebook) - РЅРµ РїСЂРѕРІРµСЂСЏРµРј С‚РµРєСѓС‰РёР№ РїР°СЂРѕР»СЊ
       if (currentPassword) {
-        return res.status(400).json({ error: 'Для пользователей с OAuth текущий пароль не требуется' });
+        return res.status(400).json({ error: 'Р”Р»СЏ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ СЃ OAuth С‚РµРєСѓС‰РёР№ РїР°СЂРѕР»СЊ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ' });
       }
     }
     
-    // Хешируем новый пароль
+    // РҐРµС€РёСЂСѓРµРј РЅРѕРІС‹Р№ РїР°СЂРѕР»СЊ
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
     
-    // Обновляем пароль
+    // РћР±РЅРѕРІР»СЏРµРј РїР°СЂРѕР»СЊ
     await prisma.user.update({
       where: { id: user.id },
       data: { passwordHash: newPasswordHash }
     });
     
-    res.json({ message: 'Пароль успешно изменен' });
+    res.json({ message: 'РџР°СЂРѕР»СЊ СѓСЃРїРµС€РЅРѕ РёР·РјРµРЅРµРЅ' });
   } catch (error) {
     console.error('Password change error:', error);
-    res.status(500).json({ error: 'Ошибка смены пароля' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СЃРјРµРЅС‹ РїР°СЂРѕР»СЏ' });
   }
 });
 
-// === Admin: получить всех пользователей ===
+// === Admin: РїРѕР»СѓС‡РёС‚СЊ РІСЃРµС… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ ===
 app.get('/api/admin/users', authMiddleware, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   try {
     const users = await prisma.user.findMany({
@@ -4085,33 +4017,33 @@ app.get('/api/admin/users', authMiddleware, async (req, res) => {
     res.json(users);
   } catch (error) {
     console.error('Admin users fetch error:', error);
-    res.status(500).json({ error: 'Ошибка получения пользователей' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№' });
   }
 });
 
-// === Admin: удалить пользователя ===
+// === Admin: СѓРґР°Р»РёС‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ ===
 app.delete('/api/admin/users/:id', authMiddleware, async (req, res) => {
   const admin = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!admin || admin.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   const userId = parseInt(req.params.id);
   if (userId === admin.id) {
-    return res.status(400).json({ error: 'Нельзя удалить самого себя' });
+    return res.status(400).json({ error: 'РќРµР»СЊР·СЏ СѓРґР°Р»РёС‚СЊ СЃР°РјРѕРіРѕ СЃРµР±СЏ' });
   }
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {
-    return res.status(404).json({ error: 'Пользователь не найден' });
+    return res.status(404).json({ error: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ' });
   }
   if (user.role === 'admin') {
-    return res.status(400).json({ error: 'Нельзя удалить другого администратора' });
+    return res.status(400).json({ error: 'РќРµР»СЊР·СЏ СѓРґР°Р»РёС‚СЊ РґСЂСѓРіРѕРіРѕ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   try {
-    console.log(`🗑️ Admin: Starting deletion of user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Starting deletion of user ${userId}`);
     
-    // Удаляем все связанные записи в правильном порядке
+    // РЈРґР°Р»СЏРµРј РІСЃРµ СЃРІСЏР·Р°РЅРЅС‹Рµ Р·Р°РїРёСЃРё РІ РїСЂР°РІРёР»СЊРЅРѕРј РїРѕСЂСЏРґРєРµ
     
-    // 1. Удаляем элементы корзины
+    // 1. РЈРґР°Р»СЏРµРј СЌР»РµРјРµРЅС‚С‹ РєРѕСЂР·РёРЅС‹
     await prisma.cartItem.deleteMany({
       where: {
         cart: {
@@ -4119,13 +4051,13 @@ app.delete('/api/admin/users/:id', authMiddleware, async (req, res) => {
         }
       }
     });
-    console.log(`🗑️ Admin: Deleted cart items for user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Deleted cart items for user ${userId}`);
     
-    // 2. Удаляем корзину
+    // 2. РЈРґР°Р»СЏРµРј РєРѕСЂР·РёРЅСѓ
     await prisma.cart.deleteMany({ where: { userId: userId } });
-    console.log(`🗑️ Admin: Deleted cart for user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Deleted cart for user ${userId}`);
     
-    // 3. Удаляем элементы wishlist
+    // 3. РЈРґР°Р»СЏРµРј СЌР»РµРјРµРЅС‚С‹ wishlist
     await prisma.wishlistItem.deleteMany({
       where: {
         wishlist: {
@@ -4133,79 +4065,79 @@ app.delete('/api/admin/users/:id', authMiddleware, async (req, res) => {
         }
       }
     });
-    console.log(`🗑️ Admin: Deleted wishlist items for user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Deleted wishlist items for user ${userId}`);
     
-    // 4. Удаляем wishlist
+    // 4. РЈРґР°Р»СЏРµРј wishlist
     await prisma.wishlist.deleteMany({ where: { userId: userId } });
-    console.log(`🗑️ Admin: Deleted wishlist for user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Deleted wishlist for user ${userId}`);
     
-    // 5. Удаляем скрытые отзывы (HiddenReview)
+    // 5. РЈРґР°Р»СЏРµРј СЃРєСЂС‹С‚С‹Рµ РѕС‚Р·С‹РІС‹ (HiddenReview)
     await prisma.hiddenReview.deleteMany({ where: { userId: userId } });
-    console.log(`🗑️ Admin: Deleted hidden reviews for user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Deleted hidden reviews for user ${userId}`);
     
-    // 6. Удаляем скрытые отзывы о магазине (HiddenShopReview)
+    // 6. РЈРґР°Р»СЏРµРј СЃРєСЂС‹С‚С‹Рµ РѕС‚Р·С‹РІС‹ Рѕ РјР°РіР°Р·РёРЅРµ (HiddenShopReview)
     await prisma.hiddenShopReview.deleteMany({ where: { userId: userId } });
-    console.log(`🗑️ Admin: Deleted hidden shop reviews for user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Deleted hidden shop reviews for user ${userId}`);
     
-    // 7. Удаляем скрытые заказы (UserHiddenOrder)
+    // 7. РЈРґР°Р»СЏРµРј СЃРєСЂС‹С‚С‹Рµ Р·Р°РєР°Р·С‹ (UserHiddenOrder)
     await prisma.userHiddenOrder.deleteMany({ where: { userId: userId } });
-    console.log(`🗑️ Admin: Deleted hidden orders for user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Deleted hidden orders for user ${userId}`);
     
-    // 8. Удаляем отзывы о товарах
+    // 8. РЈРґР°Р»СЏРµРј РѕС‚Р·С‹РІС‹ Рѕ С‚РѕРІР°СЂР°С…
     await prisma.review.deleteMany({ where: { userId: userId } });
-    console.log(`🗑️ Admin: Deleted product reviews for user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Deleted product reviews for user ${userId}`);
     
-    // 9. Удаляем вопросы о товарах
+    // 9. РЈРґР°Р»СЏРµРј РІРѕРїСЂРѕСЃС‹ Рѕ С‚РѕРІР°СЂР°С…
     await prisma.productQuestion.deleteMany({ where: { userId: userId } });
-    console.log(`🗑️ Admin: Deleted product questions for user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Deleted product questions for user ${userId}`);
     
-    // 10. Удаляем отзывы о магазине
+    // 10. РЈРґР°Р»СЏРµРј РѕС‚Р·С‹РІС‹ Рѕ РјР°РіР°Р·РёРЅРµ
     await prisma.shopReview.deleteMany({ where: { userId: userId } });
-    console.log(`🗑️ Admin: Deleted shop reviews for user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Deleted shop reviews for user ${userId}`);
     
-    // 11. Удаляем уведомления
+    // 11. РЈРґР°Р»СЏРµРј СѓРІРµРґРѕРјР»РµРЅРёСЏ
     await prisma.notification.deleteMany({ where: { userId: userId } });
-    console.log(`🗑️ Admin: Deleted notifications for user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Deleted notifications for user ${userId}`);
     
-    // 12. Обнуляем userId в заказах (заказы оставляем для истории)
+    // 12. РћР±РЅСѓР»СЏРµРј userId РІ Р·Р°РєР°Р·Р°С… (Р·Р°РєР°Р·С‹ РѕСЃС‚Р°РІР»СЏРµРј РґР»СЏ РёСЃС‚РѕСЂРёРё)
     await prisma.order.updateMany({
       where: { userId: userId },
       data: { userId: null }
     });
-    console.log(`🗑️ Admin: Nullified userId in orders for user ${userId}`);
+    console.log(`рџ—‘пёЏ Admin: Nullified userId in orders for user ${userId}`);
     
-    // 13. Наконец, удаляем самого пользователя
+    // 13. РќР°РєРѕРЅРµС†, СѓРґР°Р»СЏРµРј СЃР°РјРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     await prisma.user.delete({ where: { id: userId } });
-    console.log(`✅ Admin: Successfully deleted user ${userId}`);
+    console.log(`вњ… Admin: Successfully deleted user ${userId}`);
     
-    res.json({ message: 'Пользователь удалён' });
+    res.json({ message: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СѓРґР°Р»С‘РЅ' });
   } catch (error) {
-    console.error('❌ Admin user delete error:', error);
-    res.status(500).json({ error: 'Ошибка удаления пользователя: ' + error.message });
+    console.error('вќЊ Admin user delete error:', error);
+    res.status(500).json({ error: 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ: ' + error.message });
   }
 });
 
-// === Admin: отправить уведомление пользователю ===
+// === Admin: РѕС‚РїСЂР°РІРёС‚СЊ СѓРІРµРґРѕРјР»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ ===
 app.post('/api/admin/users/:id/notify', authMiddleware, async (req, res) => {
   const admin = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!admin || admin.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   const userId = parseInt(req.params.id);
   const { message } = req.body;
   if (!message || typeof message !== 'string' || !message.trim()) {
-    return res.status(400).json({ error: 'Текст уведомления обязателен' });
+    return res.status(400).json({ error: 'РўРµРєСЃС‚ СѓРІРµРґРѕРјР»РµРЅРёСЏ РѕР±СЏР·Р°С‚РµР»РµРЅ' });
   }
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {
-    return res.status(404).json({ error: 'Пользователь не найден' });
+    return res.status(404).json({ error: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ' });
   }
-  // Создаём уведомление в базе
+  // РЎРѕР·РґР°С‘Рј СѓРІРµРґРѕРјР»РµРЅРёРµ РІ Р±Р°Р·Рµ
   await prisma.notification.create({
     data: {
       userId: user.id,
       type: 'admin',
-      title: 'Сообщение от администратора',
+      title: 'РЎРѕРѕР±С‰РµРЅРёРµ РѕС‚ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°',
       message: message,
       isRead: false
     }
@@ -4213,7 +4145,7 @@ app.post('/api/admin/users/:id/notify', authMiddleware, async (req, res) => {
   res.json({ success: true });
 });
 
-// === Получить уведомления пользователя ===
+// === РџРѕР»СѓС‡РёС‚СЊ СѓРІРµРґРѕРјР»РµРЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ ===
 app.get('/api/profile/notifications', authMiddleware, async (req, res) => {
   try {
     const notifications = await prisma.notification.findMany({
@@ -4222,12 +4154,12 @@ app.get('/api/profile/notifications', authMiddleware, async (req, res) => {
     });
     res.json(notifications);
   } catch (error) {
-    console.error('Ошибка получения уведомлений:', error);
-    res.status(500).json({ error: 'Ошибка получения уведомлений' });
+    console.error('РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ СѓРІРµРґРѕРјР»РµРЅРёР№:', error);
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ СѓРІРµРґРѕРјР»РµРЅРёР№' });
   }
 });
 
-// === Получить количество непрочитанных уведомлений пользователя ===
+// === РџРѕР»СѓС‡РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹С… СѓРІРµРґРѕРјР»РµРЅРёР№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ ===
 app.get('/api/profile/notifications/unread-count', authMiddleware, async (req, res) => {
   try {
     const count = await prisma.notification.count({
@@ -4238,42 +4170,42 @@ app.get('/api/profile/notifications/unread-count', authMiddleware, async (req, r
     });
     res.json({ count });
   } catch (error) {
-    console.error('Ошибка получения количества непрочитанных уведомлений:', error);
-    res.status(500).json({ error: 'Ошибка получения количества непрочитанных уведомлений' });
+    console.error('РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РєРѕР»РёС‡РµСЃС‚РІР° РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹С… СѓРІРµРґРѕРјР»РµРЅРёР№:', error);
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РєРѕР»РёС‡РµСЃС‚РІР° РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹С… СѓРІРµРґРѕРјР»РµРЅРёР№' });
   }
 });
 
-// === Удалить одно уведомление пользователя ===
+// === РЈРґР°Р»РёС‚СЊ РѕРґРЅРѕ СѓРІРµРґРѕРјР»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ ===
 app.delete('/api/profile/notifications/:id', authMiddleware, async (req, res) => {
   try {
     const notificationId = parseInt(req.params.id);
     if (isNaN(notificationId)) {
-      return res.status(400).json({ error: 'Некорректный id уведомления' });
+      return res.status(400).json({ error: 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ id СѓРІРµРґРѕРјР»РµРЅРёСЏ' });
     }
-    // Удаляем только если уведомление принадлежит пользователю
+    // РЈРґР°Р»СЏРµРј С‚РѕР»СЊРєРѕ РµСЃР»Рё СѓРІРµРґРѕРјР»РµРЅРёРµ РїСЂРёРЅР°РґР»РµР¶РёС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ
     const deleted = await prisma.notification.deleteMany({
       where: { id: notificationId, userId: req.user.userId }
     });
     if (deleted.count === 0) {
-      return res.status(404).json({ error: 'Уведомление не найдено' });
+      return res.status(404).json({ error: 'РЈРІРµРґРѕРјР»РµРЅРёРµ РЅРµ РЅР°Р№РґРµРЅРѕ' });
     }
     res.json({ success: true });
   } catch (error) {
-    console.error('Ошибка удаления уведомления:', error);
-    res.status(500).json({ error: 'Ошибка удаления уведомления' });
+    console.error('РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ СѓРІРµРґРѕРјР»РµРЅРёСЏ:', error);
+    res.status(500).json({ error: 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ СѓРІРµРґРѕРјР»РµРЅРёСЏ' });
   }
 });
 
-// === Удалить все уведомления пользователя ===
+// === РЈРґР°Р»РёС‚СЊ РІСЃРµ СѓРІРµРґРѕРјР»РµРЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ ===
 app.delete('/api/profile/notifications', authMiddleware, async (req, res) => {
   try {
     await prisma.notification.deleteMany({
       where: { userId: req.user.userId }
     });
-    res.json({ message: 'Все уведомления удалены' });
+    res.json({ message: 'Р’СЃРµ СѓРІРµРґРѕРјР»РµРЅРёСЏ СѓРґР°Р»РµРЅС‹' });
   } catch (error) {
     console.error('Error deleting all notifications:', error);
-    res.status(500).json({ error: 'Ошибка удаления уведомлений' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ СѓРІРµРґРѕРјР»РµРЅРёР№' });
   }
 });
 
@@ -4287,7 +4219,7 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-// POST /api/reviews/shop — создать отзыв о магазине
+// POST /api/reviews/shop вЂ” СЃРѕР·РґР°С‚СЊ РѕС‚Р·С‹РІ Рѕ РјР°РіР°Р·РёРЅРµ
 app.post('/api/reviews/shop', authMiddleware, async (req, res) => {
   try {
     const { orderId, rating, text } = req.body;
@@ -4295,31 +4227,31 @@ app.post('/api/reviews/shop', authMiddleware, async (req, res) => {
     
     if (!orderId || !rating) {
       console.log('Missing required fields:', { orderId, rating });
-      return res.status(400).json({ error: 'orderId и rating обязательны' });
+      return res.status(400).json({ error: 'orderId Рё rating РѕР±СЏР·Р°С‚РµР»СЊРЅС‹' });
     }
     
-    // Преобразуем типы
+    // РџСЂРµРѕР±СЂР°Р·СѓРµРј С‚РёРїС‹
     const parsedOrderId = parseInt(orderId);
     const parsedRating = parseInt(rating);
     
     console.log('Parsed values:', { parsedOrderId, parsedRating });
     
-    // Проверяем, что пользователь действительно делал этот заказ
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РґРµР№СЃС‚РІРёС‚РµР»СЊРЅРѕ РґРµР»Р°Р» СЌС‚РѕС‚ Р·Р°РєР°Р·
     const order = await prisma.order.findUnique({ where: { id: parsedOrderId } });
     console.log('Order found:', order ? { id: order.id, userId: order.userId } : null);
     
     if (!order || order.userId !== req.user.userId) {
       console.log('Access denied: order not found or user mismatch');
-      return res.status(403).json({ error: 'Нет доступа к заказу' });
+      return res.status(403).json({ error: 'РќРµС‚ РґРѕСЃС‚СѓРїР° Рє Р·Р°РєР°Р·Сѓ' });
     }
     
-    // Проверяем, что отзыв по этому заказу ещё не оставлен
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РѕС‚Р·С‹РІ РїРѕ СЌС‚РѕРјСѓ Р·Р°РєР°Р·Сѓ РµС‰С‘ РЅРµ РѕСЃС‚Р°РІР»РµРЅ
     const existing = await prisma.shopReview.findFirst({ where: { orderId: parsedOrderId, userId: req.user.userId } });
     console.log('Existing shop review check:', existing ? { id: existing.id } : 'No existing review');
     
     if (existing) {
       console.log('Shop review already exists');
-      return res.status(400).json({ error: 'Отзыв по этому заказу уже оставлен' });
+      return res.status(400).json({ error: 'РћС‚Р·С‹РІ РїРѕ СЌС‚РѕРјСѓ Р·Р°РєР°Р·Сѓ СѓР¶Рµ РѕСЃС‚Р°РІР»РµРЅ' });
     }
     
     const review = await prisma.shopReview.create({
@@ -4336,11 +4268,11 @@ app.post('/api/reviews/shop', authMiddleware, async (req, res) => {
     res.json(review);
   } catch (error) {
     console.error('Error creating shop review:', error);
-    res.status(500).json({ error: 'Ошибка создания отзыва о магазине' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ РѕС‚Р·С‹РІР° Рѕ РјР°РіР°Р·РёРЅРµ' });
   }
 });
 
-// GET /api/reviews/shop/published — получить только опубликованные отзывы о магазине
+// GET /api/reviews/shop/published вЂ” РїРѕР»СѓС‡РёС‚СЊ С‚РѕР»СЊРєРѕ РѕРїСѓР±Р»РёРєРѕРІР°РЅРЅС‹Рµ РѕС‚Р·С‹РІС‹ Рѕ РјР°РіР°Р·РёРЅРµ
 app.get('/api/reviews/shop/published', async (req, res) => {
   try {
     const reviews = await prisma.shopReview.findMany({
@@ -4351,15 +4283,15 @@ app.get('/api/reviews/shop/published', async (req, res) => {
 
     res.json(reviews);
   } catch (error) {
-    console.error('API: Ошибка получения опубликованных отзывов о магазине:', error);
-    res.status(500).json({ error: 'Ошибка получения отзывов о магазине' });
+    console.error('API: РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕРїСѓР±Р»РёРєРѕРІР°РЅРЅС‹С… РѕС‚Р·С‹РІРѕРІ Рѕ РјР°РіР°Р·РёРЅРµ:', error);
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚Р·С‹РІРѕРІ Рѕ РјР°РіР°Р·РёРЅРµ' });
   }
 });
 
-// GET /api/reviews/shop — получить все отзывы о магазине (для модерации)
+// GET /api/reviews/shop вЂ” РїРѕР»СѓС‡РёС‚СЊ РІСЃРµ РѕС‚Р·С‹РІС‹ Рѕ РјР°РіР°Р·РёРЅРµ (РґР»СЏ РјРѕРґРµСЂР°С†РёРё)
 app.get('/api/reviews/shop', async (req, res) => {
   try {
-    // Проверяем, является ли пользователь админом
+    // РџСЂРѕРІРµСЂСЏРµРј, СЏРІР»СЏРµС‚СЃСЏ Р»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ Р°РґРјРёРЅРѕРј
     const token = req.headers.authorization?.split(' ')[1];
     let isAdmin = false;
     
@@ -4383,12 +4315,12 @@ app.get('/api/reviews/shop', async (req, res) => {
 
     res.json(reviews);
   } catch (error) {
-    console.error('API: Ошибка получения отзывов о магазине:', error);
-    res.status(500).json({ error: 'Ошибка получения отзывов о магазине' });
+    console.error('API: РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚Р·С‹РІРѕРІ Рѕ РјР°РіР°Р·РёРЅРµ:', error);
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚Р·С‹РІРѕРІ Рѕ РјР°РіР°Р·РёРЅРµ' });
   }
 });
 
-// PUT /api/admin/reviews/shop/:id — модерация отзыва о магазине
+// PUT /api/admin/reviews/shop/:id вЂ” РјРѕРґРµСЂР°С†РёСЏ РѕС‚Р·С‹РІР° Рѕ РјР°РіР°Р·РёРЅРµ
 app.put('/api/admin/reviews/shop/:id', authMiddleware, async (req, res) => {
   try {
     console.log('Shop review moderation request:', { 
@@ -4399,12 +4331,12 @@ app.put('/api/admin/reviews/shop/:id', authMiddleware, async (req, res) => {
       userRole: req.user.role 
     });
     
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Нет доступа' });
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'РќРµС‚ РґРѕСЃС‚СѓРїР°' });
     const { status } = req.body;
     console.log('Validating shop review status:', status, 'Valid statuses:', ['published', 'rejected', 'pending', 'hidden']);
     if (!['published', 'rejected', 'pending', 'hidden'].includes(status)) {
       console.log('Invalid shop review status:', status);
-      return res.status(400).json({ error: 'Некорректный статус' });
+      return res.status(400).json({ error: 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ СЃС‚Р°С‚СѓСЃ' });
     }
     
     const review = await prisma.shopReview.update({
@@ -4416,24 +4348,24 @@ app.put('/api/admin/reviews/shop/:id', authMiddleware, async (req, res) => {
     res.json(review);
   } catch (error) {
     console.error('Error updating shop review:', error);
-    res.status(500).json({ error: 'Ошибка модерации отзыва о магазине' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РјРѕРґРµСЂР°С†РёРё РѕС‚Р·С‹РІР° Рѕ РјР°РіР°Р·РёРЅРµ' });
   }
 });
 
-// DELETE /api/admin/reviews/shop/:id — удаление отзыва о магазине
+// DELETE /api/admin/reviews/shop/:id вЂ” СѓРґР°Р»РµРЅРёРµ РѕС‚Р·С‹РІР° Рѕ РјР°РіР°Р·РёРЅРµ
 app.delete('/api/admin/reviews/shop/:id', authMiddleware, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Нет доступа' });
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'РќРµС‚ РґРѕСЃС‚СѓРїР°' });
     await prisma.shopReview.delete({
       where: { id: parseInt(req.params.id) }
     });
-    res.json({ message: 'Отзыв о магазине удален' });
+    res.json({ message: 'РћС‚Р·С‹РІ Рѕ РјР°РіР°Р·РёРЅРµ СѓРґР°Р»РµРЅ' });
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка удаления отзыва о магазине' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РѕС‚Р·С‹РІР° Рѕ РјР°РіР°Р·РёРЅРµ' });
   }
 });
 
-// POST /api/reviews/product — создать отзыв о товаре
+// POST /api/reviews/product вЂ” СЃРѕР·РґР°С‚СЊ РѕС‚Р·С‹РІ Рѕ С‚РѕРІР°СЂРµ
 app.post('/api/reviews/product', authMiddleware, async (req, res) => {
   try {
     const { orderId, productId, rating, text } = req.body;
@@ -4441,17 +4373,17 @@ app.post('/api/reviews/product', authMiddleware, async (req, res) => {
     
     if (!orderId || !productId || !rating) {
       console.log('Missing required fields:', { orderId, productId, rating });
-      return res.status(400).json({ error: 'orderId, productId и rating обязательны' });
+      return res.status(400).json({ error: 'orderId, productId Рё rating РѕР±СЏР·Р°С‚РµР»СЊРЅС‹' });
     }
     
-    // Преобразуем типы
+    // РџСЂРµРѕР±СЂР°Р·СѓРµРј С‚РёРїС‹
     const parsedOrderId = parseInt(orderId);
     const parsedProductId = parseInt(productId);
     const parsedRating = parseInt(rating);
     
     console.log('Parsed values:', { parsedOrderId, parsedProductId, parsedRating });
     
-    // Проверяем, что пользователь действительно заказывал этот товар
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РґРµР№СЃС‚РІРёС‚РµР»СЊРЅРѕ Р·Р°РєР°Р·С‹РІР°Р» СЌС‚РѕС‚ С‚РѕРІР°СЂ
     const order = await prisma.order.findUnique({
       where: { id: parsedOrderId },
       include: { items: true }
@@ -4461,7 +4393,7 @@ app.post('/api/reviews/product', authMiddleware, async (req, res) => {
     
     if (!order || order.userId !== req.user.userId) {
       console.log('Access denied: order not found or user mismatch');
-      return res.status(403).json({ error: 'Нет доступа к заказу' });
+      return res.status(403).json({ error: 'РќРµС‚ РґРѕСЃС‚СѓРїР° Рє Р·Р°РєР°Р·Сѓ' });
     }
     
     const hasProduct = order.items.some(item => item.productId === parsedProductId);
@@ -4469,10 +4401,10 @@ app.post('/api/reviews/product', authMiddleware, async (req, res) => {
     
     if (!hasProduct) {
       console.log('Product not found in order');
-      return res.status(400).json({ error: 'Товар не найден в заказе' });
+      return res.status(400).json({ error: 'РўРѕРІР°СЂ РЅРµ РЅР°Р№РґРµРЅ РІ Р·Р°РєР°Р·Рµ' });
     }
     
-    // Проверяем, что отзыв по этому товару и заказу ещё не оставлен
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РѕС‚Р·С‹РІ РїРѕ СЌС‚РѕРјСѓ С‚РѕРІР°СЂСѓ Рё Р·Р°РєР°Р·Сѓ РµС‰С‘ РЅРµ РѕСЃС‚Р°РІР»РµРЅ
     const existing = await prisma.review.findFirst({ 
       where: { orderId: parsedOrderId, productId: parsedProductId, userId: req.user.userId } 
     });
@@ -4481,7 +4413,7 @@ app.post('/api/reviews/product', authMiddleware, async (req, res) => {
     
     if (existing) {
       console.log('Review already exists');
-      return res.status(400).json({ error: 'Отзыв по этому товару уже оставлен' });
+      return res.status(400).json({ error: 'РћС‚Р·С‹РІ РїРѕ СЌС‚РѕРјСѓ С‚РѕРІР°СЂСѓ СѓР¶Рµ РѕСЃС‚Р°РІР»РµРЅ' });
     }
     
     const review = await prisma.review.create({
@@ -4499,11 +4431,11 @@ app.post('/api/reviews/product', authMiddleware, async (req, res) => {
     res.json(review);
   } catch (error) {
     console.error('Error creating product review:', error);
-    res.status(500).json({ error: 'Ошибка создания отзыва о товаре' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ РѕС‚Р·С‹РІР° Рѕ С‚РѕРІР°СЂРµ' });
   }
 });
 
-// GET /api/reviews/product/:productId — получить все опубликованные отзывы о товаре
+// GET /api/reviews/product/:productId вЂ” РїРѕР»СѓС‡РёС‚СЊ РІСЃРµ РѕРїСѓР±Р»РёРєРѕРІР°РЅРЅС‹Рµ РѕС‚Р·С‹РІС‹ Рѕ С‚РѕРІР°СЂРµ
 app.get('/api/reviews/product/:productId', async (req, res) => {
   try {
     const productId = parseInt(req.params.productId);
@@ -4514,25 +4446,25 @@ app.get('/api/reviews/product/:productId', async (req, res) => {
     });
     res.json(reviews);
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка получения отзывов о товаре' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚Р·С‹РІРѕРІ Рѕ С‚РѕРІР°СЂРµ' });
   }
 });
 
-// GET /api/admin/reviews/product — получить все отзывы о товарах для CMS
+// GET /api/admin/reviews/product вЂ” РїРѕР»СѓС‡РёС‚СЊ РІСЃРµ РѕС‚Р·С‹РІС‹ Рѕ С‚РѕРІР°СЂР°С… РґР»СЏ CMS
 app.get('/api/admin/reviews/product', authMiddleware, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Нет доступа' });
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'РќРµС‚ РґРѕСЃС‚СѓРїР°' });
     const reviews = await prisma.review.findMany({
       orderBy: { createdAt: 'desc' },
       include: { user: { select: { name: true, surname: true, email: true } }, product: { select: { name: true } } }
     });
     res.json(reviews);
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка получения отзывов о товарах' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚Р·С‹РІРѕРІ Рѕ С‚РѕРІР°СЂР°С…' });
   }
 });
 
-// PUT /api/admin/reviews/product/:id — модерация отзыва о товаре
+// PUT /api/admin/reviews/product/:id вЂ” РјРѕРґРµСЂР°С†РёСЏ РѕС‚Р·С‹РІР° Рѕ С‚РѕРІР°СЂРµ
 app.put('/api/admin/reviews/product/:id', authMiddleware, async (req, res) => {
   try {
     console.log('Product review moderation request:', { 
@@ -4543,12 +4475,12 @@ app.put('/api/admin/reviews/product/:id', authMiddleware, async (req, res) => {
       userRole: req.user.role 
     });
     
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Нет доступа' });
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'РќРµС‚ РґРѕСЃС‚СѓРїР°' });
     const { status } = req.body;
     console.log('Validating product review status:', status, 'Valid statuses:', ['published', 'rejected', 'pending', 'hidden']);
     if (!['published', 'rejected', 'pending', 'hidden'].includes(status)) {
       console.log('Invalid product review status:', status);
-      return res.status(400).json({ error: 'Некорректный статус' });
+      return res.status(400).json({ error: 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ СЃС‚Р°С‚СѓСЃ' });
     }
     
     const review = await prisma.review.update({
@@ -4560,30 +4492,30 @@ app.put('/api/admin/reviews/product/:id', authMiddleware, async (req, res) => {
     res.json(review);
   } catch (error) {
     console.error('Error updating product review:', error);
-    res.status(500).json({ error: 'Ошибка модерации отзыва о товаре' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РјРѕРґРµСЂР°С†РёРё РѕС‚Р·С‹РІР° Рѕ С‚РѕРІР°СЂРµ' });
   }
 });
 
-// DELETE /api/admin/reviews/product/:id — удаление отзыва о товаре
+// DELETE /api/admin/reviews/product/:id вЂ” СѓРґР°Р»РµРЅРёРµ РѕС‚Р·С‹РІР° Рѕ С‚РѕРІР°СЂРµ
 app.delete('/api/admin/reviews/product/:id', authMiddleware, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Нет доступа' });
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'РќРµС‚ РґРѕСЃС‚СѓРїР°' });
     await prisma.review.delete({
       where: { id: parseInt(req.params.id) }
     });
-    res.json({ message: 'Отзыв о товаре удален' });
+    res.json({ message: 'РћС‚Р·С‹РІ Рѕ С‚РѕРІР°СЂРµ СѓРґР°Р»РµРЅ' });
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка удаления отзыва о товаре' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РѕС‚Р·С‹РІР° Рѕ С‚РѕРІР°СЂРµ' });
   }
 });
 
-// GET /api/profile/reviews/shop — получить все отзывы пользователя о магазине (исключая скрытые)
+// GET /api/profile/reviews/shop вЂ” РїРѕР»СѓС‡РёС‚СЊ РІСЃРµ РѕС‚Р·С‹РІС‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ Рѕ РјР°РіР°Р·РёРЅРµ (РёСЃРєР»СЋС‡Р°СЏ СЃРєСЂС‹С‚С‹Рµ)
 app.get('/api/profile/reviews/shop', authMiddleware, async (req, res) => {
   try {
     const reviews = await prisma.shopReview.findMany({
       where: { 
         userId: req.user.userId,
-        // Исключаем скрытые отзывы о магазине
+        // РСЃРєР»СЋС‡Р°РµРј СЃРєСЂС‹С‚С‹Рµ РѕС‚Р·С‹РІС‹ Рѕ РјР°РіР°Р·РёРЅРµ
         NOT: {
           hiddenBy: {
             some: {
@@ -4596,18 +4528,18 @@ app.get('/api/profile/reviews/shop', authMiddleware, async (req, res) => {
     });
     res.json(reviews);
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка получения отзывов о магазине' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚Р·С‹РІРѕРІ Рѕ РјР°РіР°Р·РёРЅРµ' });
   }
 });
 
-// GET /api/profile/reviews/product — получить все отзывы пользователя о товарах (исключая скрытые)
+// GET /api/profile/reviews/product вЂ” РїРѕР»СѓС‡РёС‚СЊ РІСЃРµ РѕС‚Р·С‹РІС‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ Рѕ С‚РѕРІР°СЂР°С… (РёСЃРєР»СЋС‡Р°СЏ СЃРєСЂС‹С‚С‹Рµ)
 app.get('/api/profile/reviews/product', authMiddleware, async (req, res) => {
   try {
     const reviews = await prisma.review.findMany({
       where: { 
         userId: req.user.userId,
-        // Показываем все отзывы пользователя (не только опубликованные)
-        // Исключаем скрытые отзывы
+        // РџРѕРєР°Р·С‹РІР°РµРј РІСЃРµ РѕС‚Р·С‹РІС‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ (РЅРµ С‚РѕР»СЊРєРѕ РѕРїСѓР±Р»РёРєРѕРІР°РЅРЅС‹Рµ)
+        // РСЃРєР»СЋС‡Р°РµРј СЃРєСЂС‹С‚С‹Рµ РѕС‚Р·С‹РІС‹
         NOT: {
           hiddenBy: {
             some: {
@@ -4621,16 +4553,16 @@ app.get('/api/profile/reviews/product', authMiddleware, async (req, res) => {
     });
     res.json(reviews);
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка получения отзывов о товарах' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚Р·С‹РІРѕРІ Рѕ С‚РѕРІР°СЂР°С…' });
   }
 });
 
-// POST /api/profile/reviews/product/:id/hide — скрыть отзыв из списка пользователя
+// POST /api/profile/reviews/product/:id/hide вЂ” СЃРєСЂС‹С‚СЊ РѕС‚Р·С‹РІ РёР· СЃРїРёСЃРєР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 app.post('/api/profile/reviews/product/:id/hide', authMiddleware, async (req, res) => {
   try {
     const reviewId = parseInt(req.params.id);
     
-    // Проверяем, что отзыв принадлежит пользователю
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РѕС‚Р·С‹РІ РїСЂРёРЅР°РґР»РµР¶РёС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ
     const review = await prisma.review.findFirst({
       where: {
         id: reviewId,
@@ -4639,10 +4571,10 @@ app.post('/api/profile/reviews/product/:id/hide', authMiddleware, async (req, re
     });
     
     if (!review) {
-      return res.status(404).json({ error: 'Отзыв не найден' });
+      return res.status(404).json({ error: 'РћС‚Р·С‹РІ РЅРµ РЅР°Р№РґРµРЅ' });
     }
     
-    // Создаем запись о скрытом отзыве
+    // РЎРѕР·РґР°РµРј Р·Р°РїРёСЃСЊ Рѕ СЃРєСЂС‹С‚РѕРј РѕС‚Р·С‹РІРµ
     await prisma.hiddenReview.create({
       data: {
         userId: req.user.userId,
@@ -4650,23 +4582,23 @@ app.post('/api/profile/reviews/product/:id/hide', authMiddleware, async (req, re
       }
     });
     
-    res.json({ message: 'Отзыв скрыт из списка' });
+    res.json({ message: 'РћС‚Р·С‹РІ СЃРєСЂС‹С‚ РёР· СЃРїРёСЃРєР°' });
   } catch (error) {
     if (error.code === 'P2002') {
-      // Отзыв уже скрыт
-      res.json({ message: 'Отзыв уже скрыт' });
+      // РћС‚Р·С‹РІ СѓР¶Рµ СЃРєСЂС‹С‚
+      res.json({ message: 'РћС‚Р·С‹РІ СѓР¶Рµ СЃРєСЂС‹С‚' });
     } else {
-      res.status(500).json({ error: 'Ошибка скрытия отзыва' });
+      res.status(500).json({ error: 'РћС€РёР±РєР° СЃРєСЂС‹С‚РёСЏ РѕС‚Р·С‹РІР°' });
     }
   }
 });
 
-// DELETE /api/profile/reviews/product/:id/hide — показать отзыв в списке пользователя
+// DELETE /api/profile/reviews/product/:id/hide вЂ” РїРѕРєР°Р·Р°С‚СЊ РѕС‚Р·С‹РІ РІ СЃРїРёСЃРєРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 app.delete('/api/profile/reviews/product/:id/hide', authMiddleware, async (req, res) => {
   try {
     const reviewId = parseInt(req.params.id);
     
-    // Удаляем запись о скрытом отзыве
+    // РЈРґР°Р»СЏРµРј Р·Р°РїРёСЃСЊ Рѕ СЃРєСЂС‹С‚РѕРј РѕС‚Р·С‹РІРµ
     await prisma.hiddenReview.deleteMany({
       where: {
         userId: req.user.userId,
@@ -4674,18 +4606,18 @@ app.delete('/api/profile/reviews/product/:id/hide', authMiddleware, async (req, 
       }
     });
     
-    res.json({ message: 'Отзыв показан в списке' });
+    res.json({ message: 'РћС‚Р·С‹РІ РїРѕРєР°Р·Р°РЅ РІ СЃРїРёСЃРєРµ' });
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка показа отзыва' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕРєР°Р·Р° РѕС‚Р·С‹РІР°' });
   }
 });
 
-// POST /api/profile/reviews/shop/:id/hide — скрыть отзыв о магазине из списка пользователя
+// POST /api/profile/reviews/shop/:id/hide вЂ” СЃРєСЂС‹С‚СЊ РѕС‚Р·С‹РІ Рѕ РјР°РіР°Р·РёРЅРµ РёР· СЃРїРёСЃРєР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 app.post('/api/profile/reviews/shop/:id/hide', authMiddleware, async (req, res) => {
   try {
     const reviewId = parseInt(req.params.id);
     
-    // Проверяем, что отзыв принадлежит пользователю
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РѕС‚Р·С‹РІ РїСЂРёРЅР°РґР»РµР¶РёС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ
     const review = await prisma.shopReview.findFirst({
       where: {
         id: reviewId,
@@ -4694,10 +4626,10 @@ app.post('/api/profile/reviews/shop/:id/hide', authMiddleware, async (req, res) 
     });
     
     if (!review) {
-      return res.status(404).json({ error: 'Отзыв не найден' });
+      return res.status(404).json({ error: 'РћС‚Р·С‹РІ РЅРµ РЅР°Р№РґРµРЅ' });
     }
     
-    // Создаем запись о скрытом отзыве о магазине
+    // РЎРѕР·РґР°РµРј Р·Р°РїРёСЃСЊ Рѕ СЃРєСЂС‹С‚РѕРј РѕС‚Р·С‹РІРµ Рѕ РјР°РіР°Р·РёРЅРµ
     await prisma.hiddenShopReview.create({
       data: {
         userId: req.user.userId,
@@ -4705,23 +4637,23 @@ app.post('/api/profile/reviews/shop/:id/hide', authMiddleware, async (req, res) 
       }
     });
     
-    res.json({ message: 'Отзыв о магазине скрыт из списка' });
+    res.json({ message: 'РћС‚Р·С‹РІ Рѕ РјР°РіР°Р·РёРЅРµ СЃРєСЂС‹С‚ РёР· СЃРїРёСЃРєР°' });
   } catch (error) {
     if (error.code === 'P2002') {
-      // Отзыв уже скрыт
-      res.json({ message: 'Отзыв о магазине уже скрыт' });
+      // РћС‚Р·С‹РІ СѓР¶Рµ СЃРєСЂС‹С‚
+      res.json({ message: 'РћС‚Р·С‹РІ Рѕ РјР°РіР°Р·РёРЅРµ СѓР¶Рµ СЃРєСЂС‹С‚' });
     } else {
-      res.status(500).json({ error: 'Ошибка скрытия отзыва о магазине' });
+      res.status(500).json({ error: 'РћС€РёР±РєР° СЃРєСЂС‹С‚РёСЏ РѕС‚Р·С‹РІР° Рѕ РјР°РіР°Р·РёРЅРµ' });
     }
   }
 });
 
-// DELETE /api/profile/reviews/shop/:id/hide — показать отзыв о магазине в списке пользователя
+// DELETE /api/profile/reviews/shop/:id/hide вЂ” РїРѕРєР°Р·Р°С‚СЊ РѕС‚Р·С‹РІ Рѕ РјР°РіР°Р·РёРЅРµ РІ СЃРїРёСЃРєРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 app.delete('/api/profile/reviews/shop/:id/hide', authMiddleware, async (req, res) => {
   try {
     const reviewId = parseInt(req.params.id);
     
-    // Удаляем запись о скрытом отзыве о магазине
+    // РЈРґР°Р»СЏРµРј Р·Р°РїРёСЃСЊ Рѕ СЃРєСЂС‹С‚РѕРј РѕС‚Р·С‹РІРµ Рѕ РјР°РіР°Р·РёРЅРµ
     await prisma.hiddenShopReview.deleteMany({
       where: {
         userId: req.user.userId,
@@ -4729,19 +4661,19 @@ app.delete('/api/profile/reviews/shop/:id/hide', authMiddleware, async (req, res
       }
     });
     
-    res.json({ message: 'Отзыв о магазине показан в списке' });
+    res.json({ message: 'РћС‚Р·С‹РІ Рѕ РјР°РіР°Р·РёРЅРµ РїРѕРєР°Р·Р°РЅ РІ СЃРїРёСЃРєРµ' });
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка показа отзыва о магазине' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕРєР°Р·Р° РѕС‚Р·С‹РІР° Рѕ РјР°РіР°Р·РёРЅРµ' });
   }
 });
 
-// GET /api/profile/questions — получить все вопросы пользователя о товарах
+// GET /api/profile/questions вЂ” РїРѕР»СѓС‡РёС‚СЊ РІСЃРµ РІРѕРїСЂРѕСЃС‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ Рѕ С‚РѕРІР°СЂР°С…
 app.get('/api/profile/questions', authMiddleware, async (req, res) => {
   try {
     const questions = await prisma.productQuestion.findMany({
       where: { 
         userId: req.user.userId,
-        // Показываем только вопросы с ответами (опубликованные)
+        // РџРѕРєР°Р·С‹РІР°РµРј С‚РѕР»СЊРєРѕ РІРѕРїСЂРѕСЃС‹ СЃ РѕС‚РІРµС‚Р°РјРё (РѕРїСѓР±Р»РёРєРѕРІР°РЅРЅС‹Рµ)
         status: 'published',
         answer: { not: null }
       },
@@ -4753,80 +4685,80 @@ app.get('/api/profile/questions', authMiddleware, async (req, res) => {
     
     res.json(questions);
   } catch (error) {
-    console.error('Ошибка получения вопросов пользователя:', error);
-    res.status(500).json({ error: 'Ошибка получения вопросов' });
+    console.error('РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РІРѕРїСЂРѕСЃРѕРІ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ:', error);
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РІРѕРїСЂРѕСЃРѕРІ' });
   }
 });
 
-// POST /api/admin/clear-all-data — очистить все данные (только для администраторов)
+// POST /api/admin/clear-all-data вЂ” РѕС‡РёСЃС‚РёС‚СЊ РІСЃРµ РґР°РЅРЅС‹Рµ (С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ)
 app.post('/api/admin/clear-all-data', authMiddleware, async (req, res) => {
   try {
-    // Проверяем, что пользователь является администратором
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЏРІР»СЏРµС‚СЃСЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРј
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
 
-    console.log('🧹 Администратор инициировал очистку всех данных...');
+    console.log('рџ§№ РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ РёРЅРёС†РёРёСЂРѕРІР°Р» РѕС‡РёСЃС‚РєСѓ РІСЃРµС… РґР°РЅРЅС‹С…...');
 
-    // Очищаем данные в правильном порядке (сначала зависимые таблицы)
+    // РћС‡РёС‰Р°РµРј РґР°РЅРЅС‹Рµ РІ РїСЂР°РІРёР»СЊРЅРѕРј РїРѕСЂСЏРґРєРµ (СЃРЅР°С‡Р°Р»Р° Р·Р°РІРёСЃРёРјС‹Рµ С‚Р°Р±Р»РёС†С‹)
     const results = {};
 
-    // Скрытые отзывы
+    // РЎРєСЂС‹С‚С‹Рµ РѕС‚Р·С‹РІС‹
     results.hiddenReviews = await prisma.hiddenReview.deleteMany({});
     
-    // Отзывы о товарах
+    // РћС‚Р·С‹РІС‹ Рѕ С‚РѕРІР°СЂР°С…
     results.reviews = await prisma.review.deleteMany({});
     
-    // Отзывы о магазине
+    // РћС‚Р·С‹РІС‹ Рѕ РјР°РіР°Р·РёРЅРµ
     results.shopReviews = await prisma.shopReview.deleteMany({});
     
-    // Элементы заказов
+    // Р­Р»РµРјРµРЅС‚С‹ Р·Р°РєР°Р·РѕРІ
     results.orderItems = await prisma.orderItem.deleteMany({});
     
-    // Заказы
+    // Р—Р°РєР°Р·С‹
     results.orders = await prisma.order.deleteMany({});
     
-    // Элементы корзины
+    // Р­Р»РµРјРµРЅС‚С‹ РєРѕСЂР·РёРЅС‹
     results.cartItems = await prisma.cartItem.deleteMany({});
     
-    // Корзины
+    // РљРѕСЂР·РёРЅС‹
     results.carts = await prisma.cart.deleteMany({});
     
-    // Элементы избранного
+    // Р­Р»РµРјРµРЅС‚С‹ РёР·Р±СЂР°РЅРЅРѕРіРѕ
     results.wishlistItems = await prisma.wishlistItem.deleteMany({});
     
-    // Списки избранного
+    // РЎРїРёСЃРєРё РёР·Р±СЂР°РЅРЅРѕРіРѕ
     results.wishlists = await prisma.wishlist.deleteMany({});
     
-    // Уведомления
+    // РЈРІРµРґРѕРјР»РµРЅРёСЏ
     results.notifications = await prisma.notification.deleteMany({});
     
-    // Уведомления о наличии товаров
+    // РЈРІРµРґРѕРјР»РµРЅРёСЏ Рѕ РЅР°Р»РёС‡РёРё С‚РѕРІР°СЂРѕРІ
     results.availabilityNotifications = await prisma.availabilityNotification.deleteMany({});
 
-    console.log('✅ Очистка завершена успешно!');
+    console.log('вњ… РћС‡РёСЃС‚РєР° Р·Р°РІРµСЂС€РµРЅР° СѓСЃРїРµС€РЅРѕ!');
     
     res.json({
-      message: 'Все данные успешно очищены',
+      message: 'Р’СЃРµ РґР°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ РѕС‡РёС‰РµРЅС‹',
       statistics: results
     });
 
   } catch (error) {
-    console.error('❌ Ошибка при очистке данных:', error);
-    res.status(500).json({ error: 'Ошибка очистки данных' });
+    console.error('вќЊ РћС€РёР±РєР° РїСЂРё РѕС‡РёСЃС‚РєРµ РґР°РЅРЅС‹С…:', error);
+    res.status(500).json({ error: 'РћС€РёР±РєР° РѕС‡РёСЃС‚РєРё РґР°РЅРЅС‹С…' });
   }
 });
 
-// === Очистить старые уведомления с неправильными actionUrl ===
+// === РћС‡РёСЃС‚РёС‚СЊ СЃС‚Р°СЂС‹Рµ СѓРІРµРґРѕРјР»РµРЅРёСЏ СЃ РЅРµРїСЂР°РІРёР»СЊРЅС‹РјРё actionUrl ===
 app.delete('/api/admin/notifications/cleanup', authMiddleware, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   
   try {
-    // Удаляем уведомления с actionUrl, содержащими 'latest'
+    // РЈРґР°Р»СЏРµРј СѓРІРµРґРѕРјР»РµРЅРёСЏ СЃ actionUrl, СЃРѕРґРµСЂР¶Р°С‰РёРјРё 'latest'
     const deletedCount = await prisma.notification.deleteMany({
       where: {
         actionUrl: {
@@ -4836,36 +4768,36 @@ app.delete('/api/admin/notifications/cleanup', authMiddleware, async (req, res) 
     });
     
     res.json({ 
-      message: `Удалено ${deletedCount.count} уведомлений с неправильными ссылками`,
+      message: `РЈРґР°Р»РµРЅРѕ ${deletedCount.count} СѓРІРµРґРѕРјР»РµРЅРёР№ СЃ РЅРµРїСЂР°РІРёР»СЊРЅС‹РјРё СЃСЃС‹Р»РєР°РјРё`,
       deletedCount: deletedCount.count
     });
   } catch (error) {
     console.error('Error cleaning up notifications:', error);
-    res.status(500).json({ error: 'Ошибка очистки уведомлений' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РѕС‡РёСЃС‚РєРё СѓРІРµРґРѕРјР»РµРЅРёР№' });
   }
 });
 
-// === Создать тестовое уведомление ===
+// === РЎРѕР·РґР°С‚СЊ С‚РµСЃС‚РѕРІРѕРµ СѓРІРµРґРѕРјР»РµРЅРёРµ ===
 app.post('/api/admin/notifications/test', authMiddleware, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   
   try {
     const { orderId } = req.body;
     
     if (!orderId) {
-      return res.status(400).json({ error: 'orderId обязателен' });
+      return res.status(400).json({ error: 'orderId РѕР±СЏР·Р°С‚РµР»РµРЅ' });
     }
     
-    // Проверяем, что заказ существует
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ Р·Р°РєР°Р· СЃСѓС‰РµСЃС‚РІСѓРµС‚
     const order = await prisma.order.findUnique({
       where: { id: parseInt(orderId) }
     });
     
     if (!order) {
-      return res.status(404).json({ error: 'Заказ не найден' });
+      return res.status(404).json({ error: 'Р—Р°РєР°Р· РЅРµ РЅР°Р№РґРµРЅ' });
     }
     
     const notification = await prisma.notification.create({
@@ -4880,22 +4812,22 @@ app.post('/api/admin/notifications/test', authMiddleware, async (req, res) => {
     });
     
     res.json({ 
-      message: 'Тестовое уведомление создано',
+      message: 'РўРµСЃС‚РѕРІРѕРµ СѓРІРµРґРѕРјР»РµРЅРёРµ СЃРѕР·РґР°РЅРѕ',
       notification
     });
   } catch (error) {
     console.error('Error creating test notification:', error);
-    res.status(500).json({ error: 'Ошибка создания тестового уведомления' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ С‚РµСЃС‚РѕРІРѕРіРѕ СѓРІРµРґРѕРјР»РµРЅРёСЏ' });
   }
 });
 
-// === Очистить старые уведомления с неправильными actionUrl ===
+// === РћС‡РёСЃС‚РёС‚СЊ СЃС‚Р°СЂС‹Рµ СѓРІРµРґРѕРјР»РµРЅРёСЏ СЃ РЅРµРїСЂР°РІРёР»СЊРЅС‹РјРё actionUrl ===
 
-// === Получить список всех заказов пользователя (для отладки) ===
+// === РџРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє РІСЃРµС… Р·Р°РєР°Р·РѕРІ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ (РґР»СЏ РѕС‚Р»Р°РґРєРё) ===
 app.get('/api/admin/orders/list', authMiddleware, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
   if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+    return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
   }
   
   try {
@@ -4929,14 +4861,14 @@ app.get('/api/admin/orders/list', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching orders:', error);
-    res.status(500).json({ error: 'Ошибка при получении списка заказов' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё СЃРїРёСЃРєР° Р·Р°РєР°Р·РѕРІ' });
   }
 });
 
-// GET /api/reviews/product — получить все отзывы о товарах для модерации
+// GET /api/reviews/product вЂ” РїРѕР»СѓС‡РёС‚СЊ РІСЃРµ РѕС‚Р·С‹РІС‹ Рѕ С‚РѕРІР°СЂР°С… РґР»СЏ РјРѕРґРµСЂР°С†РёРё
 app.get('/api/reviews/product', authMiddleware, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Нет доступа' });
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'РќРµС‚ РґРѕСЃС‚СѓРїР°' });
     
     const reviews = await prisma.review.findMany({
       orderBy: { createdAt: 'desc' },
@@ -4948,17 +4880,17 @@ app.get('/api/reviews/product', authMiddleware, async (req, res) => {
 
     res.json(reviews);
   } catch (error) {
-    console.error('API: Ошибка получения отзывов о товарах:', error);
-    res.status(500).json({ error: 'Ошибка получения отзывов о товарах' });
+    console.error('API: РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚Р·С‹РІРѕРІ Рѕ С‚РѕРІР°СЂР°С…:', error);
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚Р·С‹РІРѕРІ Рѕ С‚РѕРІР°СЂР°С…' });
   }
 });
 
-// === API для статистики изображений ===
+// === API РґР»СЏ СЃС‚Р°С‚РёСЃС‚РёРєРё РёР·РѕР±СЂР°Р¶РµРЅРёР№ ===
 app.get('/api/admin/images/stats', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
 
     const processor = new BatchImageProcessor();
@@ -4967,28 +4899,28 @@ app.get('/api/admin/images/stats', authMiddleware, async (req, res) => {
     res.json(stats);
   } catch (error) {
     console.error('Error getting image stats:', error);
-    res.status(500).json({ error: 'Ошибка получения статистики изображений' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ СЃС‚Р°С‚РёСЃС‚РёРєРё РёР·РѕР±СЂР°Р¶РµРЅРёР№' });
   }
 });
 
-// === API для пакетной обработки изображений ===
+// === API РґР»СЏ РїР°РєРµС‚РЅРѕР№ РѕР±СЂР°Р±РѕС‚РєРё РёР·РѕР±СЂР°Р¶РµРЅРёР№ ===
 app.post('/api/admin/images/process', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
 
     const processor = new BatchImageProcessor();
     
-    // Получаем статистику до обработки
+    // РџРѕР»СѓС‡Р°РµРј СЃС‚Р°С‚РёСЃС‚РёРєСѓ РґРѕ РѕР±СЂР°Р±РѕС‚РєРё
     const statsBefore = await processor.getImageStats();
     
-    // Обрабатываем изображения
+    // РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
     const productResults = await processor.processAllProductImages();
     const categoryResults = await processor.processCategoryImages();
     
-    // Получаем статистику после обработки
+    // РџРѕР»СѓС‡Р°РµРј СЃС‚Р°С‚РёСЃС‚РёРєСѓ РїРѕСЃР»Рµ РѕР±СЂР°Р±РѕС‚РєРё
     const statsAfter = await processor.getImageStats();
     
     const totalSaved = productResults.totalSaved + categoryResults.totalSaved;
@@ -5011,33 +4943,33 @@ app.post('/api/admin/images/process', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('Error processing images:', error);
-    res.status(500).json({ error: 'Ошибка обработки изображений' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РѕР±СЂР°Р±РѕС‚РєРё РёР·РѕР±СЂР°Р¶РµРЅРёР№' });
   }
 });
 
-// === API для исправления изображений категорий ===
+// === API РґР»СЏ РёСЃРїСЂР°РІР»РµРЅРёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№ РєР°С‚РµРіРѕСЂРёР№ ===
 app.post('/api/admin/fix-category-images', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
     if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ запрещён: только для администратора' });
+      return res.status(403).json({ error: 'Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ: С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°' });
     }
 
-    // Маппинг категорий на правильные fallback изображения
+    // РњР°РїРїРёРЅРі РєР°С‚РµРіРѕСЂРёР№ РЅР° РїСЂР°РІРёР»СЊРЅС‹Рµ fallback РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
     const categoryImageMapping = {
-      'Настольные игры': 'nastolka.png',
-      'Рисование': 'creativity.png',
-      'Наборы для творчества': 'creativity.png',
-      'Раскраски': 'creativity.png',
-      'Куклы': 'toys.png',
-      'Мягкие игрушки': 'toys.png',
-      'Активные игры': 'sport.png',
-      'Декоративная косметика и украшения': 'toys.png',
-      'Роботы и трансформеры': 'toys.png',
-      'Игрушки на радиоуправлении': 'toys.png'
+      'РќР°СЃС‚РѕР»СЊРЅС‹Рµ РёРіСЂС‹': 'nastolka.png',
+      'Р РёСЃРѕРІР°РЅРёРµ': 'creativity.png',
+      'РќР°Р±РѕСЂС‹ РґР»СЏ С‚РІРѕСЂС‡РµСЃС‚РІР°': 'creativity.png',
+      'Р Р°СЃРєСЂР°СЃРєРё': 'creativity.png',
+      'РљСѓРєР»С‹': 'toys.png',
+      'РњСЏРіРєРёРµ РёРіСЂСѓС€РєРё': 'toys.png',
+      'РђРєС‚РёРІРЅС‹Рµ РёРіСЂС‹': 'sport.png',
+      'Р”РµРєРѕСЂР°С‚РёРІРЅР°СЏ РєРѕСЃРјРµС‚РёРєР° Рё СѓРєСЂР°С€РµРЅРёСЏ': 'toys.png',
+      'Р РѕР±РѕС‚С‹ Рё С‚СЂР°РЅСЃС„РѕСЂРјРµСЂС‹': 'toys.png',
+      'РРіСЂСѓС€РєРё РЅР° СЂР°РґРёРѕСѓРїСЂР°РІР»РµРЅРёРё': 'toys.png'
     };
 
-    // Получаем все категории
+    // РџРѕР»СѓС‡Р°РµРј РІСЃРµ РєР°С‚РµРіРѕСЂРёРё
     const categories = await prisma.category.findMany({
       select: {
         id: true,
@@ -5049,24 +4981,24 @@ app.post('/api/admin/fix-category-images', authMiddleware, async (req, res) => {
     let updatedCount = 0;
     const updatedCategories = [];
 
-    // Проверяем каждую категорию
+    // РџСЂРѕРІРµСЂСЏРµРј РєР°Р¶РґСѓСЋ РєР°С‚РµРіРѕСЂРёСЋ
     for (const category of categories) {
       let needsUpdate = false;
       let newImage = category.image;
 
-      // Если изображение начинается с цифр (загруженный файл), заменяем на fallback
+      // Р•СЃР»Рё РёР·РѕР±СЂР°Р¶РµРЅРёРµ РЅР°С‡РёРЅР°РµС‚СЃСЏ СЃ С†РёС„СЂ (Р·Р°РіСЂСѓР¶РµРЅРЅС‹Р№ С„Р°Р№Р»), Р·Р°РјРµРЅСЏРµРј РЅР° fallback
       if (category.image && /^\d+/.test(category.image)) {
         needsUpdate = true;
         newImage = categoryImageMapping[category.name] || 'toys.png';
       }
 
-      // Если изображение не соответствует маппингу, исправляем
+      // Р•СЃР»Рё РёР·РѕР±СЂР°Р¶РµРЅРёРµ РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ РјР°РїРїРёРЅРіСѓ, РёСЃРїСЂР°РІР»СЏРµРј
       if (categoryImageMapping[category.name] && category.image !== categoryImageMapping[category.name]) {
         needsUpdate = true;
         newImage = categoryImageMapping[category.name];
       }
 
-      // Обновляем категорию если нужно
+      // РћР±РЅРѕРІР»СЏРµРј РєР°С‚РµРіРѕСЂРёСЋ РµСЃР»Рё РЅСѓР¶РЅРѕ
       if (needsUpdate) {
         await prisma.category.update({
           where: { id: category.id },
@@ -5084,21 +5016,21 @@ app.post('/api/admin/fix-category-images', authMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      message: `Исправлено ${updatedCount} категорий`,
+      message: `РСЃРїСЂР°РІР»РµРЅРѕ ${updatedCount} РєР°С‚РµРіРѕСЂРёР№`,
       updatedCount,
       updatedCategories
     });
 
   } catch (error) {
     console.error('Error fixing category images:', error);
-    res.status(500).json({ error: 'Ошибка исправления изображений категорий' });
+    res.status(500).json({ error: 'РћС€РёР±РєР° РёСЃРїСЂР°РІР»РµРЅРёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№ РєР°С‚РµРіРѕСЂРёР№' });
   }
 });
 
-// === Экспорт данных ===
+// === Р­РєСЃРїРѕСЂС‚ РґР°РЅРЅС‹С… ===
 app.get('/api/export-data', async (req, res) => {
   try {
-    console.log('📤 Экспорт данных через API...');
+    console.log('рџ“¤ Р­РєСЃРїРѕСЂС‚ РґР°РЅРЅС‹С… С‡РµСЂРµР· API...');
     
     const exportData = {
       categories: [],
@@ -5113,27 +5045,27 @@ app.get('/api/export-data', async (req, res) => {
       exportDate: new Date().toISOString()
     };
 
-    // Экспортируем категории
+    // Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј РєР°С‚РµРіРѕСЂРёРё
     try {
       const categories = await prisma.category.findMany();
       exportData.categories = categories;
-      console.log(`✅ Категории экспортированы: ${categories.length}`);
+      console.log(`вњ… РљР°С‚РµРіРѕСЂРёРё СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅС‹: ${categories.length}`);
     } catch (error) {
-      console.error('❌ Ошибка экспорта категорий:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° СЌРєСЃРїРѕСЂС‚Р° РєР°С‚РµРіРѕСЂРёР№:', error.message);
       exportData.categories = [];
     }
 
-    // Экспортируем товары
+    // Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј С‚РѕРІР°СЂС‹
     try {
       const products = await prisma.product.findMany();
       exportData.products = products;
-      console.log(`✅ Товары экспортированы: ${products.length}`);
+      console.log(`вњ… РўРѕРІР°СЂС‹ СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅС‹: ${products.length}`);
     } catch (error) {
-      console.error('❌ Ошибка экспорта товаров:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° СЌРєСЃРїРѕСЂС‚Р° С‚РѕРІР°СЂРѕРІ:', error.message);
       exportData.products = [];
     }
 
-    // Экспортируем пользователей (без паролей)
+    // Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ (Р±РµР· РїР°СЂРѕР»РµР№)
     try {
       const users = await prisma.user.findMany({
         select: {
@@ -5147,73 +5079,73 @@ app.get('/api/export-data', async (req, res) => {
         }
       });
       exportData.users = users;
-      console.log(`✅ Пользователи экспортированы: ${users.length}`);
+      console.log(`вњ… РџРѕР»СЊР·РѕРІР°С‚РµР»Рё СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅС‹: ${users.length}`);
     } catch (error) {
-      console.error('❌ Ошибка экспорта пользователей:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° СЌРєСЃРїРѕСЂС‚Р° РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№:', error.message);
       exportData.users = [];
     }
 
-    // Экспортируем заказы
+    // Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј Р·Р°РєР°Р·С‹
     try {
       const orders = await prisma.order.findMany();
       exportData.orders = orders;
-      console.log(`✅ Заказы экспортированы: ${orders.length}`);
+      console.log(`вњ… Р—Р°РєР°Р·С‹ СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅС‹: ${orders.length}`);
     } catch (error) {
-      console.error('❌ Ошибка экспорта заказов:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° СЌРєСЃРїРѕСЂС‚Р° Р·Р°РєР°Р·РѕРІ:', error.message);
       exportData.orders = [];
     }
 
-    // Экспортируем вопросы
+    // Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј РІРѕРїСЂРѕСЃС‹
     try {
       const productQuestions = await prisma.productQuestion.findMany();
       exportData.productQuestions = productQuestions;
-      console.log(`✅ Вопросы экспортированы: ${productQuestions.length}`);
+      console.log(`вњ… Р’РѕРїСЂРѕСЃС‹ СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅС‹: ${productQuestions.length}`);
     } catch (error) {
-      console.error('❌ Ошибка экспорта вопросов:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° СЌРєСЃРїРѕСЂС‚Р° РІРѕРїСЂРѕСЃРѕРІ:', error.message);
       exportData.productQuestions = [];
     }
 
-    // Экспортируем отзывы
+    // Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј РѕС‚Р·С‹РІС‹
     try {
       const reviews = await prisma.review.findMany();
       exportData.reviews = reviews;
-      console.log(`✅ Отзывы экспортированы: ${reviews.length}`);
+      console.log(`вњ… РћС‚Р·С‹РІС‹ СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅС‹: ${reviews.length}`);
     } catch (error) {
-      console.error('❌ Ошибка экспорта отзывов:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° СЌРєСЃРїРѕСЂС‚Р° РѕС‚Р·С‹РІРѕРІ:', error.message);
       exportData.reviews = [];
     }
 
-    // Экспортируем отзывы о магазине
+    // Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј РѕС‚Р·С‹РІС‹ Рѕ РјР°РіР°Р·РёРЅРµ
     try {
       const shopReviews = await prisma.shopReview.findMany();
       exportData.shopReviews = shopReviews;
-      console.log(`✅ Отзывы о магазине экспортированы: ${shopReviews.length}`);
+      console.log(`вњ… РћС‚Р·С‹РІС‹ Рѕ РјР°РіР°Р·РёРЅРµ СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅС‹: ${shopReviews.length}`);
     } catch (error) {
-      console.error('❌ Ошибка экспорта отзывов о магазине:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° СЌРєСЃРїРѕСЂС‚Р° РѕС‚Р·С‹РІРѕРІ Рѕ РјР°РіР°Р·РёРЅРµ:', error.message);
       exportData.shopReviews = [];
     }
 
-    // Экспортируем избранное
+    // Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј РёР·Р±СЂР°РЅРЅРѕРµ
     try {
       const wishlists = await prisma.wishlist.findMany();
       exportData.wishlists = wishlists;
-      console.log(`✅ Избранное экспортировано: ${wishlists.length}`);
+      console.log(`вњ… РР·Р±СЂР°РЅРЅРѕРµ СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅРѕ: ${wishlists.length}`);
     } catch (error) {
-      console.error('❌ Ошибка экспорта избранного:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° СЌРєСЃРїРѕСЂС‚Р° РёР·Р±СЂР°РЅРЅРѕРіРѕ:', error.message);
       exportData.wishlists = [];
     }
 
-    // Экспортируем уведомления
+    // Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј СѓРІРµРґРѕРјР»РµРЅРёСЏ
     try {
       const notifications = await prisma.notification.findMany();
       exportData.notifications = notifications;
-      console.log(`✅ Уведомления экспортированы: ${notifications.length}`);
+      console.log(`вњ… РЈРІРµРґРѕРјР»РµРЅРёСЏ СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅС‹: ${notifications.length}`);
     } catch (error) {
-      console.error('❌ Ошибка экспорта уведомлений:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° СЌРєСЃРїРѕСЂС‚Р° СѓРІРµРґРѕРјР»РµРЅРёР№:', error.message);
       exportData.notifications = [];
     }
 
-    console.log(`✅ Данные экспортированы:`, {
+    console.log(`вњ… Р”Р°РЅРЅС‹Рµ СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅС‹:`, {
       categories: exportData.categories.length,
       products: exportData.products.length,
       users: exportData.users.length,
@@ -5227,150 +5159,150 @@ app.get('/api/export-data', async (req, res) => {
 
     res.json(exportData);
   } catch (error) {
-    console.error('❌ Ошибка при экспорте данных:', error);
-    res.status(500).json({ error: 'Ошибка при экспорте данных', details: error.message });
+    console.error('вќЊ РћС€РёР±РєР° РїСЂРё СЌРєСЃРїРѕСЂС‚Рµ РґР°РЅРЅС‹С…:', error);
+    res.status(500).json({ error: 'РћС€РёР±РєР° РїСЂРё СЌРєСЃРїРѕСЂС‚Рµ РґР°РЅРЅС‹С…', details: error.message });
   }
 });
 
-// === Тестовый endpoint ===
+// === РўРµСЃС‚РѕРІС‹Р№ endpoint ===
 app.get('/api/test-export', async (req, res) => {
   try {
-    console.log('🧪 Тестовый endpoint для экспорта...');
+    console.log('рџ§Є РўРµСЃС‚РѕРІС‹Р№ endpoint РґР»СЏ СЌРєСЃРїРѕСЂС‚Р°...');
     
-    // Простая проверка подключения к базе данных
+    // РџСЂРѕСЃС‚Р°СЏ РїСЂРѕРІРµСЂРєР° РїРѕРґРєР»СЋС‡РµРЅРёСЏ Рє Р±Р°Р·Рµ РґР°РЅРЅС‹С…
     const testData = {
-      message: 'Тестовый endpoint работает',
+      message: 'РўРµСЃС‚РѕРІС‹Р№ endpoint СЂР°Р±РѕС‚Р°РµС‚',
       timestamp: new Date().toISOString(),
       database: 'connected'
     };
 
-    // Попробуем получить количество товаров
+    // РџРѕРїСЂРѕР±СѓРµРј РїРѕР»СѓС‡РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ С‚РѕРІР°СЂРѕРІ
     try {
       const productCount = await prisma.product.count();
       testData.productCount = productCount;
-      console.log(`✅ Количество товаров: ${productCount}`);
+      console.log(`вњ… РљРѕР»РёС‡РµСЃС‚РІРѕ С‚РѕРІР°СЂРѕРІ: ${productCount}`);
     } catch (error) {
-      console.error('❌ Ошибка подсчета товаров:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° РїРѕРґСЃС‡РµС‚Р° С‚РѕРІР°СЂРѕРІ:', error.message);
       testData.productCount = 'error';
     }
 
-    // Попробуем получить количество категорий
+    // РџРѕРїСЂРѕР±СѓРµРј РїРѕР»СѓС‡РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РєР°С‚РµРіРѕСЂРёР№
     try {
       const categoryCount = await prisma.category.count();
       testData.categoryCount = categoryCount;
-      console.log(`✅ Количество категорий: ${categoryCount}`);
+      console.log(`вњ… РљРѕР»РёС‡РµСЃС‚РІРѕ РєР°С‚РµРіРѕСЂРёР№: ${categoryCount}`);
     } catch (error) {
-      console.error('❌ Ошибка подсчета категорий:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° РїРѕРґСЃС‡РµС‚Р° РєР°С‚РµРіРѕСЂРёР№:', error.message);
       testData.categoryCount = 'error';
     }
 
-    // Попробуем получить количество вопросов
+    // РџРѕРїСЂРѕР±СѓРµРј РїРѕР»СѓС‡РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РІРѕРїСЂРѕСЃРѕРІ
     try {
       const questionCount = await prisma.productQuestion.count();
       testData.questionCount = questionCount;
-      console.log(`✅ Количество вопросов: ${questionCount}`);
+      console.log(`вњ… РљРѕР»РёС‡РµСЃС‚РІРѕ РІРѕРїСЂРѕСЃРѕРІ: ${questionCount}`);
     } catch (error) {
-      console.error('❌ Ошибка подсчета вопросов:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° РїРѕРґСЃС‡РµС‚Р° РІРѕРїСЂРѕСЃРѕРІ:', error.message);
       testData.questionCount = 'error';
     }
 
     res.json(testData);
   } catch (error) {
-    console.error('❌ Ошибка в тестовом endpoint:', error);
-    res.status(500).json({ error: 'Ошибка в тестовом endpoint', details: error.message });
+    console.error('вќЊ РћС€РёР±РєР° РІ С‚РµСЃС‚РѕРІРѕРј endpoint:', error);
+    res.status(500).json({ error: 'РћС€РёР±РєР° РІ С‚РµСЃС‚РѕРІРѕРј endpoint', details: error.message });
   }
 });
 
-// POST /api/migrate - безопасное применение миграций
+// POST /api/migrate - Р±РµР·РѕРїР°СЃРЅРѕРµ РїСЂРёРјРµРЅРµРЅРёРµ РјРёРіСЂР°С†РёР№
 app.post('/api/migrate', async (req, res) => {
   try {
-    console.log('🔄 Запуск безопасной миграции через API...');
+    console.log('рџ”„ Р—Р°РїСѓСЃРє Р±РµР·РѕРїР°СЃРЅРѕР№ РјРёРіСЂР°С†РёРё С‡РµСЂРµР· API...');
     
     const migration = new SafeMigration();
     const result = await migration.run();
     
     if (result.success) {
-      console.log('✅ Безопасная миграция завершена успешно');
+      console.log('вњ… Р‘РµР·РѕРїР°СЃРЅР°СЏ РјРёРіСЂР°С†РёСЏ Р·Р°РІРµСЂС€РµРЅР° СѓСЃРїРµС€РЅРѕ');
       res.json({ 
         success: true, 
         message: result.message,
-        details: 'Миграция выполнена с резервным копированием и проверками'
+        details: 'РњРёРіСЂР°С†РёСЏ РІС‹РїРѕР»РЅРµРЅР° СЃ СЂРµР·РµСЂРІРЅС‹Рј РєРѕРїРёСЂРѕРІР°РЅРёРµРј Рё РїСЂРѕРІРµСЂРєР°РјРё'
       });
     } else {
-      console.log('❌ Безопасная миграция не удалась');
+      console.log('вќЊ Р‘РµР·РѕРїР°СЃРЅР°СЏ РјРёРіСЂР°С†РёСЏ РЅРµ СѓРґР°Р»Р°СЃСЊ');
       res.status(500).json({ 
         success: false,
         error: result.error,
         message: result.message,
-        details: 'Миграция не удалась, но данные защищены резервной копией'
+        details: 'РњРёРіСЂР°С†РёСЏ РЅРµ СѓРґР°Р»Р°СЃСЊ, РЅРѕ РґР°РЅРЅС‹Рµ Р·Р°С‰РёС‰РµРЅС‹ СЂРµР·РµСЂРІРЅРѕР№ РєРѕРїРёРµР№'
       });
     }
   } catch (error) {
-    console.error('❌ Критическая ошибка миграции:', error);
+    console.error('вќЊ РљСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР° РјРёРіСЂР°С†РёРё:', error);
     res.status(500).json({ 
       success: false,
-      error: 'Критическая ошибка миграции', 
+      error: 'РљСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР° РјРёРіСЂР°С†РёРё', 
       details: error.message 
     });
   }
 });
 
-// POST /api/contact - обработка формы обратной связи
+// POST /api/contact - РѕР±СЂР°Р±РѕС‚РєР° С„РѕСЂРјС‹ РѕР±СЂР°С‚РЅРѕР№ СЃРІСЏР·Рё
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, phone, message } = req.body;
     
-    console.log('📧 Получено сообщение с формы контактов:', { name, email, phone, message });
+    console.log('рџ“§ РџРѕР»СѓС‡РµРЅРѕ СЃРѕРѕР±С‰РµРЅРёРµ СЃ С„РѕСЂРјС‹ РєРѕРЅС‚Р°РєС‚РѕРІ:', { name, email, phone, message });
     
-    // Валидация
+    // Р’Р°Р»РёРґР°С†РёСЏ
     if (!name || !email || !message) {
       return res.status(400).json({ 
-        error: 'Необходимо заполнить имя, email и сообщение' 
+        error: 'РќРµРѕР±С…РѕРґРёРјРѕ Р·Р°РїРѕР»РЅРёС‚СЊ РёРјСЏ, email Рё СЃРѕРѕР±С‰РµРЅРёРµ' 
       });
     }
     
-    // Проверка формата email
+    // РџСЂРѕРІРµСЂРєР° С„РѕСЂРјР°С‚Р° email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ 
-        error: 'Неверный формат email' 
+        error: 'РќРµРІРµСЂРЅС‹Р№ С„РѕСЂРјР°С‚ email' 
       });
     }
     
-    // Формируем сообщение для Telegram
+    // Р¤РѕСЂРјРёСЂСѓРµРј СЃРѕРѕР±С‰РµРЅРёРµ РґР»СЏ Telegram
     const telegramMessage = `
-📧 <b>НОВОЕ СООБЩЕНИЕ С САЙТА</b>
+рџ“§ <b>РќРћР’РћР• РЎРћРћР‘Р©Р•РќРР• РЎ РЎРђР™РўРђ</b>
 
-👤 <b>Имя:</b> ${name}
-📧 <b>Email:</b> ${email}
-📱 <b>Телефон:</b> ${phone || 'Не указан'}
-💬 <b>Сообщение:</b>
+рџ‘¤ <b>РРјСЏ:</b> ${name}
+рџ“§ <b>Email:</b> ${email}
+рџ“± <b>РўРµР»РµС„РѕРЅ:</b> ${phone || 'РќРµ СѓРєР°Р·Р°РЅ'}
+рџ’¬ <b>РЎРѕРѕР±С‰РµРЅРёРµ:</b>
 
 ${message}
 
-⏰ <b>Время:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
-🌐 <b>Источник:</b> Форма обратной связи
+вЏ° <b>Р’СЂРµРјСЏ:</b> ${new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', dateStyle: 'short', timeStyle: 'short' })}
+рџЊђ <b>РСЃС‚РѕС‡РЅРёРє:</b> Р¤РѕСЂРјР° РѕР±СЂР°С‚РЅРѕР№ СЃРІСЏР·Рё
     `.trim();
     
-    // Отправляем уведомление в Telegram
+    // РћС‚РїСЂР°РІР»СЏРµРј СѓРІРµРґРѕРјР»РµРЅРёРµ РІ Telegram
     try {
       await sendTelegramNotification(telegramMessage);
-      console.log('✅ Сообщение с формы контактов отправлено в Telegram');
+      console.log('вњ… РЎРѕРѕР±С‰РµРЅРёРµ СЃ С„РѕСЂРјС‹ РєРѕРЅС‚Р°РєС‚РѕРІ РѕС‚РїСЂР°РІР»РµРЅРѕ РІ Telegram');
     } catch (telegramError) {
-      console.error('❌ Ошибка отправки в Telegram:', telegramError);
-      // Не прерываем выполнение, если Telegram недоступен
+      console.error('вќЊ РћС€РёР±РєР° РѕС‚РїСЂР°РІРєРё РІ Telegram:', telegramError);
+      // РќРµ РїСЂРµСЂС‹РІР°РµРј РІС‹РїРѕР»РЅРµРЅРёРµ, РµСЃР»Рё Telegram РЅРµРґРѕСЃС‚СѓРїРµРЅ
     }
     
-    console.log('✅ Сообщение с формы контактов обработано успешно');
+    console.log('вњ… РЎРѕРѕР±С‰РµРЅРёРµ СЃ С„РѕСЂРјС‹ РєРѕРЅС‚Р°РєС‚РѕРІ РѕР±СЂР°Р±РѕС‚Р°РЅРѕ СѓСЃРїРµС€РЅРѕ');
     res.json({ 
       success: true, 
-      message: 'Сообщение отправлено! Мы ответим вам в ближайшее время.' 
+      message: 'РЎРѕРѕР±С‰РµРЅРёРµ РѕС‚РїСЂР°РІР»РµРЅРѕ! РњС‹ РѕС‚РІРµС‚РёРј РІР°Рј РІ Р±Р»РёР¶Р°Р№С€РµРµ РІСЂРµРјСЏ.' 
     });
     
   } catch (error) {
-    console.error('❌ Ошибка обработки формы контактов:', error);
+    console.error('вќЊ РћС€РёР±РєР° РѕР±СЂР°Р±РѕС‚РєРё С„РѕСЂРјС‹ РєРѕРЅС‚Р°РєС‚РѕРІ:', error);
     res.status(500).json({ 
-      error: 'Внутренняя ошибка сервера' 
+      error: 'Р’РЅСѓС‚СЂРµРЅРЅСЏСЏ РѕС€РёР±РєР° СЃРµСЂРІРµСЂР°' 
     });
   }
 });
@@ -5380,49 +5312,49 @@ app.listen(PORT, (err) => {
     console.error('Server failed to start:', err);
     process.exit(1);
   } else {
-    console.log(`🚀 Сервер запущен на порту ${PORT}`);
-    console.log('🔍 DEBUG: Final uploads path check:', path.join(__dirname, '..', '..', '..', 'uploads'));
-    console.log('🔍 DEBUG: Final uploads directory exists:', fs.existsSync(path.join(__dirname, '..', '..', '..', 'uploads')));
+    console.log(`рџљЂ РЎРµСЂРІРµСЂ Р·Р°РїСѓС‰РµРЅ РЅР° РїРѕСЂС‚Сѓ ${PORT}`);
+    console.log('рџ”Ќ DEBUG: Final uploads path check:', path.join(__dirname, '..', '..', '..', 'uploads'));
+    console.log('рџ”Ќ DEBUG: Final uploads directory exists:', fs.existsSync(path.join(__dirname, '..', '..', '..', 'uploads')));
     const uploadsPath = path.join(__dirname, '..', '..', 'backend', 'uploads');
     if (fs.existsSync(uploadsPath)) {
-      console.log('🔍 DEBUG: Final uploads directory contents:', fs.readdirSync(uploadsPath).slice(0, 5));
+      console.log('рџ”Ќ DEBUG: Final uploads directory contents:', fs.readdirSync(uploadsPath).slice(0, 5));
     } else {
-      console.log('🔍 DEBUG: Uploads directory does not exist, creating it...');
+      console.log('рџ”Ќ DEBUG: Uploads directory does not exist, creating it...');
       fs.mkdirSync(uploadsPath, { recursive: true });
-      console.log('✅ Uploads directory created successfully');
+      console.log('вњ… Uploads directory created successfully');
     }
     startSafeMigration();
   }
 });
 
-// Функция для запуска безопасной миграции
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ Р·Р°РїСѓСЃРєР° Р±РµР·РѕРїР°СЃРЅРѕР№ РјРёРіСЂР°С†РёРё
 function startSafeMigration() {
-  // Автоматически применяем безопасную миграцию при запуске
+  // РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РїСЂРёРјРµРЅСЏРµРј Р±РµР·РѕРїР°СЃРЅСѓСЋ РјРёРіСЂР°С†РёСЋ РїСЂРё Р·Р°РїСѓСЃРєРµ
   setTimeout(async () => {
     try {
-      console.log('🔄 Запуск безопасной миграции при старте сервера...');
+      console.log('рџ”„ Р—Р°РїСѓСЃРє Р±РµР·РѕРїР°СЃРЅРѕР№ РјРёРіСЂР°С†РёРё РїСЂРё СЃС‚Р°СЂС‚Рµ СЃРµСЂРІРµСЂР°...');
       
       const migration = new SafeMigration();
       const result = await migration.run();
       
       if (result.success) {
-        console.log('✅ Безопасная миграция завершена:', result.message);
+        console.log('вњ… Р‘РµР·РѕРїР°СЃРЅР°СЏ РјРёРіСЂР°С†РёСЏ Р·Р°РІРµСЂС€РµРЅР°:', result.message);
       } else {
-        console.log('⚠️ Миграция не удалась:', result.message);
+        console.log('вљ пёЏ РњРёРіСЂР°С†РёСЏ РЅРµ СѓРґР°Р»Р°СЃСЊ:', result.message);
       }
       
     } catch (error) {
-      console.error('❌ Ошибка безопасной миграции:', error.message);
+      console.error('вќЊ РћС€РёР±РєР° Р±РµР·РѕРїР°СЃРЅРѕР№ РјРёРіСЂР°С†РёРё:', error.message);
     }
-  }, 5000); // Задержка 5 секунд для полной инициализации
+  }, 5000); // Р—Р°РґРµСЂР¶РєР° 5 СЃРµРєСѓРЅРґ РґР»СЏ РїРѕР»РЅРѕР№ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё
 }
 
-// Diagnostic endpoint для проверки структуры базы данных
+// Diagnostic endpoint РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃС‚СЂСѓРєС‚СѓСЂС‹ Р±Р°Р·С‹ РґР°РЅРЅС‹С…
 app.get('/api/debug/database-structure', async (req, res) => {
   try {
-    console.log('🔍 Проверка структуры базы данных...');
+    console.log('рџ”Ќ РџСЂРѕРІРµСЂРєР° СЃС‚СЂСѓРєС‚СѓСЂС‹ Р±Р°Р·С‹ РґР°РЅРЅС‹С…...');
     
-    // Проверяем существование таблицы Product
+    // РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ С‚Р°Р±Р»РёС†С‹ Product
     const tableExists = await prisma.$queryRaw`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
@@ -5431,7 +5363,7 @@ app.get('/api/debug/database-structure', async (req, res) => {
       );
     `;
     
-    // Проверяем существование полей переводов
+    // РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ РїРѕР»РµР№ РїРµСЂРµРІРѕРґРѕРІ
     const columnsExist = await prisma.$queryRaw`
       SELECT column_name, data_type, is_nullable
       FROM information_schema.columns 
@@ -5441,7 +5373,7 @@ app.get('/api/debug/database-structure', async (req, res) => {
       ORDER BY column_name;
     `;
     
-    // Проверяем количество продуктов с переводами
+    // РџСЂРѕРІРµСЂСЏРµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРѕРґСѓРєС‚РѕРІ СЃ РїРµСЂРµРІРѕРґР°РјРё
     const productsWithTranslations = await prisma.product.findMany({
       where: {
         OR: [
@@ -5459,7 +5391,7 @@ app.get('/api/debug/database-structure', async (req, res) => {
       take: 5
     });
     
-    // Общее количество продуктов
+    // РћР±С‰РµРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРѕРґСѓРєС‚РѕРІ
     const totalProducts = await prisma.product.count();
     
     res.json({
@@ -5476,7 +5408,7 @@ app.get('/api/debug/database-structure', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('❌ Ошибка при проверке структуры БД:', error);
+    console.error('вќЊ РћС€РёР±РєР° РїСЂРё РїСЂРѕРІРµСЂРєРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ Р‘Р”:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -5485,14 +5417,20 @@ app.get('/api/debug/database-structure', async (req, res) => {
   }
 });
 
-// 🖼️ API роуты для умной системы HD-изображений
-app.get('/api/images/config', smartImageUploadMiddleware.getConfigInfo.bind(smartImageUploadMiddleware));
+// рџ–јпёЏ API СЂРѕСѓС‚С‹ РґР»СЏ СѓРјРЅРѕР№ СЃРёСЃС‚РµРјС‹ HD-РёР·РѕР±СЂР°Р¶РµРЅРёР№
+// API endpoints РґР»СЏ РёРЅС„РѕСЂРјР°С†РёРё РѕР± РёР·РѕР±СЂР°Р¶РµРЅРёСЏС… (РёСЃРїРѕР»СЊР·СѓРµРј DualStorage)
+app.get('/api/images/config', (req, res) => {
+  const config = dualStorageUploadMiddleware.imageHandler.getConfigInfo();
+  res.json(config);
+});
+
+// РЎС‚Р°СЂС‹Рµ endpoints РґР»СЏ РѕР±СЂР°С‚РЅРѕР№ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё
 app.get('/api/images/hd-info/:imageUrl', smartImageUploadMiddleware.getHdImageInfo.bind(smartImageUploadMiddleware));
 app.post('/api/images/hd-info/bulk', smartImageUploadMiddleware.getBulkHdImageInfo.bind(smartImageUploadMiddleware));
 app.post('/api/images/switch-mode', smartImageUploadMiddleware.switchMode.bind(smartImageUploadMiddleware));
 app.post('/api/images/cleanup', smartImageUploadMiddleware.cleanupUnusedHdVersions.bind(smartImageUploadMiddleware));
 
-// 🖼️ Endpoint для создания HD версий в продакшене
+// рџ–јпёЏ Endpoint РґР»СЏ СЃРѕР·РґР°РЅРёСЏ HD РІРµСЂСЃРёР№ РІ РїСЂРѕРґР°РєС€РµРЅРµ
 app.get('/api/images/hd', async (req, res) => {
   try {
     const { path: imagePath, quality = '4x' } = req.query;
@@ -5504,9 +5442,9 @@ app.get('/api/images/hd', async (req, res) => {
       });
     }
     
-    console.log(`🔧 Запрос HD версии: ${imagePath}, качество: ${quality}`);
+    console.log(`рџ”§ Р—Р°РїСЂРѕСЃ HD РІРµСЂСЃРёРё: ${imagePath}, РєР°С‡РµСЃС‚РІРѕ: ${quality}`);
     
-    // Проверяем, что это локальное изображение
+    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ СЌС‚Рѕ Р»РѕРєР°Р»СЊРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ
     if (!imagePath.startsWith('/uploads/') && !imagePath.includes('/uploads/')) {
       return res.status(400).json({
         success: false,
@@ -5514,18 +5452,18 @@ app.get('/api/images/hd', async (req, res) => {
       });
     }
     
-    // Определяем размер для HD версии
+    // РћРїСЂРµРґРµР»СЏРµРј СЂР°Р·РјРµСЂ РґР»СЏ HD РІРµСЂСЃРёРё
     const size = quality === '4x' ? 2400 : 1200;
     
-    // Создаем HD версию через Sharp
+    // РЎРѕР·РґР°РµРј HD РІРµСЂСЃРёСЋ С‡РµСЂРµР· Sharp
     const sharp = require('sharp');
     const path = require('path');
     const fs = require('fs').promises;
     
-    // Путь к оригинальному файлу
+    // РџСѓС‚СЊ Рє РѕСЂРёРіРёРЅР°Р»СЊРЅРѕРјСѓ С„Р°Р№Р»Сѓ
     const originalPath = path.join(__dirname, '..', '..', imagePath);
     
-    // Проверяем существование файла
+    // РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ С„Р°Р№Р»Р°
     try {
       await fs.access(originalPath);
     } catch (error) {
@@ -5535,7 +5473,7 @@ app.get('/api/images/hd', async (req, res) => {
       });
     }
     
-    // Создаем HD версию
+    // РЎРѕР·РґР°РµРј HD РІРµСЂСЃРёСЋ
     const hdBuffer = await sharp(originalPath)
       .resize(size, size, { 
         fit: 'inside',
@@ -5547,15 +5485,15 @@ app.get('/api/images/hd', async (req, res) => {
       })
       .toBuffer();
     
-    // Отправляем HD версию
+    // РћС‚РїСЂР°РІР»СЏРµРј HD РІРµСЂСЃРёСЋ
     res.setHeader('Content-Type', 'image/webp');
-    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Кэшируем на год
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // РљСЌС€РёСЂСѓРµРј РЅР° РіРѕРґ
     res.send(hdBuffer);
     
-    console.log(`✅ HD ${quality} версия создана и отправлена`);
+    console.log(`вњ… HD ${quality} РІРµСЂСЃРёСЏ СЃРѕР·РґР°РЅР° Рё РѕС‚РїСЂР°РІР»РµРЅР°`);
     
   } catch (error) {
-    console.error('❌ Ошибка создания HD версии:', error);
+    console.error('вќЊ РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ HD РІРµСЂСЃРёРё:', error);
     res.status(500).json({
       success: false,
       error: error.message
@@ -5563,15 +5501,15 @@ app.get('/api/images/hd', async (req, res) => {
   }
 });
 
-// Diagnostic endpoint для тестирования создания продукта с переводами
+// Diagnostic endpoint РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ СЃРѕР·РґР°РЅРёСЏ РїСЂРѕРґСѓРєС‚Р° СЃ РїРµСЂРµРІРѕРґР°РјРё
 app.post('/api/debug/test-translations', async (req, res) => {
   try {
-    console.log('🧪 Тестирование создания продукта с переводами...');
-    console.log('📥 Полученные данные:', JSON.stringify(req.body, null, 2));
+    console.log('рџ§Є РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЃРѕР·РґР°РЅРёСЏ РїСЂРѕРґСѓРєС‚Р° СЃ РїРµСЂРµРІРѕРґР°РјРё...');
+    console.log('рџ“Ґ РџРѕР»СѓС‡РµРЅРЅС‹Рµ РґР°РЅРЅС‹Рµ:', JSON.stringify(req.body, null, 2));
     
     const { name, description, nameHe, descriptionHe, price = 100 } = req.body;
     
-    // Создаем тестовый продукт
+    // РЎРѕР·РґР°РµРј С‚РµСЃС‚РѕРІС‹Р№ РїСЂРѕРґСѓРєС‚
     const testProduct = await prisma.product.create({
       data: {
         name: name || 'Test Product',
@@ -5584,9 +5522,9 @@ app.post('/api/debug/test-translations', async (req, res) => {
       }
     });
     
-    console.log('✅ Тестовый продукт создан:', testProduct);
+    console.log('вњ… РўРµСЃС‚РѕРІС‹Р№ РїСЂРѕРґСѓРєС‚ СЃРѕР·РґР°РЅ:', testProduct);
     
-    // Получаем созданный продукт для проверки
+    // РџРѕР»СѓС‡Р°РµРј СЃРѕР·РґР°РЅРЅС‹Р№ РїСЂРѕРґСѓРєС‚ РґР»СЏ РїСЂРѕРІРµСЂРєРё
     const createdProduct = await prisma.product.findUnique({
       where: { id: testProduct.id }
     });
@@ -5600,7 +5538,7 @@ app.post('/api/debug/test-translations', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('❌ Ошибка при тестировании переводов:', error);
+    console.error('вќЊ РћС€РёР±РєР° РїСЂРё С‚РµСЃС‚РёСЂРѕРІР°РЅРёРё РїРµСЂРµРІРѕРґРѕРІ:', error);
     res.status(500).json({
       success: false,
       error: error.message,

@@ -19,42 +19,61 @@ class DualStorageImageHandler {
       console.log('⚠️ DualStorage: CLOUDINARY_CLOUD_NAME не найден, Cloudinary отключен');
     }
     
-    console.log('🔧 DualStorageImageHandler: Режим двойного сохранения');
+    console.log('🔧 DualStorageImageHandler: Режим тройного сохранения');
     console.log(`   Локальный обработчик: ${this.localHandler ? '✅' : '❌'}`);
     console.log(`   Cloudinary обработчик: ${this.cloudinaryHandler ? '✅' : '❌'}`);
+    console.log('📦 Версии: Cloudinary (CDN) + HD локально + сжатое локально');
   }
 
   /**
-   * Обрабатывает изображение с двойным сохранением (Cloudinary + локально)
-   * Всегда создает локальную резервную копию, но по умолчанию использует Cloudinary
+   * Обрабатывает изображение с тройным сохранением (Cloudinary + HD локально + сжатое локально)
+   * Всегда создает 2 локальные копии: HD для галереи и сжатую для превью
    */
   async processImageFromBuffer(buffer, originalName) {
-    console.log(`🖼️ DualStorage: Обработка ${originalName} с двойным сохранением...`);
+    console.log(`🖼️ DualStorage: Обработка ${originalName} с тройным сохранением...`);
     
     const results = {
       cloudinary: null,
-      local: null
+      localHD: null,
+      localCompressed: null
     };
 
-    // 1. ВСЕГДА сохраняем локально как резерв (в сжатом качестве)
+    // 1. Сохраняем HD версию локально (для галереи с зумом)
     try {
-      console.log('💾 DualStorage: Создание локальной резервной копии...');
+      console.log('💎 DualStorage: Создание HD версии...');
       
-      // Создаем сжатую версию для локального хранения
-      const compressedBuffer = await this.createCompressedVersion(buffer, originalName);
-      results.local = await this.localHandler.processImageFromBuffer(compressedBuffer, originalName);
+      const hdBuffer = await this.createHDVersion(buffer, originalName);
+      results.localHD = await this.saveLocalHD(hdBuffer, originalName);
       
-      if (results.local.success) {
-        console.log('✅ DualStorage: Локальная резервная копия создана');
+      if (results.localHD.success) {
+        console.log('✅ DualStorage: HD версия создана:', results.localHD.url);
       } else {
-        console.warn('⚠️ DualStorage: Локальная резервная копия не создана:', results.local.error);
+        console.warn('⚠️ DualStorage: HD версия не создана:', results.localHD.error);
       }
     } catch (error) {
-      console.error('❌ DualStorage: Ошибка создания локальной резервной копии:', error.message);
-      results.local = { success: false, error: error.message };
+      console.error('❌ DualStorage: Ошибка создания HD версии:', error.message);
+      results.localHD = { success: false, error: error.message };
     }
 
-    // 2. Пытаемся сохранить в Cloudinary (основное хранилище)
+    // 2. Сохраняем сжатую версию локально (для списков/превью)
+    try {
+      console.log('📦 DualStorage: Создание сжатой версии...');
+      
+      const compressedBuffer = await this.createCompressedVersion(buffer, originalName);
+      // Сохраняем напрямую БЕЗ создания дополнительных HD версий
+      results.localCompressed = await this.saveLocalCompressed(compressedBuffer, originalName);
+      
+      if (results.localCompressed.success) {
+        console.log('✅ DualStorage: Сжатая версия создана:', results.localCompressed.url);
+      } else {
+        console.warn('⚠️ DualStorage: Сжатая версия не создана:', results.localCompressed.error);
+      }
+    } catch (error) {
+      console.error('❌ DualStorage: Ошибка создания сжатой версии:', error.message);
+      results.localCompressed = { success: false, error: error.message };
+    }
+
+    // 3. Пытаемся сохранить в Cloudinary (основное хранилище для CDN)
     if (this.cloudinaryHandler) {
       try {
         console.log('☁️ DualStorage: Сохранение в Cloudinary...');
@@ -63,22 +82,27 @@ class DualStorageImageHandler {
         if (results.cloudinary.success) {
           console.log('✅ DualStorage: Cloudinary сохранение успешно');
           
-          // Cloudinary успешно - используем его как основной, но сохраняем информацию о резерве
+          // Cloudinary успешно - используем его как основной, с резервными локальными копиями
           const result = {
             ...results.cloudinary,
-            processedBy: 'DUAL_STORAGE',
+            processedBy: 'TRIPLE_STORAGE',
             environment: 'production',
             storage: {
               primary: 'cloudinary',
-              fallback: results.local && results.local.success ? 'local' : null,
               cloudinaryUrl: results.cloudinary.url,
-              localUrl: results.local && results.local.success ? results.local.url : null
+              localHDUrl: results.localHD && results.localHD.success ? results.localHD.url : null,
+              localCompressedUrl: results.localCompressed && results.localCompressed.success ? results.localCompressed.url : null,
+              hdVersion: results.localHD && results.localHD.success ? results.localHD.url : null,
+              previewVersion: results.localCompressed && results.localCompressed.success ? results.localCompressed.url : null
             }
           };
           
           console.log(`✅ DualStorage: Основной URL (Cloudinary): ${result.url}`);
-          if (result.storage.localUrl) {
-            console.log(`💾 DualStorage: Резервный URL (локальный): ${result.storage.localUrl}`);
+          if (result.storage.localHDUrl) {
+            console.log(`💎 DualStorage: HD версия (локально): ${result.storage.localHDUrl}`);
+          }
+          if (result.storage.localCompressedUrl) {
+            console.log(`📦 DualStorage: Сжатая версия (локально): ${result.storage.localCompressedUrl}`);
           }
           
           return result;
@@ -91,54 +115,193 @@ class DualStorageImageHandler {
       }
     }
 
-    // 3. Если Cloudinary недоступен, используем локальную копию
-    if (results.local && results.local.success) {
-      console.log('🔄 DualStorage: Cloudinary недоступен, используем локальную резервную копию');
+    // 4. Если Cloudinary недоступен, используем локальную HD копию
+    if (results.localHD && results.localHD.success) {
+      console.log('🔄 DualStorage: Cloudinary недоступен, используем локальную HD копию');
       
       const result = {
-        ...results.local,
-        processedBy: 'DUAL_STORAGE_FALLBACK',
+        ...results.localHD,
+        processedBy: 'TRIPLE_STORAGE_FALLBACK_HD',
         environment: 'production',
         storage: {
-          primary: 'local',
-          fallback: null,
+          primary: 'local_hd',
           cloudinaryUrl: null,
-          localUrl: results.local.url
+          localHDUrl: results.localHD.url,
+          localCompressedUrl: results.localCompressed && results.localCompressed.success ? results.localCompressed.url : null,
+          hdVersion: results.localHD.url,
+          previewVersion: results.localCompressed && results.localCompressed.success ? results.localCompressed.url : null
         }
       };
       
-      console.log(`💾 DualStorage: Используем локальную копию: ${result.url}`);
+      console.log(`💎 DualStorage: Используем HD копию: ${result.url}`);
       return result;
-    } else {
-      // Ни один способ не работает
+    } 
+    
+    // 5. Если HD недоступна, используем сжатую версию
+    if (results.localCompressed && results.localCompressed.success) {
+      console.log('🔄 DualStorage: HD недоступна, используем сжатую копию');
+      
+      const result = {
+        ...results.localCompressed,
+        processedBy: 'TRIPLE_STORAGE_FALLBACK_COMPRESSED',
+        environment: 'production',
+        storage: {
+          primary: 'local_compressed',
+          cloudinaryUrl: null,
+          localHDUrl: null,
+          localCompressedUrl: results.localCompressed.url,
+          hdVersion: null,
+          previewVersion: results.localCompressed.url
+        }
+      };
+      
+      console.log(`📦 DualStorage: Используем сжатую копию: ${result.url}`);
+      return result;
+    }
+    
+    // Ни один способ не сработал
+    return {
+      success: false,
+      error: 'Не удалось сохранить изображение никаким способом',
+      originalName,
+      details: {
+        cloudinary: results.cloudinary,
+        localHD: results.localHD,
+        localCompressed: results.localCompressed
+      }
+    };
+  }
+
+  /**
+   * Создает HD версию изображения для галереи с зумом
+   */
+  async createHDVersion(buffer, originalName) {
+    const sharp = require('sharp');
+    
+    try {
+      // Создаем HD версию (качество 95%, максимальная ширина 2400px)
+      const hdBuffer = await sharp(buffer)
+        .resize(2400, null, { 
+          withoutEnlargement: true,
+          fit: 'inside'
+        })
+        .webp({ 
+          quality: 95,
+          effort: 6
+        })
+        .toBuffer();
+      
+      console.log(`💎 DualStorage: HD версия ${originalName}: ${buffer.length} -> ${hdBuffer.length} байт`);
+      return hdBuffer;
+    } catch (error) {
+      console.warn('⚠️ DualStorage: Ошибка создания HD, используем оригинал:', error.message);
+      return buffer;
+    }
+  }
+
+  /**
+   * Сохраняет HD версию в специальную папку
+   */
+  async saveLocalHD(buffer, originalName) {
+    const fs = require('fs').promises;
+    const path = require('path');
+    const crypto = require('crypto');
+    
+    try {
+      // Создаем уникальное имя файла
+      const timestamp = Date.now();
+      const randomString = crypto.randomBytes(5).toString('hex');
+      const ext = '.webp'; // HD всегда в WebP
+      const filename = `${timestamp}-${randomString}${ext}`;
+      
+      // Путь к HD папке
+      const hdDir = path.join(process.cwd(), 'uploads', 'hd');
+      const filepath = path.join(hdDir, filename);
+      
+      // Создаем папку если не существует
+      await fs.mkdir(hdDir, { recursive: true });
+      
+      // Сохраняем файл
+      await fs.writeFile(filepath, buffer);
+      
+      const url = `/uploads/hd/${filename}`;
+      
+      return {
+        success: true,
+        url,
+        filename,
+        size: buffer.length,
+        type: 'hd_local'
+      };
+    } catch (error) {
+      console.error('❌ Ошибка сохранения HD версии:', error.message);
       return {
         success: false,
-        error: 'Не удалось сохранить изображение ни в Cloudinary, ни локально',
-        originalName,
-        details: {
-          cloudinary: results.cloudinary,
-          local: results.local
-        }
+        error: error.message
       };
     }
   }
 
   /**
-   * Создает сжатую версию изображения для локального хранения
+   * Сохраняет сжатую версию локально (для списков/превью)
+   * БЕЗ создания дополнительных HD версий
+   */
+  async saveLocalCompressed(buffer, originalName) {
+    const fs = require('fs').promises;
+    const path = require('path');
+    const crypto = require('crypto');
+    
+    try {
+      // Создаем уникальное имя файла
+      const timestamp = Date.now();
+      const randomString = crypto.randomBytes(5).toString('hex');
+      const ext = '.webp';
+      const filename = `${timestamp}-${randomString}${ext}`;
+      
+      // Путь к обычной папке uploads
+      const uploadsDir = path.join(process.cwd(), 'uploads');
+      const filepath = path.join(uploadsDir, filename);
+      
+      // Создаем папку если не существует
+      await fs.mkdir(uploadsDir, { recursive: true });
+      
+      // Сохраняем файл
+      await fs.writeFile(filepath, buffer);
+      
+      const url = `/uploads/${filename}`;
+      
+      return {
+        success: true,
+        url,
+        filename,
+        size: buffer.length,
+        type: 'compressed_local'
+      };
+    } catch (error) {
+      console.error('❌ Ошибка сохранения сжатой версии:', error.message);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Создает сжатую версию изображения для превью
    */
   async createCompressedVersion(buffer, originalName) {
     const sharp = require('sharp');
     
     try {
-      // Создаем сжатую версию (качество 70%, максимальная ширина 1200px)
+      // Создаем сжатую версию (качество 75%, максимальная ширина 800px)
       const compressedBuffer = await sharp(buffer)
-        .resize(1200, null, { 
+        .resize(800, null, { 
           withoutEnlargement: true,
           fit: 'inside'
         })
-        .jpeg({ 
-          quality: 70,
-          progressive: true
+        .webp({ 
+          quality: 75,
+          effort: 4
         })
         .toBuffer();
       
@@ -243,12 +406,17 @@ class DualStorageImageHandler {
   getConfigInfo() {
     return {
       environment: 'production',
-      mode: 'dual_storage',
+      mode: 'triple_storage',
       localHandler: !!this.localHandler,
       cloudinaryHandler: !!this.cloudinaryHandler,
-      activeHandler: 'dual_storage',
+      activeHandler: 'triple_storage',
       cloudinaryConfigured: !!process.env.CLOUDINARY_CLOUD_NAME,
-      description: 'Двойное сохранение: Cloudinary (основное) + локальное (резерв)'
+      description: 'Тройное сохранение: Cloudinary (CDN) + HD локально (галерея) + сжатое локально (превью)',
+      versions: {
+        cloudinary: 'Основное хранилище для быстрой загрузки через CDN',
+        localHD: 'HD версия (2400px, WebP 95%) для галереи с зумом',
+        localCompressed: 'Сжатая версия (800px, WebP 75%) для списков и превью'
+      }
     };
   }
 }

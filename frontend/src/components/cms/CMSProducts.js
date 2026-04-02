@@ -96,12 +96,18 @@ function CMSProducts({ mode, editModalOpen, setEditModalOpen, editingProduct, se
       setSelectedProducts([]);
       setSelectAll(false);
     }, [currentPage]);
+
+    // Прокрутка в начало страницы при переключении страниц
+    React.useEffect(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [currentPage]);
   
   
   
     // Обработчики пагинации
     const handlePageChange = (event, value) => {
       setCurrentPage(value);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     };
     
     const [form, setForm] = React.useState({ 

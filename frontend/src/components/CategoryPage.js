@@ -81,7 +81,9 @@ import {
   Phone,
   LocationOn,
   NavigateNext,
-  Home
+  Home,
+  SwapVert as SortIcon,
+  FormatListNumbered as ItemsPerPageIcon
 } from '@mui/icons-material';
 import { API_BASE_URL, FRONTEND_URL, getImageUrl } from '../config';
 import { getTranslatedName, getTranslatedDescription } from '../utils/translationUtils';
@@ -90,7 +92,8 @@ import { useDeviceType } from '../utils/deviceDetection';
 import ProductCard from './ProductCard';
 import ElegantProductCarousel from './ElegantProductCarousel';
 import LazyImage from './LazyImage';
-import Lenis from '@studio-freight/lenis';
+import Lenis from 'lenis';
+import CustomSelect from './CustomSelect';
 
 // Страница категории (показывает подкатегории)
 function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, user, wishlist, onWishlistToggle, onEditProduct }) {
@@ -105,6 +108,9 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
     const [interimTranscript, setInterimTranscript] = useState('');
     const recognitionRef = useRef(null);
     const [categoryProducts, setCategoryProducts] = useState([]);
+    const [pageSize, setPageSize] = useState(24);
+    const [page, setPage] = useState(1);
+    const [sortBy, setSortBy] = useState('popular');
     const deviceType = useDeviceType();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
@@ -255,6 +261,41 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
       if (product.category && typeof product.category === 'string' && product.category === category?.name) return true;
       return false;
     });
+
+    // Сортировка товаров
+    const sortedCategoryProducts = React.useMemo(() => {
+      let arr = [...filteredCategoryProducts];
+      switch (sortBy) {
+        case 'popular':
+          return arr.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        case 'newest':
+          return arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        case 'price-low':
+          return arr.sort((a, b) => (a.price || 0) - (b.price || 0));
+        case 'price-high':
+          return arr.sort((a, b) => (b.price || 0) - (a.price || 0));
+        case 'name-az':
+          return arr.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        case 'name-za':
+          return arr.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+        default:
+          return arr;
+      }
+    }, [filteredCategoryProducts, sortBy]);
+
+    // Пагинация
+    const totalPages = Math.ceil(sortedCategoryProducts.length / pageSize) || 1;
+    const pagedCategoryProducts = sortedCategoryProducts.slice((page - 1) * pageSize, page * pageSize);
+    
+    // Сброс страницы при изменении параметров
+    useEffect(() => { 
+      setPage(1); 
+    }, [sortBy, pageSize, searchQuery]);
+
+    // Прокрутка в начало страницы при переключении страниц
+    useEffect(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [page]);
   
     const canonicalUrl = `${FRONTEND_URL || ''}/category/${id}`;
     const categoryTitle = category ? `${translateCategory(category.name)} – סימבה מלך הצעצועים` : 'סימבה מלך הצעצועים';
@@ -739,6 +780,58 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
   
           {/* Отступ между карточками подкатегорий и блоком товаров */}
           <Box sx={{ mb: 6 }} />
+
+          {/* Блок сортировки и количества товаров */}
+          {filteredCategoryProducts.length > 0 && (
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: { xs: 1, md: 3 },
+              mb: 3,
+              flexWrap: 'wrap',
+              maxWidth: 1100,
+              margin: '0 auto',
+            }}>
+              {/* Сортировка и количество — слева */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <SortIcon sx={{ fontSize: 20, color: '#ff9800' }} />
+                  <CustomSelect
+                    value={sortBy}
+                    onChange={v => setSortBy(v)}
+                    width={180}
+                    options={[
+                      { value: 'popular', label: t('catalog.sortOptions.popular') },
+                      { value: 'newest', label: t('catalog.sortOptions.newest') },
+                      { value: 'price-low', label: t('catalog.sortOptions.priceLow') },
+                      { value: 'price-high', label: t('catalog.sortOptions.priceHigh') },
+                      { value: 'name-az', label: t('catalog.sortOptions.nameAZ') },
+                      { value: 'name-za', label: t('catalog.sortOptions.nameZA') },
+                    ]}
+                    sx={{ minWidth: 160 }}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {!isMobile && <ItemsPerPageIcon sx={{ fontSize: 20, color: '#666' }} />}
+                  <CustomSelect
+                    value={pageSize}
+                    onChange={v => setPageSize(Number(v))}
+                    width={100}
+                    options={[
+                      { value: 24, label: '24' },
+                      { value: 48, label: '48' },
+                      { value: 96, label: '96' },
+                    ]}
+                    sx={{ minWidth: 60 }}
+                  />
+                </Box>
+              </Box>
+            </Box>
+          )}
+
+          {/* Отступ между сортировкой и товарами */}
+          {sortedCategoryProducts.length > 0 && <Box sx={{ mb: 3 }} />}
   
           {/* Сетка товаров из этой категории */}
           <Box sx={{
@@ -770,8 +863,8 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
             mx: 'auto',
             px: 0
           }}>
-            {filteredCategoryProducts.length > 0 ? (
-              filteredCategoryProducts.map(product => (
+            {pagedCategoryProducts.length > 0 ? (
+              pagedCategoryProducts.map(product => (
                 <Box key={product.id}>
                   <ProductCard 
                     product={product} 
@@ -793,6 +886,61 @@ function CategoryPage({ products, onAddToCart, cart, handleChangeCartQuantity, u
               </Typography>
             )}
           </Box>
+
+          {/* Пагинация */}
+          {totalPages > 1 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mb: 4, mt: 4 }}>
+              <Button 
+                variant="contained" 
+                onClick={() => setPage(p => Math.max(1, p - 1))} 
+                disabled={page === 1}
+                sx={{
+                  background: page === 1 ? '#e0e0e0' : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                  color: page === 1 ? '#999' : '#fff',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  px: 3,
+                  py: 1,
+                  minWidth: 100,
+                  boxShadow: page === 1 ? 'none' : '0 2px 4px rgba(25, 118, 210, 0.2)',
+                  '&:hover': page === 1 ? {} : {
+                    background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                    boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                    transform: 'translateY(-1px)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {t('catalog.pagination.prev')}
+              </Button>
+              <Typography sx={{ fontWeight: 500, fontSize: 16, color: '#333' }}>
+                {t('catalog.pagination.page', { current: page, total: totalPages })}
+              </Typography>
+              <Button 
+                variant="contained" 
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+                disabled={page === totalPages}
+                sx={{
+                  background: page === totalPages ? '#e0e0e0' : 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                  color: page === totalPages ? '#999' : '#fff',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  px: 3,
+                  py: 1,
+                  minWidth: 100,
+                  boxShadow: page === totalPages ? 'none' : '0 2px 4px rgba(25, 118, 210, 0.2)',
+                  '&:hover': page === totalPages ? {} : {
+                    background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                    boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                    transform: 'translateY(-1px)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {t('catalog.pagination.next')}
+              </Button>
+            </Box>
+          )}
         </Box>
       </Container>
     );

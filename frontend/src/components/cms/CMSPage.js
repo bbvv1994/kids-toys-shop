@@ -11,7 +11,10 @@ import {
   ListItemText,
   Divider,
   List,
-  ListItem
+  ListItem,
+  Drawer,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { 
   Add as AddIcon,
@@ -19,7 +22,9 @@ import {
   Category as CategoryIcon,
   ShoppingCart as OrdersIcon,
   ExpandMore as ExpandMoreIcon,
-  KeyboardArrowDown
+  KeyboardArrowDown,
+  Menu as MenuIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import CMSProducts from './CMSProducts';
 import CMSCategories from './CMSCategories';
@@ -32,11 +37,14 @@ import BulkImportProducts from '../BulkImportProducts';
 import { API_BASE_URL } from '../../config';
 
 function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editingProduct, setEditingProduct, dbCategories }) {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
     const [section, setSection] = React.useState('products');
     const [productsSubsection, setProductsSubsection] = React.useState('list'); // 'add' | 'list'
     const [productsMenuOpen, setProductsMenuOpen] = React.useState(false);
     const [reviewsSubsection, setReviewsSubsection] = React.useState('shop'); // 'shop' | 'product' | 'questions'
     const [reviewsMenuOpen, setReviewsMenuOpen] = React.useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
     const sections = [
       { key: 'products', label: 'Товары' },
       { key: 'categories', label: 'Категории' },
@@ -76,15 +84,23 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
       </Typography>
     );
   
-      return (
-        <Box sx={{ display: 'flex', minHeight: '100vh', background: '#f7f7f7', pt: 'calc(var(--appbar-height) - 92px)', boxSizing: 'border-box' }}>
-        <Box sx={{ width: 220, background: '#fff', borderRight: '1px solid #eee', p: 0 }}>
-          <Typography variant="h6" sx={{ p: 2, fontWeight: 'bold', color: '#1976d2' }}>CMS</Typography>
-          <List>
+    // Компонент меню (используется и для десктопа, и для мобильного drawer)
+    const renderMenu = () => (
+      <>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, borderBottom: '1px solid #eee' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1976d2' }}>CMS</Typography>
+          {isMobile && (
+            <IconButton onClick={() => setMobileMenuOpen(false)} size="small">
+              <CloseIcon />
+            </IconButton>
+          )}
+        </Box>
+        <List>
             {/* Товары с выпадающим меню */}
             <ListItem onClick={() => {
               setSection('products');
               setProductsMenuOpen(o => !o);
+              // Не закрываем drawer при клике на главный пункт с подменю
             }} selected={section === 'products'} sx={{ cursor: 'pointer' }}>
               <ListItemText primary="Товары" />
               <KeyboardArrowDown
@@ -103,6 +119,7 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
                     setSection('products'); 
                     setProductsSubsection('add'); 
                     setProductsMenuOpen(true);
+                    if (isMobile) setMobileMenuOpen(false);
                   }} sx={{ cursor: 'pointer' }}>
                     <ListItemText primary="Добавить товар" />
                   </ListItem>
@@ -110,6 +127,7 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
                       setSection('products'); 
                       setProductsSubsection('list'); 
                       setProductsMenuOpen(true);
+                      if (isMobile) setMobileMenuOpen(false);
                     }} sx={{ cursor: 'pointer' }}>
                       <ListItemText primary="Список товаров" />
                     </ListItem>
@@ -117,6 +135,7 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
                       setSection('products'); 
                       setProductsSubsection('import'); 
                       setProductsMenuOpen(true);
+                      if (isMobile) setMobileMenuOpen(false);
                     }} sx={{ cursor: 'pointer' }}>
                       <ListItemText primary="Массовый импорт" />
                     </ListItem>
@@ -127,6 +146,7 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
             <ListItem onClick={() => {
               setSection('reviews');
               setReviewsMenuOpen(o => !o);
+              // Не закрываем drawer при клике на главный пункт с подменю
             }} selected={section === 'reviews'} sx={{ cursor: 'pointer' }}>
               <ListItemText primary="Отзывы и вопросы" />
               <KeyboardArrowDown
@@ -142,10 +162,10 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
               <Box sx={{ pl: 3 }}>
                 <List dense>
                   <ListItem selected={reviewsSubsection === 'shop'} onClick={() => { 
-                                setSection('reviews'); 
-              setReviewsSubsection('shop');
-              setReviewsMenuOpen(true); 
+                    setSection('reviews'); 
+                    setReviewsSubsection('shop');
                     setReviewsMenuOpen(true);
+                    if (isMobile) setMobileMenuOpen(false);
                   }} sx={{ cursor: 'pointer' }}>
                     <ListItemText primary="Отзывы о магазине" />
                   </ListItem>
@@ -153,6 +173,7 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
                     setSection('reviews'); 
                     setReviewsSubsection('product'); 
                     setReviewsMenuOpen(true);
+                    if (isMobile) setMobileMenuOpen(false);
                   }} sx={{ cursor: 'pointer' }}>
                     <ListItemText primary="Отзывы о товарах" />
                   </ListItem>
@@ -160,6 +181,7 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
                     setSection('reviews'); 
                     setReviewsSubsection('questions'); 
                     setReviewsMenuOpen(true);
+                    if (isMobile) setMobileMenuOpen(false);
                   }} sx={{ cursor: 'pointer' }}>
                     <ListItemText primary="Вопросы и ответы" />
                   </ListItem>
@@ -172,14 +194,64 @@ function CMSPage({ loadCategoriesFromAPI, editModalOpen, setEditModalOpen, editi
                 setSection(s.key); 
                 setProductsMenuOpen(false);
                 setProductsSubsection('list'); // Сбрасываем подраздел товаров
+                if (isMobile) setMobileMenuOpen(false);
               }} sx={{ cursor: 'pointer' }}>
                 <ListItemText primary={s.label} />
               </ListItem>
             ))}
           </List>
-        </Box>
+      </>
+    );
+
+    return (
+      <Box sx={{ display: 'flex', minHeight: '100vh', background: '#f7f7f7', pt: 'calc(var(--appbar-height) - 92px)', boxSizing: 'border-box' }}>
+        {/* Кнопка открытия меню для мобильных */}
+        {isMobile && (
+          <Box sx={{ position: 'fixed', top: 'calc(var(--appbar-height) + 10px)', left: 10, zIndex: 1200 }}>
+            <IconButton
+              onClick={() => setMobileMenuOpen(true)}
+              sx={{
+                backgroundColor: '#1976d2',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: '#1565c0',
+                },
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
+        )}
+
+        {/* Боковое меню - десктоп (всегда видимое) */}
+        {!isMobile && (
+          <Box sx={{ width: 220, background: '#fff', borderRight: '1px solid #eee', p: 0 }}>
+            {renderMenu()}
+          </Box>
+        )}
+
+        {/* Drawer для мобильных */}
+        {isMobile && (
+          <Drawer
+            anchor="left"
+            open={mobileMenuOpen}
+            onClose={() => setMobileMenuOpen(false)}
+            sx={{
+              '& .MuiDrawer-paper': {
+                width: 280,
+                background: '#fff',
+                top: 'var(--appbar-height)',
+                height: 'calc(100vh - var(--appbar-height))',
+              },
+            }}
+          >
+            {renderMenu()}
+          </Drawer>
+        )}
+
         {/* Убираем фиксированную высоту и overflow у правой части */}
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, p: 0 }}>
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, p: 0, ml: isMobile ? 0 : 0 }}>
           {section === 'products' ? (
             productsSubsection === 'import' ? (
               <BulkImportProducts />
