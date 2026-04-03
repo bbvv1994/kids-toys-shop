@@ -28,7 +28,8 @@ export function getCategoryIcon(category) {
     'Отдых на воде': '/voda.png',
     'Настольные игры': '/nastolka.png',
     'Развивающие игры': '/edu_game.png',
-    'Акции': '/sale.png'
+    'Акции': '/sale.png',
+    'Праздничная символика': '/holiday.png'
   };
   
   // Сначала проверяем точное совпадение
@@ -69,7 +70,9 @@ export function getCategoryIcon(category) {
     'карандаш': '/stationery.png',
     'ручк': '/stationery.png',
     'бумаг': '/stationery.png',
-    'альбом': '/creativity.png'
+    'альбом': '/creativity.png',
+    'праздн': '/holiday.png',
+    'символик': '/holiday.png'
   };
   
   for (const [keyword, icon] of Object.entries(partialMatches)) {

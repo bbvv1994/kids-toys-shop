@@ -183,15 +183,7 @@
     "currency": "מטבע",
     "login": "כניסה"
   },
-  "footer": {
-    "about": "אודות החברה",
-    "delivery": "משלוח",
-    "payment": "תשלום",
-    "returns": "החזרות",
-    "support": "תמיכה",
-    "privacy": "פרטיות",
-    "terms": "תנאי שימוש"
-  },
+
   "home": {
     "newArrivals": "חדשים",
     "popular": "פופולריים"
@@ -293,6 +285,10 @@
     "toSchool": {
       "title": "לבית הספר בשמחה",
       "subtitle": "כלי כתיבה ומוצרים נלווים"
+    },
+    "israelDay": {
+      "title": "יום העצמאות!",
+      "subtitle": "מתכוננים לחגים!"
     }
   },
   "filters": {
@@ -330,7 +326,14 @@
     "privacyPolicy": "מדיניות פרטיות",
     "termsOfService": "תנאי שימוש",
     "sitemap": "מפת האתר",
-    "attribution": "בעלי זכויות"
+    "attribution": "בעלי זכויות",
+    "seoDescription": "חנות צעצועים בקריות. הזמינו אונליין ובואו לאסוף! איסוף עצמי נוח מקריית ים, קרוב לקריית מוצקין, חיפה והקריות.",
+    "delivery": "משלוח",
+    "payment": "תשלום",
+    "returns": "החזרות",
+    "support": "תמיכה",
+    "privacy": "פרטיות",
+    "terms": "תנאי שימוש"
   },
   "category": {
     "title": "קטגוריות",
@@ -553,6 +556,7 @@
     "water_recreation": "נופש במים",
     "board_games": "משחקי קופסה",
     "educational_games": "משחקים חינוכיים",
+    "holiday_symbolism": "סמלי חג",
     "sales": "מבצעים",
     "subcategories": {
       "toys": {

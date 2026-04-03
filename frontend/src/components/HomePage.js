@@ -107,6 +107,82 @@ function HomePage({ products, onAddToCart, cart, user, onWishlistToggle, onChang
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={seoTitle} />
           <meta name="twitter:description" content={seoDescription} />
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ToyStore",
+              "name": isHebrew ? "סימבה מלך הצעצועים" : "Симба - Король игрушек",
+              "image": [`${siteUrl}/logo.png`],
+              "@id": siteUrl,
+              "url": siteUrl,
+              "telephone": "053-377-4509",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Robert Szold 8",
+                "addressLocality": "Kiryat Yam",
+                "addressRegion": "Krayot",
+                "addressCountry": "IL"
+              },
+              "openingHoursSpecification": [
+                {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": [
+                    "Sunday",
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday"
+                  ],
+                  "opens": "10:00",
+                  "closes": "20:00"
+                },
+                {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": "Friday",
+                  "opens": "09:00",
+                  "closes": "14:00"
+                }
+              ],
+              "areaServed": [
+                {
+                  "@type": "City",
+                  "name": "Kiryat Yam"
+                },
+                {
+                  "@type": "City",
+                  "name": "Kiryat Motzkin"
+                },
+                {
+                  "@type": "City",
+                  "name": "Kiryat Bialik"
+                },
+                {
+                  "@type": "City",
+                  "name": "Kiryat Haim"
+                },
+                {
+                  "@type": "City",
+                  "name": "Haifa"
+                }
+              ],
+              "potentialAction": {
+                "@type": "ReserveAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": `${siteUrl}/catalog`,
+                  "actionPlatform": [
+                    "http://schema.org/DesktopWebPlatform",
+                    "http://schema.org/IOSPlatform",
+                    "http://schema.org/AndroidPlatform"
+                  ]
+                },
+                "result": {
+                  "@type": "Reservation",
+                  "name": "Reserve and Collect"
+                }
+              }
+            })}
+          </script>
         </Helmet>
       <Box sx={{ minHeight: '80vh', pt: 4, flexDirection: 'column' }}>
         {/* Баннеры главной страницы */}

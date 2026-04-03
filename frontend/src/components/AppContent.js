@@ -474,9 +474,10 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
         'Отдых на воде': '/voda.png',
         'Настольные игры': '/nastolka.png',
         'Развивающие игры': '/edu_game.png',
+        'Праздничная символика': '/holiday.png',
         'Акции': '/sale.png'
       };
-      return iconMap[categoryName] || '/toys.png';
+      return iconMap[categoryName] || '/toys.png'; // дефолт - toys, не holiday
     };
     // Функция для преобразования dbCategories в формат для Navigation (локально вычисленная)
     const navCategoriesComputed = useMemo(() => {
@@ -492,6 +493,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
           'Отдых на воде': t('categories.water_recreation'),
           'Настольные игры': t('categories.board_games'),
           'Развивающие игры': t('categories.educational_games'),
+          'Праздничная символика': t('categories.holiday_symbolism'),
           'Акции': t('categories.sales')
         };
         return categoryMap[categoryName] || categoryName;
@@ -736,6 +738,18 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
               translateSubcategory('Акции', 'Скидки недели'),
               translateSubcategory('Акции', 'Товары по акции')
             ]
+          },
+          {
+            id: 11,
+            name: translateCategory('Праздничная символика'),
+            label: translateCategory('Праздничная символика'),
+            icon: '/holiday.png',
+            active: true,
+            sub: [
+              translateSubcategory('Праздничная символика', 'Флаги'),
+              translateSubcategory('Праздничная символика', 'Аксессуары'),
+              translateSubcategory('Праздничная символика', 'Подарки')
+            ]
           }
         ];
       }
@@ -950,14 +964,14 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
         // Упрощенная логика для определения пути к иконке
         let iconPath;
         
-        const imagePath = cat.icon || cat.image;
+        const imagePath = (cat.icon || cat.image || '').trim();
         if (imagePath) {
-          // Если изображение содержит временную метку (175... или 176...), это загруженный файл
-          if (imagePath.match(/^(175|176)\d+/)) {
+          // Если изображение содержит временную метку (таймштамп из 10+ цифр), это загруженный файл
+          if (imagePath.match(/^\d{10,}/)) {
             iconPath = `${API_BASE_URL}/uploads/${imagePath}`;
           } else {
-            // Если это старый файл из public папки или fallback иконка
-            iconPath = `/${imagePath}`;
+            // Если это старый файл или иконка, гарантируем один слэш
+            iconPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
           }
         } else {
           // Если нет изображения, используем fallback
@@ -1171,8 +1185,8 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
         
         function handleClickOutside(event) {
           if (
-            menuRef.current &&
-            !menuRef.current.contains(event.target) &&
+            mainMenuRef.current &&
+            !mainMenuRef.current.contains(event.target) &&
             categoryBtnRef.current &&
             !categoryBtnRef.current.contains(event.target)
             && !(document.querySelector('.category-dropdown-submenu') && document.querySelector('.category-dropdown-submenu').contains(event.target))
@@ -1183,7 +1197,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
         
         // Добавляем обработчик для предотвращения прокрутки фона
         const preventScroll = (e) => {
-          if (menuRef.current?.contains(e.target)) {
+          if (mainMenuRef.current?.contains(e.target)) {
             return; // Разрешаем прокрутку внутри меню
           }
           
@@ -1223,30 +1237,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
       };
     }, [menuOpen]);
   
-    useEffect(() => {
-      if (isHome && mainMenuRef.current) {
-        if (lenisMainMenuRef.current) {
-          lenisMainMenuRef.current.destroy();
-          lenisMainMenuRef.current = null;
-        }
-        lenisMainMenuRef.current = new Lenis({
-          wrapper: mainMenuRef.current,
-          duration: 1.2,
-          smooth: true,
-          easing: (t) => 1 - Math.pow(1 - t, 3),
-          syncTouch: true,
-        });
-        function raf(time) {
-          lenisMainMenuRef.current?.raf(time);
-          if (isHome) requestAnimationFrame(raf);
-        }
-        requestAnimationFrame(raf);
-        return () => {
-          lenisMainMenuRef.current?.destroy();
-          lenisMainMenuRef.current = null;
-        };
-      }
-    }, [isHome]);
+    // Убрали Lenis для основного меню, чтобы использовать нативный скролл с видимым скроллбаром
   
     useEffect(() => {
       if (isHome && hoveredCategory && subcategoriesMenuRef.current) {
@@ -2044,9 +2035,21 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
 
           {/* Меню категорий с position: absolute */}
           {isDesktop && !instantClose && !shouldHideCategories && !userLoading && (
-          <Box sx={{ position: 'relative' }}>
+          <Box 
+            sx={{ position: 'relative', zIndex: 1400 }}
+            onMouseLeave={() => {
+              if (!isTouchDevice) {
+                // Закрываем меню только при уходе из ВСЕГО блока (категории + подкатегории)
+                const timer = setTimeout(() => {
+                  setActiveSub(null);
+                  setHoveredCategory(null);
+                }, 500);
+                setSubmenuTimeout(timer);
+              }
+            }}
+          >
             <Paper
-              ref={menuRef}
+              ref={mainMenuRef}
               className="category-dropdown-menu"
               sx={{
                 position: 'absolute',
@@ -2058,11 +2061,14 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                 p: 0,
                 borderRadius: 0,
                 boxShadow: menuOpen ? 'none' : '0 2px 8px rgba(0,0,0,0.08)',
-                background: '#fff',
-                // Унифицированная высота для всех случаев
-                maxHeight: (menuOpen || isHome) ? '540px' : '0px',
-                transition: 'none',
-                overflow: 'auto',
+                // Строго фиксированная высота 540px
+                height: (menuOpen || isHome) ? '540px' : '0px',
+                transition: 'height 0.3s ease-in-out',
+                overflow: 'hidden', // Скролл будет внутри списка (Lenis)
+                backgroundColor: '#fff',
+                display: 'flex',
+                flexDirection: 'column',
+                overscrollBehavior: 'contain',
               }}
             >
               {/* Надпись "Категории" на главной странице */}
@@ -2084,20 +2090,59 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                   {t('catalog.categoriesButton')}
                 </Box>
               )}
-              <List sx={{ pt: '8px', background: '#fff', height: '100%' }} data-category-list>
+              <List 
+                ref={(el) => {
+                  if (el) {
+                    if (window.lenisMainMenu) {
+                      window.lenisMainMenu.destroy();
+                    }
+                    window.lenisMainMenu = new Lenis({
+                      wrapper: el,
+                      content: el,
+                      duration: 0.7, // Было 1.2, уменьшаем для скорости
+                      smooth: true,
+                      easing: (t) => 1 - Math.pow(1 - t, 3),
+                      syncTouch: true,
+                    });
+                    function raf(time) {
+                      window.lenisMainMenu?.raf(time);
+                      if (menuOpen || isHome) requestAnimationFrame(raf);
+                    }
+                    requestAnimationFrame(raf);
+                  } else {
+                    if (window.lenisMainMenu) {
+                      window.lenisMainMenu.destroy();
+                      window.lenisMainMenu = null;
+                    }
+                  }
+                }}
+                sx={{ 
+                  pt: '8px', 
+                  background: '#fff', 
+                  flexGrow: 1, 
+                  overflowY: 'auto', // Нативный скролл как база для Lenis
+                  overflowX: 'hidden',
+                  overscrollBehavior: 'contain',
+                  // Используем глобальные стили из index.css
+                }} 
+                data-category-list
+              >
                 {rootCategories.map((cat, idx) => (
                   <ListItem
                     key={cat.label || cat.id}
                     onMouseEnter={() => {
                       if (!isTouchDevice) {
+                        // Очищаем таймаут закрытия, если он есть
+                        if (submenuTimeout) {
+                          clearTimeout(submenuTimeout);
+                          setSubmenuTimeout(null);
+                        }
                         setActiveSub(cat.id);
                         setTouchedCategory(null);
                       }
                     }}
                     onMouseLeave={() => {
-                      if (!isTouchDevice) {
-                        setActiveSub(null);
-                      }
+                      // Локальный Leave больше не нужен, за всё отвечает общий контейнер Box выше.
                     }}
                     onTouchStart={(e) => {
                       if (isTouchDevice) {
@@ -2140,7 +2185,7 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                         if (!isHome) setMenuOpen(false);
                         setTouchedCategory(null);
                         setActiveSub(null);
-                        setTimeout(() => setInstantClose(false), 0);
+                        setTimeout(() => setInstantClose(false), 300);
                       }
                     }}
                     sx={{
@@ -2157,8 +2202,34 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                       cursor: 'pointer',
                     }}
                   >
-                    <img src={cat.icon || getCategoryIcon(cat.name)} alt="" style={{ width: 32, height: 32, marginRight: 20, borderRadius: 0, objectFit: 'cover' }} />
-                    <ListItemText primary={cat.label || cat.name} sx={{ fontWeight: 600, color: '#2c3e50', fontSize: 16, lineHeight: 0.95, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} />
+                    <img 
+                      src={cat.icon || getCategoryIcon(cat.name)} 
+                      alt="" 
+                      onError={(e) => {
+                        e.target.src = '/toys.png';
+                      }}
+                      style={{ 
+                        width: 32, 
+                        height: 32, 
+                        marginRight: 16, 
+                        borderRadius: '0px', 
+                        objectFit: 'contain',
+                        filter: 'none',
+                        transition: 'transform 0.3s ease',
+                        transform: (activeSub === cat.id || touchedCategory === cat.id) ? 'scale(1.1)' : 'scale(1)'
+                      }} 
+                    />
+                    <ListItemText 
+                      primary={cat.label || cat.name} 
+                      sx={{ 
+                        fontWeight: 600, 
+                        color: '#2c3e50', 
+                        fontSize: 16, 
+                        lineHeight: 1.1, // Увеличиваем для читаемости двух строк
+                        whiteSpace: 'pre-line', // Разрешаем перенос строки из i18n
+                        overflow: 'hidden'
+                      }} 
+                    />
                     {getSubcategories(cat).length > 0 && (
                       <span style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', color: '#FFB300', height: '21px', lineHeight: '21px' }}>{'>'}</span>
                     )}
@@ -2166,27 +2237,15 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                 ))}
               </List>
               </Paper>
-              {/* Универсальная панель подкатегорий */}
-              {(activeSub || hoveredCategory || touchedCategory) && (() => {
-                // Определяем категорию и подкатегории
-                let cat, subcats;
+              {/* Универсальная панель подкатегорий (Стабильный JSX) */}
+              {(() => {
+                const activeCat = activeSub ? rootCategories.find(c => c.id === activeSub) :
+                                 hoveredCategory ? safeCategories.find(c => c.label === hoveredCategory) :
+                                 touchedCategory ? rootCategories.find(c => c.id === touchedCategory) : null;
+                const activeSubcats = activeCat ? getSubcategories(activeCat) : [];
                 
-                if (activeSub) {
-                  // Для основного меню (activeSub) - десктоп
-                   cat = rootCategories.find(c => c.id === activeSub);
-                   subcats = cat ? getSubcategories(cat) : [];
-                } else if (hoveredCategory) {
-                  // Для мобильного меню (hoveredCategory)
-                  cat = safeCategories.find(c => c.label === hoveredCategory);
-                  subcats = cat ? getSubcategories(cat) : [];
-                } else if (touchedCategory) {
-                  // Для сенсорного устройства (touchedCategory)
-                  cat = rootCategories.find(c => c.id === touchedCategory);
-                  subcats = cat ? getSubcategories(cat) : [];
-                }
-                
-                if (!cat || !subcats.length) return null;
-                
+                if (!activeCat || !activeSubcats.length) return null;
+
                 return (
                   <Box
                     className="category-dropdown-submenu"
@@ -2218,34 +2277,43 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                     sx={{
                       position: 'absolute',
                       top: 4,
-                      left: 250,
+                      left: 248, // Стабильный нахлест в 2px
                       width: 250,
                       height: 'calc(100vh - 100px - 67px + 4px)',
                       background: '#fff',
-                      zIndex: 1400,
-                      boxShadow: '0 8px 16px -8px rgba(0,0,0,0.08)',
-                      borderLeft: 'none',
+                      zIndex: 1410, // Гарантированно выше основного меню
+                      boxShadow: '10px 0 20px -10px rgba(0,0,0,0.1)',
+                      borderLeft: '1px solid #f0f0f0',
                       borderRadius: 0,
                       display: 'flex',
                       flexDirection: 'column',
                       pt: '44px',
-                      overflowY: 'auto',
+                      overflowY: 'auto'
                     }}
                     onMouseEnter={() => {
                       if (!isTouchDevice) {
+                        // Очищаем таймаут закрытия - мы попали в цель!
+                        if (submenuTimeout) {
+                          clearTimeout(submenuTimeout);
+                          setSubmenuTimeout(null);
+                        }
                         if (activeSub) setActiveSub(activeSub);
                         if (hoveredCategory) setHoveredCategory(hoveredCategory);
                       }
                     }}
                     onMouseLeave={() => {
                       if (!isTouchDevice) {
-                        if (activeSub) setActiveSub(null);
-                        if (hoveredCategory) setHoveredCategory(null);
+                        // Также даем задержку при уходе из подкатегорий
+                        const timer = setTimeout(() => {
+                          if (activeSub) setActiveSub(null);
+                          if (hoveredCategory) setHoveredCategory(null);
+                        }, 500); // Увеличиваем до 500мс
+                        setSubmenuTimeout(timer);
                       }
                     }}
                     onWheel={e => e.stopPropagation()}
                   >
-                    {subcats.map((subcat, i) => (
+                    {activeSubcats.map((subcat, i) => (
                       <Box
                         key={subcat.id || i}
                          onClick={() => {
@@ -2257,28 +2325,28 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                                navigate(`/subcategory/${subcat.id}`);
                              } else {
                                // Fallback если нет id
-                               navigate(`/category/${cat.id}`);
+                               navigate(`/category/${activeCat?.id}`);
                              }
                             setActiveSub(null);
                             if (!isHome) setMenuOpen(false);
                           } else if (hoveredCategory) {
                             // Для мобильного меню
                             if (dbCategories && dbCategories.length > 0) {
-                              const parentCat = dbCategories.find(c => c.name === cat.name && !c.parentId);
+                              const parentCat = dbCategories.find(c => c.name === activeCat?.name && !c.parentId);
                               if (parentCat) {
                                 const dbSubcat = dbCategories.find(c => c.name === subcat && c.parentId === parentCat.id);
                                 if (dbSubcat) {
                                   navigate(`/subcategory/${dbSubcat.id}`);
                                   setDrawerOpen(false);
                                   setHoveredCategory(null);
-                                  setTimeout(() => setInstantClose(false), 0);
+                                  setTimeout(() => setInstantClose(false), 300);
                                   return;
                                 }
                               }
                             }
                             // Fallback - используем индекс как ID
                             navigate(`/subcategory/${i + 1}`);
-                            setDrawerOpen(false);
+                            setActiveSub(null);
                             setHoveredCategory(null);
                           } else if (touchedCategory) {
                             // Для сенсорного устройства
@@ -2286,13 +2354,13 @@ function Navigation({ cartCount, user, userLoading, handleLogout, setAuthOpen, p
                               navigate(`/subcategory/${subcat.id}`);
                             } else {
                               // Fallback если нет id
-                              navigate(`/category/${cat.id}`);
+                              navigate(`/category/${activeCat?.id}`);
                             }
                             setTouchedCategory(null);
                             if (!isHome) setMenuOpen(false);
                           }
                           
-                          setTimeout(() => setInstantClose(false), 0);
+                          setTimeout(() => setInstantClose(false), 300);
                         }}
                         sx={{
                           px: 3,
@@ -4105,6 +4173,20 @@ function AppContent({
             borderTop: '1px solid rgba(255,255,255,0.1)'
           }}>
             <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: 'rgba(255,255,255,0.7)', 
+                  textAlign: 'center', 
+                  mb: 2, 
+                  fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                  fontStyle: 'italic',
+                  maxWidth: '800px',
+                  margin: '0 auto 16px'
+                }}
+              >
+                {t('footer.seoDescription')}
+              </Typography>
               <Box sx={{ 
                 display: 'flex', 
                 justifyContent: 'space-between', 

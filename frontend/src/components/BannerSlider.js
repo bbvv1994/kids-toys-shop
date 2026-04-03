@@ -25,6 +25,14 @@ const BannerSlider = ({ drawerWidth = 280 }) => {
       clickable: false // Первый баннер не кликабельный
     },
     {
+      id: 8,
+      image: '/banners/israel-day.png',
+      title: t('banners.israelDay.title'),
+      subtitle: t('banners.israelDay.subtitle'),
+      link: '/category/4',
+      clickable: true
+    },
+    {
       id: 2,
       image: '/banners/sale1.webp',
       title: t('banners.specialOffers.title'),

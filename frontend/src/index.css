@@ -44,12 +44,31 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  background: #888;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #FF5252, #26A69A);
+  background: #666;
+}
+
+/* Специальное правило для скроллбара в списке категорий, чтобы он не мешал ховеру */
+[data-category-list]::-webkit-scrollbar {
+  width: 6px;
+}
+
+[data-category-list]::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+[data-category-list]::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+[data-category-list] {
+  scrollbar-width: thin;
+  scrollbar-color: #888 transparent;
 }
 
 /* Стили для учета скроллбара */
@@ -843,25 +862,33 @@ p, h1, h2, h3, h4, h5, h6, span, div {
   display: none !important;
 }
 
+/* Скроллбары для категории разрешены, так как пунктов стало много */
 .category-dropdown-menu,
 .category-dropdown-menu * {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
+  scrollbar-width: thin !important; /* Уменьшаем ширину */
+  -ms-overflow-style: auto !important;
 }
 .category-dropdown-menu::-webkit-scrollbar,
 .category-dropdown-menu *::-webkit-scrollbar {
+  display: block !important;
+  width: 4px !important; /* Делаем полоску совсем изящной */
+}
+/* Скрываем стрелочки (кнопки) скроллбара */
+.category-dropdown-menu::-webkit-scrollbar-button,
+.category-dropdown-menu *::-webkit-scrollbar-button {
   display: none !important;
 }
 
 /* Оставить скроллбар для подкатегорий */
 .category-dropdown-submenu,
 .category-dropdown-submenu * {
-  scrollbar-width: auto !important;
+  scrollbar-width: thin !important;
   -ms-overflow-style: auto !important;
 }
 .category-dropdown-submenu::-webkit-scrollbar,
 .category-dropdown-submenu *::-webkit-scrollbar {
   display: initial !important;
+  width: 4px !important; /* Делаем таким же тонким */
 }
 
 .category-listitem-text {

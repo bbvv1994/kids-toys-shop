@@ -159,6 +159,7 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
     { key: 'water_recreation', baseName: 'Отдых на воде', icon: '/voda.webp' },
     { key: 'board_games', baseName: 'Настольные игры', icon: '/nastolnie-igri.webp' },
     { key: 'educational_games', baseName: 'Развивающие игры', icon: '/razvitie.webp' },
+    { key: 'holiday_symbolism', baseName: 'Праздничная символика', icon: '/banners/israel-day-card.png' },
     { key: 'sales', baseName: 'Акции', icon: '/sale.webp' }
   ];
 
@@ -610,7 +611,9 @@ function CatalogPage({ products, onAddToCart, cart, handleChangeCartQuantity, us
                     color: '#222',
                     textAlign: 'center',
                     m: 0,
-                    p: 0
+                    p: 0,
+                    whiteSpace: 'pre-line',
+                    lineHeight: 1.1
                   }}>
                     {cat.label}
                   </Typography>
